@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
+using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -27,12 +27,28 @@ namespace Sandra.Chess.Pgn
     /// Represents a single background node in an abstract PGN syntax tree.
     /// Use <see cref="GreenPgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
-    public abstract class GreenPgnBackgroundSyntax : ISpan
+    public abstract class GreenPgnBackgroundSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public abstract PgnSymbolType SymbolType { get; }
+
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        public virtual IEnumerable<PgnErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public abstract void Accept(GreenPgnBackgroundSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);

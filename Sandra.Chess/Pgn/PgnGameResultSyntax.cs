@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -73,7 +74,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents any of four types of game termination markers in PGN.
     /// </summary>
-    public sealed class PgnGameResultSyntax
+    public sealed class PgnGameResultSyntax : PgnSyntax, IPgnSymbol
     {
         public const char AsteriskCharacter = '*';
         public const int AsteriskLength = 1;
@@ -86,5 +87,65 @@ namespace Sandra.Chess.Pgn
 
         public static readonly string WhiteWinMarkerText = "1-0";
         public const int WhiteWinMarkerLength = 3;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnGameResultWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnGameResultSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public PgnGameResult GameResult => Green.GameResult;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnGameResultSyntax(PgnGameResultWithTriviaSyntax parent, GreenPgnGameResultSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitGameResultSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitGameResultSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitGameResultSyntax(this, arg);
+    }
+
+    public sealed class PgnGameResultWithTriviaSyntax : WithTriviaSyntax<PgnGameResultSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnGameResultSyntax CreateContentNode() => new PgnGameResultSyntax(this, (GreenPgnGameResultSyntax)Green.ContentNode);
+
+        internal PgnGameResultWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

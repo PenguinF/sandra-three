@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -55,5 +56,66 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    /// <summary>
+    /// Represents a syntax node which contains an integer move number.
+    /// </summary>
+    public sealed class PgnMoveNumberSyntax : PgnSyntax, IPgnSymbol
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnMoveNumberWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnMoveNumberSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnMoveNumberSyntax(PgnMoveNumberWithTriviaSyntax parent, GreenPgnMoveNumberSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitMoveNumberSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitMoveNumberSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveNumberSyntax(this, arg);
+    }
+
+    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<PgnMoveNumberSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnMoveNumberSyntax CreateContentNode() => new PgnMoveNumberSyntax(this, (GreenPgnMoveNumberSyntax)Green.ContentNode);
+
+        internal PgnMoveNumberWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

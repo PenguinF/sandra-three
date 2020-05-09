@@ -60,11 +60,17 @@ namespace Sandra.Chess.Pgn.Temp
         PgnSyntax ToPgnSyntax();
     }
 
-    public class GreenPgnTopLevelSymbolSyntax : WithTrivia<IGreenPgnSymbol>, IGreenPgnTopLevelSyntax
+    public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
     {
-        public GreenPgnTopLevelSymbolSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
-            : base(leadingTrivia, foreground)
+        internal readonly WithTrivia GreenNodeWithTrivia;
+        internal readonly Func<PgnSyntaxNodes, int, WithTrivia, IPgnTopLevelSyntax> SyntaxNodeConstructor;
+
+        public int Length => GreenNodeWithTrivia.Length;
+
+        public GreenPgnTopLevelSymbolSyntax(WithTrivia greenNodeWithTrivia, Func<PgnSyntaxNodes, int, WithTrivia, IPgnTopLevelSyntax> syntaxNodeConstructor)
         {
+            GreenNodeWithTrivia = greenNodeWithTrivia;
+            SyntaxNodeConstructor = syntaxNodeConstructor;
         }
     }
 
@@ -115,7 +121,8 @@ namespace Sandra.Chess.Pgn.Temp
                     }
                     else
                     {
-                        return new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)topLevelNode);
+                        var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;
+                        return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
                     }
                 });
 

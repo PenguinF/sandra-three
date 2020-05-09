@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -75,7 +76,10 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
-    public static class PgnMoveSyntax
+    /// <summary>
+    /// Represents a syntax node which contains a move text.
+    /// </summary>
+    public sealed class PgnMoveSyntax : PgnSyntax, IPgnSymbol
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for a PGN syntax node with an unknown symbol.
@@ -92,5 +96,70 @@ namespace Sandra.Chess.Pgn
                 start,
                 symbolText.Length,
                 new[] { symbolText });
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnMoveWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnMoveSyntax Green { get; }
+
+        /// <summary>
+        /// Gets if the move syntax is a valid tag name (<see cref="PgnTagNameSyntax"/>) as well.
+        /// </summary>
+        public bool IsValidTagName => Green.IsValidTagName;
+
+        /// <summary>
+        /// Gets if this is an unrecognized move.
+        /// </summary>
+        public bool IsUnrecognizedMove => Green.IsUnrecognizedMove;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnMoveSyntax(PgnMoveWithTriviaSyntax parent, GreenPgnMoveSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitMoveSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitMoveSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveSyntax(this, arg);
+    }
+
+    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<PgnMoveSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, (GreenPgnMoveSyntax)Green.ContentNode);
+
+        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

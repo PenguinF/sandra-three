@@ -21,7 +21,6 @@
 
 using Eutherion.Win.AppTemplate;
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using ScintillaNET;
 using System.Drawing;
 
@@ -78,39 +77,29 @@ namespace Sandra.UI
         public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[escapedLineStyleIndex];
 
+        public override Style VisitGameResultSyntax(PgnGameResultSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[moveTextStyleIndex];
+
         public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
+
+        public override Style VisitMoveNumberSyntax(PgnMoveNumberSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[moveNumberStyleIndex];
+
+        public override Style VisitMoveSyntax(PgnMoveSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[node.IsUnrecognizedMove ? errorSymbolStyleIndex : moveTextStyleIndex];
+
+        // Only darken OverflowNag, and display EmptyNag like a regular NAG. Got to go through that state before creating a valid NAG.
+        public override Style VisitNagSyntax(PgnNagSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[node.Green.SymbolType == PgnSymbolType.OverflowNag ? errorSymbolStyleIndex : moveTextStyleIndex];
+
+        public override Style VisitPeriodSyntax(PgnPeriodSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[moveNumberStyleIndex];
 
         public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[tagNameStyleIndex];
 
         public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[node.ContainsErrors ? errorTagValueStyleIndex : tagValueStyleIndex];
-
-        public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-        {
-            switch (node.Green.SymbolType)
-            {
-                case PgnSymbolType.MoveNumber:
-                case PgnSymbolType.Period:
-                    return syntaxEditor.Styles[moveNumberStyleIndex];
-                case PgnSymbolType.Move:
-                case PgnSymbolType.Nag:
-                // Don't darken this one like OverflowNag, got to go through this state before creating a valid NAG.
-                case PgnSymbolType.EmptyNag:
-                    return syntaxEditor.Styles[moveTextStyleIndex];
-                case PgnSymbolType.OverflowNag:
-                    return syntaxEditor.Styles[errorSymbolStyleIndex];
-                case PgnSymbolType.UnrecognizedMove:
-                    return syntaxEditor.Styles[illegalCharacterStyleIndex];
-                case PgnSymbolType.Asterisk:
-                case PgnSymbolType.DrawMarker:
-                case PgnSymbolType.WhiteWinMarker:
-                case PgnSymbolType.BlackWinMarker:
-                    return syntaxEditor.Styles[moveTextStyleIndex];
-            }
-
-            return syntaxEditor.DefaultStyle;
-        }
     }
 }

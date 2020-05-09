@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -75,12 +74,17 @@ namespace Sandra.Chess.Pgn
             public override PgnSyntax VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node;
             public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
+            public override PgnSyntax VisitGameResultSyntax(PgnGameResultSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
+            public override PgnSyntax VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => node;
+            public override PgnSyntax VisitMoveSyntax(PgnMoveSyntax node) => node;
+            public override PgnSyntax VisitNagSyntax(PgnNagSyntax node) => node;
+            public override PgnSyntax VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node;
+            public override PgnSyntax VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node;
+            public override PgnSyntax VisitPeriodSyntax(PgnPeriodSyntax node) => node;
             public override PgnSyntax VisitTagNameSyntax(PgnTagNameSyntax node) => node;
             public override PgnSyntax VisitTagValueSyntax(PgnTagValueSyntax node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
-
-            public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
         }
 
         /// <summary>
@@ -93,47 +97,5 @@ namespace Sandra.Chess.Pgn
         /// The converted <see cref="PgnSyntax"/> node.
         /// </returns>
         public static PgnSyntax ToSyntax(this IPgnSymbol pgnSymbol) => pgnSymbol.Accept(ToPgnSyntaxConverter.Instance);
-    }
-}
-
-namespace Sandra.Chess.Pgn.Temp
-{
-    public class PgnSymbolWithTrivia : WithTriviaSyntax<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
-    {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
-
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
-        public override PgnSyntax ParentSyntax => Parent;
-
-        internal override PgnSymbol CreateContentNode() => new PgnSymbol(this, Green.ContentNode);
-
-        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
-            : base(green)
-        {
-            Parent = parent;
-            ParentIndex = parentIndex;
-        }
-    }
-
-    public class PgnSymbol : PgnSyntax, IPgnSymbol
-    {
-        public PgnSymbolWithTrivia Parent { get; }
-        public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Green.LeadingTrivia.Length;
-        public override int Length => Green.Length;
-        public override PgnSyntax ParentSyntax => Parent;
-
-        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
-        {
-            Parent = parent;
-            Green = green;
-        }
-
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPgnSymbol(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPgnSymbol(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPgnSymbol(this, arg);
     }
 }

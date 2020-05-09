@@ -46,7 +46,7 @@ namespace Sandra.Chess.Pgn
     public abstract class PgnTagElementSyntax : PgnSyntax
     {
         /// <summary>
-        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// Gets the parent syntax node of this instance.
         /// </summary>
         public PgnTagElementWithTriviaSyntax Parent { get; }
 

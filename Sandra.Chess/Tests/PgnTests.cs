@@ -37,12 +37,17 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitGameResultSyntax(PgnGameResultSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitMoveSyntax(PgnMoveSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitNagSyntax(PgnNagSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitPeriodSyntax(PgnPeriodSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagValueSyntax(PgnTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
-
-            public override IGreenPgnSymbol VisitPgnSymbol(PgnSymbol node) => node.Green;
         }
 
         /// <summary>
@@ -238,16 +243,16 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(""));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
-            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(Array.Empty<GreenPgnBackgroundSyntax>(), null));
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
 
-            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new WithTrivia<GreenPgnBracketOpenSyntax>(null, GreenPgnBracketOpenSyntax.Value));
-            Assert.Throws<ArgumentNullException>("syntaxNode", () => new WithTrivia<GreenPgnBracketOpenSyntax>(GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new WithTrivia(null, GreenPgnBracketOpenSyntax.Value));
+            Assert.Throws<ArgumentNullException>("contentNode", () => new WithTrivia(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
-            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<WithTrivia<GreenPgnTagElementSyntax>>.Instance));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<WithTrivia>.Instance));
 
             Assert.Throws<ArgumentNullException>("tagPairNodes", () => GreenPgnTagSectionSyntax.Create(null));
             Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));

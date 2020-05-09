@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -37,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Escape;
+        public override PgnSymbolType SymbolType => PgnSymbolType.Escape;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnEscapeSyntax"/>.
@@ -51,8 +50,6 @@ namespace Sandra.Chess.Pgn
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitEscapeSyntax(this);
         public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitEscapeSyntax(this);

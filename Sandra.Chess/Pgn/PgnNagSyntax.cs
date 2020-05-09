@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -77,7 +78,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node.
     /// </summary>
-    public sealed class PgnNagSyntax
+    public sealed class PgnNagSyntax : PgnSyntax, IPgnSymbol
     {
         public const char NagCharacter = '$';
         public const int NagLength = 1;
@@ -106,5 +107,66 @@ namespace Sandra.Chess.Pgn
                 start,
                 overflowNagText.Length,
                 new[] { overflowNagText });
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnNagWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnNagSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the annotation value of this syntax node.
+        /// Is <see cref="PgnAnnotation.Null"/> for '$', '$0', and '$256' or greater.
+        /// </summary>
+        public PgnAnnotation Annotation => Green.Annotation;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnNagSyntax(PgnNagWithTriviaSyntax parent, GreenPgnNagSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitNagSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitNagSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitNagSyntax(this, arg);
+    }
+
+    public sealed class PgnNagWithTriviaSyntax : WithTriviaSyntax<PgnNagSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnNagSyntax CreateContentNode() => new PgnNagSyntax(this, (GreenPgnNagSyntax)Green.ContentNode);
+
+        internal PgnNagWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

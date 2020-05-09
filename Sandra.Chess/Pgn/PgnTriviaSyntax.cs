@@ -38,7 +38,20 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public static readonly GreenPgnTriviaSyntax Empty = new GreenPgnTriviaSyntax(
             ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Empty,
-            ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty);
+            ReadOnlySpanList<IGreenPgnSymbol>.Empty);
+
+        internal static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<IGreenPgnSymbol> backgroundAfter)
+        {
+            if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
+            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
+
+            var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
+            var backgroundAfterSpanList = ReadOnlySpanList<IGreenPgnSymbol>.Create(backgroundAfter);
+
+            return commentNodeSpanList.Count == 0 && backgroundAfterSpanList.Count == 0
+                ? Empty
+                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfterSpanList);
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTriviaSyntax"/>.
@@ -56,17 +69,7 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
         public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
-        {
-            if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
-            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
-
-            var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
-            var backgroundAfterSpanList = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
-
-            return commentNodeSpanList.Count == 0 && backgroundAfterSpanList.Count == 0
-                ? Empty
-                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfterSpanList);
-        }
+            => Create(commentNodes, (IEnumerable<IGreenPgnSymbol>)backgroundAfter);
 
         /// <summary>
         /// Gets the comment nodes.
@@ -76,14 +79,14 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the background after the comment nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundAfter { get; }
+        public ReadOnlySpanList<IGreenPgnSymbol> BackgroundAfter { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length => CommentNodes.Length + BackgroundAfter.Length;
 
-        private GreenPgnTriviaSyntax(ReadOnlySpanList<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
+        private GreenPgnTriviaSyntax(ReadOnlySpanList<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<IGreenPgnSymbol> backgroundAfter)
         {
             CommentNodes = commentNodes;
             BackgroundAfter = backgroundAfter;
