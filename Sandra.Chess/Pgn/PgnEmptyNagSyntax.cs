@@ -34,16 +34,11 @@ namespace Sandra.Chess.Pgn
         public static GreenPgnEmptyNagSyntax Value { get; } = new GreenPgnEmptyNagSyntax();
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public override int Length => PgnNagSyntax.NagLength;
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
         public override PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
 
-        private GreenPgnEmptyNagSyntax() { }
+        private GreenPgnEmptyNagSyntax() => Length = PgnNagSyntax.NagLength;
 
         /// <summary>
         /// Generates the error associated with this symbol at a given start position.

@@ -35,11 +35,6 @@ namespace Sandra.Chess.Pgn
         public string OverflowNagText { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public override int Length { get; }
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
         public override PgnSymbolType SymbolType => PgnSymbolType.OverflowNag;

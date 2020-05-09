@@ -43,7 +43,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public virtual int Length { get; }
+        public int Length { get; protected set; }
 
         /// <summary>
         /// Gets the type of this symbol.
