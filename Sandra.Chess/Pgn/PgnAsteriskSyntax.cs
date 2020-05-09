@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the asterisk character '*' in PGN text.
     /// </summary>
-    public sealed class GreenPgnAsteriskSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnAsteriskSyntax : GreenPgnGameResultSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnAsteriskSyntax"/> value.
@@ -42,6 +42,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the type of this symbol.
         /// </summary>
         public PgnSymbolType SymbolType => PgnSymbolType.Asterisk;
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public override PgnGameResult GameResult => PgnGameResult.Undetermined;
 
         private GreenPgnAsteriskSyntax() { }
 

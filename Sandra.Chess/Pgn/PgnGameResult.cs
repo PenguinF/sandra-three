@@ -21,4 +21,29 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Enumerates four types of game termination markers in PGN.
+    /// </summary>
+    public enum PgnGameResult
+    {
+        /// <summary>
+        /// The game is in progress, its result is unknown, or the game is abandoned.
+        /// </summary>
+        Undetermined,
+
+        /// <summary>
+        /// Black wins the game.
+        /// </summary>
+        BlackWins,
+
+        /// <summary>
+        /// The game is a draw.
+        /// </summary>
+        Draw,
+
+        /// <summary>
+        /// White wins the game.
+        /// </summary>
+        WhiteWins,
+    }
 }

@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the white win game termination marker "1-0".
     /// </summary>
-    public sealed class GreenPgnWhiteWinMarkerSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnWhiteWinMarkerSyntax : GreenPgnGameResultSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnWhiteWinMarkerSyntax"/> value.
@@ -42,6 +42,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the type of this symbol.
         /// </summary>
         public PgnSymbolType SymbolType => PgnSymbolType.WhiteWinMarker;
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public override PgnGameResult GameResult => PgnGameResult.WhiteWins;
 
         private GreenPgnWhiteWinMarkerSyntax() { }
 

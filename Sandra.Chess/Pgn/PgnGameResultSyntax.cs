@@ -21,4 +21,18 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents any of four types of game termination markers in PGN.
+    /// These are <see cref="GreenPgnAsteriskSyntax"/>, <see cref="GreenPgnBlackWinMarkerSyntax"/>,
+    /// <see cref="GreenPgnDrawMarkerSyntax"/> and <see cref="GreenPgnWhiteWinMarkerSyntax"/>.
+    /// </summary>
+    public abstract class GreenPgnGameResultSyntax
+    {
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public abstract PgnGameResult GameResult { get; }
+
+        internal GreenPgnGameResultSyntax() { }
+    }
 }
