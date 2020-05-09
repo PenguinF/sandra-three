@@ -27,56 +27,59 @@ namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
+        private static ParseTree<PgnSyntaxNodes> NoGame(ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => new ParseTree<PgnSyntaxNodes> { trailingTrivia };
+
         internal static List<(string, ParseTree)> TriviaParseTrees() => new List<(string, ParseTree)>
         {
-            ("", new ParseTree<PgnSyntaxNodes> { EmptyTrivia }),
-            (" ", new ParseTree<PgnSyntaxNodes> { WhitespaceTrivia }),
-            ("%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } } }),
-            ("% ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } } }),
-            ("% \n", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } } }),
-            ("\n%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } } }),
+            ("", NoGame(EmptyTrivia)),
+            (" ", NoGame(WhitespaceTrivia)),
+            ("%", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } })),
+            ("% ", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } })),
+            ("% \n", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } })),
+            ("\n%", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } })),
 
-            ("0 0", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, WhitespaceTriviaThenSymbol, EmptyTrivia }),
-            (" 0  00   000    0 ", new ParseTree<PgnSyntaxNodes> { WhitespaceTriviaThenSymbol, WhitespaceTriviaThenSymbol, WhitespaceTriviaThenSymbol, WhitespaceTriviaThenSymbol, WhitespaceTrivia }),
+            ("0 0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, WS_MoveNumber))),
+            (" 0  00   000    0 ", OneGameTrailingTrivia(EmptyTagSection, Plies(WS_MoveNumber, WS_MoveNumber, WS_MoveNumber, WS_MoveNumber), WhitespaceTrivia)),
 
-            ("{}", new ParseTree<PgnSyntaxNodes> { CommentTrivia }),
-            ("  {}   * ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
-            (" *   {}  ", new ParseTree<PgnSyntaxNodes> { WhitespaceTriviaThenSymbol, WhitespaceCommentWhitespace }),
-            (" {} {} ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace } }),
+            ("{}", NoGame(CommentTrivia)),
+            ("  {}   * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
+            (" *   {}  ", Games(Game(WS_Result), WhitespaceCommentWhitespace)),
+            (" {} {} ", NoGame(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace })),
 
-            (" * {} {} ", new ParseTree<PgnSyntaxNodes> { WhitespaceTriviaThenSymbol, new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace } }),
-            (" {} * {} ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceCommentWhitespace), WhitespaceCommentWhitespace }),
-            (" {} {} * ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
+            (" * {} {} ", Games(Game(WS_Result), new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace })),
+            (" {} * {} ", Games(Game(ResultWithTrivia(WhitespaceCommentWhitespace)), WhitespaceCommentWhitespace)),
+            (" {} {} * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
 
-            (" {} * * ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceTriviaThenSymbol, WhitespaceTrivia }),
-            (" * {} * ", new ParseTree<PgnSyntaxNodes> { WhitespaceTriviaThenSymbol, PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
-            (" * * {} ", new ParseTree<PgnSyntaxNodes> { WhitespaceTriviaThenSymbol, WhitespaceTriviaThenSymbol, WhitespaceCommentWhitespace }),
+            (" {} * * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), Game(WS_Result), WhitespaceTrivia)),
+            (" * {} * ", Games(Game(WS_Result), Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
+            (" * * {} ", Games(Game(WS_Result), Game(WS_Result), WhitespaceCommentWhitespace)),
 
-            ("{}{}*{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), CommentTrivia }),
-            ("{}{}**", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), SymbolNoTrivia, EmptyTrivia }),
-            ("{}*{}{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } }),
-            ("{}*{}*", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), EmptyTrivia }),
-            ("{}**{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), SymbolNoTrivia, CommentTrivia }),
-            ("*{}{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), EmptyTrivia }),
-            ("*{}*{}", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), CommentTrivia }),
-            ("*{}**", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), SymbolNoTrivia, EmptyTrivia }),
-            ("**{}{}", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, SymbolNoTrivia, new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } }),
-            ("**{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), EmptyTrivia }),
+            ("{}{}*{}", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), CommentTrivia)),
+            ("{}{}**", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia))),
+            ("{}*{}{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } )),
+            ("{}*{}*", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)))),
+            ("{}**{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia), CommentTrivia)),
+            ("*{}{}*", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)))),
+            ("*{}*{}", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), CommentTrivia)),
+            ("*{}**", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia))),
+            ("**{}{}", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } )),
+            ("**{}*", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)))),
         };
 
         internal static List<(string, ParseTree, PgnErrorCode[])> TriviaParseTreesWithErrors() => new List<(string, ParseTree, PgnErrorCode[])>
         {
-            (" %", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } } },
+            (" %", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } }),
                 new[] { PgnErrorCode.IllegalCharacter }),
-            (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } } },
+            (" % ", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } }),
                 new[] { PgnErrorCode.IllegalCharacter }),
 
-            ("{", new ParseTree<PgnSyntaxNodes> { CommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" {", new ParseTree<PgnSyntaxNodes> { WhitespaceThenCommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            ("{ ", new ParseTree<PgnSyntaxNodes> { CommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" { ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenCommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{", NoGame(CommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" {", NoGame(WhitespaceThenCommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{ ", NoGame(CommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" { ", NoGame(WhitespaceThenCommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
-            ("0%%0", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { TwoIllegalCharacters }), EmptyTrivia },
+            ("0%%0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, new ParseTree<PgnSymbolWithTrivia> { TwoIllegalCharactersTrivia, MoveNumber })),
                 new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
         };
     }

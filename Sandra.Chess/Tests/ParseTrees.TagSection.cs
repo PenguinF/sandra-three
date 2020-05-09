@@ -22,70 +22,219 @@
 using Sandra.Chess.Pgn;
 using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
-        private static ParseTree<PgnSyntaxNodes> TagSectionOnly(ParseTree<PgnTagPairSyntax> firstTagPair, params ParseTree<PgnTagPairSyntax>[] otherTagPairs)
-            => TagSectionTrailingTrivia(EmptyTrivia, firstTagPair, otherTagPairs);
+        private static ParseTree<PgnSyntaxNodes> TagSectionOnly(params ParseTree<PgnTagPairSyntax>[] tagPairs)
+            => OneGame(TagSection(tagPairs), NoPlies);
 
         internal static List<(string, ParseTree)> TagSectionParseTrees() => new List<(string, ParseTree)>
         {
-            ("[", TagSectionOnly(TagPair(BracketOpen))),
-            ("]", TagSectionOnly(TagPair(BracketClose))),
-            ("[]", TagSectionOnly(TagPair(BracketOpen, BracketClose))),
-            ("[[]", TagSectionOnly(TagPair(BracketOpen), TagPair(BracketOpen, BracketClose))),
-            ("[]]", TagSectionOnly(TagPair(BracketOpen, BracketClose), TagPair(BracketClose))),
+        };
+
+        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrors()
+            => TagSectionParseTreesWithErrorsTemp().Select(x => (x.Item1, x.Item2, x.Item3.Where(code => code < PgnErrorCode.EmptyTag).ToArray())).ToList();
+
+        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrorsTemp() => new List<(string, ParseTree, PgnErrorCode[])>
+        {
+            ("[", TagSectionOnly(TagPair(BracketOpen)),
+                new[] { PgnErrorCode.EmptyTag, PgnErrorCode.MissingTagBracketClose }),
+            ("]", TagSectionOnly(TagPair(BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.EmptyTag }),
+            ("[]", TagSectionOnly(TagPair(BracketOpen, BracketClose)),
+                new[] { PgnErrorCode.EmptyTag }),
+            ("[[]", TagSectionOnly(TagPair(BracketOpen), TagPair(BracketOpen, BracketClose)),
+                new[] { PgnErrorCode.EmptyTag, PgnErrorCode.MissingTagBracketClose, PgnErrorCode.EmptyTag }),
+            ("[]]", TagSectionOnly(TagPair(BracketOpen, BracketClose), TagPair(BracketClose)),
+                new[] { PgnErrorCode.EmptyTag, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.EmptyTag }),
 
             // Missing brackets at 4 places.
             // Last one doesn't miss brackets but still has a duplicate tag.
-            ("Event \"?\"\nEvent \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue))),
-            ("Event \"?\"\nEvent \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue, BracketClose))),
-            ("Event \"?\"\n[Event \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue))),
-            ("Event \"?\"\n[Event \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose))),
-            ("Event \"?\"]\nEvent \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue))),
-            ("Event \"?\"]\nEvent \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue, BracketClose))),
-            ("Event \"?\"]\n[Event \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue))),
-            ("Event \"?\"]\n[Event \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose))),
-            ("[Event \"?\"\nEvent \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue))),
-            ("[Event \"?\"\nEvent \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue, BracketClose))),
-            ("[Event \"?\"\n[Event \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue))),
-            ("[Event \"?\"\n[Event \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose))),
-            ("[Event \"?\"]\nEvent \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue))),
-            ("[Event \"?\"]\nEvent \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue, BracketClose))),
-            ("[Event \"?\"]\n[Event \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue))),
-            ("[Event \"?\"]\n[Event \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose))),
+            ("Event \"?\"\nEvent \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("Event \"?\"\nEvent \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketOpen }),
+            ("Event \"?\"\n[Event \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketClose }),
+            ("Event \"?\"\n[Event \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("Event \"?\"]\nEvent \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("Event \"?\"]\nEvent \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketOpen }),
+            ("Event \"?\"]\n[Event \"?\"", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("Event \"?\"]\n[Event \"?\"]", TagSectionOnly(TagPair(TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen }),
+            ("[Event \"?\"\nEvent \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("[Event \"?\"\nEvent \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketOpen }),
+            ("[Event \"?\"\n[Event \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketClose, PgnErrorCode.MissingTagBracketClose }),
+            ("[Event \"?\"\n[Event \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketClose }),
+            ("[Event \"?\"]\nEvent \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose }),
+            ("[Event \"?\"]\nEvent \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_TagName, WS_TagValue, BracketClose)),
+                new[] { PgnErrorCode.MissingTagBracketOpen }),
+            ("[Event \"?\"]\n[Event \"?\"", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue)),
+                new[] { PgnErrorCode.MissingTagBracketClose }),
+            ("[Event \"?\"]\n[Event \"?\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose), TagPair(WS_BracketOpen, TagName, WS_TagValue, BracketClose)),
+                new PgnErrorCode[] { }),
 
             // Missing tag values.
-            ("Event\nEvent", TagSectionOnly(TagPair(TagName), TagPair(WS_TagName))),
-            ("\"?\"Event\nEvent", TagSectionOnly(TagPair(TagValue), TagPair(TagName), TagPair(WS_TagName))),
-            ("Event\"?\"\nEvent", TagSectionOnly(TagPair(TagName, TagValue), TagPair(WS_TagName))),
-            ("Event\n\"?\"Event", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(TagName))),
-            ("Event\nEvent\"?\"", TagSectionOnly(TagPair(TagName), TagPair(WS_TagName, TagValue))),
+            ("Event", TagSectionOnly(TagPair(TagName)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("Event\nEvent", TagSectionOnly(TagPair(TagName), TagPair(WS_TagName)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"Event\nEvent", TagSectionOnly(TagPair(TagValue), TagPair(TagName), TagPair(WS_TagName)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("Event\"?\"\nEvent", TagSectionOnly(TagPair(TagName, TagValue), TagPair(WS_TagName)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("Event\n\"?\"Event", TagSectionOnly(TagPair(TagName, WS_TagValue), TagPair(TagName)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("Event\nEvent\"?\"", TagSectionOnly(TagPair(TagName), TagPair(WS_TagName, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose
+                }),
 
             // Duplicate values, missing tag names.
-            ("\"?\"\n\"?\"", TagSectionOnly(TagPair(TagValue, WS_TagValue))),
-            ("\"?\"\n]\"?\"", TagSectionOnly(TagPair(TagValue, WS_BracketClose), TagPair(TagValue))),
-            ("\"?\"[\n\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(BracketOpen, WS_TagValue))),
-            ("\"?\"]\n[\"?\"", TagSectionOnly(TagPair(TagValue, BracketClose), TagPair(WS_BracketOpen, TagValue))),
-            ("\"?\"[\n]\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(BracketOpen, WS_BracketClose), TagPair(TagValue))),
-            ("Event\"?\"\n\"?\"", TagSectionOnly(TagPair(TagName, TagValue, WS_TagValue))),
-            ("\"?\"\nEvent\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(WS_TagName, TagValue))),
-            ("\"?\"\n\"?\"Event", TagSectionOnly(TagPair(TagValue, WS_TagValue), TagPair(TagName))),
+            ("\"?\"\n\"?\"", TagSectionOnly(TagPair(TagValue, WS_TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"\n]\"?\"", TagSectionOnly(TagPair(TagValue, WS_BracketClose), TagPair(TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"[\n\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(BracketOpen, WS_TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"]\n[\"?\"", TagSectionOnly(TagPair(TagValue, BracketClose), TagPair(WS_BracketOpen, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName,
+                    PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"[\n]\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(BracketOpen, WS_BracketClose), TagPair(TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.EmptyTag,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("Event\"?\"\n\"?\"", TagSectionOnly(TagPair(TagName, TagValue, WS_TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"\nEvent\"?\"", TagSectionOnly(TagPair(TagValue), TagPair(WS_TagName, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"\n\"?\"Event", TagSectionOnly(TagPair(TagValue, WS_TagValue), TagPair(TagName)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose,
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagValue, PgnErrorCode.MissingTagBracketClose
+                }),
+
+            ("\"", TagSectionOnly(TagPair(TagValue)),
+                new[]
+                {
+                    PgnErrorCode.UnterminatedTagValue, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\n", TagSectionOnly(TagPair(TagValue)),
+                new[]
+                {
+                    PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"", TagSectionOnly(TagPair(TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.UnterminatedTagValue, PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.UnterminatedTagValue, PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"\"\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue, TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MultipleTagValues, PgnErrorCode.UnterminatedTagValue, PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"\"\"\"\"\"\"\"", TagSectionOnly(TagPair(TagValue, TagValue, TagValue, TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MultipleTagValues, PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
 
             // Whitespace between consecutive tag values.
-            ("\n\"?\"\n\"?\"", TagSectionOnly(TagPair(WS_TagValue, WS_TagValue))),
-            ("\"?\"\n\"?\"\n", TagSectionTrailingTrivia(WhitespaceTrivia, TagPair(TagValue, WS_TagValue))),
-            ("\n\"?\"\n\"?\"\n", TagSectionTrailingTrivia(WhitespaceTrivia, TagPair(WS_TagValue, WS_TagValue))),
-        };
-
-        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrors() => new List<(string, ParseTree, PgnErrorCode[])>
-        {
-            ("\"", TagSectionOnly(TagPair(TagValue)),
-                new[] { PgnErrorCode.UnterminatedTagValue }),
-            ("\"\n", TagSectionOnly(TagPair(TagValue)),
-                new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
+            ("\n\"?\"\n\"?\"", TagSectionOnly(TagPair(WS_TagValue, WS_TagValue)),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\"?\"\n\"?\"\n", OneGameTrailingTrivia(TagSection(TagPair(TagValue, WS_TagValue)), NoPlies, WhitespaceTrivia),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
+            ("\n\"?\"\n\"?\"\n", OneGameTrailingTrivia(TagSection(TagPair(WS_TagValue, WS_TagValue)), NoPlies, WhitespaceTrivia),
+                new[]
+                {
+                    PgnErrorCode.MultipleTagValues, PgnErrorCode.MissingTagBracketOpen, PgnErrorCode.MissingTagName, PgnErrorCode.MissingTagBracketClose
+                }),
 
             // Error tag values must behave like regular tag values, i.e. not generate extra errors.
             ("[Event \"\\u\"]", TagSectionOnly(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose)),

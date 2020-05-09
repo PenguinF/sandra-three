@@ -46,6 +46,38 @@ namespace Sandra.Chess.Tests
             public override Type ExpectedType => typeof(T);
         }
 
+        private class TagSectionAndMoveTreeAndResult
+        {
+            public ParseTree<PgnTagSectionSyntax> TagSection;
+            public ParseTree<PgnSymbolWithTrivia>[] MoveSection;
+            public ParseTree<PgnSymbolWithTrivia> Result;
+
+            public TagSectionAndMoveTreeAndResult(ParseTree<PgnSymbolWithTrivia> result)
+            {
+                Result = result;
+            }
+
+            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnSymbolWithTrivia>[] moveSection)
+            {
+                TagSection = tagSection;
+                MoveSection = moveSection;
+            }
+
+            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnSymbolWithTrivia>[] moveSection, ParseTree<PgnSymbolWithTrivia> result)
+            {
+                TagSection = tagSection;
+                MoveSection = moveSection;
+                Result = result;
+            }
+
+            public void AddTo(ParseTree<PgnSyntaxNodes> gamesSyntax)
+            {
+                if (TagSection != null && TagSection.Any()) gamesSyntax.Add(TagSection);
+                if (MoveSection != null) MoveSection.ForEach(gamesSyntax.Add);
+                if (Result != null) gamesSyntax.Add(Result);
+            }
+        }
+
         private static readonly ParseTree<PgnWhitespaceSyntax> WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
         private static readonly ParseTree<PgnIllegalCharacterSyntax> IllegalCharacter = new ParseTree<PgnIllegalCharacterSyntax>();
         private static readonly ParseTree<PgnEscapeSyntax> EscapedLine = new ParseTree<PgnEscapeSyntax>();
@@ -55,32 +87,41 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnBackgroundListSyntax> Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceTrivia = new ParseTree<PgnTriviaSyntax> { Whitespace };
         private static readonly ParseTree<PgnBackgroundListSyntax> TwoIllegalCharacters = new ParseTree<PgnBackgroundListSyntax> { IllegalCharacter, IllegalCharacter };
+        private static readonly ParseTree<PgnTriviaSyntax> TwoIllegalCharactersTrivia = new ParseTree<PgnTriviaSyntax> { TwoIllegalCharacters };
 
         private static readonly ParseTree<PgnCommentSyntax> Comment = new ParseTree<PgnCommentSyntax>();
-        private static readonly ParseTree<PgnSymbol> Symbol = new ParseTree<PgnSymbol>();
-
-        private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(ParseTree<PgnTriviaSyntax> leadingTrivia)
-            => new ParseTree<PgnSymbolWithTrivia> { leadingTrivia, Symbol };
-
-        private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(
-            ParseTree<PgnTriviaElementSyntax> element1,
-            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
-            => PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { element1, backgroundAfter });
-
-        private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(
-            ParseTree<PgnTriviaElementSyntax> element1,
-            ParseTree<PgnTriviaElementSyntax> element2,
-            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
-            => PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { element1, element2, backgroundAfter });
 
         private static readonly ParseTree<PgnTriviaElementSyntax> CommentNoBackground = new ParseTree<PgnTriviaElementSyntax> { EmptyBackground, Comment };
-        private static readonly ParseTree<PgnSymbolWithTrivia> SymbolNoTrivia = PgnSymbolWithLeadingTrivia(EmptyTrivia);
         private static readonly ParseTree<PgnTriviaElementSyntax> WhitespaceThenComment = new ParseTree<PgnTriviaElementSyntax> { Whitespace, Comment };
-        private static readonly ParseTree<PgnSymbolWithTrivia> WhitespaceTriviaThenSymbol = PgnSymbolWithLeadingTrivia(WhitespaceTrivia);
 
         private static readonly ParseTree<PgnTriviaSyntax> CommentTrivia = new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground };
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceThenCommentTrivia = new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, EmptyBackground };
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceCommentWhitespace = new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, Whitespace };
+
+        private static readonly ParseTree<PgnSymbol> MoveNumber = new ParseTree<PgnSymbol>();
+        private static readonly ParseTree<PgnSymbolWithTrivia> MoveNumberNoTrivia = new ParseTree<PgnSymbolWithTrivia> { EmptyTrivia, MoveNumber };
+        private static readonly ParseTree<PgnSymbolWithTrivia> WS_MoveNumber = new ParseTree<PgnSymbolWithTrivia> { WhitespaceTrivia, MoveNumber };
+
+        private static readonly ParseTree<PgnSymbol> GameResult = new ParseTree<PgnSymbol>();
+
+        private static readonly ParseTree<PgnSymbolWithTrivia> ResultNoTrivia = new ParseTree<PgnSymbolWithTrivia> { EmptyTrivia, GameResult };
+
+        private static ParseTree<PgnSymbolWithTrivia> ResultWithTrivia(
+            ParseTree<PgnTriviaSyntax> leadingTrivia)
+            => new ParseTree<PgnSymbolWithTrivia> { leadingTrivia, GameResult };
+
+        private static ParseTree<PgnSymbolWithTrivia> ResultWithTrivia(
+            ParseTree<PgnTriviaElementSyntax> element1,
+            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
+            => ResultWithTrivia(new ParseTree<PgnTriviaSyntax> { element1, backgroundAfter });
+
+        private static ParseTree<PgnSymbolWithTrivia> ResultWithTrivia(
+            ParseTree<PgnTriviaElementSyntax> element1,
+            ParseTree<PgnTriviaElementSyntax> element2,
+            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
+            => ResultWithTrivia(new ParseTree<PgnTriviaSyntax> { element1, element2, backgroundAfter });
+
+        private static readonly ParseTree<PgnSymbolWithTrivia> WS_Result = ResultWithTrivia(WhitespaceTrivia);
 
         private static ParseTree<PgnTagElementWithTriviaSyntax> NoTrivia<TTagElement>()
             where TTagElement : PgnTagElementSyntax
@@ -107,15 +148,62 @@ namespace Sandra.Chess.Tests
             return tagPairSyntax;
         }
 
-        private static ParseTree<PgnSyntaxNodes> TagSectionTrailingTrivia(
-            ParseTree<PgnTriviaSyntax> trailingTrivia,
-            ParseTree<PgnTagPairSyntax> firstTagPair,
-            params ParseTree<PgnTagPairSyntax>[] otherTagPairs)
+        private static readonly ParseTree<PgnTagSectionSyntax> EmptyTagSection = new ParseTree<PgnTagSectionSyntax> { };
+
+        private static ParseTree<PgnTagSectionSyntax> TagSection(params ParseTree<PgnTagPairSyntax>[] tagPairs)
         {
-            var tagSectionSyntax = new ParseTree<PgnTagSectionSyntax> { firstTagPair };
-            otherTagPairs.ForEach(tagSectionSyntax.Add);
-            return new ParseTree<PgnSyntaxNodes> { tagSectionSyntax, trailingTrivia };
+            var tagSectionSyntax = new ParseTree<PgnTagSectionSyntax>();
+            tagPairs.ForEach(tagSectionSyntax.Add);
+            return tagSectionSyntax;
         }
+
+        private static ParseTree<PgnSymbolWithTrivia>[] Plies(params ParseTree<PgnSymbolWithTrivia>[] symbols)
+            => symbols;
+
+        private static readonly ParseTree<PgnSymbolWithTrivia>[] NoPlies = Plies();
+
+        private static TagSectionAndMoveTreeAndResult Game(
+            ParseTree<PgnSymbolWithTrivia> result)
+            => new TagSectionAndMoveTreeAndResult(result);
+
+        private static TagSectionAndMoveTreeAndResult Game(
+            ParseTree<PgnTagSectionSyntax> tagSection,
+            ParseTree<PgnSymbolWithTrivia>[] moveSection)
+            => new TagSectionAndMoveTreeAndResult(tagSection, moveSection);
+
+        private static ParseTree<PgnSyntaxNodes> Games(TagSectionAndMoveTreeAndResult game1, ParseTree<PgnTriviaSyntax> trailingTrivia)
+        {
+            var gamesSyntax = new ParseTree<PgnSyntaxNodes>();
+            game1.AddTo(gamesSyntax);
+            gamesSyntax.Add(trailingTrivia);
+            return gamesSyntax;
+        }
+
+        private static ParseTree<PgnSyntaxNodes> Games(TagSectionAndMoveTreeAndResult game1, TagSectionAndMoveTreeAndResult game2, ParseTree<PgnTriviaSyntax> trailingTrivia)
+        {
+            var gamesSyntax = new ParseTree<PgnSyntaxNodes>();
+            game1.AddTo(gamesSyntax);
+            game2.AddTo(gamesSyntax);
+            gamesSyntax.Add(trailingTrivia);
+            return gamesSyntax;
+        }
+
+        private static ParseTree<PgnSyntaxNodes> Games(params TagSectionAndMoveTreeAndResult[] games)
+        {
+            var gamesSyntax = new ParseTree<PgnSyntaxNodes>();
+            games.ForEach(x => x.AddTo(gamesSyntax));
+            gamesSyntax.Add(EmptyTrivia);
+            return gamesSyntax;
+        }
+
+        private static ParseTree<PgnSyntaxNodes> OneGameTrailingTrivia(
+            ParseTree<PgnTagSectionSyntax> tagSection,
+            ParseTree<PgnSymbolWithTrivia>[] moveSection,
+            ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => Games(Game(tagSection, moveSection), trailingTrivia);
+
+        private static ParseTree<PgnSyntaxNodes> OneGame(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnSymbolWithTrivia>[] moveSection)
+            => Games(Game(tagSection, moveSection));
 
         internal static readonly List<(string, ParseTree)> TestParseTrees
             = TriviaParseTrees()
