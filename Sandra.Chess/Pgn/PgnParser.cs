@@ -306,8 +306,18 @@ namespace Sandra.Chess.Pgn
                     }
                     else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
                     {
-                        // If HasTagPairTagValue was already true, this symbol is ignored.
-                        HasTagPairTagValue = true;
+                        // Only accept the first tag value.
+                        if (!HasTagPairTagValue)
+                        {
+                            HasTagPairTagValue = true;
+                        }
+                        else
+                        {
+                            Errors.Add(new PgnErrorInfo(
+                                PgnErrorCode.MultipleTagValues,
+                                symbolStartIndex,
+                                symbol.Length));
+                        }
                     }
 
                     AddTagElementToBuilder(leadingTrivia, (GreenPgnTagElementSyntax)symbol);
