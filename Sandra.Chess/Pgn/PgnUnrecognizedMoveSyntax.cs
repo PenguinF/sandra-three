@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnUnknownSymbolSyntax.cs
+ * PgnUnrecognizedMoveSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -25,19 +25,19 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a PGN syntax node with an unknown symbol, or unrecognized move.
+    /// Represents a PGN syntax node with an unrecognized move.
     /// </summary>
-    public sealed class GreenPgnUnknownSymbolSyntax : GreenPgnMoveSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnUnrecognizedMoveSyntax : GreenPgnMoveSyntax, IGreenPgnSymbol
     {
         /// <summary>
-        /// The text containing the unknown symbol.
+        /// The text containing the unrecognized move.
         /// </summary>
         public string SymbolText { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public override PgnSymbolType SymbolType => PgnSymbolType.Unknown;
+        public override PgnSymbolType SymbolType => PgnSymbolType.UnrecognizedMove;
 
         /// <summary>
         /// Gets if this is an unrecognized move.
@@ -45,10 +45,10 @@ namespace Sandra.Chess.Pgn
         public override bool IsUnrecognizedMove => true;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnUnknownSymbolSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenPgnUnrecognizedMoveSyntax"/>.
         /// </summary>
         /// <param name="symbolText">
-        /// The text containing the unknown symbol.
+        /// The text containing the unrecognized move.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="symbolText"/> is null.
@@ -56,7 +56,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentException">
         /// <paramref name="symbolText"/> has a length of 0.
         /// </exception>
-        public GreenPgnUnknownSymbolSyntax(string symbolText) : base(symbolText == null ? 0 : symbolText.Length)
+        public GreenPgnUnrecognizedMoveSyntax(string symbolText) : base(symbolText == null ? 0 : symbolText.Length)
         {
             if (symbolText == null) throw new ArgumentNullException(nameof(symbolText));
             if (Length <= 0) throw new ArgumentException($"{symbolText} is empty.", nameof(symbolText));

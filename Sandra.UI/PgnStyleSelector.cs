@@ -101,7 +101,7 @@ namespace Sandra.UI
                     return syntaxEditor.Styles[moveTextStyleIndex];
                 case PgnSymbolType.OverflowNag:
                     return syntaxEditor.Styles[errorSymbolStyleIndex];
-                case PgnSymbolType.Unknown:
+                case PgnSymbolType.UnrecognizedMove:
                     return syntaxEditor.Styles[illegalCharacterStyleIndex];
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:

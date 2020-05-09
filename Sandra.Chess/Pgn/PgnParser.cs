@@ -273,7 +273,7 @@ namespace Sandra.Chess.Pgn
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
             => Yield(symbolBuilder.Yield(length)
-                     ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length)));
+                     ?? new GreenPgnUnrecognizedMoveSyntax(pgnText.Substring(symbolStartIndex, length)));
 
         private void ParsePgnText(string pgnText)
         {

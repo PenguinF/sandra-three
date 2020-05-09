@@ -87,7 +87,7 @@
     <Compile Include="Pgn\PgnTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaElementSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaSyntax.cs" />
-    <Compile Include="Pgn\PgnUnknownSymbolSyntax.cs" />
+    <Compile Include="Pgn\PgnUnrecognizedMoveSyntax.cs" />
     <Compile Include="Pgn\PgnUnterminatedCommentSyntax.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />

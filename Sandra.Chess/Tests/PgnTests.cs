@@ -66,15 +66,15 @@ namespace Sandra.Chess.Tests
                     resultTokenType = tokenType1;
                     return true;
                 }
-                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax))
+                else if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax))
                 {
                     resultTokenType = tokenType2;
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(GreenPgnUnknownSymbolSyntax))
+            else if (tokenType1 == typeof(GreenPgnUnrecognizedMoveSyntax))
             {
-                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax)
                     || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
@@ -99,10 +99,10 @@ namespace Sandra.Chess.Tests
                     resultTokenType = tokenType1;
                     return true;
                 }
-                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                else if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
-                    resultTokenType = typeof(GreenPgnUnknownSymbolSyntax);
+                    resultTokenType = typeof(GreenPgnUnrecognizedMoveSyntax);
                     return true;
                 }
             }
@@ -127,7 +127,7 @@ namespace Sandra.Chess.Tests
                 yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
                 yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
                 yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1=", typeof(GreenPgnUnknownSymbolSyntax));
+                yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
                 yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
@@ -234,8 +234,8 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0, false));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1, false));
 
-            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(null));
-            Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(""));
+            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(null));
+            Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(""));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
@@ -694,7 +694,7 @@ namespace Sandra.Chess.Tests
         [MemberData(nameof(StateMachineInvalidSymbols))]
         public void SymbolStateMachineInvalidSymbols(string pgn)
         {
-            AssertTokens(pgn, ExpectToken<GreenPgnUnknownSymbolSyntax>(pgn.Length));
+            AssertTokens(pgn, ExpectToken<GreenPgnUnrecognizedMoveSyntax>(pgn.Length));
         }
 
         private static int AssertParseTree(ParseTrees.ParseTree expectedParseTree, PgnSyntax expectedParent, int expectedStart, PgnSyntax actualParseTree)
