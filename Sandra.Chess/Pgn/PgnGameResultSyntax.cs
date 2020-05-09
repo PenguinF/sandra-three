@@ -29,6 +29,26 @@ namespace Sandra.Chess.Pgn
     public abstract class GreenPgnGameResultSyntax
     {
         /// <summary>
+        /// Gets the <see cref="GreenPgnGameResultSyntax"/> which represents the undetermined result.
+        /// </summary>
+        public static GreenPgnGameResultSyntax UndeterminedResultSyntax => GreenPgnAsteriskSyntax.Value;
+
+        /// <summary>
+        /// Gets the <see cref="GreenPgnGameResultSyntax"/> which represents a black win.
+        /// </summary>
+        public static GreenPgnGameResultSyntax BlackWinsResultSyntax => GreenPgnBlackWinMarkerSyntax.Value;
+
+        /// <summary>
+        /// Gets the <see cref="GreenPgnGameResultSyntax"/> which represents a draw.
+        /// </summary>
+        public static GreenPgnGameResultSyntax DrawResultSyntax => GreenPgnDrawMarkerSyntax.Value;
+
+        /// <summary>
+        /// Gets the <see cref="GreenPgnGameResultSyntax"/> which represents a white win.
+        /// </summary>
+        public static GreenPgnGameResultSyntax WhiteWinsResultSyntax => GreenPgnWhiteWinMarkerSyntax.Value;
+
+        /// <summary>
         /// Gets the type of game termination marker.
         /// </summary>
         public abstract PgnGameResult GameResult { get; }
