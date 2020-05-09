@@ -151,7 +151,7 @@ namespace Sandra.UI
             string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePgn)
             {
-                pieceSymbols = PgnMoveSyntax.PieceSymbols;
+                pieceSymbols = PgnMoveFormatter.PieceSymbols;
             }
             else
             {
@@ -159,7 +159,7 @@ namespace Sandra.UI
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.
-                    pieceSymbols = PgnMoveSyntax.PieceSymbols;
+                    pieceSymbols = PgnMoveFormatter.PieceSymbols;
                 }
             }
 

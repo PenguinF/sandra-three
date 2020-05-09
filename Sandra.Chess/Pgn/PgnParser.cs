@@ -99,7 +99,7 @@ namespace Sandra.Chess.Pgn
             // Special cases.
             PgnCharacterClassTable['O'] = PgnSymbolStateMachine.LetterO;
             PgnCharacterClassTable['P'] = PgnSymbolStateMachine.LetterP;
-            PgnMoveSyntax.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
+            PgnMoveFormatter.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
             PgnCharacterClassTable['x'] = PgnSymbolStateMachine.LowercaseX;
             PgnCharacterClassTable['-'] = PgnSymbolStateMachine.Dash;
             PgnCharacterClassTable['/'] = PgnSymbolStateMachine.Slash;
