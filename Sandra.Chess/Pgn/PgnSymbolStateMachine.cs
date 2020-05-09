@@ -349,8 +349,9 @@ namespace Sandra.Chess.Pgn
             {
                 ulong resultState = 1ul << CurrentState;
                 if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
-                if (ValidMoveTextStates.Test(resultState)) return new GreenPgnMoveSyntax(length);
-                if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
+                bool isValidTagName = ValidTagNameStates.Test(resultState);
+                if (ValidMoveTextStates.Test(resultState)) return new GreenPgnMoveSyntax(length, isValidTagName);
+                if (isValidTagName) return new GreenPgnTagNameSyntax(length);
             }
 
             return null;
