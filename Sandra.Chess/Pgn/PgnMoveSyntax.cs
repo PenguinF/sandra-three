@@ -76,6 +76,9 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
+    /// <summary>
+    /// Represents a syntax node which contains a move text.
+    /// </summary>
     public sealed class PgnMoveSyntax : PgnSyntax, IPgnSymbol
     {
         /// <summary>
@@ -94,10 +97,39 @@ namespace Sandra.Chess.Pgn
                 symbolText.Length,
                 new[] { symbolText });
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnMoveWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenPgnMoveSyntax Green { get; }
+
+        /// <summary>
+        /// Gets if the move syntax is a valid tag name (<see cref="PgnTagNameSyntax"/>) as well.
+        /// </summary>
+        public bool IsValidTagName => Green.IsValidTagName;
+
+        /// <summary>
+        /// Gets if this is an unrecognized move.
+        /// </summary>
+        public bool IsUnrecognizedMove => Green.IsUnrecognizedMove;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal PgnMoveSyntax(PgnMoveWithTriviaSyntax parent, GreenPgnMoveSyntax green)

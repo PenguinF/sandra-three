@@ -88,10 +88,34 @@ namespace Sandra.Chess.Pgn
         public static readonly string WhiteWinMarkerText = "1-0";
         public const int WhiteWinMarkerLength = 3;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnGameResultWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenPgnGameResultSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public PgnGameResult GameResult => Green.GameResult;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal PgnGameResultSyntax(PgnGameResultWithTriviaSyntax parent, GreenPgnGameResultSyntax green)

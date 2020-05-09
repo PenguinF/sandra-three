@@ -58,12 +58,34 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
+    /// <summary>
+    /// Represents a syntax node which contains an integer move number.
+    /// </summary>
     public sealed class PgnMoveNumberSyntax : PgnSyntax, IPgnSymbol
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnMoveNumberWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenPgnMoveNumberSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal PgnMoveNumberSyntax(PgnMoveNumberWithTriviaSyntax parent, GreenPgnMoveNumberSyntax green)

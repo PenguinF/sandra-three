@@ -87,7 +87,7 @@ namespace Sandra.UI
             => syntaxEditor.Styles[moveNumberStyleIndex];
 
         public override Style VisitMoveSyntax(PgnMoveSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[node.Green.IsUnrecognizedMove ? errorSymbolStyleIndex : moveTextStyleIndex];
+            => syntaxEditor.Styles[node.IsUnrecognizedMove ? errorSymbolStyleIndex : moveTextStyleIndex];
 
         // Only darken OverflowNag, and display EmptyNag like a regular NAG. Got to go through that state before creating a valid NAG.
         public override Style VisitNagSyntax(PgnNagSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)

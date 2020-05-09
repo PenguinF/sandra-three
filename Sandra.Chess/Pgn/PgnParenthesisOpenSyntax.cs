@@ -49,22 +49,40 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
+    /// <summary>
+    /// Represents the parenthesis open character '(' in PGN text.
+    /// </summary>
     public sealed class PgnParenthesisOpenSyntax : PgnSyntax, IPgnSymbol
     {
         public const char ParenthesisOpenCharacter = '(';
         public const int ParenthesisOpenLength = 1;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnParenthesisOpenWithTriviaSyntax Parent { get; }
-        public GreenPgnParenthesisOpenSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnParenthesisOpenSyntax Green => GreenPgnParenthesisOpenSyntax.Value;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
-        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => ParenthesisOpenLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnParenthesisOpenSyntax(PgnParenthesisOpenWithTriviaSyntax parent, GreenPgnParenthesisOpenSyntax green)
-        {
-            Parent = parent;
-            Green = green;
-        }
+        internal PgnParenthesisOpenSyntax(PgnParenthesisOpenWithTriviaSyntax parent) => Parent = parent;
 
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitParenthesisOpenSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitParenthesisOpenSyntax(this);
@@ -81,7 +99,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnParenthesisOpenSyntax CreateContentNode() => new PgnParenthesisOpenSyntax(this, Green.ContentNode);
+        internal override PgnParenthesisOpenSyntax CreateContentNode() => new PgnParenthesisOpenSyntax(this);
 
         internal PgnParenthesisOpenWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnParenthesisOpenSyntax> green)
             : base(green)

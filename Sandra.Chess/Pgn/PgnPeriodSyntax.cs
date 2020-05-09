@@ -49,22 +49,40 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
+    /// <summary>
+    /// Represents the period character '.' in PGN text.
+    /// </summary>
     public sealed class PgnPeriodSyntax : PgnSyntax, IPgnSymbol
     {
         public const char PeriodCharacter = '.';
         public const int PeriodLength = 1;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnPeriodWithTriviaSyntax Parent { get; }
-        public GreenPgnPeriodSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnPeriodSyntax Green => GreenPgnPeriodSyntax.Value;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
-        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => PeriodLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent, GreenPgnPeriodSyntax green)
-        {
-            Parent = parent;
-            Green = green;
-        }
+        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent, GreenPgnPeriodSyntax green) => Parent = parent;
 
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);

@@ -49,22 +49,40 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
+    /// <summary>
+    /// Represents the parenthesis close character ')' in PGN text.
+    /// </summary>
     public sealed class PgnParenthesisCloseSyntax : PgnSyntax, IPgnSymbol
     {
         public const char ParenthesisCloseCharacter = ')';
         public const int ParenthesisCloseLength = 1;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnParenthesisCloseWithTriviaSyntax Parent { get; }
-        public GreenPgnParenthesisCloseSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnParenthesisCloseSyntax Green => GreenPgnParenthesisCloseSyntax.Value;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
-        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => ParenthesisCloseLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnParenthesisCloseSyntax(PgnParenthesisCloseWithTriviaSyntax parent, GreenPgnParenthesisCloseSyntax green)
-        {
-            Parent = parent;
-            Green = green;
-        }
+        internal PgnParenthesisCloseSyntax(PgnParenthesisCloseWithTriviaSyntax parent) => Parent = parent;
 
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitParenthesisCloseSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitParenthesisCloseSyntax(this);
@@ -81,7 +99,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnParenthesisCloseSyntax CreateContentNode() => new PgnParenthesisCloseSyntax(this, Green.ContentNode);
+        internal override PgnParenthesisCloseSyntax CreateContentNode() => new PgnParenthesisCloseSyntax(this);
 
         internal PgnParenthesisCloseWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnParenthesisCloseSyntax> green)
             : base(green)

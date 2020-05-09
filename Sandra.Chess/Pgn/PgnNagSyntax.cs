@@ -108,10 +108,35 @@ namespace Sandra.Chess.Pgn
                 overflowNagText.Length,
                 new[] { overflowNagText });
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public PgnNagWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenPgnNagSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the annotation value of this syntax node.
+        /// Is <see cref="PgnAnnotation.Null"/> for '$', '$0', and '$256' or greater.
+        /// </summary>
+        public PgnAnnotation Annotation => Green.Annotation;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal PgnNagSyntax(PgnNagWithTriviaSyntax parent, GreenPgnNagSyntax green)
