@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
@@ -332,7 +333,39 @@ namespace Sandra.Chess.Pgn
                 {
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, symbol));
+
+                    switch (symbolType)
+                    {
+                        case PgnSymbolType.MoveNumber:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnMoveNumberSyntax)symbol));
+                            break;
+                        case PgnSymbolType.Period:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnPeriodSyntax)symbol));
+                            break;
+                        case PgnSymbolType.Move:
+                        case PgnSymbolType.UnrecognizedMove:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnMoveSyntax)symbol));
+                            break;
+                        case PgnSymbolType.Nag:
+                        case PgnSymbolType.EmptyNag:
+                        case PgnSymbolType.OverflowNag:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnNagSyntax)symbol));
+                            break;
+                        case PgnSymbolType.ParenthesisOpen:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, GreenPgnParenthesisOpenSyntax.Value));
+                            break;
+                        case PgnSymbolType.ParenthesisClose:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, GreenPgnParenthesisCloseSyntax.Value));
+                            break;
+                        case PgnSymbolType.Asterisk:
+                        case PgnSymbolType.DrawMarker:
+                        case PgnSymbolType.WhiteWinMarker:
+                        case PgnSymbolType.BlackWinMarker:
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnGameResultSyntax)symbol));
+                            break;
+                        default:
+                            throw new UnreachableException();
+                    }
                 }
 
                 BackgroundBuilder.Clear();
