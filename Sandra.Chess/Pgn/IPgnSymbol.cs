@@ -109,7 +109,7 @@ namespace Sandra.Chess.Pgn.Temp
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
+        internal override PgnSymbol CreateContentNode() => new PgnSymbol(this, Green.ContentNode);
 
         internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)

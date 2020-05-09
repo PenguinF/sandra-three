@@ -62,14 +62,14 @@ namespace Sandra.Chess.Pgn
     public class WithTrivia<TSyntaxNode> : WithTrivia where TSyntaxNode : ISpan
     {
         /// <summary>
-        /// Gets the inner syntax node.
+        /// Gets the content syntax node which anchors the trivia.
         /// </summary>
-        public TSyntaxNode SyntaxNode { get; }
+        public TSyntaxNode ContentNode { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public sealed override int Length => LeadingTrivia.Length + SyntaxNode.Length;
+        public sealed override int Length => LeadingTrivia.Length + ContentNode.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="WithTrivia"/>.
@@ -87,7 +87,7 @@ namespace Sandra.Chess.Pgn
             : base(leadingTrivia)
         {
             if (syntaxNode == null) throw new ArgumentNullException(nameof(syntaxNode));
-            SyntaxNode = syntaxNode;
+            ContentNode = syntaxNode;
         }
     }
 
@@ -103,9 +103,16 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
 
-        internal WithTriviaSyntax(WithTrivia green)
+        /// <summary>
+        /// Gets the content syntax node which anchors the trivia.
+        /// </summary>
+        public PgnSyntax ContentNode => ContentNodeUntyped;
+
+        internal abstract PgnSyntax ContentNodeUntyped { get; }
+
+        internal WithTriviaSyntax(GreenPgnTriviaSyntax greenLeadingTrivia)
         {
-            leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, green.LeadingTrivia));
+            leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, greenLeadingTrivia));
         }
     }
 
@@ -127,12 +134,17 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public WithTrivia<TGreenSyntaxNode> Green { get; }
 
-        private readonly SafeLazyObject<TSyntaxNode> syntaxNode;
+        private readonly SafeLazyObject<TSyntaxNode> contentNode;
 
         /// <summary>
-        /// Gets the inner syntax node.
+        /// Gets the content syntax node which anchors the trivia.
         /// </summary>
-        public TSyntaxNode SyntaxNode => syntaxNode.Object;
+        /// <remarks>
+        /// Intentionally hides the base <see cref="ContentNode"/> property.
+        /// </remarks>
+        public new TSyntaxNode ContentNode => contentNode.Object;
+
+        internal sealed override PgnSyntax ContentNodeUntyped => ContentNode;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -150,7 +162,7 @@ namespace Sandra.Chess.Pgn
         public sealed override PgnSyntax GetChild(int index)
         {
             if (index == 0) return LeadingTrivia;
-            if (index == 1) return SyntaxNode;
+            if (index == 1) return ContentNode;
             throw new IndexOutOfRangeException();
         }
 
@@ -164,14 +176,14 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal abstract TSyntaxNode CreateChildNode();
+        internal abstract TSyntaxNode CreateContentNode();
 
         internal WithTriviaSyntax(WithTrivia<TGreenSyntaxNode> green)
-            : base(green)
+            : base(green.LeadingTrivia)
         {
             Green = green;
 
-            syntaxNode = new SafeLazyObject<TSyntaxNode>(CreateChildNode);
+            contentNode = new SafeLazyObject<TSyntaxNode>(CreateContentNode);
         }
     }
 }

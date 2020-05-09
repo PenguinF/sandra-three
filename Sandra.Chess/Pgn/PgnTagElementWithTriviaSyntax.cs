@@ -68,7 +68,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnTagElementSyntax CreateChildNode() => PgnTagElementSyntaxCreator.Instance.Visit(Green.SyntaxNode, this);
+        internal override PgnTagElementSyntax CreateContentNode() => PgnTagElementSyntaxCreator.Instance.Visit(Green.ContentNode, this);
 
         internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, WithTrivia<GreenPgnTagElementSyntax> green)
             : base(green)
