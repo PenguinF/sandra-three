@@ -22,7 +22,6 @@
 using Sandra.Chess.Pgn;
 using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.Chess.Tests
 {
@@ -35,10 +34,7 @@ namespace Sandra.Chess.Tests
         {
         };
 
-        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrors()
-            => TagSectionParseTreesWithErrorsTemp().Select(x => (x.Item1, x.Item2, x.Item3.Where(code => code < PgnErrorCode.EmptyTag).ToArray())).ToList();
-
-        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrorsTemp() => new List<(string, ParseTree, PgnErrorCode[])>
+        internal static List<(string, ParseTree, PgnErrorCode[])> TagSectionParseTreesWithErrors() => new List<(string, ParseTree, PgnErrorCode[])>
         {
             ("[", TagSectionOnly(TagPair(BracketOpen)),
                 new[] { PgnErrorCode.EmptyTag, PgnErrorCode.MissingTagBracketClose }),
