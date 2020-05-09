@@ -52,11 +52,6 @@ namespace Sandra.Chess.Tests
             public ParseTree<PgnSymbolWithTrivia>[] MoveSection;
             public ParseTree<PgnSymbolWithTrivia> Result;
 
-            public TagSectionAndMoveTreeAndResult(ParseTree<PgnSymbolWithTrivia> result)
-            {
-                Result = result;
-            }
-
             public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnSymbolWithTrivia>[] moveSection)
             {
                 TagSection = tagSection;
@@ -72,8 +67,8 @@ namespace Sandra.Chess.Tests
 
             public void AddTo(ParseTree<PgnSyntaxNodes> gamesSyntax)
             {
-                if (TagSection != null && TagSection.Any()) gamesSyntax.Add(TagSection);
-                if (MoveSection != null) MoveSection.ForEach(gamesSyntax.Add);
+                if (TagSection.Any()) gamesSyntax.Add(TagSection);
+                MoveSection.ForEach(gamesSyntax.Add);
                 if (Result != null) gamesSyntax.Add(Result);
             }
         }
@@ -164,7 +159,7 @@ namespace Sandra.Chess.Tests
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnSymbolWithTrivia> result)
-            => new TagSectionAndMoveTreeAndResult(result);
+            => new TagSectionAndMoveTreeAndResult(EmptyTagSection, NoPlies, result);
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnTagSectionSyntax> tagSection,
