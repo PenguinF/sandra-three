@@ -66,9 +66,37 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
-    public static class PgnNagSyntax
+    /// <summary>
+    /// Represents a Numeric Annotation Glyph syntax node.
+    /// </summary>
+    public sealed class PgnNagSyntax
     {
         public const char NagCharacter = '$';
         public const int NagLength = 1;
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for an empty Numeric Annotation Glyph.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the empty Numeric Annotation Glyph.
+        /// </param>
+        public static PgnErrorInfo CreateEmptyNagMessage(int start)
+            => new PgnErrorInfo(PgnErrorCode.EmptyNag, start, NagLength);
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for a Numeric Annotation Glyph with an annotation value of 256 or larger.
+        /// </summary>
+        /// <param name="overflowNagText">
+        /// The text containing the overflow NAG, including the '$' character.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the Numeric Annotation Glyph with an annotation value of 256 or larger.
+        /// </param>
+        public static PgnErrorInfo CreateOverflowNagMessage(string overflowNagText, int start)
+            => new PgnErrorInfo(
+                PgnErrorCode.OverflowNag,
+                start,
+                overflowNagText.Length,
+                new[] { overflowNagText });
     }
 }

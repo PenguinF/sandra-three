@@ -54,20 +54,8 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// The error associated with this symbol.
         /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnEmptyNagSyntax.CreateError(startPosition);
+        public PgnErrorInfo GetError(int startPosition) => PgnNagSyntax.CreateEmptyNagMessage(startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-    }
-
-    public static class PgnEmptyNagSyntax
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for an empty Numeric Annotation Glyph.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the empty Numeric Annotation Glyph.
-        /// </param>
-        public static PgnErrorInfo CreateError(int start)
-            => new PgnErrorInfo(PgnErrorCode.EmptyNag, start, PgnNagSyntax.NagLength);
     }
 }
