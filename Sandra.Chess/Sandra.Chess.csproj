@@ -62,6 +62,7 @@
     <Compile Include="Pgn\PgnErrorTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnEscapeSyntax.cs" />
     <Compile Include="Pgn\PgnIllegalCharacterSyntax.cs" />
+    <Compile Include="Pgn\PgnMoveFormatter.cs" />
     <Compile Include="Pgn\PgnMoveNumberSyntax.cs" />
     <Compile Include="Pgn\PgnMoveSyntax.cs" />
     <Compile Include="Pgn\PgnNagSyntax.cs" />
