@@ -68,7 +68,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => Green.Length;
+        public override int Length => BracketCloseLength;
 
         internal PgnBracketCloseSyntax(PgnTagElementWithTriviaSyntax parent) : base(parent) { }
 
