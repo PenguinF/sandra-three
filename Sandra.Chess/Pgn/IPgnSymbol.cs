@@ -74,7 +74,6 @@ namespace Sandra.Chess.Pgn
             public override PgnSyntax VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node;
             public override PgnSyntax VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node;
             public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
-            public override PgnSyntax VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitTagNameSyntax(PgnTagNameSyntax node) => node;

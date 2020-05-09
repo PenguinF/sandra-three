@@ -38,9 +38,6 @@ namespace Sandra.Chess.Pgn
             public override PgnTagElementSyntax VisitBracketOpenSyntax(GreenPgnBracketOpenSyntax node, PgnTagElementWithTriviaSyntax parent)
                 => new PgnBracketOpenSyntax(parent);
 
-            public override PgnTagElementSyntax VisitErrorTagValueSyntax(GreenPgnErrorTagValueSyntax node, PgnTagElementWithTriviaSyntax parent)
-                => new PgnErrorTagValueSyntax(parent, node);
-
             public override PgnTagElementSyntax VisitTagNameSyntax(GreenPgnTagNameSyntax node, PgnTagElementWithTriviaSyntax parent)
                 => new PgnTagNameSyntax(parent, node);
 

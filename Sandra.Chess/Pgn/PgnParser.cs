@@ -523,20 +523,20 @@ namespace Sandra.Chess.Pgn
                         {
                             if (char.IsControl(escapedChar))
                             {
-                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex - symbolStartIndex));
+                                errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex - symbolStartIndex));
                             }
 
                             if (StringLiteral.CharacterMustBeEscaped(escapedChar))
                             {
                                 // Just don't show the control character.
-                                errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     EscapeCharacterString,
                                     escapeSequenceStart - symbolStartIndex,
                                     2));
                             }
                             else
                             {
-                                errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
                                     escapeSequenceStart - symbolStartIndex,
                                     2));
@@ -546,7 +546,7 @@ namespace Sandra.Chess.Pgn
                     else
                     {
                         // In addition to this, break out of the loop because this is now also an unterminated string.
-                        errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                        errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                             EscapeCharacterString,
                             escapeSequenceStart - symbolStartIndex,
                             1));
@@ -556,7 +556,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (char.IsControl(c))
                 {
-                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex - symbolStartIndex));
+                    errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex - symbolStartIndex));
                 }
                 else
                 {
@@ -566,7 +566,7 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnErrorTagValueSyntax.Unterminated(length - symbolStartIndex));
+            errors.Add(PgnTagValueSyntax.UnterminatedError(length - symbolStartIndex));
 
             Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors));
             return;

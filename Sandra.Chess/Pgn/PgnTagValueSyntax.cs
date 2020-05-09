@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 
@@ -89,9 +90,50 @@ namespace Sandra.Chess.Pgn
     public sealed class PgnTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the unterminated tag value.
+        /// </param>
+        public static PgnErrorInfo UnterminatedError(int length)
+            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, 0, length);
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for unrecognized escape sequences.
+        /// </summary>
+        /// <param name="displayCharValue">
+        /// A friendly representation of the unrecognized escape sequence.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the unrecognized escape sequence relative to the start position of the tag value.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unrecognized escape sequence.
+        /// </param>
+        public static PgnErrorInfo UnrecognizedEscapeSequenceError(string displayCharValue, int start, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for illegal control characters in tag values.
+        /// </summary>
+        /// <param name="illegalCharacter">
+        /// The illegal control character.
+        /// </param>
+        /// <param name="position">
+        /// The position of the illegal control character relative to the start position of the tag value.
+        /// </param>
+        public static PgnErrorInfo IllegalControlCharacterError(char illegalCharacter, int position)
+            => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
+
+        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenPgnTagValueSyntax Green { get; }
+
+        /// <summary>
+        /// Gets if this tag value contains errors and therefore has an undefined value.
+        /// </summary>
+        public bool ContainsErrors => Green.ContainsErrors;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.

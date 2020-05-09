@@ -36,7 +36,6 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
-            public override IGreenPgnSymbol VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;

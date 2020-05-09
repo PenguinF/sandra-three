@@ -75,9 +75,6 @@ namespace Sandra.UI
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[errorTagValueStyleIndex];
-
         public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[escapedLineStyleIndex];
 
@@ -88,7 +85,7 @@ namespace Sandra.UI
             => syntaxEditor.Styles[tagNameStyleIndex];
 
         public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[tagValueStyleIndex];
+            => syntaxEditor.Styles[node.ContainsErrors ? errorTagValueStyleIndex : tagValueStyleIndex];
 
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
         {
