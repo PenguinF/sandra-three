@@ -143,7 +143,7 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveSyntax(this, arg);
     }
 
-    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<GreenPgnMoveSyntax, PgnMoveSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<PgnMoveSyntax>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -153,9 +153,9 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, Green.ContentNode);
+        internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, (GreenPgnMoveSyntax)Green.ContentNode);
 
-        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnMoveSyntax> green)
+        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
             : base(green)
         {
             Parent = parent;

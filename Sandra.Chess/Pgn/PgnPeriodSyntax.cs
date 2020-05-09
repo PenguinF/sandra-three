@@ -89,7 +89,7 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPeriodSyntax(this, arg);
     }
 
-    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<GreenPgnPeriodSyntax, PgnPeriodSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<PgnPeriodSyntax>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -99,9 +99,9 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, Green.ContentNode);
+        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, (GreenPgnPeriodSyntax)Green.ContentNode);
 
-        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnPeriodSyntax> green)
+        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
             : base(green)
         {
             Parent = parent;

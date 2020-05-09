@@ -24,7 +24,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a node containing a single tag section element together with its leading trivia.
     /// </summary>
-    public sealed class PgnTagElementWithTriviaSyntax : WithTriviaSyntax<GreenPgnTagElementSyntax, PgnTagElementSyntax>
+    public sealed class PgnTagElementWithTriviaSyntax : WithTriviaSyntax<PgnTagElementSyntax>
     {
         private class PgnTagElementSyntaxCreator : GreenPgnTagElementSyntaxVisitor<PgnTagElementWithTriviaSyntax, PgnTagElementSyntax>
         {
@@ -65,9 +65,9 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnTagElementSyntax CreateContentNode() => PgnTagElementSyntaxCreator.Instance.Visit(Green.ContentNode, this);
+        internal override PgnTagElementSyntax CreateContentNode() => PgnTagElementSyntaxCreator.Instance.Visit((GreenPgnTagElementSyntax)Green.ContentNode, this);
 
-        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, WithTrivia<GreenPgnTagElementSyntax> green)
+        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, WithTrivia green)
             : base(green)
         {
             Parent = parent;

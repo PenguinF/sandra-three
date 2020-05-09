@@ -89,7 +89,7 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitParenthesisOpenSyntax(this, arg);
     }
 
-    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<GreenPgnParenthesisOpenSyntax, PgnParenthesisOpenSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisOpenSyntax>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -101,7 +101,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnParenthesisOpenSyntax CreateContentNode() => new PgnParenthesisOpenSyntax(this);
 
-        internal PgnParenthesisOpenWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnParenthesisOpenSyntax> green)
+        internal PgnParenthesisOpenWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
             : base(green)
         {
             Parent = parent;

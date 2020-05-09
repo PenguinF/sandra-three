@@ -99,7 +99,7 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveNumberSyntax(this, arg);
     }
 
-    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<GreenPgnMoveNumberSyntax, PgnMoveNumberSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<PgnMoveNumberSyntax>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -109,9 +109,9 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnMoveNumberSyntax CreateContentNode() => new PgnMoveNumberSyntax(this, Green.ContentNode);
+        internal override PgnMoveNumberSyntax CreateContentNode() => new PgnMoveNumberSyntax(this, (GreenPgnMoveNumberSyntax)Green.ContentNode);
 
-        internal PgnMoveNumberWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnMoveNumberSyntax> green)
+        internal PgnMoveNumberWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
             : base(green)
         {
             Parent = parent;
