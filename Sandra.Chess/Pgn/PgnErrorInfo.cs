@@ -38,6 +38,12 @@ namespace Sandra.Chess.Pgn
                 case PgnErrorCode.UnrecognizedEscapeSequence:
                 case PgnErrorCode.IllegalControlCharacterInTagValue:
                 case PgnErrorCode.UnrecognizedMove:
+                case PgnErrorCode.EmptyTag:
+                case PgnErrorCode.MissingTagBracketOpen:
+                case PgnErrorCode.MissingTagName:
+                case PgnErrorCode.MissingTagValue:
+                case PgnErrorCode.MultipleTagValues:
+                case PgnErrorCode.MissingTagBracketClose:
                     return PgnErrorLevel.Error;
                 case PgnErrorCode.UnterminatedMultiLineComment:
                     return PgnErrorLevel.Warning;
