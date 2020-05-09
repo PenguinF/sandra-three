@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using Sandra.Chess.Pgn;
 using System.Linq;
 using System.Text;
 
@@ -96,9 +97,30 @@ namespace Sandra.Chess
         // Allocate only one StringBuilder for formatting moves.
         protected readonly StringBuilder moveBuilder = new StringBuilder();
 
-        public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+        public AlgebraicMoveFormatter(string pieceSymbols)
         {
-            this.pieceSymbols = pieceSymbols;
+            if (pieceSymbols == null || pieceSymbols.Length < 5 || pieceSymbols.Length > 6)
+            {
+                // Revert back to PGN.
+                pieceSymbols = PgnMoveFormatter.PieceSymbols;
+            }
+
+            EnumIndexedArray<Piece, string> pieceSymbolArray = EnumIndexedArray<Piece, string>.New();
+
+            int pieceIndex = 0;
+            if (pieceSymbols.Length == 6)
+            {
+                // Support for an optional pawn piece symbol.
+                pieceSymbolArray[Piece.Pawn] = pieceSymbols[pieceIndex++].ToString();
+            }
+
+            pieceSymbolArray[Piece.Knight] = pieceSymbols[pieceIndex++].ToString();
+            pieceSymbolArray[Piece.Bishop] = pieceSymbols[pieceIndex++].ToString();
+            pieceSymbolArray[Piece.Rook] = pieceSymbols[pieceIndex++].ToString();
+            pieceSymbolArray[Piece.Queen] = pieceSymbols[pieceIndex++].ToString();
+            pieceSymbolArray[Piece.King] = pieceSymbols[pieceIndex++].ToString();
+
+            this.pieceSymbols = pieceSymbolArray;
         }
 
         protected void AppendFile(StringBuilder builder, Square square)
@@ -192,7 +214,7 @@ namespace Sandra.Chess
     /// </summary>
     public sealed class LongAlgebraicMoveFormatter : AlgebraicMoveFormatter
     {
-        public LongAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+        public LongAlgebraicMoveFormatter(string pieceSymbols)
             : base(pieceSymbols) { }
 
         protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
@@ -211,9 +233,9 @@ namespace Sandra.Chess
     /// <summary>
     /// Move formatter which generates short algebraic notation.
     /// </summary>
-    public sealed class ShortAlgebraicMoveFormatter : AlgebraicMoveFormatter
+    public class ShortAlgebraicMoveFormatter : AlgebraicMoveFormatter
     {
-        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+        public ShortAlgebraicMoveFormatter(string pieceSymbols)
             : base(pieceSymbols) { }
 
         protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)

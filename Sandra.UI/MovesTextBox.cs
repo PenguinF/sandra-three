@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;
 using Sandra.Chess.Pgn;
 using Sandra.PgnDeprecated;
@@ -148,43 +147,22 @@ namespace Sandra.UI
                 Session.Current.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
             }
 
-            string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePgn)
             {
-                pieceSymbols = PgnMoveFormatter.PieceSymbols;
+                moveFormatter = PgnMoveFormatter.Instance;
             }
             else
             {
-                pieceSymbols = localizedPieceSymbols.DisplayText.Value;
-                if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
+                string pieceSymbols = localizedPieceSymbols.DisplayText.Value;
+
+                if (moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic)
                 {
-                    // Revert back to PGN.
-                    pieceSymbols = PgnMoveFormatter.PieceSymbols;
+                    moveFormatter = new Chess.LongAlgebraicMoveFormatter(pieceSymbols);
                 }
-            }
-
-            EnumIndexedArray<Chess.Piece, string> pgnPieceSymbolArray = EnumIndexedArray<Chess.Piece, string>.New();
-
-            int pieceIndex = 0;
-            if (pieceSymbols.Length == 6)
-            {
-                // Support for an optional pawn piece symbol.
-                pgnPieceSymbolArray[Chess.Piece.Pawn] = pieceSymbols[pieceIndex++].ToString();
-            }
-
-            pgnPieceSymbolArray[Chess.Piece.Knight] = pieceSymbols[pieceIndex++].ToString();
-            pgnPieceSymbolArray[Chess.Piece.Bishop] = pieceSymbols[pieceIndex++].ToString();
-            pgnPieceSymbolArray[Chess.Piece.Rook] = pieceSymbols[pieceIndex++].ToString();
-            pgnPieceSymbolArray[Chess.Piece.Queen] = pieceSymbols[pieceIndex++].ToString();
-            pgnPieceSymbolArray[Chess.Piece.King] = pieceSymbols[pieceIndex++].ToString();
-
-            if (moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic)
-            {
-                moveFormatter = new Chess.LongAlgebraicMoveFormatter(pgnPieceSymbolArray);
-            }
-            else
-            {
-                moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
+                else
+                {
+                    moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pieceSymbols);
+                }
             }
 
             RefreshText();

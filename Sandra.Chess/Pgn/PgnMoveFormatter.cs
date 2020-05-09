@@ -21,11 +21,21 @@
 
 namespace Sandra.Chess.Pgn
 {
-    public class PgnMoveFormatter
+    /// <summary>
+    /// Move formatter which generates algebraic notation for PGN text.
+    /// </summary>
+    public class PgnMoveFormatter : ShortAlgebraicMoveFormatter
     {
         /// <summary>
         /// Standardized PGN notation for pieces.
         /// </summary>
         public static readonly string PieceSymbols = "NBRQK";
+
+        /// <summary>
+        /// Returns the single <see cref="PgnMoveFormatter"/> instance.
+        /// </summary>
+        public static PgnMoveFormatter Instance { get; } = new PgnMoveFormatter();
+
+        private PgnMoveFormatter() : base(PieceSymbols) { }
     }
 }
