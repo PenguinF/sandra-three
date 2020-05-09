@@ -25,9 +25,9 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a PGN syntax node with an unknown symbol.
+    /// Represents a PGN syntax node with an unknown symbol, or unrecognized move.
     /// </summary>
-    public sealed class GreenPgnUnknownSymbolSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnUnknownSymbolSyntax : GreenPgnMoveSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// The text containing the unknown symbol.
@@ -35,14 +35,14 @@ namespace Sandra.Chess.Pgn
         public string SymbolText { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public int Length { get; }
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Unknown;
+        public override PgnSymbolType SymbolType => PgnSymbolType.Unknown;
+
+        /// <summary>
+        /// Gets if this is an unrecognized move.
+        /// </summary>
+        public override bool IsUnrecognizedMove => true;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnUnknownSymbolSyntax"/>.
@@ -53,17 +53,15 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="symbolText"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="symbolText"/> has a length of 0.
         /// </exception>
-        public GreenPgnUnknownSymbolSyntax(string symbolText)
+        public GreenPgnUnknownSymbolSyntax(string symbolText) : base(symbolText == null ? 0 : symbolText.Length)
         {
             if (symbolText == null) throw new ArgumentNullException(nameof(symbolText));
-            int length = symbolText.Length;
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (Length <= 0) throw new ArgumentException($"{symbolText} is empty.", nameof(symbolText));
 
             SymbolText = symbolText;
-            Length = length;
         }
 
         /// <summary>

@@ -235,7 +235,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1, false));
 
             Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(null));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnknownSymbolSyntax(""));
+            Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(""));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));

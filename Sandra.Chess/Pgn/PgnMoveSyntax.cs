@@ -30,7 +30,7 @@ namespace Sandra.Chess.Pgn
     /// <remarks>
     /// When encountered in a tag pair, this node may be reinterpreted as a <see cref="GreenPgnTagNameSyntax"/>.
     /// </remarks>
-    public sealed class GreenPgnMoveSyntax : IGreenPgnSymbol
+    public class GreenPgnMoveSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -40,12 +40,17 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Move;
+        public virtual PgnSymbolType SymbolType => PgnSymbolType.Move;
 
         /// <summary>
         /// Gets if the move syntax is a valid tag name (<see cref="GreenPgnTagNameSyntax"/>) as well.
         /// </summary>
         public bool IsValidTagName { get; }
+
+        /// <summary>
+        /// Gets if this is an unrecognized move.
+        /// </summary>
+        public virtual bool IsUnrecognizedMove => false;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnMoveSyntax"/>.
@@ -59,12 +64,13 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 1 or lower.
         /// </exception>
-        public GreenPgnMoveSyntax(int length, bool isValidTagName)
+        public GreenPgnMoveSyntax(int length, bool isValidTagName) : this(length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
             IsValidTagName = isValidTagName;
         }
+
+        internal GreenPgnMoveSyntax(int length) => Length = length;
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
