@@ -179,7 +179,7 @@ namespace Sandra.Chess.Pgn
 
         #region Tag section parsing
 
-        private void CaptureTagPair()
+        private void CaptureTagPair(bool hasTagPairBracketClose)
         {
             TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
             InTagPair = false;
@@ -190,7 +190,7 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureTagPairIfNecessary()
         {
-            if (InTagPair) CaptureTagPair();
+            if (InTagPair) CaptureTagPair(hasTagPairBracketClose: false);
         }
 
         private void CaptureTagSection()
@@ -241,7 +241,7 @@ namespace Sandra.Chess.Pgn
                     else if (symbolType == PgnSymbolType.TagName)
                     {
                         // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
-                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair();
+                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
                         HasTagPairTagName = true;
                     }
                     else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
@@ -255,7 +255,7 @@ namespace Sandra.Chess.Pgn
                     if (symbolType == PgnSymbolType.BracketClose)
                     {
                         // When encountering a new ']', always close this tag pair.
-                        CaptureTagPair();
+                        CaptureTagPair(hasTagPairBracketClose: true);
                     }
                 }
                 else
