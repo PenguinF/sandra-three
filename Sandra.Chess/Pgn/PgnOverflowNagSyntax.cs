@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an annotation value of 256 or larger.
     /// </summary>
-    public sealed class GreenPgnOverflowNagSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnOverflowNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// The text containing the overflow NAG, including the '$' character.
@@ -37,12 +37,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.OverflowNag;
+        public override PgnSymbolType SymbolType => PgnSymbolType.OverflowNag;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnOverflowNagSyntax"/>.

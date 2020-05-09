@@ -27,22 +27,28 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node.
     /// </summary>
-    public sealed class GreenPgnNagSyntax : IGreenPgnSymbol
+    public class GreenPgnNagSyntax : IGreenPgnSymbol
     {
         /// <summary>
+        /// Gets the empty <see cref="GreenPgnNagSyntax"/>.
+        /// </summary>
+        public static GreenPgnNagSyntax Empty => GreenPgnEmptyNagSyntax.Value;
+
+        /// <summary>
         /// Gets the annotation value of this syntax node.
+        /// Is <see cref="PgnAnnotation.Null"/> for '$', '$0', and '$256' or greater.
         /// </summary>
         public PgnAnnotation Annotation { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public virtual int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Nag;
+        public virtual PgnSymbolType SymbolType => PgnSymbolType.Nag;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnNagSyntax"/>.
@@ -62,6 +68,8 @@ namespace Sandra.Chess.Pgn
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
+
+        internal GreenPgnNagSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }

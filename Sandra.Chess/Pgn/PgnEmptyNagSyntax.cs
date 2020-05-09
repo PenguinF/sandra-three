@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an empty annotation.
     /// </summary>
-    public sealed class GreenPgnEmptyNagSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnEmptyNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnEmptyNagSyntax"/> value.
@@ -36,12 +36,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnNagSyntax.NagLength;
+        public override int Length => PgnNagSyntax.NagLength;
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
+        public override PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
 
         private GreenPgnEmptyNagSyntax() { }
 
