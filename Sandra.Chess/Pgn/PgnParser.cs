@@ -176,6 +176,32 @@ namespace Sandra.Chess.Pgn
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
 
+        #region Tag section parsing
+
+        private void CaptureTagPair()
+        {
+            if (TagPairBuilder.Count > 0)
+            {
+                TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
+                HasTagPairTagName = false;
+                HasTagPairTagValue = false;
+                TagPairBuilder.Clear();
+            }
+        }
+
+        private void CaptureTagSection()
+        {
+            if (TagSectionBuilder.Count > 0)
+            {
+                SymbolBuilder.Add(new GreenPgnTagSectionSyntax(TagSectionBuilder));
+                TagSectionBuilder.Clear();
+            }
+        }
+
+        #endregion Tag section parsing
+
+        #region Yield tokens and EOF
+
         private void Yield(IGreenPgnSymbol symbol)
         {
             Errors.AddRange(symbol.GetErrors(symbolStartIndex));
@@ -234,31 +260,15 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        private void CaptureTagPair()
-        {
-            if (TagPairBuilder.Count > 0)
-            {
-                TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
-                HasTagPairTagName = false;
-                HasTagPairTagValue = false;
-                TagPairBuilder.Clear();
-            }
-        }
-
-        private void CaptureTagSection()
-        {
-            if (TagSectionBuilder.Count > 0)
-            {
-                SymbolBuilder.Add(new GreenPgnTagSectionSyntax(TagSectionBuilder));
-                TagSectionBuilder.Clear();
-            }
-        }
-
         private void YieldEof()
         {
             CaptureTagPair();
             CaptureTagSection();
         }
+
+        #endregion Yield tokens and EOF
+
+        #region Lexing
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
@@ -703,5 +713,7 @@ namespace Sandra.Chess.Pgn
             else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
             else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
         }
+
+        #endregion Lexing
     }
 }
