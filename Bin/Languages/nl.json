@@ -51,7 +51,7 @@
     "EditCurrentLanguage": "Huidige taal bewerken",
     "EditPreferencesFile": "Voorkeuren wijzigen",
     "ErrorLocation": "{0} op regel {1}, positie {2}",
-    "ErrorPaneTitle": "Meldingen {0}",
+    "ErrorPaneTitle": "Meldingen - [{0}]",
     "Exit": "Afsluiten",
     "File": "Bestand",
     "GoToNextError": "Naar volgende melding",
@@ -119,6 +119,12 @@
     "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter",
     "PgnErrorEmptyNag": "geheel getal verwacht na annotatie '$'",
     "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'",
-    "PgnErrorUnrecognizedMove": "zet niet herkend '{0}'"
+    "PgnErrorUnrecognizedMove": "zet niet herkend '{0}'",
+    "PgnErrorEmptyTag": "label mist zowel een naam als een waarde",
+    "PgnErrorMissingTagBracketOpen": "label mist een '[' karakter",
+    "PgnErrorMissingTagName": "label mist een naam",
+    "PgnErrorMissingTagValue": "label mist een waarde",
+    "PgnErrorMultipleTagValues": "label bevat twee of meer waarden",
+    "PgnErrorMissingTagBracketClose": "label mist een ']' karakter"
   }
 }

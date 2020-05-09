@@ -51,14 +51,14 @@
     "EditCurrentLanguage": "Edit current language",
     "EditPreferencesFile": "Edit preferences",
     "ErrorLocation": "{0} at line {1}, position {2}",
-    "ErrorPaneTitle": "{0} Messages",
+    "ErrorPaneTitle": "Messages - [{0}]",
     "Exit": "Exit",
     "File": "File",
     "GoToNextError": "Go to next message",
     "GoToPreviousError": "Go to previous message",
     "Help": "Help",
     "JsonFiles": "Json files",
-    "NoErrorsMessage": "(No errors)",
+    "NoErrorsMessage": "(No messages)",
     "OpenExecutableFolder": "Open executable folder",
     "OpenLocalAppDataFolder": "Open local application data folder",
     "Paste": "Paste",
@@ -119,6 +119,12 @@
     "PgnErrorUnterminatedMultiLineComment": "unterminated comment",
     "PgnErrorEmptyNag": "expected integer value after annotation '$'",
     "PgnErrorOverflowNag": "expected integer value between 0 and 255 for annotation, but found '{0}'",
-    "PgnErrorUnrecognizedMove": "unrecognized move '{0}'"
+    "PgnErrorUnrecognizedMove": "unrecognized move '{0}'",
+    "PgnErrorEmptyTag": "tag is missing both a name and a value",
+    "PgnErrorMissingTagBracketOpen": "tag is missing '[' character",
+    "PgnErrorMissingTagName": "tag is missing a name",
+    "PgnErrorMissingTagValue": "tag is missing a value",
+    "PgnErrorMultipleTagValues": "tag contains two or more values",
+    "PgnErrorMissingTagBracketClose": "tag is missing ']' character"
   }
 }

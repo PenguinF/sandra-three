@@ -163,6 +163,10 @@ namespace Sandra.Chess.Pgn
 
         private int symbolStartIndex;
 
+        private bool InTagPair;
+        private int TagPairLeadingTriviaLength;
+        private int TagPairStartIndex;
+        private bool HasTagPairBracketOpen;
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
@@ -178,15 +182,68 @@ namespace Sandra.Chess.Pgn
 
         #region Tag section parsing
 
-        private void CaptureTagPair()
+        private void CaptureTagPair(bool hasTagPairBracketClose)
         {
-            if (TagPairBuilder.Count > 0)
+            var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
+
+            // To report tag pair errors, start at the '[', not where its leading trivia starts.
+            int tagPairErrorLength = tagPairSyntax.Length - TagPairLeadingTriviaLength;
+
+            // Analyze for errors.
+            // Expect '[', tag name. tag value, ']'.
+            if (!HasTagPairBracketOpen)
             {
-                TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
-                HasTagPairTagName = false;
-                HasTagPairTagValue = false;
-                TagPairBuilder.Clear();
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagBracketOpen,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
             }
+
+            if (!HasTagPairTagName)
+            {
+                if (!HasTagPairTagValue)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.EmptyTag,
+                        TagPairStartIndex,
+                        tagPairErrorLength));
+                }
+                else
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingTagName,
+                        TagPairStartIndex,
+                        tagPairErrorLength));
+                }
+            }
+            else if (!HasTagPairTagValue)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagValue,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
+            }
+
+            if (!hasTagPairBracketClose)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagBracketClose,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
+            }
+
+            TagSectionBuilder.Add(tagPairSyntax);
+
+            InTagPair = false;
+            HasTagPairBracketOpen = false;
+            HasTagPairTagName = false;
+            HasTagPairTagValue = false;
+            TagPairBuilder.Clear();
+        }
+
+        private void CaptureTagPairIfNecessary()
+        {
+            if (InTagPair) CaptureTagPair(hasTagPairBracketClose: false);
         }
 
         private void CaptureTagSection()
@@ -196,6 +253,18 @@ namespace Sandra.Chess.Pgn
                 SymbolBuilder.Add(GreenPgnTagSectionSyntax.Create(TagSectionBuilder));
                 TagSectionBuilder.Clear();
             }
+        }
+
+        private void AddTagElementToBuilder(GreenPgnTriviaSyntax leadingTrivia, GreenPgnTagElementSyntax node)
+        {
+            if (!InTagPair)
+            {
+                InTagPair = true;
+                TagPairLeadingTriviaLength = leadingTrivia.Length;
+                TagPairStartIndex = symbolStartIndex;
+            }
+
+            TagPairBuilder.Add(new WithTrivia<GreenPgnTagElementSyntax>(leadingTrivia, node));
         }
 
         #endregion Tag section parsing
@@ -226,31 +295,42 @@ namespace Sandra.Chess.Pgn
                     if (symbolType == PgnSymbolType.BracketOpen)
                     {
                         // When encountering a new '[', open a new tag pair.
-                        CaptureTagPair();
+                        CaptureTagPairIfNecessary();
+                        HasTagPairBracketOpen = true;
                     }
                     else if (symbolType == PgnSymbolType.TagName)
                     {
                         // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
-                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair();
+                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
                         HasTagPairTagName = true;
                     }
                     else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
                     {
-                        // If HasTagPairTagValue was already true, this symbol is ignored.
-                        HasTagPairTagValue = true;
+                        // Only accept the first tag value.
+                        if (!HasTagPairTagValue)
+                        {
+                            HasTagPairTagValue = true;
+                        }
+                        else
+                        {
+                            Errors.Add(new PgnErrorInfo(
+                                PgnErrorCode.MultipleTagValues,
+                                symbolStartIndex,
+                                symbol.Length));
+                        }
                     }
 
-                    TagPairBuilder.Add(new WithTrivia<GreenPgnTagElementSyntax>(leadingTrivia, (GreenPgnTagElementSyntax)symbol));
+                    AddTagElementToBuilder(leadingTrivia, (GreenPgnTagElementSyntax)symbol);
 
                     if (symbolType == PgnSymbolType.BracketClose)
                     {
                         // When encountering a new ']', always close this tag pair.
-                        CaptureTagPair();
+                        CaptureTagPair(hasTagPairBracketClose: true);
                     }
                 }
                 else
                 {
-                    CaptureTagPair();
+                    CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, symbol));
                 }
@@ -262,7 +342,7 @@ namespace Sandra.Chess.Pgn
 
         private void YieldEof()
         {
-            CaptureTagPair();
+            CaptureTagPairIfNecessary();
             CaptureTagSection();
         }
 

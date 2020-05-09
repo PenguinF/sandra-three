@@ -65,5 +65,35 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a symbol is not recognized as a move text, tag name, move number, or game termination marker.
         /// </summary>
         UnrecognizedMove,
+
+        /// <summary>
+        /// Occurs when a tag pair contains neither a name nor a value.
+        /// </summary>
+        EmptyTag,
+
+        /// <summary>
+        /// Occurs when a tag pair misses its '[' character.
+        /// </summary>
+        MissingTagBracketOpen,
+
+        /// <summary>
+        /// Occurs when a tag pair misses its tag name.
+        /// </summary>
+        MissingTagName,
+
+        /// <summary>
+        /// Occurs when a tag pair misses its tag value.
+        /// </summary>
+        MissingTagValue,
+
+        /// <summary>
+        /// Occurs when a tag pair contains two or more values.
+        /// </summary>
+        MultipleTagValues,
+
+        /// <summary>
+        /// Occurs when a tag pair misses its ']' character.
+        /// </summary>
+        MissingTagBracketClose,
     }
 }

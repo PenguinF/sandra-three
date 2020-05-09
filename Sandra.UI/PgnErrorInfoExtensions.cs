@@ -46,6 +46,12 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.EmptyNag), "expected integer value after annotation '$'" },
             { GetLocalizedStringKey(PgnErrorCode.OverflowNag), "expected integer value between 0 and 255 for annotation, but found '{0}'" },
             { GetLocalizedStringKey(PgnErrorCode.UnrecognizedMove), "unrecognized move '{0}'" },
+            { GetLocalizedStringKey(PgnErrorCode.EmptyTag), "tag is missing both a name and a value" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingTagBracketOpen), "tag is missing '[' character" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingTagName), "tag is missing a name" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingTagValue), "tag is missing a value" },
+            { GetLocalizedStringKey(PgnErrorCode.MultipleTagValues), "tag contains two or more values" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingTagBracketClose), "tag is missing ']' character" },
         };
     }
 }
