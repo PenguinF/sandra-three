@@ -156,7 +156,7 @@ namespace Sandra.Chess.Pgn
         }
 
         private readonly List<PgnErrorInfo> Errors;
-        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly List<IGreenPgnSymbol> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<WithTrivia> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
@@ -174,7 +174,7 @@ namespace Sandra.Chess.Pgn
         private PgnParser()
         {
             Errors = new List<PgnErrorInfo>();
-            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
+            BackgroundBuilder = new List<IGreenPgnSymbol>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<WithTrivia>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
@@ -280,11 +280,11 @@ namespace Sandra.Chess.Pgn
 
             if (symbolType.IsBackground())
             {
-                BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
+                BackgroundBuilder.Add(symbol);
             }
             else if (symbolType.IsTrivia())
             {
-                TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, (GreenPgnCommentSyntax)symbol));
+                TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, symbol));
                 BackgroundBuilder.Clear();
             }
             else

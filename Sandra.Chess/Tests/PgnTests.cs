@@ -243,13 +243,13 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(""));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
-            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(Array.Empty<GreenPgnBackgroundSyntax>(), null));
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
 
             Assert.Throws<ArgumentNullException>("leadingTrivia", () => new WithTrivia(null, GreenPgnBracketOpenSyntax.Value));
-            Assert.Throws<ArgumentNullException>("syntaxNode", () => new WithTrivia(GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("contentNode", () => new WithTrivia(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
             Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<WithTrivia>.Instance));

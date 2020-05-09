@@ -54,7 +54,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the bottom-up only 'green' read-only list with background nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> Green { get; }
+        public ReadOnlySpanList<IGreenPgnSymbol> Green { get; }
 
         /// <summary>
         /// Gets the collection of background nodes.
@@ -91,14 +91,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnBackgroundListSyntax(Union<PgnTriviaElementSyntax, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        internal PgnBackgroundListSyntax(Union<PgnTriviaElementSyntax, PgnTriviaSyntax> parent, ReadOnlySpanList<IGreenPgnSymbol> green)
         {
             Parent = parent;
             Green = green;
 
             BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
                 green.Count,
-                index => PgnBackgroundSyntaxCreator.Instance.Visit(Green[index], (this, index)));
+                index => PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)Green[index], (this, index)));
         }
     }
 }

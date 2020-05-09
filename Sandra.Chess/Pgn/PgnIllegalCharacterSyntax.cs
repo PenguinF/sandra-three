@@ -42,7 +42,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.IllegalCharacter;
+        public override PgnSymbolType SymbolType => PgnSymbolType.IllegalCharacter;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnIllegalCharacterSyntax"/>.
@@ -75,7 +75,7 @@ namespace Sandra.Chess.Pgn
         /// </returns>
         public PgnErrorInfo GetError(int startPosition) => PgnIllegalCharacterSyntax.CreateError(DisplayCharValue, startPosition);
 
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
+        public override IEnumerable<PgnErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
 
         public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
         public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
