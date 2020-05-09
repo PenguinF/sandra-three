@@ -184,7 +184,56 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureTagPair(bool hasTagPairBracketClose)
         {
-            TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
+            var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
+
+            // To report tag pair errors, start at the '[', not where its leading trivia starts.
+            int tagPairErrorLength = tagPairSyntax.Length - TagPairLeadingTriviaLength;
+
+            // Analyze for errors.
+            // Expect '[', tag name. tag value, ']'.
+            if (!HasTagPairBracketOpen)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagBracketOpen,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
+            }
+
+            if (!HasTagPairTagName)
+            {
+                if (!HasTagPairTagValue)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.EmptyTag,
+                        TagPairStartIndex,
+                        tagPairErrorLength));
+                }
+                else
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingTagName,
+                        TagPairStartIndex,
+                        tagPairErrorLength));
+                }
+            }
+            else if (!HasTagPairTagValue)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagValue,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
+            }
+
+            if (!hasTagPairBracketClose)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.MissingTagBracketClose,
+                    TagPairStartIndex,
+                    tagPairErrorLength));
+            }
+
+            TagSectionBuilder.Add(tagPairSyntax);
+
             InTagPair = false;
             HasTagPairBracketOpen = false;
             HasTagPairTagName = false;
