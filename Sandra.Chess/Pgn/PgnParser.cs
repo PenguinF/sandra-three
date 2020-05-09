@@ -291,22 +291,27 @@ namespace Sandra.Chess.Pgn
             {
                 GreenPgnTriviaSyntax leadingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
 
-                if (symbolType.IsTagSection())
+                switch (symbolType)
                 {
-                    if (symbolType == PgnSymbolType.BracketOpen)
-                    {
+                    case PgnSymbolType.BracketOpen:
                         // When encountering a new '[', open a new tag pair.
                         CaptureTagPairIfNecessary();
                         HasTagPairBracketOpen = true;
-                    }
-                    else if (symbolType == PgnSymbolType.TagName)
-                    {
+                        AddTagElementToBuilder(leadingTrivia, symbol);
+                        break;
+                    case PgnSymbolType.BracketClose:
+                        // When encountering a ']', always immediately close this tag pair.
+                        AddTagElementToBuilder(leadingTrivia, symbol);
+                        CaptureTagPair(hasTagPairBracketClose: true);
+                        break;
+                    case PgnSymbolType.TagName:
                         // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
                         if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
                         HasTagPairTagName = true;
-                    }
-                    else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
-                    {
+                        AddTagElementToBuilder(leadingTrivia, symbol);
+                        break;
+                    case PgnSymbolType.TagValue:
+                    case PgnSymbolType.ErrorTagValue:
                         // Only accept the first tag value.
                         if (!HasTagPairTagValue)
                         {
@@ -319,60 +324,64 @@ namespace Sandra.Chess.Pgn
                                 symbolStartIndex,
                                 symbol.Length));
                         }
-                    }
-
-                    AddTagElementToBuilder(leadingTrivia, symbol);
-
-                    if (symbolType == PgnSymbolType.BracketClose)
-                    {
-                        // When encountering a new ']', always close this tag pair.
-                        CaptureTagPair(hasTagPairBracketClose: true);
-                    }
-                }
-                else
-                {
-                    CaptureTagPairIfNecessary();
-                    CaptureTagSection();
-
-                    switch (symbolType)
-                    {
-                        case PgnSymbolType.MoveNumber:
-                            WithTrivia moveNumber = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.Period:
-                            WithTrivia period = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(period, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.Move:
-                        case PgnSymbolType.UnrecognizedMove:
-                            WithTrivia move = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.Nag:
-                        case PgnSymbolType.EmptyNag:
-                        case PgnSymbolType.OverflowNag:
-                            WithTrivia nag = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.ParenthesisOpen:
-                            WithTrivia parenthesisOpen = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.ParenthesisClose:
-                            WithTrivia parenthesisClose = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-                            break;
-                        case PgnSymbolType.Asterisk:
-                        case PgnSymbolType.DrawMarker:
-                        case PgnSymbolType.WhiteWinMarker:
-                        case PgnSymbolType.BlackWinMarker:
-                            WithTrivia gameResult = new WithTrivia(leadingTrivia, symbol);
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
-                            break;
-                        default:
-                            throw new UnreachableException();
-                    }
+                        AddTagElementToBuilder(leadingTrivia, symbol);
+                        break;
+                    case PgnSymbolType.MoveNumber:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia moveNumber = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.Period:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia period = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(period, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.Move:
+                    case PgnSymbolType.UnrecognizedMove:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia move = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.Nag:
+                    case PgnSymbolType.EmptyNag:
+                    case PgnSymbolType.OverflowNag:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia nag = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.ParenthesisOpen:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia parenthesisOpen = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.ParenthesisClose:
+                        // Switch to move tree section.
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia parenthesisClose = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                        break;
+                    case PgnSymbolType.Asterisk:
+                    case PgnSymbolType.DrawMarker:
+                    case PgnSymbolType.WhiteWinMarker:
+                    case PgnSymbolType.BlackWinMarker:
+                        CaptureTagPairIfNecessary();
+                        CaptureTagSection();
+                        WithTrivia gameResult = new WithTrivia(leadingTrivia, symbol);
+                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                        break;
+                    default:
+                        throw new UnreachableException();
                 }
 
                 BackgroundBuilder.Clear();
