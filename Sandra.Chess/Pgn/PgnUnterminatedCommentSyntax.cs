@@ -59,26 +59,8 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// The error associated with this symbol.
         /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnUnterminatedCommentSyntax.CreateError(startPosition, Length);
+        public PgnErrorInfo GetError(int startPosition) => PgnCommentSyntax.CreateUnterminatedCommentMessage(startPosition, Length);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-    }
-
-    /// <summary>
-    /// Contains a method to create a <see cref="PgnErrorInfo"/> for an unterminated comment.
-    /// </summary>
-    public static class PgnUnterminatedCommentSyntax
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for an unterminated comment.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated comment.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated comment.
-        /// </param>
-        public static PgnErrorInfo CreateError(int start, int length)
-            => new PgnErrorInfo(PgnErrorCode.UnterminatedMultiLineComment, start, length);
     }
 }

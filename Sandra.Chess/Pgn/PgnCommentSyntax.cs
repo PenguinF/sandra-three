@@ -81,6 +81,18 @@ namespace Sandra.Chess.Pgn
         public const char MultiLineCommentEndCharacter = '}';
 
         /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for an unterminated comment.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the unterminated comment.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unterminated comment.
+        /// </param>
+        public static PgnErrorInfo CreateUnterminatedCommentMessage(int start, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnterminatedMultiLineComment, start, length);
+
+        /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public PgnTriviaElementSyntax Parent { get; }
