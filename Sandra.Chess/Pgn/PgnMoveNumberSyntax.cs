@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -55,5 +56,44 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public sealed class PgnMoveNumberSyntax : PgnSyntax, IPgnSymbol
+    {
+        public PgnMoveNumberWithTriviaSyntax Parent { get; }
+        public GreenPgnMoveNumberSyntax Green { get; }
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnMoveNumberSyntax(PgnMoveNumberWithTriviaSyntax parent, GreenPgnMoveNumberSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitMoveNumberSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitMoveNumberSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveNumberSyntax(this, arg);
+    }
+
+    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<GreenPgnMoveNumberSyntax, PgnMoveNumberSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnMoveNumberSyntax CreateContentNode() => new PgnMoveNumberSyntax(this, Green.ContentNode);
+
+        internal PgnMoveNumberWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnMoveNumberSyntax> green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

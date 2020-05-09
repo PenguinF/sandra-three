@@ -79,7 +79,7 @@ namespace Sandra.Chess.Tests
             ("{ ", NoGame(CommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
             (" { ", NoGame(WhitespaceThenCommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
-            ("0%%0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, new ParseTree<PgnSymbolWithTrivia> { TwoIllegalCharactersTrivia, MoveNumber })),
+            ("0%%0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, new ParseTree<PgnMoveNumberWithTriviaSyntax> { TwoIllegalCharactersTrivia, MoveNumber })),
                 new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
         };
     }

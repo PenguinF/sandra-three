@@ -59,7 +59,7 @@ namespace Sandra.Chess.Pgn
     /// <typeparam name="TSyntaxNode">
     /// The type of <see cref="IGreenPgnSymbol"/> syntax node.
     /// </typeparam>
-    public class WithTrivia<TSyntaxNode> : WithTrivia where TSyntaxNode : ISpan
+    public sealed class WithTrivia<TSyntaxNode> : WithTrivia where TSyntaxNode : ISpan
     {
         /// <summary>
         /// Gets the content syntax node which anchors the trivia.
@@ -69,7 +69,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public sealed override int Length => LeadingTrivia.Length + ContentNode.Length;
+        public override int Length => LeadingTrivia.Length + ContentNode.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="WithTrivia"/>.

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -75,7 +76,7 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
-    public static class PgnMoveSyntax
+    public sealed class PgnMoveSyntax : PgnSyntax, IPgnSymbol
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for a PGN syntax node with an unknown symbol.
@@ -92,5 +93,41 @@ namespace Sandra.Chess.Pgn
                 start,
                 symbolText.Length,
                 new[] { symbolText });
+
+        public PgnMoveWithTriviaSyntax Parent { get; }
+        public GreenPgnMoveSyntax Green { get; }
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnMoveSyntax(PgnMoveWithTriviaSyntax parent, GreenPgnMoveSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitMoveSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitMoveSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveSyntax(this, arg);
+    }
+
+    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<GreenPgnMoveSyntax, PgnMoveSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, Green.ContentNode);
+
+        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnMoveSyntax> green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

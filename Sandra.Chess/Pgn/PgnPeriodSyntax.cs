@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -48,9 +49,45 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
-    public static class PgnPeriodSyntax
+    public sealed class PgnPeriodSyntax : PgnSyntax, IPgnSymbol
     {
         public const char PeriodCharacter = '.';
         public const int PeriodLength = 1;
+
+        public PgnPeriodWithTriviaSyntax Parent { get; }
+        public GreenPgnPeriodSyntax Green { get; }
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent, GreenPgnPeriodSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPeriodSyntax(this, arg);
+    }
+
+    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<GreenPgnPeriodSyntax, PgnPeriodSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, Green.ContentNode);
+
+        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnPeriodSyntax> green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

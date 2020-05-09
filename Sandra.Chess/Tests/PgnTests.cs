@@ -37,12 +37,17 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitGameResultSyntax(PgnGameResultSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitMoveSyntax(PgnMoveSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitNagSyntax(PgnNagSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitPeriodSyntax(PgnPeriodSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagValueSyntax(PgnTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
-
-            public override IGreenPgnSymbol VisitPgnSymbol(PgnSymbol node) => node.Green;
         }
 
         /// <summary>

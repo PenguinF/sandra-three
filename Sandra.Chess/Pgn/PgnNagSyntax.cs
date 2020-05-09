@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -77,7 +78,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node.
     /// </summary>
-    public sealed class PgnNagSyntax
+    public sealed class PgnNagSyntax : PgnSyntax, IPgnSymbol
     {
         public const char NagCharacter = '$';
         public const int NagLength = 1;
@@ -106,5 +107,41 @@ namespace Sandra.Chess.Pgn
                 start,
                 overflowNagText.Length,
                 new[] { overflowNagText });
+
+        public PgnNagWithTriviaSyntax Parent { get; }
+        public GreenPgnNagSyntax Green { get; }
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnNagSyntax(PgnNagWithTriviaSyntax parent, GreenPgnNagSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitNagSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitNagSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitNagSyntax(this, arg);
+    }
+
+    public sealed class PgnNagWithTriviaSyntax : WithTriviaSyntax<GreenPgnNagSyntax, PgnNagSyntax>, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnNagSyntax CreateContentNode() => new PgnNagSyntax(this, Green.ContentNode);
+
+        internal PgnNagWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia<GreenPgnNagSyntax> green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

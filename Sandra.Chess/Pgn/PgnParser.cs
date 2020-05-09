@@ -337,31 +337,38 @@ namespace Sandra.Chess.Pgn
                     switch (symbolType)
                     {
                         case PgnSymbolType.MoveNumber:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnMoveNumberSyntax)symbol));
+                            WithTrivia<GreenPgnMoveNumberSyntax> moveNumber = new WithTrivia<GreenPgnMoveNumberSyntax>(leadingTrivia, (GreenPgnMoveNumberSyntax)symbol);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, moveNumber)));
                             break;
                         case PgnSymbolType.Period:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnPeriodSyntax)symbol));
+                            WithTrivia<GreenPgnPeriodSyntax> period = new WithTrivia<GreenPgnPeriodSyntax>(leadingTrivia, (GreenPgnPeriodSyntax)symbol);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(period, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, period)));
                             break;
                         case PgnSymbolType.Move:
                         case PgnSymbolType.UnrecognizedMove:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnMoveSyntax)symbol));
+                            WithTrivia<GreenPgnMoveSyntax> move = new WithTrivia<GreenPgnMoveSyntax>(leadingTrivia, (GreenPgnMoveSyntax)symbol);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, move)));
                             break;
                         case PgnSymbolType.Nag:
                         case PgnSymbolType.EmptyNag:
                         case PgnSymbolType.OverflowNag:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnNagSyntax)symbol));
+                            WithTrivia<GreenPgnNagSyntax> nag = new WithTrivia<GreenPgnNagSyntax>(leadingTrivia, (GreenPgnNagSyntax)symbol);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, nag)));
                             break;
                         case PgnSymbolType.ParenthesisOpen:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, GreenPgnParenthesisOpenSyntax.Value));
+                            WithTrivia<GreenPgnParenthesisOpenSyntax> parenthesisOpen = new WithTrivia<GreenPgnParenthesisOpenSyntax>(leadingTrivia, GreenPgnParenthesisOpenSyntax.Value);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, parenthesisOpen)));
                             break;
                         case PgnSymbolType.ParenthesisClose:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, GreenPgnParenthesisCloseSyntax.Value));
+                            WithTrivia<GreenPgnParenthesisCloseSyntax> parenthesisClose = new WithTrivia<GreenPgnParenthesisCloseSyntax>(leadingTrivia, GreenPgnParenthesisCloseSyntax.Value);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, parenthesisClose)));
                             break;
                         case PgnSymbolType.Asterisk:
                         case PgnSymbolType.DrawMarker:
                         case PgnSymbolType.WhiteWinMarker:
                         case PgnSymbolType.BlackWinMarker:
-                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, (GreenPgnGameResultSyntax)symbol));
+                            WithTrivia<GreenPgnGameResultSyntax> gameResult = new WithTrivia<GreenPgnGameResultSyntax>(leadingTrivia, (GreenPgnGameResultSyntax)symbol);
+                            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, gameResult)));
                             break;
                         default:
                             throw new UnreachableException();

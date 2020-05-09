@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -35,12 +33,17 @@ namespace Sandra.Chess.Pgn
         public virtual void VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitCommentSyntax(PgnCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
+        public virtual void VisitGameResultSyntax(PgnGameResultSyntax node) => DefaultVisit(node);
         public virtual void VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual void VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => DefaultVisit(node);
+        public virtual void VisitMoveSyntax(PgnMoveSyntax node) => DefaultVisit(node);
+        public virtual void VisitNagSyntax(PgnNagSyntax node) => DefaultVisit(node);
+        public virtual void VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
+        public virtual void VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
+        public virtual void VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
         public virtual void VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
         public virtual void VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
         public virtual void VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
-
-        public virtual void VisitPgnSymbol(PgnSymbol node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -55,12 +58,17 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCommentSyntax(PgnCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitGameResultSyntax(PgnGameResultSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitMoveSyntax(PgnMoveSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitNagSyntax(PgnNagSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
         public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
-
-        public virtual TResult VisitPgnSymbol(PgnSymbol node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -75,11 +83,16 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCommentSyntax(PgnCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitGameResultSyntax(PgnGameResultSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitMoveNumberSyntax(PgnMoveNumberSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitMoveSyntax(PgnMoveSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitNagSyntax(PgnNagSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
-
-        public virtual TResult VisitPgnSymbol(PgnSymbol node, T arg) => DefaultVisit(node, arg);
     }
 }
