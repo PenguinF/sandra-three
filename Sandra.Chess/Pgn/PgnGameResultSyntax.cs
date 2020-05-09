@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -26,7 +28,7 @@ namespace Sandra.Chess.Pgn
     /// These are <see cref="GreenPgnAsteriskSyntax"/>, <see cref="GreenPgnBlackWinMarkerSyntax"/>,
     /// <see cref="GreenPgnDrawMarkerSyntax"/> and <see cref="GreenPgnWhiteWinMarkerSyntax"/>.
     /// </summary>
-    public abstract class GreenPgnGameResultSyntax
+    public abstract class GreenPgnGameResultSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the <see cref="GreenPgnGameResultSyntax"/> which represents the undetermined result.
@@ -49,11 +51,23 @@ namespace Sandra.Chess.Pgn
         public static GreenPgnGameResultSyntax WhiteWinsResultSyntax => GreenPgnWhiteWinMarkerSyntax.Value;
 
         /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public abstract int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public abstract PgnSymbolType SymbolType { get; }
+
+        /// <summary>
         /// Gets the type of game termination marker.
         /// </summary>
         public abstract PgnGameResult GameResult { get; }
 
         internal GreenPgnGameResultSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
     /// <summary>
