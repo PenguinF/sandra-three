@@ -39,7 +39,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the tag element nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> TagElementNodes { get; }
+        public ReadOnlySpanList<WithTrivia<GreenPgnTagElementSyntax>> TagElementNodes { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagPairSyntax"/>.
@@ -53,10 +53,10 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentException">
         /// <paramref name="tagElementNodes"/> is empty.
         /// </exception>
-        public GreenPgnTagPairSyntax(IEnumerable<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> tagElementNodes)
+        public GreenPgnTagPairSyntax(IEnumerable<WithTrivia<GreenPgnTagElementSyntax>> tagElementNodes)
         {
             if (tagElementNodes == null) throw new ArgumentNullException(nameof(tagElementNodes));
-            TagElementNodes = ReadOnlySpanList<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>.Create(tagElementNodes);
+            TagElementNodes = ReadOnlySpanList<WithTrivia<GreenPgnTagElementSyntax>>.Create(tagElementNodes);
             if (TagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
         }
     }

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnSyntaxWithLeadingTrivia.cs
+ * WithTriviaSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -28,7 +28,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node together with its leading trivia.
     /// </summary>
-    public abstract class GreenPgnSyntaxWithLeadingTrivia : ISpan
+    public abstract class WithTrivia : ISpan
     {
         /// <summary>
         /// Gets the leading trivia of the syntax node.
@@ -41,7 +41,7 @@ namespace Sandra.Chess.Pgn
         public abstract int Length { get; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnSyntaxWithLeadingTrivia"/>.
+        /// Initializes a new instance of <see cref="WithTrivia"/>.
         /// </summary>
         /// <param name="leadingTrivia">
         /// The leading trivia of the syntax node.
@@ -49,7 +49,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingTrivia"/> is null.
         /// </exception>
-        public GreenPgnSyntaxWithLeadingTrivia(GreenPgnTriviaSyntax leadingTrivia)
+        internal WithTrivia(GreenPgnTriviaSyntax leadingTrivia)
             => LeadingTrivia = leadingTrivia ?? throw new ArgumentNullException(nameof(leadingTrivia));
     }
 
@@ -59,7 +59,7 @@ namespace Sandra.Chess.Pgn
     /// <typeparam name="TSyntaxNode">
     /// The type of <see cref="IGreenPgnSymbol"/> syntax node.
     /// </typeparam>
-    public class GreenPgnSyntaxWithLeadingTrivia<TSyntaxNode> : GreenPgnSyntaxWithLeadingTrivia where TSyntaxNode : ISpan
+    public class WithTrivia<TSyntaxNode> : WithTrivia where TSyntaxNode : ISpan
     {
         /// <summary>
         /// Gets the inner syntax node.
@@ -72,7 +72,7 @@ namespace Sandra.Chess.Pgn
         public sealed override int Length => LeadingTrivia.Length + SyntaxNode.Length;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnSyntaxWithLeadingTrivia"/>.
+        /// Initializes a new instance of <see cref="WithTrivia"/>.
         /// </summary>
         /// <param name="leadingTrivia">
         /// The leading trivia of the syntax node.
@@ -83,7 +83,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingTrivia"/> and/or <paramref name="syntaxNode"/> are null.
         /// </exception>
-        public GreenPgnSyntaxWithLeadingTrivia(GreenPgnTriviaSyntax leadingTrivia, TSyntaxNode syntaxNode)
+        public WithTrivia(GreenPgnTriviaSyntax leadingTrivia, TSyntaxNode syntaxNode)
             : base(leadingTrivia)
         {
             if (syntaxNode == null) throw new ArgumentNullException(nameof(syntaxNode));
@@ -94,7 +94,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node together with its leading trivia.
     /// </summary>
-    public abstract class PgnSyntaxWithLeadingTrivia : PgnSyntax
+    public abstract class WithTriviaSyntax : PgnSyntax
     {
         private readonly SafeLazyObject<PgnTriviaSyntax> leadingTrivia;
 
@@ -103,7 +103,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
 
-        internal PgnSyntaxWithLeadingTrivia(GreenPgnSyntaxWithLeadingTrivia green)
+        internal WithTriviaSyntax(WithTrivia green)
         {
             leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, green.LeadingTrivia));
         }
@@ -118,14 +118,14 @@ namespace Sandra.Chess.Pgn
     /// <typeparam name="TSyntaxNode">
     /// The type of <see cref="PgnSyntax"/> syntax node.
     /// </typeparam>
-    public abstract class PgnSyntaxWithLeadingTrivia<TGreenSyntaxNode, TSyntaxNode> : PgnSyntaxWithLeadingTrivia
+    public abstract class WithTriviaSyntax<TGreenSyntaxNode, TSyntaxNode> : WithTriviaSyntax
         where TGreenSyntaxNode : ISpan
         where TSyntaxNode : PgnSyntax
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public GreenPgnSyntaxWithLeadingTrivia<TGreenSyntaxNode> Green { get; }
+        public WithTrivia<TGreenSyntaxNode> Green { get; }
 
         private readonly SafeLazyObject<TSyntaxNode> syntaxNode;
 
@@ -166,7 +166,7 @@ namespace Sandra.Chess.Pgn
 
         internal abstract TSyntaxNode CreateChildNode();
 
-        internal PgnSyntaxWithLeadingTrivia(GreenPgnSyntaxWithLeadingTrivia<TGreenSyntaxNode> green)
+        internal WithTriviaSyntax(WithTrivia<TGreenSyntaxNode> green)
             : base(green)
         {
             Green = green;

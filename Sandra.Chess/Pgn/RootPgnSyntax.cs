@@ -60,7 +60,7 @@ namespace Sandra.Chess.Pgn.Temp
         PgnSyntax ToPgnSyntax();
     }
 
-    public class GreenPgnTopLevelSymbolSyntax : GreenPgnSyntaxWithLeadingTrivia<IGreenPgnSymbol>, IGreenPgnTopLevelSyntax
+    public class GreenPgnTopLevelSymbolSyntax : WithTrivia<IGreenPgnSymbol>, IGreenPgnTopLevelSyntax
     {
         public GreenPgnTopLevelSymbolSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
             : base(leadingTrivia, foreground)

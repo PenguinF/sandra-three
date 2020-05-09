@@ -99,7 +99,7 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia : PgnSyntaxWithLeadingTrivia<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
+    public class PgnSymbolWithTrivia : WithTriviaSyntax<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 

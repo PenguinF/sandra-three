@@ -157,7 +157,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> TagPairBuilder;
+        private readonly List<WithTrivia<GreenPgnTagElementSyntax>> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
@@ -171,7 +171,7 @@ namespace Sandra.Chess.Pgn
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            TagPairBuilder = new List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>();
+            TagPairBuilder = new List<WithTrivia<GreenPgnTagElementSyntax>>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
@@ -214,7 +214,7 @@ namespace Sandra.Chess.Pgn
                         HasTagPairTagValue = true;
                     }
 
-                    TagPairBuilder.Add(new GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>(leadingTrivia, (GreenPgnTagElementSyntax)symbol));
+                    TagPairBuilder.Add(new WithTrivia<GreenPgnTagElementSyntax>(leadingTrivia, (GreenPgnTagElementSyntax)symbol));
 
                     if (symbolType == PgnSymbolType.BracketClose)
                     {

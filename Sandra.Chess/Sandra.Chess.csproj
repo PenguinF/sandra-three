@@ -76,7 +76,6 @@
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
-    <Compile Include="Pgn\PgnSyntaxWithLeadingTrivia.cs" />
     <Compile Include="Pgn\PgnTagElementSyntax.cs" />
     <Compile Include="Pgn\PgnTagElementSyntaxVisitor.cs" />
     <Compile Include="Pgn\PgnTagElementWithTriviaSyntax.cs" />
@@ -91,6 +90,7 @@
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
+    <Compile Include="Pgn\WithTriviaSyntax.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Variation.cs" />
