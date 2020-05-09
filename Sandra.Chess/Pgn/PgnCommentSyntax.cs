@@ -51,6 +51,9 @@ namespace Sandra.Chess.Pgn
         /// The length of the syntax node, including delimiter characters ';' '{' '}',
         /// and excluding the '\n' and preceding '\r' that terminates an end-of-line comment.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public GreenPgnCommentSyntax(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
