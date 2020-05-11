@@ -76,9 +76,7 @@ namespace Sandra.Chess.Pgn
             Length = length;
         }
 
-        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
+        internal override PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent) => new PgnTagValueSyntax(parent, this);
     }
 
     /// <summary>

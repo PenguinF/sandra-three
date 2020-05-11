@@ -43,9 +43,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnBracketOpenSyntax() { }
 
-        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketOpenSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketOpenSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketOpenSyntax(this, arg);
+        internal override PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent) => new PgnBracketOpenSyntax(parent);
     }
 
     /// <summary>
