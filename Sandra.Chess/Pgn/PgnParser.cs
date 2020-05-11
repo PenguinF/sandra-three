@@ -267,12 +267,10 @@ namespace Sandra.Chess.Pgn
 
         #endregion Tag section parsing
 
-        #region Yield tokens and EOF
+        #region Yield content nodes
 
-        private void Yield(IGreenPgnSymbol symbol)
+        private void YieldContentNode()
         {
-            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol);
-
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -358,7 +356,16 @@ namespace Sandra.Chess.Pgn
                 default:
                     throw new UnreachableException();
             }
+        }
 
+        #endregion Yield content nodes
+
+        #region Yield tokens and EOF
+
+        private void Yield(IGreenPgnSymbol symbol)
+        {
+            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol);
+            YieldContentNode();
             BackgroundBuilder.Clear();
             TriviaBuilder.Clear();
         }
