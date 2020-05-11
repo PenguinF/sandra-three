@@ -19,19 +19,22 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a node containing a single tag section element in an abstract PGN syntax tree.
     /// </summary>
-    public abstract class GreenPgnTagElementSyntax : ISpan
+    public abstract class GreenPgnTagElementSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public abstract PgnSymbolType SymbolType { get; }
 
         internal abstract PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent);
     }

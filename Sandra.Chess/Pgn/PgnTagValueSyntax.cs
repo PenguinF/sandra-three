@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node.
     /// </summary>
-    public class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax
     {
         /// <summary>
         /// Gets the value of this syntax node, or null if this is a <see cref="GreenPgnErrorTagValueSyntax"/>.
@@ -42,7 +42,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public virtual PgnSymbolType SymbolType => PgnSymbolType.TagValue;
+        public override PgnSymbolType SymbolType => PgnSymbolType.TagValue;
 
         /// <summary>
         /// Gets if this tag value contains errors and therefore has an undefined value.

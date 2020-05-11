@@ -24,7 +24,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the bracket close character ']' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketCloseSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnBracketCloseSyntax : GreenPgnTagElementSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnBracketCloseSyntax"/> value.
@@ -39,7 +39,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.BracketClose;
+        public override PgnSymbolType SymbolType => PgnSymbolType.BracketClose;
 
         private GreenPgnBracketCloseSyntax() { }
 

@@ -38,7 +38,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the content syntax node which anchors the trivia.
         /// </summary>
-        public ISpan ContentNode { get; }
+        public IGreenPgnSymbol ContentNode { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -57,7 +57,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingTrivia"/> and/or <paramref name="contentNode"/> are null.
         /// </exception>
-        public GreenWithTriviaSyntax(GreenPgnTriviaSyntax leadingTrivia, ISpan contentNode)
+        public GreenWithTriviaSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol contentNode)
         {
             LeadingTrivia = leadingTrivia ?? throw new ArgumentNullException(nameof(leadingTrivia));
             ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
