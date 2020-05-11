@@ -30,22 +30,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnBackgroundListSyntax : PgnSyntax
     {
-        private class PgnBackgroundSyntaxCreator : GreenPgnBackgroundSyntaxVisitor<(PgnBackgroundListSyntax, int), PgnBackgroundSyntax>
-        {
-            public static readonly PgnBackgroundSyntaxCreator Instance = new PgnBackgroundSyntaxCreator();
-
-            private PgnBackgroundSyntaxCreator() { }
-
-            public override PgnBackgroundSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnBackgroundListSyntax, int) parent)
-                => new PgnEscapeSyntax(parent.Item1, parent.Item2, green);
-
-            public override PgnBackgroundSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnBackgroundListSyntax, int) parent)
-                => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
-
-            public override PgnBackgroundSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnBackgroundListSyntax, int) parent)
-                => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
-        }
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -98,7 +82,7 @@ namespace Sandra.Chess.Pgn
 
             BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
                 green.Count,
-                index => PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)Green[index], (this, index)));
+                index => ((GreenPgnBackgroundSyntax)Green[index]).CreateRedNode(this, index));
         }
     }
 }

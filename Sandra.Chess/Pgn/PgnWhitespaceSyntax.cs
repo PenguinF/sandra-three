@@ -74,9 +74,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnWhitespaceSyntax(int length) => Length = length;
 
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+        internal override PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex) => new PgnWhitespaceSyntax(parent, parentIndex, this);
     }
 
     /// <summary>
@@ -101,5 +99,9 @@ namespace Sandra.Chess.Pgn
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+
+        public override void Accept(PgnBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
+        public override TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
+        public override TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 }

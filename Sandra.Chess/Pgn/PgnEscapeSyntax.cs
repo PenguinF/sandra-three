@@ -51,9 +51,7 @@ namespace Sandra.Chess.Pgn
             Length = length;
         }
 
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitEscapeSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitEscapeSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitEscapeSyntax(this, arg);
+        internal override PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex) => new PgnEscapeSyntax(parent, parentIndex, this);
     }
 
     /// <summary>
@@ -83,5 +81,9 @@ namespace Sandra.Chess.Pgn
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitEscapeSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitEscapeSyntax(this);
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitEscapeSyntax(this, arg);
+
+        public override void Accept(PgnBackgroundSyntaxVisitor visitor) => visitor.VisitEscapeSyntax(this);
+        public override TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitEscapeSyntax(this);
+        public override TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitEscapeSyntax(this, arg);
     }
 }

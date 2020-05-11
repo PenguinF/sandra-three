@@ -22,41 +22,41 @@
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="GreenPgnBackgroundSyntax"/>.
+    /// Represents a visitor that visits a single <see cref="PgnBackgroundSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class GreenPgnBackgroundSyntaxVisitor
+    public abstract class PgnBackgroundSyntaxVisitor
     {
-        public virtual void DefaultVisit(GreenPgnBackgroundSyntax node) { }
-        public virtual void Visit(GreenPgnBackgroundSyntax node) { if (node != null) node.Accept(this); }
-        public virtual void VisitEscapeSyntax(GreenPgnEscapeSyntax node) => DefaultVisit(node);
-        public virtual void VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node) => DefaultVisit(node);
-        public virtual void VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node) => DefaultVisit(node);
+        public virtual void DefaultVisit(PgnBackgroundSyntax node) { }
+        public virtual void Visit(PgnBackgroundSyntax node) { if (node != null) node.Accept(this); }
+        public virtual void VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
+        public virtual void VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual void VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="GreenPgnBackgroundSyntax"/>.
+    /// Represents a visitor that visits a single <see cref="PgnBackgroundSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class GreenPgnBackgroundSyntaxVisitor<TResult>
+    public abstract class PgnBackgroundSyntaxVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(GreenPgnBackgroundSyntax node) => default;
-        public virtual TResult Visit(GreenPgnBackgroundSyntax node) => node == null ? default : node.Accept(this);
-        public virtual TResult VisitEscapeSyntax(GreenPgnEscapeSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node) => DefaultVisit(node);
+        public virtual TResult DefaultVisit(PgnBackgroundSyntax node) => default;
+        public virtual TResult Visit(PgnBackgroundSyntax node) => node == null ? default : node.Accept(this);
+        public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="GreenPgnBackgroundSyntax"/>.
+    /// Represents a visitor that visits a single <see cref="PgnBackgroundSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class GreenPgnBackgroundSyntaxVisitor<T, TResult>
+    public abstract class PgnBackgroundSyntaxVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(GreenPgnBackgroundSyntax node, T arg) => default;
-        public virtual TResult Visit(GreenPgnBackgroundSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
-        public virtual TResult VisitEscapeSyntax(GreenPgnEscapeSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult DefaultVisit(PgnBackgroundSyntax node, T arg) => default;
+        public virtual TResult Visit(PgnBackgroundSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }

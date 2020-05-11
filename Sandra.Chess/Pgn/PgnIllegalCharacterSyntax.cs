@@ -43,9 +43,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnIllegalCharacterSyntax() { }
 
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
+        internal override PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex) => new PgnIllegalCharacterSyntax(parent, parentIndex, this);
     }
 
     /// <summary>
@@ -87,5 +85,9 @@ namespace Sandra.Chess.Pgn
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
+
+        public override void Accept(PgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
     }
 }

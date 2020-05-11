@@ -23,7 +23,6 @@ namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a single background node in an abstract PGN syntax tree.
-    /// Use <see cref="GreenPgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenPgnBackgroundSyntax : IGreenPgnSymbol
     {
@@ -37,13 +36,12 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public abstract PgnSymbolType SymbolType { get; }
 
-        public abstract void Accept(GreenPgnBackgroundSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
+        internal abstract PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex);
     }
 
     /// <summary>
     /// Represents a single background node in an abstract PGN syntax tree.
+    /// Use <see cref="PgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class PgnBackgroundSyntax : PgnSyntax
     {
@@ -72,5 +70,9 @@ namespace Sandra.Chess.Pgn
             Parent = parent;
             ParentIndex = parentIndex;
         }
+
+        public abstract void Accept(PgnBackgroundSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }
