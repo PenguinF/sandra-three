@@ -125,6 +125,9 @@
     "PgnErrorMissingTagName": "label mist een naam",
     "PgnErrorMissingTagValue": "label mist een waarde",
     "PgnErrorMultipleTagValues": "label bevat twee of meer waarden",
-    "PgnErrorMissingTagBracketClose": "label mist een ']' karakter"
+    "PgnErrorMissingTagBracketClose": "label mist een ']' karakter",
+    "PgnErrorMissingMoveNumber": "eerste zet in een hoofd- of zijvariant hoort te zijn voorzien van een zetnummer",
+    "PgnErrorMissingMove": "zet notatie verwacht maar niet gevonden",
+    "PgnErrorOrphanPeriod": "punt '.' karakter gevonden op een plaats anders dan tussen een zetnummer en zetnotatie"
   }
 }

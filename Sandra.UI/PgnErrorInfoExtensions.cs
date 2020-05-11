@@ -52,6 +52,9 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.MissingTagValue), "tag is missing a value" },
             { GetLocalizedStringKey(PgnErrorCode.MultipleTagValues), "tag contains two or more values" },
             { GetLocalizedStringKey(PgnErrorCode.MissingTagBracketClose), "tag is missing ']' character" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingMoveNumber), "first move in a main or side line should have a move number" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingMove), "move expected but not found" },
+            { GetLocalizedStringKey(PgnErrorCode.OrphanPeriod), "found period '.' character somewhere not between a move number and a move" },
         };
     }
 }
