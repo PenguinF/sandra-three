@@ -824,7 +824,9 @@ namespace Sandra.Chess.Pgn
                 }
             }
 
-            Yield(new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex));
+            int unterminatedCommentLength = length - symbolStartIndex;
+            Errors.Add(PgnCommentSyntax.CreateUnterminatedCommentMessage(symbolStartIndex, unterminatedCommentLength));
+            Yield(new GreenPgnUnterminatedCommentSyntax(unterminatedCommentLength));
             return;
 
         inNumericAnnotationGlyph:

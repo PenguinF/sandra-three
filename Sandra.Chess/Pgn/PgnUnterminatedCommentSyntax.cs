@@ -19,14 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a PGN syntax node which contains an unterminated comment.
     /// </summary>
-    public sealed class GreenPgnUnterminatedCommentSyntax : GreenPgnCommentSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnUnterminatedCommentSyntax : GreenPgnCommentSyntax
     {
         /// <summary>
         /// Gets the type of this symbol.
@@ -48,22 +46,8 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
-        public GreenPgnUnterminatedCommentSyntax(int length)
-            : base(length)
+        public GreenPgnUnterminatedCommentSyntax(int length) : base(length)
         {
         }
-
-        /// <summary>
-        /// Generates the error associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the error.
-        /// </param>
-        /// <returns>
-        /// The error associated with this symbol.
-        /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnCommentSyntax.CreateUnterminatedCommentMessage(startPosition, Length);
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
     }
 }
