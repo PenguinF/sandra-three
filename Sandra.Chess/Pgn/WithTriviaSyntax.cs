@@ -28,7 +28,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node together with its leading trivia.
     /// </summary>
-    public sealed class WithTrivia : ISpan
+    public sealed class GreenWithTriviaSyntax : ISpan
     {
         /// <summary>
         /// Gets the leading trivia of the syntax node.
@@ -46,22 +46,21 @@ namespace Sandra.Chess.Pgn
         public int Length => LeadingTrivia.Length + ContentNode.Length;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="WithTrivia"/>.
+        /// Initializes a new instance of <see cref="GreenWithTriviaSyntax"/>.
         /// </summary>
         /// <param name="leadingTrivia">
         /// The leading trivia of the syntax node.
         /// </param>
         /// <param name="contentNode">
-        /// The inner syntax node.
+        /// The content syntax node which anchors the trivia.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingTrivia"/> and/or <paramref name="contentNode"/> are null.
         /// </exception>
-        public WithTrivia(GreenPgnTriviaSyntax leadingTrivia, ISpan contentNode)
+        public GreenWithTriviaSyntax(GreenPgnTriviaSyntax leadingTrivia, ISpan contentNode)
         {
             LeadingTrivia = leadingTrivia ?? throw new ArgumentNullException(nameof(leadingTrivia));
-            if (contentNode == null) throw new ArgumentNullException(nameof(contentNode));
-            ContentNode = contentNode;
+            ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
         }
     }
 
@@ -102,7 +101,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public WithTrivia Green { get; }
+        public GreenWithTriviaSyntax Green { get; }
 
         private readonly SafeLazyObject<TSyntaxNode> contentNode;
 
@@ -148,7 +147,7 @@ namespace Sandra.Chess.Pgn
 
         internal abstract TSyntaxNode CreateContentNode();
 
-        internal WithTriviaSyntax(WithTrivia green)
+        internal WithTriviaSyntax(GreenWithTriviaSyntax green)
             : base(green.LeadingTrivia)
         {
             Green = green;

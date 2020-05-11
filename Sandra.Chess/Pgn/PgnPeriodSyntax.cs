@@ -98,7 +98,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, (GreenPgnPeriodSyntax)Green.ContentNode);
 
-        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

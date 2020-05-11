@@ -62,12 +62,12 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
     {
-        internal readonly WithTrivia GreenNodeWithTrivia;
-        internal readonly Func<PgnSyntaxNodes, int, WithTrivia, IPgnTopLevelSyntax> SyntaxNodeConstructor;
+        internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
+        internal readonly Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
 
         public int Length => GreenNodeWithTrivia.Length;
 
-        public GreenPgnTopLevelSymbolSyntax(WithTrivia greenNodeWithTrivia, Func<PgnSyntaxNodes, int, WithTrivia, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        public GreenPgnTopLevelSymbolSyntax(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
         {
             GreenNodeWithTrivia = greenNodeWithTrivia;
             SyntaxNodeConstructor = syntaxNodeConstructor;

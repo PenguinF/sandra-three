@@ -151,7 +151,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<IGreenPgnSymbol> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<WithTrivia> TagPairBuilder;
+        private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
@@ -169,7 +169,7 @@ namespace Sandra.Chess.Pgn
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<IGreenPgnSymbol>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            TagPairBuilder = new List<WithTrivia>();
+            TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
@@ -258,7 +258,7 @@ namespace Sandra.Chess.Pgn
                 TagPairStartIndex = symbolStartIndex;
             }
 
-            TagPairBuilder.Add(new WithTrivia(leadingTrivia, node));
+            TagPairBuilder.Add(new GreenWithTriviaSyntax(leadingTrivia, node));
         }
 
         #endregion Tag section parsing
@@ -321,14 +321,14 @@ namespace Sandra.Chess.Pgn
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia moveNumber = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax moveNumber = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.Period:
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia period = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax period = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(period, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.Move:
@@ -336,7 +336,7 @@ namespace Sandra.Chess.Pgn
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia move = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax move = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.Nag:
@@ -345,21 +345,21 @@ namespace Sandra.Chess.Pgn
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia nag = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax nag = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.ParenthesisOpen:
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia parenthesisOpen = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax parenthesisOpen = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.ParenthesisClose:
                         // Switch to move tree section.
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia parenthesisClose = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax parenthesisClose = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
                         break;
                     case PgnSymbolType.Asterisk:
@@ -368,7 +368,7 @@ namespace Sandra.Chess.Pgn
                     case PgnSymbolType.BlackWinMarker:
                         CaptureTagPairIfNecessary();
                         CaptureTagSection();
-                        WithTrivia gameResult = new WithTrivia(leadingTrivia, symbol);
+                        GreenWithTriviaSyntax gameResult = new GreenWithTriviaSyntax(leadingTrivia, symbol);
                         SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
                         break;
                     default:

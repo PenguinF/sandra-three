@@ -152,7 +152,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, (GreenPgnMoveSyntax)Green.ContentNode);
 
-        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
