@@ -392,14 +392,12 @@ namespace Sandra.Chess.Pgn
 
         #region Lexing
 
-        private GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c, int position)
+        private void ReportIllegalCharacterSyntaxError(char c, int position)
         {
             Errors.Add(PgnIllegalCharacterSyntax.CreateError(
                 StringLiteral.CharacterMustBeEscaped(c)
                 ? StringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c), position));
-
-            return GreenPgnIllegalCharacterSyntax.Value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -492,7 +490,8 @@ namespace Sandra.Chess.Pgn
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
-                                Yield(CreateIllegalCharacterSyntax(c, symbolStartIndex));
+                                ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
+                                Yield(GreenPgnIllegalCharacterSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             default:
@@ -501,7 +500,8 @@ namespace Sandra.Chess.Pgn
                     }
                     else
                     {
-                        Yield(CreateIllegalCharacterSyntax(c, symbolStartIndex));
+                        ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
+                        Yield(GreenPgnIllegalCharacterSyntax.Value);
                         symbolStartIndex++;
                     }
                 }
@@ -586,7 +586,8 @@ namespace Sandra.Chess.Pgn
                                 symbolStartIndex = currentIndex;
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
-                                symbolToYield = CreateIllegalCharacterSyntax(c, currentIndex);
+                                ReportIllegalCharacterSyntaxError(c, currentIndex);
+                                symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             default:
                                 throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
@@ -595,7 +596,8 @@ namespace Sandra.Chess.Pgn
                 }
                 else
                 {
-                    symbolToYield = CreateIllegalCharacterSyntax(c, currentIndex);
+                    ReportIllegalCharacterSyntaxError(c, currentIndex);
+                    symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
                     goto yieldSymbolThenCharacter;
                 }
 
