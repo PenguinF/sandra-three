@@ -138,13 +138,13 @@ namespace Sandra.Chess.Pgn
         {
             if (pgn == null) throw new ArgumentNullException(nameof(pgn));
 
-            var parser = new PgnParser();
-            parser.ParsePgnText(pgn);
-            parser.YieldEof();
+            var parser = new PgnParser(pgn);
+            parser.ParsePgnText();
+            GreenPgnTriviaSyntax trailingTrivia = parser.YieldEof();
 
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
-                GreenPgnTriviaSyntax.Create(parser.TriviaBuilder, parser.BackgroundBuilder),
+                trailingTrivia,
                 parser.Errors);
         }
 
@@ -155,21 +155,24 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
+        private readonly string pgnText;
+
         // Invariant is that this index is always at the start of the yielded symbol.
         private int symbolStartIndex;
 
-        // Save as a field, which is useful for error reporting.
+        // Save as fields, which is useful for error reporting.
         private GreenWithTriviaSyntax symbolBeingYielded;
+        private GreenPgnTriviaSyntax trailingTrivia;
 
         private bool InTagPair;
-        private int TagPairLeadingTriviaLength;
-        private int TagPairStartIndex;
         private bool HasTagPairBracketOpen;
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
-        private PgnParser()
+        private PgnParser(string pgnText)
         {
+            this.pgnText = pgnText;
+
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
@@ -184,50 +187,63 @@ namespace Sandra.Chess.Pgn
         {
             var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
 
-            // To report tag pair errors, start at the '[', not where its leading trivia starts.
-            int tagPairErrorLength = tagPairSyntax.Length - TagPairLeadingTriviaLength;
-
             // Analyze for errors.
             // Expect '[', tag name. tag value, ']'.
-            if (!HasTagPairBracketOpen)
+            if (!HasTagPairBracketOpen || !HasTagPairTagName || !HasTagPairTagValue || !hasTagPairBracketClose)
             {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagBracketOpen,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
-            }
+                // Calculate the end position of the tag pair syntax.
+                // - At the end of the file, contentNodeBeingYielded is null; the end position is the length of the pgn minus its trailing trivia.
+                // - If hasTagPairBracketClose is true, symbolStartIndex is at the start of the closing bracket.
+                // - If hasTagPairBracketClose is false, symbolStartIndex is at the start of the first symbol not in the tag pair.
+                int tagPairEndPosition
+                    = hasTagPairBracketClose ? symbolStartIndex + 1
+                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+                    : pgnText.Length - trailingTrivia.Length;
 
-            if (!HasTagPairTagName)
-            {
-                if (!HasTagPairTagValue)
+                // To report tag pair errors, start at the '[', not where its leading trivia starts.
+                int tagPairLength = tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
+                int tagPairStartPosition = tagPairEndPosition - tagPairLength;
+
+                if (!HasTagPairBracketOpen)
                 {
                     Errors.Add(new PgnErrorInfo(
-                        PgnErrorCode.EmptyTag,
-                        TagPairStartIndex,
-                        tagPairErrorLength));
+                        PgnErrorCode.MissingTagBracketOpen,
+                        tagPairStartPosition,
+                        tagPairLength));
                 }
-                else
+
+                if (!HasTagPairTagName)
+                {
+                    if (!HasTagPairTagValue)
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.EmptyTag,
+                            tagPairStartPosition,
+                            tagPairLength));
+                    }
+                    else
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.MissingTagName,
+                            tagPairStartPosition,
+                            tagPairLength));
+                    }
+                }
+                else if (!HasTagPairTagValue)
                 {
                     Errors.Add(new PgnErrorInfo(
-                        PgnErrorCode.MissingTagName,
-                        TagPairStartIndex,
-                        tagPairErrorLength));
+                        PgnErrorCode.MissingTagValue,
+                        tagPairStartPosition,
+                        tagPairLength));
                 }
-            }
-            else if (!HasTagPairTagValue)
-            {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagValue,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
-            }
 
-            if (!hasTagPairBracketClose)
-            {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagBracketClose,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
+                if (!hasTagPairBracketClose)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingTagBracketClose,
+                        tagPairStartPosition,
+                        tagPairLength));
+                }
             }
 
             TagSectionBuilder.Add(tagPairSyntax);
@@ -255,13 +271,7 @@ namespace Sandra.Chess.Pgn
 
         private void AddTagElementToBuilder()
         {
-            if (!InTagPair)
-            {
-                InTagPair = true;
-                TagPairLeadingTriviaLength = symbolBeingYielded.LeadingTrivia.Length;
-                TagPairStartIndex = symbolStartIndex;
-            }
-
+            InTagPair = true;
             TagPairBuilder.Add(symbolBeingYielded);
         }
 
@@ -381,10 +391,15 @@ namespace Sandra.Chess.Pgn
             BackgroundBuilder.Add(backgroundSyntax);
         }
 
-        private void YieldEof()
+        private GreenPgnTriviaSyntax YieldEof()
         {
+            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
+            symbolBeingYielded = null;
+
             CaptureTagPairIfNecessary();
             CaptureTagSection();
+
+            return trailingTrivia;
         }
 
         #endregion Yield tokens and EOF
@@ -415,7 +430,7 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        private void ParsePgnText(string pgnText)
+        private void ParsePgnText()
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
