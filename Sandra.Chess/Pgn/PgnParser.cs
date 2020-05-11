@@ -599,8 +599,8 @@ namespace Sandra.Chess.Pgn
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
             if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
-            Yield(symbolToYield);
             currentIndex++;
+            Yield(symbolToYield);
             symbolStartIndex = currentIndex;
             goto inWhitespace;
 
