@@ -422,7 +422,6 @@ namespace Sandra.Chess.Pgn
 
             int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
-            List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
             bool hasStringErrors;
 
             // Reusable structure to build green PGN symbols.
@@ -639,14 +638,7 @@ namespace Sandra.Chess.Pgn
 
                     if (hasStringErrors)
                     {
-                        Errors.AddRange(errors.Select(error => new PgnErrorInfo(
-                           error.ErrorCode,
-                           error.Start + symbolStartIndex,
-                           error.Length,
-                           error.Parameters)));
-
                         Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex));
-                        errors.Clear();
                     }
                     else
                     {
@@ -678,22 +670,22 @@ namespace Sandra.Chess.Pgn
 
                             if (char.IsControl(escapedChar))
                             {
-                                errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex - symbolStartIndex));
+                                Errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex));
                             }
 
                             if (StringLiteral.CharacterMustBeEscaped(escapedChar))
                             {
                                 // Just don't show the control character.
-                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
+                                Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     EscapeCharacterString,
-                                    escapeSequenceStart - symbolStartIndex,
+                                    escapeSequenceStart,
                                     2));
                             }
                             else
                             {
-                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
+                                Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
-                                    escapeSequenceStart - symbolStartIndex,
+                                    escapeSequenceStart,
                                     2));
                             }
                         }
@@ -701,18 +693,14 @@ namespace Sandra.Chess.Pgn
                     else
                     {
                         // In addition to this, break out of the loop because this is now also an unterminated string.
-                        errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
-                            EscapeCharacterString,
-                            escapeSequenceStart - symbolStartIndex,
-                            1));
-
+                        Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(EscapeCharacterString, escapeSequenceStart, 1));
                         break;
                     }
                 }
                 else if (char.IsControl(c))
                 {
                     hasStringErrors = true;
-                    errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex - symbolStartIndex));
+                    Errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex));
                 }
                 else
                 {
@@ -722,15 +710,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnTagValueSyntax.UnterminatedError(length - symbolStartIndex));
-
-            Errors.AddRange(errors.Select(error => new PgnErrorInfo(
-               error.ErrorCode,
-               error.Start + symbolStartIndex,
-               error.Length,
-               error.Parameters)));
-
-            Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex));
+            int unterminatedStringLength = length - symbolStartIndex;
+            Errors.Add(PgnTagValueSyntax.UnterminatedError(symbolStartIndex, unterminatedStringLength));
+            Yield(new GreenPgnErrorTagValueSyntax(unterminatedStringLength));
             return;
 
         inEndOfLineComment:

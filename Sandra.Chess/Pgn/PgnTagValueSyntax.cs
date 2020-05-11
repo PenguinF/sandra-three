@@ -87,11 +87,14 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
         /// </summary>
+        /// <param name="startPosition">
+        /// The start position of the unterminated tag value.
+        /// </param>
         /// <param name="length">
         /// The length of the unterminated tag value.
         /// </param>
-        public static PgnErrorInfo UnterminatedError(int length)
-            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, 0, length);
+        public static PgnErrorInfo UnterminatedError(int startPosition, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, startPosition, length);
 
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unrecognized escape sequences.
@@ -99,14 +102,14 @@ namespace Sandra.Chess.Pgn
         /// <param name="displayCharValue">
         /// A friendly representation of the unrecognized escape sequence.
         /// </param>
-        /// <param name="start">
+        /// <param name="startPosition">
         /// The start position of the unrecognized escape sequence relative to the start position of the tag value.
         /// </param>
         /// <param name="length">
         /// The length of the unrecognized escape sequence.
         /// </param>
-        public static PgnErrorInfo UnrecognizedEscapeSequenceError(string displayCharValue, int start, int length)
-            => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
+        public static PgnErrorInfo UnrecognizedEscapeSequenceError(string displayCharValue, int startPosition, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, startPosition, length, new[] { displayCharValue });
 
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for illegal control characters in tag values.
