@@ -641,7 +641,13 @@ namespace Sandra.Chess.Pgn
 
                     if (hasStringErrors)
                     {
-                        Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors));
+                        Errors.AddRange(errors.Select(error => new PgnErrorInfo(
+                           error.ErrorCode,
+                           error.Start + symbolStartIndex,
+                           error.Length,
+                           error.Parameters)));
+
+                        Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex));
                         errors.Clear();
                     }
                     else
@@ -720,7 +726,13 @@ namespace Sandra.Chess.Pgn
 
             errors.Add(PgnTagValueSyntax.UnterminatedError(length - symbolStartIndex));
 
-            Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors));
+            Errors.AddRange(errors.Select(error => new PgnErrorInfo(
+               error.ErrorCode,
+               error.Start + symbolStartIndex,
+               error.Length,
+               error.Parameters)));
+
+            Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex));
             return;
 
         inEndOfLineComment:

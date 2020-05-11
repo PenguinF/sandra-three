@@ -204,9 +204,8 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(-1, EmptyEnumerable<PgnErrorInfo>.Instance));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(0, EmptyEnumerable<PgnErrorInfo>.Instance));
-            Assert.Throws<ArgumentNullException>(() => new GreenPgnErrorTagValueSyntax(1, null));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
@@ -239,7 +238,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(0));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
-            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(Array.Empty<GreenPgnBackgroundSyntax>(), null));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
