@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -38,17 +36,6 @@ namespace Sandra.Chess.Pgn
         /// Gets the type of this symbol.
         /// </summary>
         public abstract PgnSymbolType SymbolType { get; }
-
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        public virtual IEnumerable<PgnErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public abstract void Accept(GreenPgnBackgroundSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);

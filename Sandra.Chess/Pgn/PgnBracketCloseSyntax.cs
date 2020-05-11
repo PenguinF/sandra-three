@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -44,8 +42,6 @@ namespace Sandra.Chess.Pgn
         public PgnSymbolType SymbolType => PgnSymbolType.BracketClose;
 
         private GreenPgnBracketCloseSyntax() { }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
         public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);

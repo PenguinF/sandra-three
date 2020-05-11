@@ -21,7 +21,6 @@
 
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -76,8 +75,6 @@ namespace Sandra.Chess.Pgn
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
         public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);

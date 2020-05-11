@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a PGN escape sqquence.
     /// </summary>
-    public sealed class GreenPgnEscapeSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnEscapeSyntax : GreenPgnBackgroundSyntax
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.

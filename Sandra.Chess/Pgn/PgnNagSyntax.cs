@@ -21,7 +21,6 @@
 
 using Sandra.Chess.Pgn.Temp;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -70,8 +69,6 @@ namespace Sandra.Chess.Pgn
         }
 
         internal GreenPgnNagSyntax(int length) => Length = length;
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
     /// <summary>

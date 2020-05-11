@@ -267,8 +267,6 @@ namespace Sandra.Chess.Pgn
 
         private void Yield(IGreenPgnSymbol symbol)
         {
-            Errors.AddRange(symbol.GetErrors(symbolStartIndex));
-
             var symbolType = symbol.SymbolType;
 
             if (symbolType.IsBackground())

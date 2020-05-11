@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains whitespace.
     /// </summary>
-    public sealed class GreenPgnWhitespaceSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnWhitespaceSyntax : GreenPgnBackgroundSyntax
     {
         /// <summary>
         /// Maximum length before new <see cref="GreenPgnWhitespaceSyntax"/> instances are always newly allocated.
