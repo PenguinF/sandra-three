@@ -413,6 +413,7 @@ namespace Sandra.Chess.Pgn
             int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
+            bool hasStringErrors;
 
             // Reusable structure to build green PGN symbols.
             PgnSymbolStateMachine symbolBuilder = default;
@@ -606,6 +607,9 @@ namespace Sandra.Chess.Pgn
 
         inString:
 
+            // Detect errors.
+            hasStringErrors = false;
+
             // Eat " character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
@@ -619,7 +623,7 @@ namespace Sandra.Chess.Pgn
                     // Include last character in the syntax node.
                     currentIndex++;
 
-                    if (errors.Count > 0)
+                    if (hasStringErrors)
                     {
                         Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors));
                         errors.Clear();
@@ -650,6 +654,8 @@ namespace Sandra.Chess.Pgn
                         }
                         else
                         {
+                            hasStringErrors = true;
+
                             if (char.IsControl(escapedChar))
                             {
                                 errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex - symbolStartIndex));
@@ -685,6 +691,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (char.IsControl(c))
                 {
+                    hasStringErrors = true;
                     errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex - symbolStartIndex));
                 }
                 else
