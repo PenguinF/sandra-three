@@ -32,14 +32,14 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnTagPairSyntax : ISpan
     {
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public int Length => TagElementNodes.Length;
-
-        /// <summary>
         /// Gets the tag element nodes.
         /// </summary>
         public ReadOnlySpanList<GreenWithTriviaSyntax> TagElementNodes { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => TagElementNodes.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagPairSyntax"/>.
