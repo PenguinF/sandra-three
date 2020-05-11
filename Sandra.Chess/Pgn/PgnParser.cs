@@ -407,7 +407,8 @@ namespace Sandra.Chess.Pgn
 
             if (symbol == null)
             {
-                Yield(new GreenPgnUnrecognizedMoveSyntax(pgnText.Substring(symbolStartIndex, length)));
+                Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(pgnText.Substring(symbolStartIndex, length), symbolStartIndex));
+                Yield(new GreenPgnUnrecognizedMoveSyntax(length));
             }
             else
             {
