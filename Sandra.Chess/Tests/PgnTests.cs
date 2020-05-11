@@ -197,9 +197,6 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
-            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
-            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
-
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
 
@@ -300,12 +297,6 @@ namespace Sandra.Chess.Tests
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
-        }
-
-        [Fact]
-        public void PgnSymbolsWithConstantLength()
-        {
-            Assert.Equal(1, new GreenPgnIllegalCharacterSyntax("\\0").Length);
         }
 
         private const int SharedWhitespaceInstanceLengthMinusTwo = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
