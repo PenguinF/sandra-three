@@ -122,13 +122,6 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
-            => new GreenPgnIllegalCharacterSyntax(
-                StringLiteral.CharacterMustBeEscaped(c)
-                ? StringLiteral.EscapedCharacterString(c)
-                : Convert.ToString(c));
-
         /// <summary>
         /// Parses source text in the PGN format.
         /// </summary>
@@ -398,6 +391,14 @@ namespace Sandra.Chess.Pgn
         #endregion Yield tokens and EOF
 
         #region Lexing
+
+        private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
+        {
+            return new GreenPgnIllegalCharacterSyntax(
+                StringLiteral.CharacterMustBeEscaped(c)
+                ? StringLiteral.EscapedCharacterString(c)
+                : Convert.ToString(c));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
