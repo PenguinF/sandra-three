@@ -19,14 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an empty annotation.
     /// </summary>
-    public sealed class GreenPgnEmptyNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnEmptyNagSyntax : GreenPgnNagSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnEmptyNagSyntax"/> value.
@@ -38,19 +36,6 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
 
-        private GreenPgnEmptyNagSyntax() => Length = PgnNagSyntax.NagLength;
-
-        /// <summary>
-        /// Generates the error associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the error.
-        /// </param>
-        /// <returns>
-        /// The error associated with this symbol.
-        /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnNagSyntax.CreateEmptyNagMessage(startPosition);
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
+        private GreenPgnEmptyNagSyntax() : base(PgnNagSyntax.NagLength) { }
     }
 }

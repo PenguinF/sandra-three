@@ -224,10 +224,9 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 0));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 1));
 
-            Assert.Throws<ArgumentNullException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(null));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(""));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$"));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$99"));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(2));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(3));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(0));

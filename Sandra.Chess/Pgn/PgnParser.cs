@@ -842,9 +842,21 @@ namespace Sandra.Chess.Pgn
 
                 if (digit < 0 || digit > 9)
                 {
-                    if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
-                    else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex));
-                    else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
+                    if (emptyNag)
+                    {
+                        Errors.Add(PgnNagSyntax.CreateEmptyNagMessage(symbolStartIndex));
+                        Yield(GreenPgnEmptyNagSyntax.Value);
+                    }
+                    else if (!overflowNag)
+                    {
+                        Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex));
+                    }
+                    else
+                    {
+                        int overflowNagLength = currentIndex - symbolStartIndex;
+                        Errors.Add(PgnNagSyntax.CreateOverflowNagMessage(pgnText.Substring(symbolStartIndex, overflowNagLength), symbolStartIndex));
+                        Yield(new GreenPgnOverflowNagSyntax(overflowNagLength));
+                    }
 
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
@@ -861,9 +873,21 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
-            else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
-            else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
+            if (emptyNag)
+            {
+                Errors.Add(PgnNagSyntax.CreateEmptyNagMessage(symbolStartIndex));
+                Yield(GreenPgnEmptyNagSyntax.Value);
+            }
+            else if (!overflowNag)
+            {
+                Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
+            }
+            else
+            {
+                int overflowNagLength = currentIndex - symbolStartIndex;
+                Errors.Add(PgnNagSyntax.CreateOverflowNagMessage(pgnText.Substring(symbolStartIndex, overflowNagLength), symbolStartIndex));
+                Yield(new GreenPgnOverflowNagSyntax(overflowNagLength));
+            }
         }
 
         #endregion Lexing

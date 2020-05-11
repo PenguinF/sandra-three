@@ -20,20 +20,14 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an annotation value of 256 or larger.
     /// </summary>
-    public sealed class GreenPgnOverflowNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnOverflowNagSyntax : GreenPgnNagSyntax
     {
-        /// <summary>
-        /// The text containing the overflow NAG, including the '$' character.
-        /// </summary>
-        public string OverflowNagText { get; }
-
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
@@ -42,36 +36,15 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnOverflowNagSyntax"/>.
         /// </summary>
-        /// <param name="overflowNagText">
-        /// The text containing the overflow NAG, including the '$' character.
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="overflowNagText"/> is null.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="overflowNagText"/> has a length of 3 or lower.
+        /// <paramref name="length"/> is 3 or lower.
         /// </exception>
-        public GreenPgnOverflowNagSyntax(string overflowNagText)
+        public GreenPgnOverflowNagSyntax(int length) : base(length)
         {
-            if (overflowNagText == null) throw new ArgumentNullException(nameof(overflowNagText));
-            int length = overflowNagText.Length;
-            if (length <= 3) throw new ArgumentOutOfRangeException(nameof(overflowNagText));
-
-            OverflowNagText = overflowNagText;
-            Length = length;
+            if (length <= 3) throw new ArgumentOutOfRangeException(nameof(length));
         }
-
-        /// <summary>
-        /// Generates the error associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the error.
-        /// </param>
-        /// <returns>
-        /// The error associated with this symbol.
-        /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnNagSyntax.CreateOverflowNagMessage(OverflowNagText, startPosition);
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
     }
 }
