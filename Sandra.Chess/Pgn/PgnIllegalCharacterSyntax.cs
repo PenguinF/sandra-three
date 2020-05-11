@@ -19,20 +19,17 @@
 **********************************************************************************/
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a character which is illegal in the PGN standard.
     /// </summary>
-    public sealed class GreenPgnIllegalCharacterSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnIllegalCharacterSyntax : GreenPgnBackgroundSyntax
     {
         /// <summary>
-        /// Gets a friendly representation of the illegal character.
+        /// Gets the single <see cref="GreenPgnIllegalCharacterSyntax"/> value.
         /// </summary>
-        public string DisplayCharValue { get; }
+        public static GreenPgnIllegalCharacterSyntax Value { get; } = new GreenPgnIllegalCharacterSyntax();
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -44,42 +41,9 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSymbolType SymbolType => PgnSymbolType.IllegalCharacter;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnIllegalCharacterSyntax"/>.
-        /// </summary>
-        /// <param name="displayCharValue">
-        /// A friendly representation of the illegal character.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="displayCharValue"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="displayCharValue"/> is empty.
-        /// </exception>
-        public GreenPgnIllegalCharacterSyntax(string displayCharValue)
-        {
-            if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
-            if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
+        private GreenPgnIllegalCharacterSyntax() { }
 
-            DisplayCharValue = displayCharValue;
-        }
-
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for this syntax node.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to create the error.
-        /// </param>
-        /// <returns>
-        /// The new <see cref="PgnErrorInfo"/>.
-        /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnIllegalCharacterSyntax.CreateError(DisplayCharValue, startPosition);
-
-        public override IEnumerable<PgnErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
+        internal override PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex) => new PgnIllegalCharacterSyntax(parent, parentIndex, this);
     }
 
     /// <summary>
@@ -121,5 +85,9 @@ namespace Sandra.Chess.Pgn
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
+
+        public override void Accept(PgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
     }
 }

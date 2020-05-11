@@ -34,7 +34,7 @@ namespace Eutherion.Win.AppTemplate
 {
     public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
-        private class ErrorListForm : Form
+        private class ErrorListForm : UIActionForm
         {
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);

@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -45,11 +43,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnBracketOpenSyntax() { }
 
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
-        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketOpenSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketOpenSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketOpenSyntax(this, arg);
+        internal override PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent) => new PgnBracketOpenSyntax(parent);
     }
 
     /// <summary>

@@ -21,7 +21,6 @@
 
 using Sandra.Chess.Pgn.Temp;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -44,7 +43,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; protected set; }
+        public int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -63,16 +62,13 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 1 or lower.
         /// </exception>
-        public GreenPgnNagSyntax(PgnAnnotation annotation, int length)
+        public GreenPgnNagSyntax(PgnAnnotation annotation, int length) : this(length)
         {
             Annotation = annotation;
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
         }
 
-        internal GreenPgnNagSyntax() { }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        internal GreenPgnNagSyntax(int length) => Length = length;
     }
 
     /// <summary>

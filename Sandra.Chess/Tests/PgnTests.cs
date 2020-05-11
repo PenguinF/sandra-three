@@ -197,9 +197,6 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
-            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
-            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
-
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
 
@@ -207,9 +204,8 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(-1, EmptyEnumerable<PgnErrorInfo>.Instance));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(0, EmptyEnumerable<PgnErrorInfo>.Instance));
-            Assert.Throws<ArgumentNullException>(() => new GreenPgnErrorTagValueSyntax(1, null));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
@@ -227,10 +223,9 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 0));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 1));
 
-            Assert.Throws<ArgumentNullException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(null));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(""));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$"));
-            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$99"));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(2));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnOverflowNagSyntax(3));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(0));
@@ -239,11 +234,11 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0, false));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1, false));
 
-            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(null));
-            Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(""));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(0));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
-            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(Array.Empty<GreenPgnBackgroundSyntax>(), null));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
@@ -300,12 +295,6 @@ namespace Sandra.Chess.Tests
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
-        }
-
-        [Fact]
-        public void PgnSymbolsWithConstantLength()
-        {
-            Assert.Equal(1, new GreenPgnIllegalCharacterSyntax("\\0").Length);
         }
 
         private const int SharedWhitespaceInstanceLengthMinusTwo = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;

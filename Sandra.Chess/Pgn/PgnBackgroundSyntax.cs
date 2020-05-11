@@ -19,13 +19,10 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a single background node in an abstract PGN syntax tree.
-    /// Use <see cref="GreenPgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenPgnBackgroundSyntax : IGreenPgnSymbol
     {
@@ -39,24 +36,12 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public abstract PgnSymbolType SymbolType { get; }
 
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        public virtual IEnumerable<PgnErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
-        public abstract void Accept(GreenPgnBackgroundSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
+        internal abstract PgnBackgroundSyntax CreateRedNode(PgnBackgroundListSyntax parent, int parentIndex);
     }
 
     /// <summary>
     /// Represents a single background node in an abstract PGN syntax tree.
+    /// Use <see cref="PgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class PgnBackgroundSyntax : PgnSyntax
     {
@@ -85,5 +70,9 @@ namespace Sandra.Chess.Pgn
             Parent = parent;
             ParentIndex = parentIndex;
         }
+
+        public abstract void Accept(PgnBackgroundSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(PgnBackgroundSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(PgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }

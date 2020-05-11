@@ -20,20 +20,14 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a PGN syntax node with an unrecognized move.
     /// </summary>
-    public sealed class GreenPgnUnrecognizedMoveSyntax : GreenPgnMoveSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnUnrecognizedMoveSyntax : GreenPgnMoveSyntax
     {
-        /// <summary>
-        /// The text containing the unrecognized move.
-        /// </summary>
-        public string SymbolText { get; }
-
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
@@ -47,34 +41,15 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnUnrecognizedMoveSyntax"/>.
         /// </summary>
-        /// <param name="symbolText">
-        /// The text containing the unrecognized move.
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="symbolText"/> is null.
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="symbolText"/> has a length of 0.
-        /// </exception>
-        public GreenPgnUnrecognizedMoveSyntax(string symbolText) : base(symbolText == null ? 0 : symbolText.Length)
+        public GreenPgnUnrecognizedMoveSyntax(int length) : base(length)
         {
-            if (symbolText == null) throw new ArgumentNullException(nameof(symbolText));
-            if (Length <= 0) throw new ArgumentException($"{symbolText} is empty.", nameof(symbolText));
-
-            SymbolText = symbolText;
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
         }
-
-        /// <summary>
-        /// Generates the error associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the error.
-        /// </param>
-        /// <returns>
-        /// The error associated with this symbol.
-        /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnMoveSyntax.CreateUnrecognizedMoveError(SymbolText, startPosition);
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
     }
 }

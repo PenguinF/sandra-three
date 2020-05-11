@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess.Pgn.Temp;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -67,8 +66,6 @@ namespace Sandra.Chess.Pgn
         public abstract PgnGameResult GameResult { get; }
 
         internal GreenPgnGameResultSyntax() { }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
     /// <summary>

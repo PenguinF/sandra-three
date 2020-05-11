@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -30,17 +29,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public interface IGreenPgnSymbol : ISpan
     {
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        IEnumerable<PgnErrorInfo> GetErrors(int startPosition);
-
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>

@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -59,8 +58,6 @@ namespace Sandra.Chess.Pgn
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
     }
 
     /// <summary>

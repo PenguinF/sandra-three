@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -54,11 +53,7 @@ namespace Sandra.Chess.Pgn
             Length = length;
         }
 
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
-        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitTagNameSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagNameSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagNameSyntax(this, arg);
+        internal override PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent) => new PgnTagNameSyntax(parent, this);
     }
 
     /// <summary>

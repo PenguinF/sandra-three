@@ -26,25 +26,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnTagElementWithTriviaSyntax : WithTriviaSyntax<PgnTagElementSyntax>
     {
-        private class PgnTagElementSyntaxCreator : GreenPgnTagElementSyntaxVisitor<PgnTagElementWithTriviaSyntax, PgnTagElementSyntax>
-        {
-            public static readonly PgnTagElementSyntaxCreator Instance = new PgnTagElementSyntaxCreator();
-
-            private PgnTagElementSyntaxCreator() { }
-
-            public override PgnTagElementSyntax VisitBracketCloseSyntax(GreenPgnBracketCloseSyntax node, PgnTagElementWithTriviaSyntax parent)
-                => new PgnBracketCloseSyntax(parent);
-
-            public override PgnTagElementSyntax VisitBracketOpenSyntax(GreenPgnBracketOpenSyntax node, PgnTagElementWithTriviaSyntax parent)
-                => new PgnBracketOpenSyntax(parent);
-
-            public override PgnTagElementSyntax VisitTagNameSyntax(GreenPgnTagNameSyntax node, PgnTagElementWithTriviaSyntax parent)
-                => new PgnTagNameSyntax(parent, node);
-
-            public override PgnTagElementSyntax VisitTagValueSyntax(GreenPgnTagValueSyntax node, PgnTagElementWithTriviaSyntax parent)
-                => new PgnTagValueSyntax(parent, node);
-        }
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -65,7 +46,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnTagElementSyntax CreateContentNode() => PgnTagElementSyntaxCreator.Instance.Visit((GreenPgnTagElementSyntax)Green.ContentNode, this);
+        internal override PgnTagElementSyntax CreateContentNode() => ((GreenPgnTagElementSyntax)Green.ContentNode).CreateRedNode(this);
 
         internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, WithTrivia green)
             : base(green)

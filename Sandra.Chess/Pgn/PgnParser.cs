@@ -122,13 +122,6 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
-            => new GreenPgnIllegalCharacterSyntax(
-                StringLiteral.CharacterMustBeEscaped(c)
-                ? StringLiteral.EscapedCharacterString(c)
-                : Convert.ToString(c));
-
         /// <summary>
         /// Parses source text in the PGN format.
         /// </summary>
@@ -274,8 +267,6 @@ namespace Sandra.Chess.Pgn
 
         private void Yield(IGreenPgnSymbol symbol)
         {
-            Errors.AddRange(symbol.GetErrors(symbolStartIndex));
-
             var symbolType = symbol.SymbolType;
 
             if (symbolType.IsBackground())
@@ -399,10 +390,29 @@ namespace Sandra.Chess.Pgn
 
         #region Lexing
 
+        private void ReportIllegalCharacterSyntaxError(char c, int position)
+        {
+            Errors.Add(PgnIllegalCharacterSyntax.CreateError(
+                StringLiteral.CharacterMustBeEscaped(c)
+                ? StringLiteral.EscapedCharacterString(c)
+                : Convert.ToString(c), position));
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
-            => Yield(symbolBuilder.Yield(length)
-                     ?? new GreenPgnUnrecognizedMoveSyntax(pgnText.Substring(symbolStartIndex, length)));
+        {
+            IGreenPgnSymbol symbol = symbolBuilder.Yield(length);
+
+            if (symbol == null)
+            {
+                Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(pgnText.Substring(symbolStartIndex, length), symbolStartIndex));
+                Yield(new GreenPgnUnrecognizedMoveSyntax(length));
+            }
+            else
+            {
+                Yield(symbol);
+            }
+        }
 
         private void ParsePgnText(string pgnText)
         {
@@ -412,7 +422,7 @@ namespace Sandra.Chess.Pgn
 
             int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
-            List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
+            bool hasStringErrors;
 
             // Reusable structure to build green PGN symbols.
             PgnSymbolStateMachine symbolBuilder = default;
@@ -478,7 +488,8 @@ namespace Sandra.Chess.Pgn
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
-                                Yield(CreateIllegalCharacterSyntax(c));
+                                ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
+                                Yield(GreenPgnIllegalCharacterSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             default:
@@ -487,7 +498,8 @@ namespace Sandra.Chess.Pgn
                     }
                     else
                     {
-                        Yield(CreateIllegalCharacterSyntax(c));
+                        ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
+                        Yield(GreenPgnIllegalCharacterSyntax.Value);
                         symbolStartIndex++;
                     }
                 }
@@ -572,7 +584,8 @@ namespace Sandra.Chess.Pgn
                                 symbolStartIndex = currentIndex;
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
-                                symbolToYield = CreateIllegalCharacterSyntax(c);
+                                ReportIllegalCharacterSyntaxError(c, currentIndex);
+                                symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             default:
                                 throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
@@ -581,7 +594,8 @@ namespace Sandra.Chess.Pgn
                 }
                 else
                 {
-                    symbolToYield = CreateIllegalCharacterSyntax(c);
+                    ReportIllegalCharacterSyntaxError(c, currentIndex);
+                    symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
                     goto yieldSymbolThenCharacter;
                 }
 
@@ -599,12 +613,15 @@ namespace Sandra.Chess.Pgn
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
             if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
-            Yield(symbolToYield);
             currentIndex++;
+            Yield(symbolToYield);
             symbolStartIndex = currentIndex;
             goto inWhitespace;
 
         inString:
+
+            // Detect errors.
+            hasStringErrors = false;
 
             // Eat " character, but leave symbolStartIndex unchanged.
             currentIndex++;
@@ -619,10 +636,9 @@ namespace Sandra.Chess.Pgn
                     // Include last character in the syntax node.
                     currentIndex++;
 
-                    if (errors.Count > 0)
+                    if (hasStringErrors)
                     {
-                        Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors));
-                        errors.Clear();
+                        Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex));
                     }
                     else
                     {
@@ -650,24 +666,26 @@ namespace Sandra.Chess.Pgn
                         }
                         else
                         {
+                            hasStringErrors = true;
+
                             if (char.IsControl(escapedChar))
                             {
-                                errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex - symbolStartIndex));
+                                Errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex));
                             }
 
                             if (StringLiteral.CharacterMustBeEscaped(escapedChar))
                             {
                                 // Just don't show the control character.
-                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
+                                Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     EscapeCharacterString,
-                                    escapeSequenceStart - symbolStartIndex,
+                                    escapeSequenceStart,
                                     2));
                             }
                             else
                             {
-                                errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
+                                Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
                                     new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
-                                    escapeSequenceStart - symbolStartIndex,
+                                    escapeSequenceStart,
                                     2));
                             }
                         }
@@ -675,17 +693,14 @@ namespace Sandra.Chess.Pgn
                     else
                     {
                         // In addition to this, break out of the loop because this is now also an unterminated string.
-                        errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
-                            EscapeCharacterString,
-                            escapeSequenceStart - symbolStartIndex,
-                            1));
-
+                        Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(EscapeCharacterString, escapeSequenceStart, 1));
                         break;
                     }
                 }
                 else if (char.IsControl(c))
                 {
-                    errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex - symbolStartIndex));
+                    hasStringErrors = true;
+                    Errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(c, currentIndex));
                 }
                 else
                 {
@@ -695,9 +710,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnTagValueSyntax.UnterminatedError(length - symbolStartIndex));
-
-            Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors));
+            int unterminatedStringLength = length - symbolStartIndex;
+            Errors.Add(PgnTagValueSyntax.UnterminatedError(symbolStartIndex, unterminatedStringLength));
+            Yield(new GreenPgnErrorTagValueSyntax(unterminatedStringLength));
             return;
 
         inEndOfLineComment:
@@ -801,7 +816,9 @@ namespace Sandra.Chess.Pgn
                 }
             }
 
-            Yield(new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex));
+            int unterminatedCommentLength = length - symbolStartIndex;
+            Errors.Add(PgnCommentSyntax.CreateUnterminatedCommentMessage(symbolStartIndex, unterminatedCommentLength));
+            Yield(new GreenPgnUnterminatedCommentSyntax(unterminatedCommentLength));
             return;
 
         inNumericAnnotationGlyph:
@@ -819,9 +836,21 @@ namespace Sandra.Chess.Pgn
 
                 if (digit < 0 || digit > 9)
                 {
-                    if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
-                    else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex));
-                    else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
+                    if (emptyNag)
+                    {
+                        Errors.Add(PgnNagSyntax.CreateEmptyNagMessage(symbolStartIndex));
+                        Yield(GreenPgnEmptyNagSyntax.Value);
+                    }
+                    else if (!overflowNag)
+                    {
+                        Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex));
+                    }
+                    else
+                    {
+                        int overflowNagLength = currentIndex - symbolStartIndex;
+                        Errors.Add(PgnNagSyntax.CreateOverflowNagMessage(pgnText.Substring(symbolStartIndex, overflowNagLength), symbolStartIndex));
+                        Yield(new GreenPgnOverflowNagSyntax(overflowNagLength));
+                    }
 
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
@@ -838,9 +867,21 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
-            else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
-            else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
+            if (emptyNag)
+            {
+                Errors.Add(PgnNagSyntax.CreateEmptyNagMessage(symbolStartIndex));
+                Yield(GreenPgnEmptyNagSyntax.Value);
+            }
+            else if (!overflowNag)
+            {
+                Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
+            }
+            else
+            {
+                int overflowNagLength = currentIndex - symbolStartIndex;
+                Errors.Add(PgnNagSyntax.CreateOverflowNagMessage(pgnText.Substring(symbolStartIndex, overflowNagLength), symbolStartIndex));
+                Yield(new GreenPgnOverflowNagSyntax(overflowNagLength));
+            }
         }
 
         #endregion Lexing
