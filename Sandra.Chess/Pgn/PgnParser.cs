@@ -172,6 +172,7 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagValue;
 
         // Current ply being built.
+        private GreenWithPlyFloatItemsSyntax MoveNumber;
         private GreenWithPlyFloatItemsSyntax Move;
 
         // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
@@ -202,6 +203,16 @@ namespace Sandra.Chess.Pgn
         }
 
         #region Ply parsing
+
+        private void CaptureMoveNumber()
+        {
+            if (MoveNumber != null)
+            {
+                AddFloatItems(MoveNumber.LeadingFloatItems);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(MoveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                MoveNumber = null;
+            }
+        }
 
         private void CaptureMove()
         {
@@ -241,9 +252,8 @@ namespace Sandra.Chess.Pgn
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            GreenWithPlyFloatItemsSyntax moveNumber = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
-            AddFloatItems(moveNumber.LeadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+            MoveNumber = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+            CaptureMoveNumber();
         }
 
         private void YieldPeriod()
