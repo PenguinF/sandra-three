@@ -80,7 +80,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent, GreenPgnPeriodSyntax green) => Parent = parent;
+        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent) => Parent = parent;
 
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);
@@ -114,7 +114,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
-        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, (GreenPgnPeriodSyntax)Green.ContentNode);
+        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this);
 
         internal PgnPeriodWithTriviaSyntax(Union<PgnPlySyntax, PgnSyntaxNodes> parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
