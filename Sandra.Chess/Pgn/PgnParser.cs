@@ -154,6 +154,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
+        private readonly List<GreenWithPlyFloatItemsSyntax> NagListBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private readonly string pgnText;
@@ -188,6 +189,7 @@ namespace Sandra.Chess.Pgn
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
+            NagListBuilder = new List<GreenWithPlyFloatItemsSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
 
             YieldInTagSectionAction = YieldInTagSection;
@@ -197,6 +199,17 @@ namespace Sandra.Chess.Pgn
         }
 
         #region Ply parsing
+
+        private void CaptureNags()
+        {
+            foreach (GreenWithPlyFloatItemsSyntax nag in NagListBuilder)
+            {
+                AddFloatItems(nag.LeadingFloatItems);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag.PlyContentNode, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+            }
+
+            NagListBuilder.Clear();
+        }
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
         {
@@ -234,9 +247,8 @@ namespace Sandra.Chess.Pgn
 
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            GreenWithPlyFloatItemsSyntax nag = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
-            AddFloatItems(nag.LeadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag.PlyContentNode, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+            NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded));
+            CaptureNags();
         }
 
         #endregion Ply parsing
