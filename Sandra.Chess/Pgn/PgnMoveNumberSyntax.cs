@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -99,14 +98,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a move number, together with its leading trivia.
     /// </summary>
-    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<PgnMoveNumberSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnMoveNumberWithTriviaSyntax : WithTriviaSyntax<PgnMoveNumberSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public WithPlyFloatItemsSyntax Parent { get; }
+        public PgnMoveNumberWithFloatItemsSyntax Parent { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -120,7 +117,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnMoveNumberSyntax CreateContentNode() => new PgnMoveNumberSyntax(this, (GreenPgnMoveNumberSyntax)Green.ContentNode);
 
-        internal PgnMoveNumberWithTriviaSyntax(WithPlyFloatItemsSyntax parent, GreenWithTriviaSyntax green)
+        internal PgnMoveNumberWithTriviaSyntax(PgnMoveNumberWithFloatItemsSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

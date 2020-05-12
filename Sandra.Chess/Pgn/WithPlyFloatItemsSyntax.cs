@@ -21,7 +21,6 @@
 
 using Eutherion;
 using Eutherion.Text;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -72,6 +71,35 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public abstract class WithPlyFloatItemsSyntax : PgnSyntax
     {
+        private readonly SafeLazyObject<PgnPlyFloatItemListSyntax> leadingFloatItems;
+
+        /// <summary>
+        /// Gets the leading floating items of the syntax node.
+        /// </summary>
+        public PgnPlyFloatItemListSyntax LeadingFloatItems => leadingFloatItems.Object;
+
+        /// <summary>
+        /// Gets the content syntax node which anchors the floating items.
+        /// </summary>
+        public PgnSyntax PlyContentNode => PlyContentNodeUntyped;
+
+        internal abstract PgnSyntax PlyContentNodeUntyped { get; }
+
+        internal WithPlyFloatItemsSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> greenLeadingFloatItems)
+        {
+            leadingFloatItems = new SafeLazyObject<PgnPlyFloatItemListSyntax>(() => new PgnPlyFloatItemListSyntax(this, greenLeadingFloatItems));
+        }
+    }
+
+    /// <summary>
+    /// Represents a syntax node which is an element of a ply, together with its leading floating items.
+    /// </summary>
+    /// <typeparam name="TSyntaxNode">
+    /// The type of <see cref="PgnSyntax"/> syntax node.
+    /// </typeparam>
+    public abstract class WithPlyFloatItemsSyntax<TSyntaxNode> : WithPlyFloatItemsSyntax
+        where TSyntaxNode : PgnSyntax
+    {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -82,16 +110,17 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public GreenWithPlyFloatItemsSyntax Green { get; }
 
-        private readonly SafeLazyObject<PgnPlyFloatItemListSyntax> leadingFloatItems;
+        private readonly SafeLazyObject<TSyntaxNode> plyContentNode;
 
         /// <summary>
-        /// Gets the leading floating items of the syntax node.
+        /// Gets the content syntax node which anchors the floating items.
         /// </summary>
-        public PgnPlyFloatItemListSyntax LeadingFloatItems => leadingFloatItems.Object;
+        /// <remarks>
+        /// Intentionally hides the base <see cref="PlyContentNode"/> property.
+        /// </remarks>
+        public new TSyntaxNode PlyContentNode => plyContentNode.Object;
 
-        private readonly SafeLazyObject<IPgnTopLevelSyntax> topLevelNode;
-
-        public IPgnTopLevelSyntax TopLevelNode => topLevelNode.Object;
+        internal sealed override PgnSyntax PlyContentNodeUntyped => PlyContentNode;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -114,7 +143,7 @@ namespace Sandra.Chess.Pgn
         public sealed override PgnSyntax GetChild(int index)
         {
             if (index == 0) return LeadingFloatItems;
-            if (index == 1) return TopLevelNode.ToPgnSyntax();
+            if (index == 1) return PlyContentNode;
             throw new IndexOutOfRangeException();
         }
 
@@ -128,14 +157,15 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green, Func<WithPlyFloatItemsSyntax, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        internal abstract TSyntaxNode CreatePlyContentNode();
+
+        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
+            : base(green.LeadingFloatItems)
         {
             Parent = parent;
             Green = green;
 
-            leadingFloatItems = new SafeLazyObject<PgnPlyFloatItemListSyntax>(() => new PgnPlyFloatItemListSyntax(this, green.LeadingFloatItems));
-
-            topLevelNode = new SafeLazyObject<IPgnTopLevelSyntax>(() => syntaxNodeConstructor(this, green.PlyContentNode));
+            plyContentNode = new SafeLazyObject<TSyntaxNode>(CreatePlyContentNode);
         }
     }
 }

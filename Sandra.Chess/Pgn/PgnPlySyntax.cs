@@ -233,15 +233,17 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a move number, together with its leading floating items.
     /// </summary>
-    public sealed class PgnMoveNumberWithFloatItemsSyntax : WithPlyFloatItemsSyntax
+    public sealed class PgnMoveNumberWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnMoveNumberWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => 0;
 
+        internal override PgnMoveNumberWithTriviaSyntax CreatePlyContentNode() => new PgnMoveNumberWithTriviaSyntax(this, Green.PlyContentNode);
+
         internal PgnMoveNumberWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, innerGreen) => new PgnMoveNumberWithTriviaSyntax(innerParent, innerGreen))
+            : base(parent, green)
         {
         }
     }
@@ -249,15 +251,17 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a move text, together with its leading floating items.
     /// </summary>
-    public sealed class PgnMoveWithFloatItemsSyntax : WithPlyFloatItemsSyntax
+    public sealed class PgnMoveWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnMoveWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Green.MoveNumberLength;
 
+        internal override PgnMoveWithTriviaSyntax CreatePlyContentNode() => new PgnMoveWithTriviaSyntax(this, Green.PlyContentNode);
+
         internal PgnMoveWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, innerGreen) => new PgnMoveWithTriviaSyntax(innerParent, innerGreen))
+            : base(parent, green)
         {
         }
     }
@@ -265,7 +269,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node, together with its leading floating items.
     /// </summary>
-    public sealed class PgnNagWithFloatItemsSyntax : WithPlyFloatItemsSyntax
+    public sealed class PgnNagWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnNagWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -277,8 +281,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int Start => Parent.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
 
+        internal override PgnNagWithTriviaSyntax CreatePlyContentNode() => new PgnNagWithTriviaSyntax(this, Green.PlyContentNode);
+
         internal PgnNagWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, innerGreen) => new PgnNagWithTriviaSyntax(innerParent, innerGreen))
+            : base(parent, green)
         {
             ParentIndex = parentIndex;
         }

@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -149,14 +148,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node, together with its leading trivia.
     /// </summary>
-    public sealed class PgnNagWithTriviaSyntax : WithTriviaSyntax<PgnNagSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnNagWithTriviaSyntax : WithTriviaSyntax<PgnNagSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public WithPlyFloatItemsSyntax Parent { get; }
+        public PgnNagWithFloatItemsSyntax Parent { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -170,7 +167,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnNagSyntax CreateContentNode() => new PgnNagSyntax(this, (GreenPgnNagSyntax)Green.ContentNode);
 
-        internal PgnNagWithTriviaSyntax(WithPlyFloatItemsSyntax parent, GreenWithTriviaSyntax green)
+        internal PgnNagWithTriviaSyntax(PgnNagWithFloatItemsSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
