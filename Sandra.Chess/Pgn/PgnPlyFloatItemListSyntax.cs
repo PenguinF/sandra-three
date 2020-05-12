@@ -21,8 +21,6 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -41,9 +39,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public ReadOnlySpanList<GreenWithTriviaSyntax> Green { get; }
 
-        public ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy> GreenTopLevelNodes { get; }
-
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the collection of floating items.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax> FloatItems { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -63,35 +62,26 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count;
+        public override int ChildCount => FloatItems.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+        public override PgnSyntax GetChild(int index) => FloatItems[index];
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+        public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
         internal PgnPlyFloatItemListSyntax(WithPlyFloatItemsSyntax parent, ReadOnlySpanList<GreenWithTriviaSyntax> green)
         {
             Parent = parent;
             Green = green;
 
-            List<GreenPgnTopLevelSymbolSyntaxTempCopy> greenTopLevelNodes = new List<GreenPgnTopLevelSymbolSyntaxTempCopy>();
-
-            foreach (var floatItem in green)
-            {
-                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
-            }
-
-            GreenTopLevelNodes = ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy>.Create(greenTopLevelNodes);
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index => GreenTopLevelNodes[index].SyntaxNodeConstructor(this, index, GreenTopLevelNodes[index].GreenNodeWithTrivia));
+            FloatItems = new SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax>(
+                green.Count,
+                index => new PgnPeriodWithTriviaSyntax(this, index, Green[index]));
         }
     }
 }

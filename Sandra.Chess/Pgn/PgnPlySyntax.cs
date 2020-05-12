@@ -289,18 +289,4 @@ namespace Sandra.Chess.Pgn
             ParentIndex = parentIndex;
         }
     }
-
-    public class GreenPgnTopLevelSymbolSyntaxTempCopy : ISpan
-    {
-        internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-        internal readonly Func<PgnPlyFloatItemListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
-
-        public int Length => GreenNodeWithTrivia.Length;
-
-        internal GreenPgnTopLevelSymbolSyntaxTempCopy(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnPlyFloatItemListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
-        {
-            GreenNodeWithTrivia = greenNodeWithTrivia;
-            SyntaxNodeConstructor = syntaxNodeConstructor;
-        }
-    }
 }
