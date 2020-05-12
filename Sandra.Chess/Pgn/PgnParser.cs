@@ -254,7 +254,6 @@ namespace Sandra.Chess.Pgn
         private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
             Move = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
-            CaptureMove();
         }
 
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
@@ -461,6 +460,7 @@ namespace Sandra.Chess.Pgn
         {
             ReadOnlySpanList<GreenWithTriviaSyntax> floatItems;
 
+            CaptureMove();
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -507,7 +507,7 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
-                    floatItems = CaptureFloatItems(); 
+                    floatItems = CaptureFloatItems();
                     CaptureNags();
                     YieldMove(floatItems);
                     break;
@@ -578,6 +578,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CaptureFloatItems();
+                CaptureMove();
                 CaptureNags();
                 AddFloatItems(trailingFloatItems);
             }
