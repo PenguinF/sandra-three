@@ -213,8 +213,9 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        private void YieldMoveNumber()
+        private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
+            AddFloatItems(leadingFloatItems);
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
         }
 
@@ -223,13 +224,15 @@ namespace Sandra.Chess.Pgn
             FloatItemListBuilder.Add(symbolBeingYielded);
         }
 
-        private void YieldMove()
+        private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
+            AddFloatItems(leadingFloatItems);
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
         }
 
-        private void YieldNag()
+        private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
+            AddFloatItems(leadingFloatItems);
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
         }
 
@@ -374,7 +377,7 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    YieldMoveNumber();
+                    YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Period:
@@ -389,7 +392,7 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    YieldMove();
+                    YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Nag:
@@ -398,7 +401,7 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    YieldNag();
+                    YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisOpen:
@@ -465,25 +468,19 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
-                    floatItems = CaptureFloatItems();
-                    AddFloatItems(floatItems);
-                    YieldMoveNumber();
+                    YieldMoveNumber(CaptureFloatItems());
                     break;
                 case PgnSymbolType.Period:
                     YieldPeriod();
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
-                    floatItems = CaptureFloatItems();
-                    AddFloatItems(floatItems);
-                    YieldMove();
+                    YieldMove(CaptureFloatItems());
                     break;
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
                 case PgnSymbolType.OverflowNag:
-                    floatItems = CaptureFloatItems();
-                    AddFloatItems(floatItems);
-                    YieldNag();
+                    YieldNag(CaptureFloatItems());
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     floatItems = CaptureFloatItems();
