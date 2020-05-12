@@ -142,7 +142,9 @@ namespace Sandra.Chess.Tests
                     if (singlePly.MoveNumber != null)
                     {
                         ParseTree<PgnMoveNumberWithFloatItemsSyntax> moveNumberSyntax = new ParseTree<PgnMoveNumberWithFloatItemsSyntax>();
-                        singlePly.MoveNumber.LeadingFloatItems.ForEach(moveNumberSyntax.Add);
+                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
+                        singlePly.MoveNumber.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
+                        moveNumberSyntax.Add(floatItemsSyntax);
                         moveNumberSyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
                         plySyntax.Add(moveNumberSyntax);
                     }
@@ -153,7 +155,9 @@ namespace Sandra.Chess.Tests
                     if (singlePly.Move != null)
                     {
                         ParseTree<PgnMoveWithFloatItemsSyntax> moveSyntax = new ParseTree<PgnMoveWithFloatItemsSyntax>();
-                        singlePly.Move.LeadingFloatItems.ForEach(moveSyntax.Add);
+                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
+                        singlePly.Move.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
+                        moveSyntax.Add(floatItemsSyntax);
                         moveSyntax.Add(singlePly.Move.MoveWithTrivia);
                         plySyntax.Add(moveSyntax);
                     }
@@ -164,7 +168,9 @@ namespace Sandra.Chess.Tests
                     foreach (LeadingFloatItemsAndNAG nag in singlePly.Nags)
                     {
                         ParseTree<PgnNagWithFloatItemsSyntax> nagSyntax = new ParseTree<PgnNagWithFloatItemsSyntax>();
-                        nag.LeadingFloatItems.ForEach(nagSyntax.Add);
+                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
+                        nag.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
+                        nagSyntax.Add(floatItemsSyntax);
                         nagSyntax.Add(nag.NagWithTrivia);
                         plySyntax.Add(nagSyntax);
                     }

@@ -241,7 +241,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => 0;
 
         internal PgnMoveNumberWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, index, innerGreen) => new PgnMoveNumberWithTriviaSyntax(innerParent, index, innerGreen))
+            : base(parent, green, (innerParent, innerGreen) => new PgnMoveNumberWithTriviaSyntax(innerParent, innerGreen))
         {
         }
     }
@@ -257,7 +257,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.Green.MoveNumberLength;
 
         internal PgnMoveWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, index, innerGreen) => new PgnMoveWithTriviaSyntax(innerParent, index, innerGreen))
+            : base(parent, green, (innerParent, innerGreen) => new PgnMoveWithTriviaSyntax(innerParent, innerGreen))
         {
         }
     }
@@ -278,7 +278,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
 
         internal PgnNagWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax green)
-            : base(parent, green, (innerParent, index, innerGreen) => new PgnNagWithTriviaSyntax(innerParent, index, innerGreen))
+            : base(parent, green, (innerParent, innerGreen) => new PgnNagWithTriviaSyntax(innerParent, innerGreen))
         {
             ParentIndex = parentIndex;
         }
@@ -287,11 +287,11 @@ namespace Sandra.Chess.Pgn
     public class GreenPgnTopLevelSymbolSyntaxTempCopy : ISpan
     {
         internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-        internal readonly Func<WithPlyFloatItemsSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
+        internal readonly Func<PgnPlyFloatItemListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
 
         public int Length => GreenNodeWithTrivia.Length;
 
-        internal GreenPgnTopLevelSymbolSyntaxTempCopy(GreenWithTriviaSyntax greenNodeWithTrivia, Func<WithPlyFloatItemsSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        internal GreenPgnTopLevelSymbolSyntaxTempCopy(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnPlyFloatItemListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
         {
             GreenNodeWithTrivia = greenNodeWithTrivia;
             SyntaxNodeConstructor = syntaxNodeConstructor;

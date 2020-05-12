@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
-using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
@@ -82,9 +82,16 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public GreenWithPlyFloatItemsSyntax Green { get; }
 
-        public ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy> GreenTopLevelNodes { get; }
+        private readonly SafeLazyObject<PgnPlyFloatItemListSyntax> leadingFloatItems;
 
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the leading floating items of the syntax node.
+        /// </summary>
+        public PgnPlyFloatItemListSyntax LeadingFloatItems => leadingFloatItems.Object;
+
+        private readonly SafeLazyObject<IPgnTopLevelSyntax> topLevelNode;
+
+        public IPgnTopLevelSyntax TopLevelNode => topLevelNode.Object;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -99,37 +106,36 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public sealed override int ChildCount => TopLevelNodes.Count;
+        public sealed override int ChildCount => 2;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public sealed override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+        public sealed override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return LeadingFloatItems;
+            if (index == 1) return TopLevelNode.ToPgnSyntax();
+            throw new IndexOutOfRangeException();
+        }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public sealed override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+        public sealed override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.LeadingFloatItems.Length;
+            throw new IndexOutOfRangeException();
+        }
 
-        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green, Func<WithPlyFloatItemsSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green, Func<WithPlyFloatItemsSyntax, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
         {
             Parent = parent;
             Green = green;
 
-            List<GreenPgnTopLevelSymbolSyntaxTempCopy> greenTopLevelNodes = new List<GreenPgnTopLevelSymbolSyntaxTempCopy>();
+            leadingFloatItems = new SafeLazyObject<PgnPlyFloatItemListSyntax>(() => new PgnPlyFloatItemListSyntax(this, green.LeadingFloatItems));
 
-            foreach (var floatItem in green.LeadingFloatItems)
-            {
-                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
-            }
-
-            greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(green.PlyContentNode, syntaxNodeConstructor));
-
-            GreenTopLevelNodes = ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy>.Create(greenTopLevelNodes);
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index => GreenTopLevelNodes[index].SyntaxNodeConstructor(this, index, GreenTopLevelNodes[index].GreenNodeWithTrivia));
+            topLevelNode = new SafeLazyObject<IPgnTopLevelSyntax>(() => syntaxNodeConstructor(this, green.PlyContentNode));
         }
     }
 }
