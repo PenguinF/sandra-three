@@ -56,6 +56,7 @@
     <Compile Include="Pgn\PgnCommentSyntax.cs" />
     <Compile Include="Pgn\PgnDrawMarkerSyntax.cs" />
     <Compile Include="Pgn\PgnEmptyNagSyntax.cs" />
+    <Compile Include="Pgn\PgnEmptySyntax.cs" />
     <Compile Include="Pgn\PgnErrorCode.cs" />
     <Compile Include="Pgn\PgnErrorInfo.cs" />
     <Compile Include="Pgn\PgnErrorLevel.cs" />
@@ -73,6 +74,8 @@
     <Compile Include="Pgn\PgnParenthesisOpenSyntax.cs" />
     <Compile Include="Pgn\PgnParser.cs" />
     <Compile Include="Pgn\PgnPeriodSyntax.cs" />
+    <Compile Include="Pgn\PgnPlyFloatItemListSyntax.cs" />
+    <Compile Include="Pgn\PgnPlySyntax.cs" />
     <Compile Include="Pgn\PgnSymbolStateMachine.cs" />
     <Compile Include="Pgn\PgnSymbolType.cs" />
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
+    <Compile Include="Pgn\WithPlyFloatItemsSyntax.cs" />
     <Compile Include="Pgn\WithTriviaSyntax.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

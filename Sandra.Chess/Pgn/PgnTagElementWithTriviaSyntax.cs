@@ -48,7 +48,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnTagElementSyntax CreateContentNode() => ((GreenPgnTagElementSyntax)Green.ContentNode).CreateRedNode(this);
 
-        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, WithTrivia green)
+        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

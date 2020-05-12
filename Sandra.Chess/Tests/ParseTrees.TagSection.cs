@@ -20,16 +20,12 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
-        private static ParseTree<PgnSyntaxNodes> TagSectionOnly(params ParseTree<PgnTagPairSyntax>[] tagPairs)
-            => OneGame(TagSection(tagPairs), NoPlies);
-
         internal static List<(string, ParseTree)> TagSectionParseTrees() => new List<(string, ParseTree)>
         {
         };

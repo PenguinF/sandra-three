@@ -34,26 +34,17 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the background symbols which directly precede the comment foreground node.
         /// </summary>
-        public ReadOnlySpanList<IGreenPgnSymbol> BackgroundBefore { get; }
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
 
         /// <summary>
         /// Gets the foreground node which contains the comment.
         /// </summary>
-        public IGreenPgnSymbol CommentNode { get; }
+        public GreenPgnCommentSyntax CommentNode { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length { get; }
-
-        internal GreenPgnTriviaElementSyntax(IEnumerable<IGreenPgnSymbol> backgroundBefore, IGreenPgnSymbol commentNode)
-        {
-            if (backgroundBefore == null) throw new ArgumentNullException(nameof(backgroundBefore));
-
-            BackgroundBefore = ReadOnlySpanList<IGreenPgnSymbol>.Create(backgroundBefore);
-            CommentNode = commentNode ?? throw new ArgumentNullException(nameof(commentNode));
-            Length = BackgroundBefore.Length + CommentNode.Length;
-        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTriviaElementSyntax"/>.
@@ -68,8 +59,12 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="backgroundBefore"/> and/or <paramref name="commentNode"/> are null.
         /// </exception>
         public GreenPgnTriviaElementSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, GreenPgnCommentSyntax commentNode)
-            : this((IEnumerable<IGreenPgnSymbol>)backgroundBefore, commentNode)
         {
+            if (backgroundBefore == null) throw new ArgumentNullException(nameof(backgroundBefore));
+
+            BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
+            CommentNode = commentNode ?? throw new ArgumentNullException(nameof(commentNode));
+            Length = BackgroundBefore.Length + CommentNode.Length;
         }
     }
 
@@ -155,7 +150,7 @@ namespace Sandra.Chess.Pgn
 
             backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
 
-            commentNode = new SafeLazyObject<PgnCommentSyntax>(() => new PgnCommentSyntax(this, (GreenPgnCommentSyntax)Green.CommentNode));
+            commentNode = new SafeLazyObject<PgnCommentSyntax>(() => new PgnCommentSyntax(this, Green.CommentNode));
         }
     }
 }

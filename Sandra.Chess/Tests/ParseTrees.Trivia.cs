@@ -39,9 +39,6 @@ namespace Sandra.Chess.Tests
             ("% \n", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } })),
             ("\n%", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } })),
 
-            ("0 0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, WS_MoveNumber))),
-            (" 0  00   000    0 ", OneGameTrailingTrivia(EmptyTagSection, Plies(WS_MoveNumber, WS_MoveNumber, WS_MoveNumber, WS_MoveNumber), WhitespaceTrivia)),
-
             ("{}", NoGame(CommentTrivia)),
             ("  {}   * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
             (" *   {}  ", Games(Game(WS_Result), WhitespaceCommentWhitespace)),
@@ -79,8 +76,13 @@ namespace Sandra.Chess.Tests
             ("{ ", NoGame(CommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
             (" { ", NoGame(WhitespaceThenCommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
-            ("0%%0", OneGame(EmptyTagSection, Plies(MoveNumberNoTrivia, new ParseTree<PgnMoveNumberWithTriviaSyntax> { TwoIllegalCharactersTrivia, MoveNumber })),
-                new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
+            ("0 0", OneGame(EmptyTagSection, Plies(Ply(NoFloats(MoveNumberNoTrivia)), Ply(NoFloats(WS_MoveNumber)))),
+                new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+            (" 0  00   000    0 ", OneGameTrailingTrivia(EmptyTagSection, Plies(Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber))), WhitespaceTrivia),
+                new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+
+            ("0%%0", OneGame(EmptyTagSection, Plies(Ply(NoFloats(MoveNumberNoTrivia)), Ply(NoFloats(new ParseTree<PgnMoveNumberWithTriviaSyntax> { TwoIllegalCharactersTrivia, MoveNumber })))),
+                new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
         };
     }
 }

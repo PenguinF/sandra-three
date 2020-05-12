@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag name syntax node.
     /// </summary>
-    public sealed class GreenPgnTagNameSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnTagNameSyntax : GreenPgnTagElementSyntax
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.TagName;
+        public override PgnSymbolType SymbolType => PgnSymbolType.TagName;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagNameSyntax"/>.

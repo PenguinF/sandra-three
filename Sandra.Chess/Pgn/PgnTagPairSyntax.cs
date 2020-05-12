@@ -32,14 +32,14 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnTagPairSyntax : ISpan
     {
         /// <summary>
+        /// Gets the tag element nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenWithTriviaSyntax> TagElementNodes { get; }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length => TagElementNodes.Length;
-
-        /// <summary>
-        /// Gets the tag element nodes.
-        /// </summary>
-        public ReadOnlySpanList<WithTrivia> TagElementNodes { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagPairSyntax"/>.
@@ -53,10 +53,10 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentException">
         /// <paramref name="tagElementNodes"/> is empty.
         /// </exception>
-        public GreenPgnTagPairSyntax(IEnumerable<WithTrivia> tagElementNodes)
+        public GreenPgnTagPairSyntax(IEnumerable<GreenWithTriviaSyntax> tagElementNodes)
         {
             if (tagElementNodes == null) throw new ArgumentNullException(nameof(tagElementNodes));
-            TagElementNodes = ReadOnlySpanList<WithTrivia>.Create(tagElementNodes);
+            TagElementNodes = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(tagElementNodes);
             if (TagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
         }
     }

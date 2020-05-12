@@ -95,5 +95,26 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a tag pair misses its ']' character.
         /// </summary>
         MissingTagBracketClose,
+
+        /// <summary>
+        /// Occurs when the first move in a ply list misses its move number.
+        /// </summary>
+        MissingMoveNumber,
+
+        /// <summary>
+        /// Occurs when a move is missing between a move number and other ply elements such as NAGs or variations.
+        /// </summary>
+        /// <example>
+        /// '1. $4 2.d4'
+        /// </example>
+        MissingMove,
+
+        /// <summary>
+        /// Occurs when a period character is found somewhere not between a move number and a move.
+        /// </summary>
+        /// <example>
+        /// '1 e4. e6'
+        /// </example>
+        OrphanPeriod,
     }
 }

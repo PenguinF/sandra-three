@@ -243,14 +243,20 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
 
-            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new WithTrivia(null, GreenPgnBracketOpenSyntax.Value));
-            Assert.Throws<ArgumentNullException>("contentNode", () => new WithTrivia(GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new GreenWithTriviaSyntax(null, GreenPgnBracketOpenSyntax.Value));
+            Assert.Throws<ArgumentNullException>("contentNode", () => new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
-            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<WithTrivia>.Instance));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
 
             Assert.Throws<ArgumentNullException>("tagPairNodes", () => GreenPgnTagSectionSyntax.Create(null));
             Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
+
+            Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
+            Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null));
+            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax>.Instance));
         }
 
         [Theory]

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnBackgroundListSyntax.cs
+ * PgnPlyFloatItemListSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,36 +19,35 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a node with background symbols in an abstract PGN syntax tree.
+    /// Represents a node with floating items within a ply.
     /// </summary>
-    public sealed class PgnBackgroundListSyntax : PgnSyntax
+    public sealed class PgnPlyFloatItemListSyntax : PgnSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnTriviaElementSyntax, PgnTriviaSyntax> Parent { get; }
+        public WithPlyFloatItemsSyntax Parent { get; }
 
         /// <summary>
-        /// Gets the bottom-up only 'green' read-only list with background nodes.
+        /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> Green { get; }
+        public ReadOnlySpanList<GreenWithTriviaSyntax> Green { get; }
 
         /// <summary>
-        /// Gets the collection of background nodes.
+        /// Gets the collection of floating items.
         /// </summary>
-        public SafeLazyObjectCollection<PgnBackgroundSyntax> BackgroundNodes { get; }
+        public SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax> FloatItems { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.Length - Green.Length);
+        public override int Start => 0;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -58,31 +57,31 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override PgnSyntax ParentSyntax => Parent;
 
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => BackgroundNodes.Count;
+        public override int ChildCount => FloatItems.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => BackgroundNodes[index];
+        public override PgnSyntax GetChild(int index) => FloatItems[index];
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnBackgroundListSyntax(Union<PgnTriviaElementSyntax, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        internal PgnPlyFloatItemListSyntax(WithPlyFloatItemsSyntax parent, ReadOnlySpanList<GreenWithTriviaSyntax> green)
         {
             Parent = parent;
             Green = green;
 
-            BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
+            FloatItems = new SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax>(
                 green.Count,
-                index => Green[index].CreateRedNode(this, index));
+                index => new PgnPeriodWithTriviaSyntax(this, index, Green[index]));
         }
     }
 }

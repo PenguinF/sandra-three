@@ -138,41 +138,174 @@ namespace Sandra.Chess.Pgn
         {
             if (pgn == null) throw new ArgumentNullException(nameof(pgn));
 
-            var parser = new PgnParser();
-            parser.ParsePgnText(pgn);
-            parser.YieldEof();
+            var parser = new PgnParser(pgn);
+            parser.ParsePgnText();
+            GreenPgnTriviaSyntax trailingTrivia = parser.YieldEof();
 
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
-                GreenPgnTriviaSyntax.Create(parser.TriviaBuilder, parser.BackgroundBuilder),
+                trailingTrivia,
                 parser.Errors);
         }
 
         private readonly List<PgnErrorInfo> Errors;
-        private readonly List<IGreenPgnSymbol> BackgroundBuilder;
+        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<WithTrivia> TagPairBuilder;
+        private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
+        private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
+        private readonly List<GreenWithPlyFloatItemsSyntax> NagListBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
+        private readonly string pgnText;
+
+        // Invariant is that this index is always at the start of the yielded symbol.
         private int symbolStartIndex;
 
+        // Save as fields, which is useful for error reporting.
+        private GreenWithTriviaSyntax symbolBeingYielded;
+        private GreenPgnTriviaSyntax trailingTrivia;
+
         private bool InTagPair;
-        private int TagPairLeadingTriviaLength;
-        private int TagPairStartIndex;
         private bool HasTagPairBracketOpen;
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
-        private PgnParser()
+        // Whether to report a missing move number.
+        private bool HasPly;
+
+        // Current ply being built.
+        private GreenWithPlyFloatItemsSyntax MoveNumber;
+        private GreenWithPlyFloatItemsSyntax Move;
+
+        // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
+        private readonly Action YieldInTagSectionAction;
+        private readonly Action YieldInMoveTreeSectionAction;
+
+        // This is either YieldInTagSectionAction or YieldInMoveTreeSectionAction.
+        // It is important that this action is an instance method, since invocation of such delegates is the fastest.
+        private Action YieldContentNode;
+
+        private PgnParser(string pgnText)
         {
+            this.pgnText = pgnText;
+
             Errors = new List<PgnErrorInfo>();
-            BackgroundBuilder = new List<IGreenPgnSymbol>();
+            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            TagPairBuilder = new List<WithTrivia>();
+            TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
+            FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
+            NagListBuilder = new List<GreenWithPlyFloatItemsSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+
+            YieldInTagSectionAction = YieldInTagSection;
+            YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
+
+            YieldContentNode = YieldInTagSectionAction;
         }
+
+        #region Ply parsing
+
+        private void CapturePlyUnchecked(int trailingFloatItemsLength)
+        {
+            var plySyntax = new GreenPgnPlySyntax(MoveNumber, Move, NagListBuilder);
+
+            if (!HasPly && MoveNumber == null || Move == null)
+            {
+                // See CaptureTagPair on how to calculate the error position and length.
+                int plyEndPosition
+                    = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+                    : pgnText.Length - trailingTrivia.Length;
+
+                // For a ply though we need to subtract the length of the floating items that trail the captured ply.
+                plyEndPosition -= trailingFloatItemsLength;
+
+                // For plies, start at the first content node of the first ply content node.
+                // So subtract both the leading float items length plus leading trivia length.
+                GreenWithPlyFloatItemsSyntax firstNode = MoveNumber ?? Move ?? NagListBuilder[0];
+                int plyLength = plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.LeadingTrivia.Length;
+                int plyStartPosition = plyEndPosition - plyLength;
+
+                if (!HasPly && MoveNumber == null)
+                {
+                    // Only report missing move number for the first ply.
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingMoveNumber,
+                        plyStartPosition,
+                        plyLength));
+                }
+
+                if (Move == null)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingMove,
+                        plyStartPosition,
+                        plyLength));
+                }
+            }
+
+            MoveNumber = null;
+            Move = null;
+            NagListBuilder.Clear();
+
+            HasPly = true;
+            SymbolBuilder.Add(plySyntax);
+        }
+
+        private void CapturePly(int trailingFloatItemsLength)
+        {
+            if (MoveNumber != null || Move != null || NagListBuilder.Count > 0)
+            {
+                CapturePlyUnchecked(trailingFloatItemsLength);
+            }
+        }
+
+        private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
+        {
+            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(FloatItemListBuilder);
+            FloatItemListBuilder.Clear();
+            return floatItems;
+        }
+
+        private void AddFloatItems(ReadOnlySpanList<GreenWithTriviaSyntax> floatItems)
+        {
+            foreach (var floatItem in floatItems)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+            }
+        }
+
+        private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
+        {
+            MoveNumber = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+        }
+
+        private void YieldPeriod()
+        {
+            // Report orphan period if not in between move number and move.
+            if (MoveNumber == null || Move != null)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.OrphanPeriod,
+                    symbolStartIndex,
+                    PgnPeriodSyntax.PeriodLength));
+            }
+
+            FloatItemListBuilder.Add(symbolBeingYielded);
+        }
+
+        private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
+        {
+            Move = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+        }
+
+        private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
+        {
+            NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded));
+        }
+
+        #endregion Ply parsing
 
         #region Tag section parsing
 
@@ -180,50 +313,63 @@ namespace Sandra.Chess.Pgn
         {
             var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
 
-            // To report tag pair errors, start at the '[', not where its leading trivia starts.
-            int tagPairErrorLength = tagPairSyntax.Length - TagPairLeadingTriviaLength;
-
             // Analyze for errors.
             // Expect '[', tag name. tag value, ']'.
-            if (!HasTagPairBracketOpen)
+            if (!HasTagPairBracketOpen || !HasTagPairTagName || !HasTagPairTagValue || !hasTagPairBracketClose)
             {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagBracketOpen,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
-            }
+                // Calculate the end position of the tag pair syntax.
+                // - At the end of the file, contentNodeBeingYielded is null; the end position is the length of the pgn minus its trailing trivia.
+                // - If hasTagPairBracketClose is true, symbolStartIndex is at the start of the closing bracket.
+                // - If hasTagPairBracketClose is false, symbolStartIndex is at the start of the first symbol not in the tag pair.
+                int tagPairEndPosition
+                    = hasTagPairBracketClose ? symbolStartIndex + 1
+                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+                    : pgnText.Length - trailingTrivia.Length;
 
-            if (!HasTagPairTagName)
-            {
-                if (!HasTagPairTagValue)
+                // To report tag pair errors, start at the '[', not where its leading trivia starts.
+                int tagPairLength = tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
+                int tagPairStartPosition = tagPairEndPosition - tagPairLength;
+
+                if (!HasTagPairBracketOpen)
                 {
                     Errors.Add(new PgnErrorInfo(
-                        PgnErrorCode.EmptyTag,
-                        TagPairStartIndex,
-                        tagPairErrorLength));
+                        PgnErrorCode.MissingTagBracketOpen,
+                        tagPairStartPosition,
+                        tagPairLength));
                 }
-                else
+
+                if (!HasTagPairTagName)
+                {
+                    if (!HasTagPairTagValue)
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.EmptyTag,
+                            tagPairStartPosition,
+                            tagPairLength));
+                    }
+                    else
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.MissingTagName,
+                            tagPairStartPosition,
+                            tagPairLength));
+                    }
+                }
+                else if (!HasTagPairTagValue)
                 {
                     Errors.Add(new PgnErrorInfo(
-                        PgnErrorCode.MissingTagName,
-                        TagPairStartIndex,
-                        tagPairErrorLength));
+                        PgnErrorCode.MissingTagValue,
+                        tagPairStartPosition,
+                        tagPairLength));
                 }
-            }
-            else if (!HasTagPairTagValue)
-            {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagValue,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
-            }
 
-            if (!hasTagPairBracketClose)
-            {
-                Errors.Add(new PgnErrorInfo(
-                    PgnErrorCode.MissingTagBracketClose,
-                    TagPairStartIndex,
-                    tagPairErrorLength));
+                if (!hasTagPairBracketClose)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingTagBracketClose,
+                        tagPairStartPosition,
+                        tagPairLength));
+                }
             }
 
             TagSectionBuilder.Add(tagPairSyntax);
@@ -249,141 +395,239 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        private void AddTagElementToBuilder(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol node)
+        private void AddTagElementToBuilder()
         {
-            if (!InTagPair)
-            {
-                InTagPair = true;
-                TagPairLeadingTriviaLength = leadingTrivia.Length;
-                TagPairStartIndex = symbolStartIndex;
-            }
-
-            TagPairBuilder.Add(new WithTrivia(leadingTrivia, node));
+            InTagPair = true;
+            TagPairBuilder.Add(symbolBeingYielded);
         }
 
         #endregion Tag section parsing
+
+        #region Yield content nodes
+
+        private void YieldInTagSection()
+        {
+            switch (symbolBeingYielded.ContentNode.SymbolType)
+            {
+                case PgnSymbolType.BracketOpen:
+                    // When encountering a new '[', open a new tag pair.
+                    CaptureTagPairIfNecessary();
+                    HasTagPairBracketOpen = true;
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.BracketClose:
+                    // When encountering a ']', always immediately close this tag pair.
+                    AddTagElementToBuilder();
+                    CaptureTagPair(hasTagPairBracketClose: true);
+                    break;
+                case PgnSymbolType.TagName:
+                    // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
+                    if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
+                    HasTagPairTagName = true;
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    // Only accept the first tag value.
+                    if (!HasTagPairTagValue)
+                    {
+                        HasTagPairTagValue = true;
+                    }
+                    else
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.MultipleTagValues,
+                            symbolStartIndex,
+                            symbolBeingYielded.ContentNode.Length));
+                    }
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.MoveNumber:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.Period:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    YieldPeriod();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.Move:
+                case PgnSymbolType.UnrecognizedMove:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.Nag:
+                case PgnSymbolType.EmptyNag:
+                case PgnSymbolType.OverflowNag:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.ParenthesisOpen:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.ParenthesisClose:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
+                case PgnSymbolType.Asterisk:
+                case PgnSymbolType.DrawMarker:
+                case PgnSymbolType.WhiteWinMarker:
+                case PgnSymbolType.BlackWinMarker:
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+        }
+
+        private void YieldInMoveTreeSection()
+        {
+            ReadOnlySpanList<GreenWithTriviaSyntax> floatItems;
+
+            switch (symbolBeingYielded.ContentNode.SymbolType)
+            {
+                case PgnSymbolType.BracketOpen:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    HasTagPairBracketOpen = true;
+                    AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
+                    break;
+                case PgnSymbolType.BracketClose:
+                    // When encountering a ']', switch to tag section and immediately open and close a tag pair.
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    AddTagElementToBuilder();
+                    CaptureTagPair(hasTagPairBracketClose: true);
+                    YieldContentNode = YieldInTagSectionAction;
+                    break;
+                case PgnSymbolType.TagName:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    HasTagPairTagName = true;
+                    AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
+                    break;
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    HasTagPairTagValue = true;
+                    AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
+                    break;
+                case PgnSymbolType.MoveNumber:
+                    // Move number always starts a new ply, so capture any unfinished ply.
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    YieldMoveNumber(floatItems);
+                    break;
+                case PgnSymbolType.Period:
+                    YieldPeriod();
+                    break;
+                case PgnSymbolType.Move:
+                case PgnSymbolType.UnrecognizedMove:
+                    // Only allow a preceding move number in the same ply.
+                    floatItems = CaptureFloatItems();
+                    if (Move != null || NagListBuilder.Count > 0) CapturePlyUnchecked(floatItems.Length);
+                    YieldMove(floatItems);
+                    break;
+                case PgnSymbolType.Nag:
+                case PgnSymbolType.EmptyNag:
+                case PgnSymbolType.OverflowNag:
+                    YieldNag(CaptureFloatItems());
+                    break;
+                case PgnSymbolType.ParenthesisOpen:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.ParenthesisClose:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.Asterisk:
+                case PgnSymbolType.DrawMarker:
+                case PgnSymbolType.WhiteWinMarker:
+                case PgnSymbolType.BlackWinMarker:
+                    floatItems = CaptureFloatItems();
+                    CapturePly(floatItems.Length);
+                    AddFloatItems(floatItems);
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+        }
+
+        #endregion Yield content nodes
 
         #region Yield tokens and EOF
 
         private void Yield(IGreenPgnSymbol symbol)
         {
-            var symbolType = symbol.SymbolType;
+            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol);
+            YieldContentNode();
+            BackgroundBuilder.Clear();
+            TriviaBuilder.Clear();
+        }
 
-            if (symbolType.IsBackground())
+        private void YieldTrivia(GreenPgnCommentSyntax commentSyntax)
+        {
+            TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, commentSyntax));
+            BackgroundBuilder.Clear();
+        }
+
+        private void YieldBackground(GreenPgnBackgroundSyntax backgroundSyntax)
+        {
+            BackgroundBuilder.Add(backgroundSyntax);
+        }
+
+        private GreenPgnTriviaSyntax YieldEof()
+        {
+            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
+            symbolBeingYielded = null;
+
+            if (YieldContentNode == YieldInTagSectionAction)
             {
-                BackgroundBuilder.Add(symbol);
-            }
-            else if (symbolType.IsTrivia())
-            {
-                TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, symbol));
-                BackgroundBuilder.Clear();
+                CaptureTagPairIfNecessary();
+                CaptureTagSection();
             }
             else
             {
-                GreenPgnTriviaSyntax leadingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
-
-                switch (symbolType)
-                {
-                    case PgnSymbolType.BracketOpen:
-                        // When encountering a new '[', open a new tag pair.
-                        CaptureTagPairIfNecessary();
-                        HasTagPairBracketOpen = true;
-                        AddTagElementToBuilder(leadingTrivia, symbol);
-                        break;
-                    case PgnSymbolType.BracketClose:
-                        // When encountering a ']', always immediately close this tag pair.
-                        AddTagElementToBuilder(leadingTrivia, symbol);
-                        CaptureTagPair(hasTagPairBracketClose: true);
-                        break;
-                    case PgnSymbolType.TagName:
-                        // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
-                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
-                        HasTagPairTagName = true;
-                        AddTagElementToBuilder(leadingTrivia, symbol);
-                        break;
-                    case PgnSymbolType.TagValue:
-                    case PgnSymbolType.ErrorTagValue:
-                        // Only accept the first tag value.
-                        if (!HasTagPairTagValue)
-                        {
-                            HasTagPairTagValue = true;
-                        }
-                        else
-                        {
-                            Errors.Add(new PgnErrorInfo(
-                                PgnErrorCode.MultipleTagValues,
-                                symbolStartIndex,
-                                symbol.Length));
-                        }
-                        AddTagElementToBuilder(leadingTrivia, symbol);
-                        break;
-                    case PgnSymbolType.MoveNumber:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia moveNumber = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.Period:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia period = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(period, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.Move:
-                    case PgnSymbolType.UnrecognizedMove:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia move = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.Nag:
-                    case PgnSymbolType.EmptyNag:
-                    case PgnSymbolType.OverflowNag:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia nag = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.ParenthesisOpen:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia parenthesisOpen = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.ParenthesisClose:
-                        // Switch to move tree section.
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia parenthesisClose = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(parenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-                        break;
-                    case PgnSymbolType.Asterisk:
-                    case PgnSymbolType.DrawMarker:
-                    case PgnSymbolType.WhiteWinMarker:
-                    case PgnSymbolType.BlackWinMarker:
-                        CaptureTagPairIfNecessary();
-                        CaptureTagSection();
-                        WithTrivia gameResult = new WithTrivia(leadingTrivia, symbol);
-                        SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
-                        break;
-                    default:
-                        throw new UnreachableException();
-                }
-
-                BackgroundBuilder.Clear();
-                TriviaBuilder.Clear();
+                var trailingFloatItems = CaptureFloatItems();
+                CapturePly(trailingFloatItems.Length);
+                AddFloatItems(trailingFloatItems);
             }
-        }
 
-        private void YieldEof()
-        {
-            CaptureTagPairIfNecessary();
-            CaptureTagSection();
+            return trailingTrivia;
         }
 
         #endregion Yield tokens and EOF
@@ -414,11 +658,11 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        private void ParsePgnText(string pgnText)
+        private void ParsePgnText()
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
-            int length = symbolStartIndex + pgnText.Length;
+            int length = pgnText.Length;
 
             int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
@@ -438,7 +682,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        Yield(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
+                        YieldBackground(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
                         symbolStartIndex = currentIndex;
                     }
 
@@ -489,7 +733,7 @@ namespace Sandra.Chess.Pgn
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
                                 ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
-                                Yield(GreenPgnIllegalCharacterSyntax.Value);
+                                YieldBackground(GreenPgnIllegalCharacterSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             default:
@@ -499,7 +743,7 @@ namespace Sandra.Chess.Pgn
                     else
                     {
                         ReportIllegalCharacterSyntaxError(c, symbolStartIndex);
-                        Yield(GreenPgnIllegalCharacterSyntax.Value);
+                        YieldBackground(GreenPgnIllegalCharacterSyntax.Value);
                         symbolStartIndex++;
                     }
                 }
@@ -509,7 +753,7 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                Yield(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
+                YieldBackground(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
             }
 
             return;
@@ -519,7 +763,8 @@ namespace Sandra.Chess.Pgn
             // Eat the first symbol character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
-            IGreenPgnSymbol symbolToYield;
+            GreenPgnBackgroundSyntax backgroundToYield;
+            IGreenPgnSymbol characterToYield;
 
             while (currentIndex < length)
             {
@@ -550,22 +795,22 @@ namespace Sandra.Chess.Pgn
                         switch (c)
                         {
                             case PgnGameResultSyntax.AsteriskCharacter:
-                                symbolToYield = GreenPgnAsteriskSyntax.Value;
+                                characterToYield = GreenPgnAsteriskSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnBracketOpenSyntax.BracketOpenCharacter:
-                                symbolToYield = GreenPgnBracketOpenSyntax.Value;
+                                characterToYield = GreenPgnBracketOpenSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnBracketCloseSyntax.BracketCloseCharacter:
-                                symbolToYield = GreenPgnBracketCloseSyntax.Value;
+                                characterToYield = GreenPgnBracketCloseSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
-                                symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
+                                characterToYield = GreenPgnParenthesisCloseSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
-                                symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
+                                characterToYield = GreenPgnParenthesisOpenSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnPeriodSyntax.PeriodCharacter:
-                                symbolToYield = GreenPgnPeriodSyntax.Value;
+                                characterToYield = GreenPgnPeriodSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case StringLiteral.QuoteCharacter:
                                 if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
@@ -585,8 +830,8 @@ namespace Sandra.Chess.Pgn
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
                                 ReportIllegalCharacterSyntaxError(c, currentIndex);
-                                symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
-                                goto yieldSymbolThenCharacter;
+                                backgroundToYield = GreenPgnIllegalCharacterSyntax.Value;
+                                goto yieldSymbolThenBackground;
                             default:
                                 throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
                         }
@@ -595,8 +840,8 @@ namespace Sandra.Chess.Pgn
                 else
                 {
                     ReportIllegalCharacterSyntaxError(c, currentIndex);
-                    symbolToYield = GreenPgnIllegalCharacterSyntax.Value;
-                    goto yieldSymbolThenCharacter;
+                    backgroundToYield = GreenPgnIllegalCharacterSyntax.Value;
+                    goto yieldSymbolThenBackground;
                 }
 
                 currentIndex++;
@@ -613,8 +858,19 @@ namespace Sandra.Chess.Pgn
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
             if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+            symbolStartIndex = currentIndex;
             currentIndex++;
-            Yield(symbolToYield);
+            Yield(characterToYield);
+            symbolStartIndex = currentIndex;
+            goto inWhitespace;
+
+        yieldSymbolThenBackground:
+
+            // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
+            if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+            symbolStartIndex = currentIndex;
+            currentIndex++;
+            YieldBackground(backgroundToYield);
             symbolStartIndex = currentIndex;
             goto inWhitespace;
 
@@ -736,7 +992,7 @@ namespace Sandra.Chess.Pgn
                         char secondChar = pgnText[currentIndex];
                         if (secondChar == '\n')
                         {
-                            Yield(new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex));
+                            YieldTrivia(new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex));
 
                             // Eat the '\n'.
                             symbolStartIndex = currentIndex - 1;
@@ -747,7 +1003,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (c == '\n')
                 {
-                    Yield(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
+                    YieldTrivia(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
 
                     // Eat the '\n'.
                     symbolStartIndex = currentIndex;
@@ -758,7 +1014,7 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            Yield(new GreenPgnCommentSyntax(length - symbolStartIndex));
+            YieldTrivia(new GreenPgnCommentSyntax(length - symbolStartIndex));
             return;
 
         inEscapeSequence:
@@ -776,7 +1032,7 @@ namespace Sandra.Chess.Pgn
                         char secondChar = pgnText[currentIndex];
                         if (secondChar == '\n')
                         {
-                            Yield(new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex));
+                            YieldBackground(new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex));
                             symbolStartIndex = currentIndex - 1;
                             currentIndex++;
                             goto inWhitespace;
@@ -785,7 +1041,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (c == '\n')
                 {
-                    Yield(new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex));
+                    YieldBackground(new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex));
                     symbolStartIndex = currentIndex;
                     currentIndex++;
                     goto inWhitespace;
@@ -793,7 +1049,7 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            Yield(new GreenPgnEscapeSyntax(length - symbolStartIndex));
+            YieldBackground(new GreenPgnEscapeSyntax(length - symbolStartIndex));
             return;
 
         inMultiLineComment:
@@ -810,7 +1066,7 @@ namespace Sandra.Chess.Pgn
 
                 if (c == PgnCommentSyntax.MultiLineCommentEndCharacter)
                 {
-                    Yield(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
+                    YieldTrivia(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
                 }
@@ -818,7 +1074,7 @@ namespace Sandra.Chess.Pgn
 
             int unterminatedCommentLength = length - symbolStartIndex;
             Errors.Add(PgnCommentSyntax.CreateUnterminatedCommentMessage(symbolStartIndex, unterminatedCommentLength));
-            Yield(new GreenPgnUnterminatedCommentSyntax(unterminatedCommentLength));
+            YieldTrivia(new GreenPgnUnterminatedCommentSyntax(unterminatedCommentLength));
             return;
 
         inNumericAnnotationGlyph:

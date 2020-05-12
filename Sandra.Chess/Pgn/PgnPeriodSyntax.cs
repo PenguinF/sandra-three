@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Sandra.Chess.Pgn.Temp;
 
 namespace Sandra.Chess.Pgn
@@ -70,7 +71,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.Green.LeadingTrivia.Length;
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => PeriodLength;
 
@@ -79,26 +80,43 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent, GreenPgnPeriodSyntax green) => Parent = parent;
+        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent) => Parent = parent;
 
         void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
         TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPeriodSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents the period character '.' in PGN text, together with its leading trivia.
+    /// </summary>
     public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<PgnPeriodSyntax>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
-        public PgnSyntaxNodes Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public Union<PgnPlyFloatItemListSyntax, PgnSyntaxNodes> Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
         public int ParentIndex { get; }
 
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
-        public override PgnSyntax ParentSyntax => Parent;
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Match(whenOption1: x => x.Green.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
 
-        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, (GreenPgnPeriodSyntax)Green.ContentNode);
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
-        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this);
+
+        internal PgnPeriodWithTriviaSyntax(Union<PgnPlyFloatItemListSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

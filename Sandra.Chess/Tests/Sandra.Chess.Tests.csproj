@@ -64,6 +64,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ParseTrees.cs" />
+    <Compile Include="ParseTrees.Ply.cs" />
     <Compile Include="ParseTrees.TagSection.cs" />
     <Compile Include="ParseTrees.Trivia.cs" />
     <Compile Include="PgnTests.cs" />

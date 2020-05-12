@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -120,7 +119,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.Green.LeadingTrivia.Length;
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => Green.Length;
 
@@ -140,23 +139,32 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMoveSyntax(this, arg);
     }
 
-    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<PgnMoveSyntax>, IPgnTopLevelSyntax
+    /// <summary>
+    /// Represents a syntax node which contains a move text, together with its leading trivia.
+    /// </summary>
+    public sealed class PgnMoveWithTriviaSyntax : WithTriviaSyntax<PgnMoveSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnMoveWithFloatItemsSyntax Parent { get; }
 
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingFloatItems.Length;
 
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, (GreenPgnMoveSyntax)Green.ContentNode);
 
-        internal PgnMoveWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, WithTrivia green)
+        internal PgnMoveWithTriviaSyntax(PgnMoveWithFloatItemsSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
         }
     }
 }

@@ -44,11 +44,14 @@ namespace Sandra.Chess.Pgn
                 case PgnErrorCode.MissingTagValue:
                 case PgnErrorCode.MultipleTagValues:
                 case PgnErrorCode.MissingTagBracketClose:
+                case PgnErrorCode.MissingMove:
                     return PgnErrorLevel.Error;
                 case PgnErrorCode.UnterminatedMultiLineComment:
                     return PgnErrorLevel.Warning;
                 case PgnErrorCode.EmptyNag:
                 case PgnErrorCode.OverflowNag:
+                case PgnErrorCode.MissingMoveNumber:
+                case PgnErrorCode.OrphanPeriod:
                     return PgnErrorLevel.Message;
                 default:
                     // Treat unknown error codes as just messages.

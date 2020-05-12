@@ -125,6 +125,9 @@
     "PgnErrorMissingTagName": "tag is missing a name",
     "PgnErrorMissingTagValue": "tag is missing a value",
     "PgnErrorMultipleTagValues": "tag contains two or more values",
-    "PgnErrorMissingTagBracketClose": "tag is missing ']' character"
+    "PgnErrorMissingTagBracketClose": "tag is missing ']' character",
+    "PgnErrorMissingMoveNumber": "first move in a main or side line should have a move number",
+    "PgnErrorMissingMove": "move expected but not found",
+    "PgnErrorOrphanPeriod": "found period '.' character somewhere not between a move number and a move"
   }
 }
