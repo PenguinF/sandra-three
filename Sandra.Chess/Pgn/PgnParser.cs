@@ -248,7 +248,6 @@ namespace Sandra.Chess.Pgn
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
             NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded));
-            CaptureNags();
         }
 
         #endregion Ply parsing
@@ -450,6 +449,7 @@ namespace Sandra.Chess.Pgn
         {
             ReadOnlySpanList<GreenWithTriviaSyntax> floatItems;
 
+            CaptureNags();
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -556,6 +556,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CaptureFloatItems();
+                CaptureNags();
                 AddFloatItems(trailingFloatItems);
             }
 
