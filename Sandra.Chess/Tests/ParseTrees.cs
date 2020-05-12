@@ -138,21 +138,23 @@ namespace Sandra.Chess.Tests
 
                 foreach (SinglePly singlePly in MoveSection.MainLine)
                 {
+                    ParseTree<PgnPlySyntax> plySyntax = new ParseTree<PgnPlySyntax>();
                     if (singlePly.MoveNumber != null)
                     {
-                        singlePly.MoveNumber.LeadingFloatItems.ForEach(gamesSyntax.Add);
-                        gamesSyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
+                        singlePly.MoveNumber.LeadingFloatItems.ForEach(plySyntax.Add);
+                        plySyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
                     }
                     if (singlePly.Move != null)
                     {
-                        singlePly.Move.LeadingFloatItems.ForEach(gamesSyntax.Add);
-                        gamesSyntax.Add(singlePly.Move.MoveWithTrivia);
+                        singlePly.Move.LeadingFloatItems.ForEach(plySyntax.Add);
+                        plySyntax.Add(singlePly.Move.MoveWithTrivia);
                     }
                     foreach (LeadingFloatItemsAndNAG nag in singlePly.Nags)
                     {
-                        nag.LeadingFloatItems.ForEach(gamesSyntax.Add);
-                        gamesSyntax.Add(nag.NagWithTrivia);
+                        nag.LeadingFloatItems.ForEach(plySyntax.Add);
+                        plySyntax.Add(nag.NagWithTrivia);
                     }
+                    gamesSyntax.Add(plySyntax);
                 }
 
                 MoveSection.TrailingFloatItems.ForEach(gamesSyntax.Add);

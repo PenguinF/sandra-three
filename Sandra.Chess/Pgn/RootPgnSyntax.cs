@@ -119,6 +119,10 @@ namespace Sandra.Chess.Pgn.Temp
                     {
                         return new PgnTagSectionSyntax(this, index, tagSectionSyntax);
                     }
+                    else if (topLevelNode is GreenPgnPlySyntax plySyntax)
+                    {
+                        return new PgnPlySyntax(this, index, plySyntax);
+                    }
                     else
                     {
                         var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;

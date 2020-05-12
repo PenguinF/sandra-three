@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Sandra.Chess.Pgn.Temp;
 
 namespace Sandra.Chess.Pgn
@@ -96,7 +97,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public Union<PgnPlySyntax, PgnSyntaxNodes> Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -106,16 +107,16 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Match(whenOption1: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this, (GreenPgnPeriodSyntax)Green.ContentNode);
 
-        internal PgnPeriodWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnPeriodWithTriviaSyntax(Union<PgnPlySyntax, PgnSyntaxNodes> parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

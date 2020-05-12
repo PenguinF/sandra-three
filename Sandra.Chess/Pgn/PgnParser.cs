@@ -250,24 +250,7 @@ namespace Sandra.Chess.Pgn
             NagListBuilder.Clear();
 
             HasPly = true;
-
-            if (plySyntax.MoveNumber != null)
-            {
-                AddFloatItems(plySyntax.MoveNumber.LeadingFloatItems);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(plySyntax.MoveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
-            }
-
-            if (plySyntax.Move != null)
-            {
-                AddFloatItems(plySyntax.Move.LeadingFloatItems);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(plySyntax.Move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
-            }
-
-            foreach (GreenWithPlyFloatItemsSyntax nag in plySyntax.Nags)
-            {
-                AddFloatItems(nag.LeadingFloatItems);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag.PlyContentNode, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
-            }
+            SymbolBuilder.Add(plySyntax);
         }
 
         private void CapturePly(int trailingFloatItemsLength)

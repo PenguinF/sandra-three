@@ -20,6 +20,8 @@
 #endregion
 
 using Eutherion.Text;
+using Eutherion.Utils;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -28,7 +30,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a single ply (half-move).
     /// </summary>
-    public sealed class GreenPgnPlySyntax
+    public sealed class GreenPgnPlySyntax : IGreenPgnTopLevelSyntax
     {
         /// <summary>
         /// The move number. The move number can be null.
@@ -97,6 +99,122 @@ namespace Sandra.Chess.Pgn
             }
 
             Length = length;
+        }
+    }
+
+    /// <summary>
+    /// Represents a syntax node which contains a single ply (half-move).
+    /// </summary>
+    public sealed class PgnPlySyntax : PgnSyntax, IPgnTopLevelSyntax
+    {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnSyntaxNodes Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnPlySyntax Green { get; }
+
+        public ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy> GreenTopLevelNodes { get; }
+
+        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => TopLevelNodes.Count;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+
+        internal PgnPlySyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnPlySyntax green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+            Green = green;
+
+            List<GreenPgnTopLevelSymbolSyntaxTempCopy> greenTopLevelNodes = new List<GreenPgnTopLevelSymbolSyntaxTempCopy>();
+
+            if (green.MoveNumber != null)
+            {
+                foreach (var floatItem in green.MoveNumber.LeadingFloatItems)
+                {
+                    greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
+                }
+
+                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(green.MoveNumber.PlyContentNode, (innerParent, index, innerGreen) => new PgnMoveNumberWithTriviaSyntax(innerParent, index, innerGreen)));
+            }
+
+            if (green.Move != null)
+            {
+                foreach (var floatItem in green.Move.LeadingFloatItems)
+                {
+                    greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
+                }
+
+                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(green.Move.PlyContentNode, (innerParent, index, innerGreen) => new PgnMoveWithTriviaSyntax(innerParent, index, innerGreen)));
+            }
+
+            foreach (GreenWithPlyFloatItemsSyntax nag in green.Nags)
+            {
+                foreach (var floatItem in nag.LeadingFloatItems)
+                {
+                    greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
+                }
+
+                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(nag.PlyContentNode, (innerParent, index, innerGreen) => new PgnNagWithTriviaSyntax(innerParent, index, innerGreen)));
+            }
+
+            GreenTopLevelNodes = ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy>.Create(greenTopLevelNodes);
+
+            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
+                greenTopLevelNodes.Count,
+                index => GreenTopLevelNodes[index].SyntaxNodeConstructor(this, index, GreenTopLevelNodes[index].GreenNodeWithTrivia));
+        }
+    }
+
+    public class GreenPgnTopLevelSymbolSyntaxTempCopy : ISpan
+    {
+        internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
+        internal readonly Func<PgnPlySyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
+
+        public int Length => GreenNodeWithTrivia.Length;
+
+        internal GreenPgnTopLevelSymbolSyntaxTempCopy(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnPlySyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        {
+            GreenNodeWithTrivia = greenNodeWithTrivia;
+            SyntaxNodeConstructor = syntaxNodeConstructor;
         }
     }
 }
