@@ -334,12 +334,14 @@ namespace Sandra.Chess.Pgn
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Period:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
@@ -347,6 +349,7 @@ namespace Sandra.Chess.Pgn
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
@@ -355,18 +358,21 @@ namespace Sandra.Chess.Pgn
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:
@@ -390,17 +396,20 @@ namespace Sandra.Chess.Pgn
                     CaptureTagPairIfNecessary();
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', always immediately close this tag pair.
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagName:
                     // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
                     if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
@@ -417,6 +426,7 @@ namespace Sandra.Chess.Pgn
                             symbolBeingYielded.ContentNode.Length));
                     }
                     AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
                     // Switch to move tree section.
