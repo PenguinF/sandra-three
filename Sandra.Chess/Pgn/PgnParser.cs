@@ -215,8 +215,9 @@ namespace Sandra.Chess.Pgn
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            AddFloatItems(leadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+            GreenWithPlyFloatItemsSyntax moveNumber = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+            AddFloatItems(moveNumber.LeadingFloatItems);
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(moveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
         }
 
         private void YieldPeriod()
@@ -226,14 +227,16 @@ namespace Sandra.Chess.Pgn
 
         private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            AddFloatItems(leadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+            GreenWithPlyFloatItemsSyntax move = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+            AddFloatItems(move.LeadingFloatItems);
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
         }
 
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            AddFloatItems(leadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+            GreenWithPlyFloatItemsSyntax nag = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+            AddFloatItems(nag.LeadingFloatItems);
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag.PlyContentNode, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
         }
 
         #endregion Ply parsing
