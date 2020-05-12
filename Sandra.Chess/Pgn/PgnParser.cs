@@ -198,6 +198,13 @@ namespace Sandra.Chess.Pgn
 
         #region Ply parsing
 
+        private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
+        {
+            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(FloatItemListBuilder);
+            FloatItemListBuilder.Clear();
+            return floatItems;
+        }
+
         private void YieldMoveNumber()
         {
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
@@ -206,13 +213,11 @@ namespace Sandra.Chess.Pgn
         private void YieldPeriod()
         {
             FloatItemListBuilder.Add(symbolBeingYielded);
-
-            foreach (var floatItem in FloatItemListBuilder)
+            ReadOnlySpanList<GreenWithTriviaSyntax> floatItems = CaptureFloatItems();
+            foreach (var floatItem in floatItems)
             {
                 SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
             }
-
-            FloatItemListBuilder.Clear();
         }
 
         private void YieldMove()
