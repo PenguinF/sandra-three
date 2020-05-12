@@ -745,7 +745,7 @@ namespace Sandra.Chess.Tests
 
         public static IEnumerable<object[]> GetTestParseTrees()
             => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
-            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3.Where(code => code < PgnErrorCode.MissingMoveNumber).ToArray() }));
+            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3.Where(code => code < PgnErrorCode.OrphanPeriod).ToArray() }));
 
         [Theory]
         [MemberData(nameof(GetTestParseTrees))]
