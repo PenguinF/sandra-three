@@ -206,27 +206,29 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyUnchecked()
         {
-            if (MoveNumber != null)
+            var plySyntax = new GreenPgnPlySyntax(MoveNumber, Move, NagListBuilder);
+
+            MoveNumber = null;
+            Move = null;
+            NagListBuilder.Clear();
+
+            if (plySyntax.MoveNumber != null)
             {
-                AddFloatItems(MoveNumber.LeadingFloatItems);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(MoveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
-                MoveNumber = null;
+                AddFloatItems(plySyntax.MoveNumber.LeadingFloatItems);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(plySyntax.MoveNumber.PlyContentNode, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
             }
 
-            if (Move != null)
+            if (plySyntax.Move != null)
             {
-                AddFloatItems(Move.LeadingFloatItems);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(Move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
-                Move = null;
+                AddFloatItems(plySyntax.Move.LeadingFloatItems);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(plySyntax.Move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
             }
 
-            foreach (GreenWithPlyFloatItemsSyntax nag in NagListBuilder)
+            foreach (GreenWithPlyFloatItemsSyntax nag in plySyntax.Nags)
             {
                 AddFloatItems(nag.LeadingFloatItems);
                 SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(nag.PlyContentNode, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
             }
-
-            NagListBuilder.Clear();
         }
 
         private void CapturePly()

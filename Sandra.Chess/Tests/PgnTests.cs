@@ -254,6 +254,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
             Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null));
+            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax>.Instance));
         }
 
         [Theory]
