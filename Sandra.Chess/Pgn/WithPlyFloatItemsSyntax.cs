@@ -20,6 +20,8 @@
 #endregion
 
 using Eutherion.Text;
+using Eutherion.Utils;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -62,6 +64,72 @@ namespace Sandra.Chess.Pgn
             if (leadingFloatItems == null) throw new ArgumentNullException(nameof(leadingFloatItems));
             LeadingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(leadingFloatItems);
             PlyContentNode = plyContentNode ?? throw new ArgumentNullException(nameof(plyContentNode));
+        }
+    }
+
+    /// <summary>
+    /// Represents a syntax node which is an element of a ply, together with its leading floating items.
+    /// </summary>
+    public abstract class WithPlyFloatItemsSyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnPlySyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenWithPlyFloatItemsSyntax Green { get; }
+
+        public ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy> GreenTopLevelNodes { get; }
+
+        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public sealed override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public sealed override PgnSyntax ParentSyntax => Parent;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public sealed override int ChildCount => TopLevelNodes.Count;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public sealed override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public sealed override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+
+        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green, Func<WithPlyFloatItemsSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        {
+            Parent = parent;
+            Green = green;
+
+            List<GreenPgnTopLevelSymbolSyntaxTempCopy> greenTopLevelNodes = new List<GreenPgnTopLevelSymbolSyntaxTempCopy>();
+
+            foreach (var floatItem in green.LeadingFloatItems)
+            {
+                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
+            }
+
+            greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTempCopy(green.PlyContentNode, syntaxNodeConstructor));
+
+            GreenTopLevelNodes = ReadOnlySpanList<GreenPgnTopLevelSymbolSyntaxTempCopy>.Create(greenTopLevelNodes);
+
+            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
+                greenTopLevelNodes.Count,
+                index => GreenTopLevelNodes[index].SyntaxNodeConstructor(this, index, GreenTopLevelNodes[index].GreenNodeWithTrivia));
         }
     }
 }

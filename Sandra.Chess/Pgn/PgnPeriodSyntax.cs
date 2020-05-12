@@ -97,7 +97,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnPlySyntax, PgnSyntaxNodes> Parent { get; }
+        public Union<WithPlyFloatItemsSyntax, PgnSyntaxNodes> Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -116,7 +116,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this);
 
-        internal PgnPeriodWithTriviaSyntax(Union<PgnPlySyntax, PgnSyntaxNodes> parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnPeriodWithTriviaSyntax(Union<WithPlyFloatItemsSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

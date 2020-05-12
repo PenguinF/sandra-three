@@ -150,7 +150,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnPlySyntax Parent { get; }
+        public WithPlyFloatItemsSyntax Parent { get; }
         public int ParentIndex { get; }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnMoveSyntax CreateContentNode() => new PgnMoveSyntax(this, (GreenPgnMoveSyntax)Green.ContentNode);
 
-        internal PgnMoveWithTriviaSyntax(PgnPlySyntax parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnMoveWithTriviaSyntax(WithPlyFloatItemsSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

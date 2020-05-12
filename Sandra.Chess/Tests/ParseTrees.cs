@@ -141,18 +141,32 @@ namespace Sandra.Chess.Tests
                     ParseTree<PgnPlySyntax> plySyntax = new ParseTree<PgnPlySyntax>();
                     if (singlePly.MoveNumber != null)
                     {
-                        singlePly.MoveNumber.LeadingFloatItems.ForEach(plySyntax.Add);
-                        plySyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
+                        ParseTree<PgnMoveNumberWithFloatItemsSyntax> moveNumberSyntax = new ParseTree<PgnMoveNumberWithFloatItemsSyntax>();
+                        singlePly.MoveNumber.LeadingFloatItems.ForEach(moveNumberSyntax.Add);
+                        moveNumberSyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
+                        plySyntax.Add(moveNumberSyntax);
+                    }
+                    else
+                    {
+                        plySyntax.Add(Missing);
                     }
                     if (singlePly.Move != null)
                     {
-                        singlePly.Move.LeadingFloatItems.ForEach(plySyntax.Add);
-                        plySyntax.Add(singlePly.Move.MoveWithTrivia);
+                        ParseTree<PgnMoveWithFloatItemsSyntax> moveSyntax = new ParseTree<PgnMoveWithFloatItemsSyntax>();
+                        singlePly.Move.LeadingFloatItems.ForEach(moveSyntax.Add);
+                        moveSyntax.Add(singlePly.Move.MoveWithTrivia);
+                        plySyntax.Add(moveSyntax);
+                    }
+                    else
+                    {
+                        plySyntax.Add(Missing);
                     }
                     foreach (LeadingFloatItemsAndNAG nag in singlePly.Nags)
                     {
-                        nag.LeadingFloatItems.ForEach(plySyntax.Add);
-                        plySyntax.Add(nag.NagWithTrivia);
+                        ParseTree<PgnNagWithFloatItemsSyntax> nagSyntax = new ParseTree<PgnNagWithFloatItemsSyntax>();
+                        nag.LeadingFloatItems.ForEach(nagSyntax.Add);
+                        nagSyntax.Add(nag.NagWithTrivia);
+                        plySyntax.Add(nagSyntax);
                     }
                     gamesSyntax.Add(plySyntax);
                 }
@@ -162,6 +176,8 @@ namespace Sandra.Chess.Tests
                 if (Result != null) gamesSyntax.Add(Result);
             }
         }
+
+        private static readonly ParseTree<PgnEmptySyntax> Missing = new ParseTree<PgnEmptySyntax>();
 
         private static readonly ParseTree<PgnWhitespaceSyntax> WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
         private static readonly ParseTree<PgnIllegalCharacterSyntax> IllegalCharacter = new ParseTree<PgnIllegalCharacterSyntax>();
