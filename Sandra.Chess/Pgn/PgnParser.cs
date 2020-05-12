@@ -194,6 +194,30 @@ namespace Sandra.Chess.Pgn
             YieldContentNode = YieldInTagSectionAction;
         }
 
+        #region Ply parsing
+
+        private void YieldMoveNumber()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+        }
+
+        private void YieldPeriod()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+        }
+
+        private void YieldMove()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+        }
+
+        private void YieldNag()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+        }
+
+        #endregion Ply parsing
+
         #region Tag section parsing
 
         private void CaptureTagPair(bool hasTagPairBracketClose)
@@ -333,14 +357,14 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                    YieldMoveNumber();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Period:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+                    YieldPeriod();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Move:
@@ -348,7 +372,7 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                    YieldMove();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Nag:
@@ -357,7 +381,7 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+                    YieldNag();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisOpen:
@@ -414,19 +438,19 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                    YieldMoveNumber();
                     break;
                 case PgnSymbolType.Period:
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+                    YieldPeriod();
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                    YieldMove();
                     break;
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
                 case PgnSymbolType.OverflowNag:
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+                    YieldNag();
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
