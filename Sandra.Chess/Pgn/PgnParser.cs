@@ -171,6 +171,9 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
+        // Current ply being built.
+        private GreenWithPlyFloatItemsSyntax Move;
+
         // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
         private readonly Action YieldInTagSectionAction;
         private readonly Action YieldInMoveTreeSectionAction;
@@ -199,6 +202,16 @@ namespace Sandra.Chess.Pgn
         }
 
         #region Ply parsing
+
+        private void CaptureMove()
+        {
+            if (Move != null)
+            {
+                AddFloatItems(Move.LeadingFloatItems);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(Move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                Move = null;
+            }
+        }
 
         private void CaptureNags()
         {
@@ -240,9 +253,8 @@ namespace Sandra.Chess.Pgn
 
         private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            GreenWithPlyFloatItemsSyntax move = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
-            AddFloatItems(move.LeadingFloatItems);
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(move.PlyContentNode, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+            Move = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
+            CaptureMove();
         }
 
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
