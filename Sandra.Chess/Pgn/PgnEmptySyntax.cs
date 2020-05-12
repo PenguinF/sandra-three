@@ -21,4 +21,31 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents an empty placeholder node.
+    /// </summary>
+    // This exists primarily to simplify length and count offset calculation code.
+    public sealed class PgnEmptySyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => 0;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax { get; }
+
+        internal PgnEmptySyntax(PgnSyntax parentSyntax, int start)
+        {
+            ParentSyntax = parentSyntax;
+            Start = start;
+        }
+    }
 }
