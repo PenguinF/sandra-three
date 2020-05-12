@@ -169,6 +169,11 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
+        // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
+        private readonly Action YieldInTagSectionAction;
+
+        private Action YieldContentNode;
+
         private PgnParser(string pgnText)
         {
             this.pgnText = pgnText;
@@ -179,6 +184,10 @@ namespace Sandra.Chess.Pgn
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+
+            YieldInTagSectionAction = YieldInTagSection;
+
+            YieldContentNode = YieldInTagSectionAction;
         }
 
         #region Tag section parsing
@@ -279,7 +288,7 @@ namespace Sandra.Chess.Pgn
 
         #region Yield content nodes
 
-        private void YieldContentNode()
+        private void YieldInTagSection()
         {
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
