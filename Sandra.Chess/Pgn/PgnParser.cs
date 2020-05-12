@@ -171,7 +171,10 @@ namespace Sandra.Chess.Pgn
 
         // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
         private readonly Action YieldInTagSectionAction;
+        private readonly Action YieldInMoveTreeSectionAction;
 
+        // This is either YieldInTagSectionAction or YieldInMoveTreeSectionAction.
+        // It is important that this action is an instance method, since invocation of such delegates is the fastest.
         private Action YieldContentNode;
 
         private PgnParser(string pgnText)
@@ -186,6 +189,7 @@ namespace Sandra.Chess.Pgn
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
 
             YieldInTagSectionAction = YieldInTagSection;
+            YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
 
             YieldContentNode = YieldInTagSectionAction;
         }
@@ -289,6 +293,95 @@ namespace Sandra.Chess.Pgn
         #region Yield content nodes
 
         private void YieldInTagSection()
+        {
+            switch (symbolBeingYielded.ContentNode.SymbolType)
+            {
+                case PgnSymbolType.BracketOpen:
+                    // When encountering a new '[', open a new tag pair.
+                    CaptureTagPairIfNecessary();
+                    HasTagPairBracketOpen = true;
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.BracketClose:
+                    // When encountering a ']', always immediately close this tag pair.
+                    AddTagElementToBuilder();
+                    CaptureTagPair(hasTagPairBracketClose: true);
+                    break;
+                case PgnSymbolType.TagName:
+                    // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
+                    if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair(hasTagPairBracketClose: false);
+                    HasTagPairTagName = true;
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    // Only accept the first tag value.
+                    if (!HasTagPairTagValue)
+                    {
+                        HasTagPairTagValue = true;
+                    }
+                    else
+                    {
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.MultipleTagValues,
+                            symbolStartIndex,
+                            symbolBeingYielded.ContentNode.Length));
+                    }
+                    AddTagElementToBuilder();
+                    break;
+                case PgnSymbolType.MoveNumber:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.Period:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.Move:
+                case PgnSymbolType.UnrecognizedMove:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.Nag:
+                case PgnSymbolType.EmptyNag:
+                case PgnSymbolType.OverflowNag:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnNagWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.ParenthesisOpen:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.ParenthesisClose:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    break;
+                case PgnSymbolType.Asterisk:
+                case PgnSymbolType.DrawMarker:
+                case PgnSymbolType.WhiteWinMarker:
+                case PgnSymbolType.BlackWinMarker:
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+        }
+
+        private void YieldInMoveTreeSection()
         {
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
