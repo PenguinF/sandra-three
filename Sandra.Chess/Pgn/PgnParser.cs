@@ -205,6 +205,14 @@ namespace Sandra.Chess.Pgn
             return floatItems;
         }
 
+        private void AddFloatItems(ReadOnlySpanList<GreenWithTriviaSyntax> floatItems)
+        {
+            foreach (var floatItem in floatItems)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+            }
+        }
+
         private void YieldMoveNumber()
         {
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnMoveNumberWithTriviaSyntax(parent, index, green)));
@@ -214,10 +222,7 @@ namespace Sandra.Chess.Pgn
         {
             FloatItemListBuilder.Add(symbolBeingYielded);
             ReadOnlySpanList<GreenWithTriviaSyntax> floatItems = CaptureFloatItems();
-            foreach (var floatItem in floatItems)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-            }
+            AddFloatItems(floatItems);
         }
 
         private void YieldMove()
