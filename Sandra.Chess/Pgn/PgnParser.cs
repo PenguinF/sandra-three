@@ -300,6 +300,15 @@ namespace Sandra.Chess.Pgn
 
         private void YieldPeriod()
         {
+            // Report orphan period if not in between move number and move.
+            if (MoveNumber == null || Move != null)
+            {
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.OrphanPeriod,
+                    symbolStartIndex,
+                    PgnPeriodSyntax.PeriodLength));
+            }
+
             FloatItemListBuilder.Add(symbolBeingYielded);
         }
 
