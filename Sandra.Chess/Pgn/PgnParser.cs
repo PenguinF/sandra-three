@@ -253,7 +253,6 @@ namespace Sandra.Chess.Pgn
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
             MoveNumber = new GreenWithPlyFloatItemsSyntax(leadingFloatItems, symbolBeingYielded);
-            CaptureMoveNumber();
         }
 
         private void YieldPeriod()
@@ -470,6 +469,7 @@ namespace Sandra.Chess.Pgn
         {
             ReadOnlySpanList<GreenWithTriviaSyntax> floatItems;
 
+            CaptureMoveNumber();
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -596,6 +596,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CaptureFloatItems();
+                CaptureMoveNumber();
                 CaptureMove();
                 CaptureNags();
                 AddFloatItems(trailingFloatItems);
