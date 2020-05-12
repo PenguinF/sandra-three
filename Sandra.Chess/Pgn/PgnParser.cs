@@ -153,6 +153,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
+        private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private readonly string pgnText;
@@ -186,6 +187,7 @@ namespace Sandra.Chess.Pgn
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
+            FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
 
             YieldInTagSectionAction = YieldInTagSection;
@@ -203,7 +205,14 @@ namespace Sandra.Chess.Pgn
 
         private void YieldPeriod()
         {
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+            FloatItemListBuilder.Add(symbolBeingYielded);
+
+            foreach (var floatItem in FloatItemListBuilder)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+            }
+
+            FloatItemListBuilder.Clear();
         }
 
         private void YieldMove()
