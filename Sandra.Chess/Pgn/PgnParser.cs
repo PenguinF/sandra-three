@@ -221,8 +221,6 @@ namespace Sandra.Chess.Pgn
         private void YieldPeriod()
         {
             FloatItemListBuilder.Add(symbolBeingYielded);
-            ReadOnlySpanList<GreenWithTriviaSyntax> floatItems = CaptureFloatItems();
-            AddFloatItems(floatItems);
         }
 
         private void YieldMove()
@@ -432,6 +430,9 @@ namespace Sandra.Chess.Pgn
 
         private void YieldInMoveTreeSection()
         {
+            ReadOnlySpanList<GreenWithTriviaSyntax> floatItems = CaptureFloatItems();
+            AddFloatItems(floatItems);
+
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -520,6 +521,11 @@ namespace Sandra.Chess.Pgn
             {
                 CaptureTagPairIfNecessary();
                 CaptureTagSection();
+            }
+            else
+            {
+                var trailingFloatItems = CaptureFloatItems();
+                AddFloatItems(trailingFloatItems);
             }
 
             return trailingTrivia;
