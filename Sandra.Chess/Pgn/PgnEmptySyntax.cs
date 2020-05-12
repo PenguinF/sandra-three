@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -46,6 +49,36 @@ namespace Sandra.Chess.Pgn
         {
             ParentSyntax = parentSyntax;
             Start = start;
+        }
+    }
+
+    /// <summary>
+    /// Wraps either an empty syntax or a lazy child node of the specified type.
+    /// </summary>
+    internal struct SafeLazyChildSyntaxOrEmpty<TChildSyntax> where TChildSyntax : PgnSyntax
+    {
+        private readonly SafeLazyObject<TChildSyntax> lazyNodeIfNonEmpty;
+        private readonly PgnEmptySyntax nodeIfEmpty;
+
+        public TChildSyntax ChildNodeOrNull => nodeIfEmpty == null ? lazyNodeIfNonEmpty.Object : null;
+        public PgnSyntax ChildNodeOrEmpty => nodeIfEmpty == null ? lazyNodeIfNonEmpty.Object : (PgnSyntax)nodeIfEmpty;
+
+        /// <summary>
+        /// Initializes as lazy child node.
+        /// </summary>
+        public SafeLazyChildSyntaxOrEmpty(Func<TChildSyntax> childConstructor)
+        {
+            lazyNodeIfNonEmpty = new SafeLazyObject<TChildSyntax>(childConstructor);
+            nodeIfEmpty = null;
+        }
+
+        /// <summary>
+        /// Initializes as empty.
+        /// </summary>
+        public SafeLazyChildSyntaxOrEmpty(PgnSyntax parent, int start)
+        {
+            lazyNodeIfNonEmpty = default;
+            nodeIfEmpty = new PgnEmptySyntax(parent, start);
         }
     }
 }
