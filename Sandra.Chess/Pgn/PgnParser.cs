@@ -130,16 +130,7 @@ namespace Sandra.Chess.Pgn
         {
             var plyListSyntax = new GreenPgnPlyListSyntax(PlyListBuilder, trailingFloatItems);
             PlyListBuilder.Clear();
-
-            foreach (var plySyntax in plyListSyntax.Plies)
-            {
-                SymbolBuilder.Add(plySyntax);
-            }
-
-            foreach (var floatItem in plyListSyntax.TrailingFloatItems)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-            }
+            SymbolBuilder.Add(plyListSyntax);
         }
 
         #endregion Variation parsing
@@ -550,7 +541,10 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CapturePly();
-                CapturePlyList(trailingFloatItems);
+                if (PlyListBuilder.Count > 0 || trailingFloatItems.Count > 0)
+                {
+                    CapturePlyList(trailingFloatItems);
+                }
             }
 
             return trailingTrivia;

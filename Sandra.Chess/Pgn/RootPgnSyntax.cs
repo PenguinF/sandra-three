@@ -119,9 +119,9 @@ namespace Sandra.Chess.Pgn.Temp
                     {
                         return new PgnTagSectionSyntax(this, index, tagSectionSyntax);
                     }
-                    else if (topLevelNode is GreenPgnPlySyntax plySyntax)
+                    else if (topLevelNode is GreenPgnPlyListSyntax plySyntax)
                     {
-                        return new PgnPlySyntax(this, index, plySyntax);
+                        return new PgnPlyListSyntax(this, index, plySyntax);
                     }
                     else
                     {

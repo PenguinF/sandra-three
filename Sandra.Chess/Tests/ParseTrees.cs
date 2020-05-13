@@ -136,6 +136,7 @@ namespace Sandra.Chess.Tests
             {
                 if (TagSection.Any()) gamesSyntax.Add(TagSection);
 
+                ParseTree<PgnPlyListSyntax> plyListSyntax = new ParseTree<PgnPlyListSyntax>();
                 foreach (SinglePly singlePly in MoveSection.MainLine)
                 {
                     ParseTree<PgnPlySyntax> plySyntax = new ParseTree<PgnPlySyntax>();
@@ -174,10 +175,12 @@ namespace Sandra.Chess.Tests
                         nagSyntax.Add(nag.NagWithTrivia);
                         plySyntax.Add(nagSyntax);
                     }
-                    gamesSyntax.Add(plySyntax);
+                    plyListSyntax.Add(plySyntax);
                 }
 
-                MoveSection.TrailingFloatItems.ForEach(gamesSyntax.Add);
+                MoveSection.TrailingFloatItems.ForEach(plyListSyntax.Add);
+
+                if (plyListSyntax.Any()) gamesSyntax.Add(plyListSyntax);
 
                 if (Result != null) gamesSyntax.Add(Result);
             }

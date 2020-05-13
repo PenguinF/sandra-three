@@ -78,7 +78,7 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="nags"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and/or <paramref name="nags"/> is empty.
+        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and <paramref name="nags"/> is empty.
         /// </exception>
         public GreenPgnPlySyntax(GreenWithPlyFloatItemsSyntax moveNumber, GreenWithPlyFloatItemsSyntax move, IEnumerable<GreenWithPlyFloatItemsSyntax> nags)
         {
@@ -112,7 +112,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public PgnPlyListSyntax Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -197,7 +197,7 @@ namespace Sandra.Chess.Pgn
             return Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
         }
 
-        internal PgnPlySyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnPlySyntax green)
+        internal PgnPlySyntax(PgnPlyListSyntax parent, int parentIndex, GreenPgnPlySyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
