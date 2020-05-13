@@ -72,6 +72,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
         private readonly List<GreenWithPlyFloatItemsSyntax> NagListBuilder;
+        private readonly List<GreenPgnPlySyntax> PlyListBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private readonly string pgnText;
@@ -114,6 +115,7 @@ namespace Sandra.Chess.Pgn
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
             NagListBuilder = new List<GreenWithPlyFloatItemsSyntax>();
+            PlyListBuilder = new List<GreenPgnPlySyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
 
             YieldInTagSectionAction = YieldInTagSection;
@@ -121,6 +123,20 @@ namespace Sandra.Chess.Pgn
 
             YieldContentNode = YieldInTagSectionAction;
         }
+
+        #region Variation parsing
+
+        private void CapturePlyList()
+        {
+            foreach (var plySyntax in PlyListBuilder)
+            {
+                SymbolBuilder.Add(plySyntax);
+            }
+
+            PlyListBuilder.Clear();
+        }
+
+        #endregion Variation parsing
 
         #region Ply parsing
 
@@ -167,7 +183,8 @@ namespace Sandra.Chess.Pgn
             NagListBuilder.Clear();
 
             HasPly = true;
-            SymbolBuilder.Add(plySyntax);
+            PlyListBuilder.Add(plySyntax);
+            CapturePlyList();
         }
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CapturePly()
