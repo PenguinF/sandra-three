@@ -126,7 +126,7 @@ namespace Sandra.Chess.Pgn
 
         #region Variation parsing
 
-        private void CapturePlyList()
+        private void CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
             foreach (var plySyntax in PlyListBuilder)
             {
@@ -134,6 +134,11 @@ namespace Sandra.Chess.Pgn
             }
 
             PlyListBuilder.Clear();
+
+            foreach (var floatItem in trailingFloatItems)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
+            }
         }
 
         #endregion Variation parsing
@@ -203,14 +208,6 @@ namespace Sandra.Chess.Pgn
             var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(FloatItemListBuilder);
             FloatItemListBuilder.Clear();
             return floatItems;
-        }
-
-        private void AddFloatItems(ReadOnlySpanList<GreenWithTriviaSyntax> floatItems)
-        {
-            foreach (var floatItem in floatItems)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-            }
         }
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
@@ -445,8 +442,7 @@ namespace Sandra.Chess.Pgn
             {
                 case PgnSymbolType.BracketOpen:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
@@ -454,16 +450,14 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', switch to tag section and immediately open and close a tag pair.
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagName:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
@@ -471,8 +465,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     HasTagPairTagValue = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
@@ -499,14 +492,12 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
                     break;
                 case PgnSymbolType.Asterisk:
@@ -514,8 +505,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
                     floatItems = CapturePly();
-                    CapturePlyList();
-                    AddFloatItems(floatItems);
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
                     break;
                 default:
@@ -559,8 +549,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CapturePly();
-                CapturePlyList();
-                AddFloatItems(trailingFloatItems);
+                CapturePlyList(trailingFloatItems);
             }
 
             return trailingTrivia;
