@@ -184,7 +184,6 @@ namespace Sandra.Chess.Pgn
 
             HasPly = true;
             PlyListBuilder.Add(plySyntax);
-            CapturePlyList();
         }
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CapturePly()
@@ -446,6 +445,7 @@ namespace Sandra.Chess.Pgn
             {
                 case PgnSymbolType.BracketOpen:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
@@ -454,6 +454,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', switch to tag section and immediately open and close a tag pair.
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
@@ -461,6 +462,7 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.TagName:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
@@ -469,6 +471,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     HasTagPairTagValue = true;
                     AddTagElementToBuilder();
@@ -477,6 +480,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.MoveNumber:
                     // Move number always starts a new ply, so capture any unfinished ply.
                     floatItems = CapturePly();
+                    CapturePlyList();
                     YieldMoveNumber(floatItems);
                     break;
                 case PgnSymbolType.Period:
@@ -487,6 +491,7 @@ namespace Sandra.Chess.Pgn
                     // Only allow a preceding move number in the same ply.
                     floatItems = CaptureFloatItems();
                     if (Move != null || NagListBuilder.Count > 0) CapturePlyUnchecked(floatItems.Length);
+                    CapturePlyList();
                     YieldMove(floatItems);
                     break;
                 case PgnSymbolType.Nag:
@@ -496,11 +501,13 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
                     break;
@@ -509,6 +516,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
                     floatItems = CapturePly();
+                    CapturePlyList();
                     AddFloatItems(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
                     break;
@@ -553,6 +561,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CapturePly();
+                CapturePlyList();
                 AddFloatItems(trailingFloatItems);
             }
 
