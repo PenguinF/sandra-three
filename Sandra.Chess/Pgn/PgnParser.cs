@@ -24,7 +24,6 @@ using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -35,88 +34,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        #region PGN character classes
-
-        private const int IllegalCharacter = 0;
-
-        // Symbol characters in discrete partitions of character sets.
-        private const int SymbolCharacterMask = 0x3f;
-
-        private const int SpecialCharacter = 1 << 6;
-        private const int WhitespaceCharacter = 1 << 7;
-
-        /// <summary>
-        /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
-        /// A value of 0 means the character is not allowed.
-        /// </summary>
-        private static readonly int[] PgnCharacterClassTable = new int[0x100];
-
-        static PgnParser()
-        {
-            // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
-            PgnCharacterClassTable['\t'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\n'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\v'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\r'] = WhitespaceCharacter;
-            PgnCharacterClassTable[' '] = WhitespaceCharacter;
-
-            // Treat 0xa0 as a space separator too.
-            PgnCharacterClassTable[0xa0] = WhitespaceCharacter;
-
-            new[]
-            {
-                PgnGameResultSyntax.AsteriskCharacter,
-                PgnBracketOpenSyntax.BracketOpenCharacter,
-                PgnBracketCloseSyntax.BracketCloseCharacter,
-                PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
-                PgnParenthesisOpenSyntax.ParenthesisOpenCharacter,
-                PgnPeriodSyntax.PeriodCharacter,
-                StringLiteral.QuoteCharacter,
-                PgnCommentSyntax.EndOfLineCommentStartCharacter,
-                PgnCommentSyntax.MultiLineCommentStartCharacter,
-                PgnNagSyntax.NagCharacter,
-                PgnEscapeSyntax.EscapeCharacter,
-            }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
-
-            // Digits.
-            PgnCharacterClassTable['0'] = PgnSymbolStateMachine.Digit0;
-            PgnCharacterClassTable['1'] = PgnSymbolStateMachine.Digit1;
-            PgnCharacterClassTable['2'] = PgnSymbolStateMachine.Digit2;
-            for (char c = '3'; c <= '8'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.Digit3_8;
-            PgnCharacterClassTable['9'] = PgnSymbolStateMachine.Digit9;
-
-            // Letters.
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;
-            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xc0-0xd6
-            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xd8-0xde
-            for (char c = 'a'; c <= 'h'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseAtoH;
-            for (char c = 'i'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;
-            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xdf-0xf6
-            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xf8-0xff
-
-            // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.OtherLowercaseLetter;
-
-            // Special cases.
-            PgnCharacterClassTable['O'] = PgnSymbolStateMachine.LetterO;
-            PgnCharacterClassTable['P'] = PgnSymbolStateMachine.LetterP;
-            PgnMoveFormatter.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
-            PgnCharacterClassTable['x'] = PgnSymbolStateMachine.LowercaseX;
-            PgnCharacterClassTable['-'] = PgnSymbolStateMachine.Dash;
-            PgnCharacterClassTable['/'] = PgnSymbolStateMachine.Slash;
-            PgnCharacterClassTable['='] = PgnSymbolStateMachine.EqualitySign;
-            PgnCharacterClassTable['+'] = PgnSymbolStateMachine.PlusOrOctothorpe;
-            PgnCharacterClassTable['#'] = PgnSymbolStateMachine.PlusOrOctothorpe;
-            PgnCharacterClassTable['!'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
-            PgnCharacterClassTable['?'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetCharacterClass(char pgnCharacter)
-            => pgnCharacter <= 0xff ? PgnCharacterClassTable[pgnCharacter] : IllegalCharacter;
-
-        #endregion PGN character classes
-
         /// <summary>
         /// See also <see cref="StringLiteral.EscapeCharacter"/>.
         /// </summary>
@@ -155,6 +72,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
         private readonly List<GreenWithPlyFloatItemsSyntax> NagListBuilder;
+        private readonly List<GreenPgnPlySyntax> PlyListBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private readonly string pgnText;
@@ -197,6 +115,7 @@ namespace Sandra.Chess.Pgn
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
             NagListBuilder = new List<GreenWithPlyFloatItemsSyntax>();
+            PlyListBuilder = new List<GreenPgnPlySyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
 
             YieldInTagSectionAction = YieldInTagSection;
@@ -204,6 +123,17 @@ namespace Sandra.Chess.Pgn
 
             YieldContentNode = YieldInTagSectionAction;
         }
+
+        #region Variation parsing
+
+        private void CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
+        {
+            var plyListSyntax = new GreenPgnPlyListSyntax(PlyListBuilder, trailingFloatItems);
+            PlyListBuilder.Clear();
+            SymbolBuilder.Add(plyListSyntax);
+        }
+
+        #endregion Variation parsing
 
         #region Ply parsing
 
@@ -250,15 +180,19 @@ namespace Sandra.Chess.Pgn
             NagListBuilder.Clear();
 
             HasPly = true;
-            SymbolBuilder.Add(plySyntax);
+            PlyListBuilder.Add(plySyntax);
         }
 
-        private void CapturePly(int trailingFloatItemsLength)
+        private ReadOnlySpanList<GreenWithTriviaSyntax> CapturePly()
         {
+            ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems = CaptureFloatItems();
+
             if (MoveNumber != null || Move != null || NagListBuilder.Count > 0)
             {
-                CapturePlyUnchecked(trailingFloatItemsLength);
+                CapturePlyUnchecked(trailingFloatItems.Length);
             }
+
+            return trailingFloatItems;
         }
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
@@ -266,14 +200,6 @@ namespace Sandra.Chess.Pgn
             var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(FloatItemListBuilder);
             FloatItemListBuilder.Clear();
             return floatItems;
-        }
-
-        private void AddFloatItems(ReadOnlySpanList<GreenWithTriviaSyntax> floatItems)
-        {
-            foreach (var floatItem in floatItems)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
-            }
         }
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
@@ -507,43 +433,38 @@ namespace Sandra.Chess.Pgn
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', switch to tag section and immediately open and close a tag pair.
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagName:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     HasTagPairTagValue = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
                     // Move number always starts a new ply, so capture any unfinished ply.
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
+                    floatItems = CapturePly();
                     YieldMoveNumber(floatItems);
                     break;
                 case PgnSymbolType.Period:
@@ -562,24 +483,21 @@ namespace Sandra.Chess.Pgn
                     YieldNag(CaptureFloatItems());
                     break;
                 case PgnSymbolType.ParenthesisOpen:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
                     break;
                 case PgnSymbolType.ParenthesisClose:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
                     break;
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
-                    floatItems = CaptureFloatItems();
-                    CapturePly(floatItems.Length);
-                    AddFloatItems(floatItems);
+                    floatItems = CapturePly();
+                    CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
                     break;
                 default:
@@ -622,9 +540,11 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                var trailingFloatItems = CaptureFloatItems();
-                CapturePly(trailingFloatItems.Length);
-                AddFloatItems(trailingFloatItems);
+                var trailingFloatItems = CapturePly();
+                if (PlyListBuilder.Count > 0 || trailingFloatItems.Count > 0)
+                {
+                    CapturePlyList(trailingFloatItems);
+                }
             }
 
             return trailingTrivia;
@@ -676,9 +596,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                int characterClass = GetCharacterClass(c);
+                int characterClass = PgnParserCharacterClass.GetCharacterClass(c);
 
-                if (characterClass != WhitespaceCharacter)
+                if (characterClass != PgnParserCharacterClass.WhitespaceCharacter)
                 {
                     if (symbolStartIndex < currentIndex)
                     {
@@ -686,9 +606,9 @@ namespace Sandra.Chess.Pgn
                         symbolStartIndex = currentIndex;
                     }
 
-                    if (characterClass != IllegalCharacter)
+                    if (characterClass != PgnParserCharacterClass.IllegalCharacter)
                     {
-                        int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                        int symbolCharacterClass = characterClass & PgnParserCharacterClass.SymbolCharacterMask;
                         if (symbolCharacterClass != 0)
                         {
                             symbolBuilder.Start(symbolCharacterClass);
@@ -769,9 +689,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                int characterClass = GetCharacterClass(c);
+                int characterClass = PgnParserCharacterClass.GetCharacterClass(c);
 
-                if (characterClass == WhitespaceCharacter)
+                if (characterClass == PgnParserCharacterClass.WhitespaceCharacter)
                 {
                     if (symbolStartIndex < currentIndex)
                     {
@@ -783,9 +703,9 @@ namespace Sandra.Chess.Pgn
                     goto inWhitespace;
                 }
 
-                if (characterClass != IllegalCharacter)
+                if (characterClass != PgnParserCharacterClass.IllegalCharacter)
                 {
-                    int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                    int symbolCharacterClass = characterClass & PgnParserCharacterClass.SymbolCharacterMask;
                     if (symbolCharacterClass != 0)
                     {
                         symbolBuilder.Transition(symbolCharacterClass);

@@ -21,7 +21,6 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -30,7 +29,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a single ply (half-move).
     /// </summary>
-    public sealed class GreenPgnPlySyntax : IGreenPgnTopLevelSyntax
+    public sealed class GreenPgnPlySyntax : ISpan
     {
         /// <summary>
         /// The move number. The move number can be null.
@@ -78,7 +77,7 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="nags"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and/or <paramref name="nags"/> is empty.
+        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and <paramref name="nags"/> is empty.
         /// </exception>
         public GreenPgnPlySyntax(GreenWithPlyFloatItemsSyntax moveNumber, GreenWithPlyFloatItemsSyntax move, IEnumerable<GreenWithPlyFloatItemsSyntax> nags)
         {
@@ -105,14 +104,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a single ply (half-move).
     /// </summary>
-    public sealed class PgnPlySyntax : PgnSyntax, IPgnTopLevelSyntax
+    public sealed class PgnPlySyntax : PgnSyntax
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public PgnPlyListSyntax Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -156,7 +153,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Green.Plies.GetElementOffset(ParentIndex);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -197,7 +194,7 @@ namespace Sandra.Chess.Pgn
             return Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
         }
 
-        internal PgnPlySyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnPlySyntax green)
+        internal PgnPlySyntax(PgnPlyListSyntax parent, int parentIndex, GreenPgnPlySyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

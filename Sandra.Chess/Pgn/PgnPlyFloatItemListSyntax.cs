@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 
@@ -32,7 +33,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public WithPlyFloatItemsSyntax Parent { get; }
+        public Union<WithPlyFloatItemsSyntax, PgnPlyListSyntax> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -47,7 +48,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => 0;
+        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.Length - Green.Length);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -57,7 +58,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         /// <summary>
         /// Gets the number of children of this syntax node.
@@ -74,7 +75,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnPlyFloatItemListSyntax(WithPlyFloatItemsSyntax parent, ReadOnlySpanList<GreenWithTriviaSyntax> green)
+        internal PgnPlyFloatItemListSyntax(Union<WithPlyFloatItemsSyntax, PgnPlyListSyntax> parent, ReadOnlySpanList<GreenWithTriviaSyntax> green)
         {
             Parent = parent;
             Green = green;

@@ -46,86 +46,19 @@ namespace Sandra.Chess.Tests
             public override Type ExpectedType => typeof(T);
         }
 
-        private class LeadingFloatItemsAndMoveNumber
-        {
-            public readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> LeadingFloatItems;
-            public readonly ParseTree<PgnMoveNumberWithTriviaSyntax> MoveNumberWithTrivia;
-
-            public LeadingFloatItemsAndMoveNumber(List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems, ParseTree<PgnMoveNumberWithTriviaSyntax> moveNumberWithTrivia)
-            {
-                LeadingFloatItems = leadingFloatItems;
-                MoveNumberWithTrivia = moveNumberWithTrivia;
-            }
-        }
-
-        private class LeadingFloatItemsAndMove
-        {
-            public readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> LeadingFloatItems;
-            public readonly ParseTree<PgnMoveWithTriviaSyntax> MoveWithTrivia;
-
-            public LeadingFloatItemsAndMove(List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems, ParseTree<PgnMoveWithTriviaSyntax> moveWithTrivia)
-            {
-                LeadingFloatItems = leadingFloatItems;
-                MoveWithTrivia = moveWithTrivia;
-            }
-        }
-
-        private class LeadingFloatItemsAndNAG
-        {
-            public readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> LeadingFloatItems;
-            public readonly ParseTree<PgnNagWithTriviaSyntax> NagWithTrivia;
-
-            public LeadingFloatItemsAndNAG(List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems, ParseTree<PgnNagWithTriviaSyntax> nagWithTrivia)
-            {
-                LeadingFloatItems = leadingFloatItems;
-                NagWithTrivia = nagWithTrivia;
-            }
-        }
-
-        private class SinglePly
-        {
-            public readonly LeadingFloatItemsAndMoveNumber MoveNumber;
-            public readonly LeadingFloatItemsAndMove Move;
-            public readonly LeadingFloatItemsAndNAG[] Nags;
-
-            public SinglePly(LeadingFloatItemsAndMoveNumber moveNumber, LeadingFloatItemsAndMove move, LeadingFloatItemsAndNAG[] nags)
-            {
-                MoveNumber = moveNumber;
-                Move = move;
-                Nags = nags;
-            }
-        }
-
-        private class MainLineAndTrailingFloats
-        {
-            public SinglePly[] MainLine;
-            public List<ParseTree<PgnPeriodWithTriviaSyntax>> TrailingFloatItems;
-
-            public MainLineAndTrailingFloats(SinglePly[] mainLine, List<ParseTree<PgnPeriodWithTriviaSyntax>> trailingFloatItems)
-            {
-                MainLine = mainLine;
-                TrailingFloatItems = trailingFloatItems;
-            }
-
-            public MainLineAndTrailingFloats(SinglePly[] mainLine)
-                : this(mainLine, EmptyFloatItems)
-            {
-            }
-        }
-
         private class TagSectionAndMoveTreeAndResult
         {
             public ParseTree<PgnTagSectionSyntax> TagSection;
-            public MainLineAndTrailingFloats MoveSection;
+            public ParseTree<PgnPlyListSyntax> MoveSection;
             public ParseTree<PgnGameResultWithTriviaSyntax> Result;
 
-            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, MainLineAndTrailingFloats moveSection)
+            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnPlyListSyntax> moveSection)
             {
                 TagSection = tagSection;
                 MoveSection = moveSection;
             }
 
-            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, MainLineAndTrailingFloats moveSection, ParseTree<PgnGameResultWithTriviaSyntax> result)
+            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnPlyListSyntax> moveSection, ParseTree<PgnGameResultWithTriviaSyntax> result)
             {
                 TagSection = tagSection;
                 MoveSection = moveSection;
@@ -135,50 +68,7 @@ namespace Sandra.Chess.Tests
             public void AddTo(ParseTree<PgnSyntaxNodes> gamesSyntax)
             {
                 if (TagSection.Any()) gamesSyntax.Add(TagSection);
-
-                foreach (SinglePly singlePly in MoveSection.MainLine)
-                {
-                    ParseTree<PgnPlySyntax> plySyntax = new ParseTree<PgnPlySyntax>();
-                    if (singlePly.MoveNumber != null)
-                    {
-                        ParseTree<PgnMoveNumberWithFloatItemsSyntax> moveNumberSyntax = new ParseTree<PgnMoveNumberWithFloatItemsSyntax>();
-                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
-                        singlePly.MoveNumber.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
-                        moveNumberSyntax.Add(floatItemsSyntax);
-                        moveNumberSyntax.Add(singlePly.MoveNumber.MoveNumberWithTrivia);
-                        plySyntax.Add(moveNumberSyntax);
-                    }
-                    else
-                    {
-                        plySyntax.Add(Missing);
-                    }
-                    if (singlePly.Move != null)
-                    {
-                        ParseTree<PgnMoveWithFloatItemsSyntax> moveSyntax = new ParseTree<PgnMoveWithFloatItemsSyntax>();
-                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
-                        singlePly.Move.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
-                        moveSyntax.Add(floatItemsSyntax);
-                        moveSyntax.Add(singlePly.Move.MoveWithTrivia);
-                        plySyntax.Add(moveSyntax);
-                    }
-                    else
-                    {
-                        plySyntax.Add(Missing);
-                    }
-                    foreach (LeadingFloatItemsAndNAG nag in singlePly.Nags)
-                    {
-                        ParseTree<PgnNagWithFloatItemsSyntax> nagSyntax = new ParseTree<PgnNagWithFloatItemsSyntax>();
-                        ParseTree<PgnPlyFloatItemListSyntax> floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
-                        nag.LeadingFloatItems.ForEach(floatItemsSyntax.Add);
-                        nagSyntax.Add(floatItemsSyntax);
-                        nagSyntax.Add(nag.NagWithTrivia);
-                        plySyntax.Add(nagSyntax);
-                    }
-                    gamesSyntax.Add(plySyntax);
-                }
-
-                MoveSection.TrailingFloatItems.ForEach(gamesSyntax.Add);
-
+                if (MoveSection.Any()) gamesSyntax.Add(MoveSection);
                 if (Result != null) gamesSyntax.Add(Result);
             }
         }
@@ -276,85 +166,96 @@ namespace Sandra.Chess.Tests
             return tagSectionSyntax;
         }
 
-        private static readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> EmptyFloatItems
-            = new List<ParseTree<PgnPeriodWithTriviaSyntax>>();
+        private static readonly ParseTree<PgnPlyFloatItemListSyntax> EmptyFloatItems
+            = new ParseTree<PgnPlyFloatItemListSyntax>();
 
-        private static readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> OnePeriod
-            = new List<ParseTree<PgnPeriodWithTriviaSyntax>> { PeriodNoTrivia };
+        private static readonly ParseTree<PgnPlyFloatItemListSyntax> OnePeriod
+            = new ParseTree<PgnPlyFloatItemListSyntax> { PeriodNoTrivia };
 
-        private static readonly List<ParseTree<PgnPeriodWithTriviaSyntax>> TwoPeriods
-            = new List<ParseTree<PgnPeriodWithTriviaSyntax>> { PeriodNoTrivia, PeriodNoTrivia };
+        private static readonly ParseTree<PgnPlyFloatItemListSyntax> TwoPeriods
+            = new ParseTree<PgnPlyFloatItemListSyntax> { PeriodNoTrivia, PeriodNoTrivia };
 
-        private static LeadingFloatItemsAndMoveNumber WithFloats(
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems,
+        private static ParseTree<PgnMoveNumberWithFloatItemsSyntax> WithFloats(
+            ParseTree<PgnPlyFloatItemListSyntax> leadingFloatItems,
             ParseTree<PgnMoveNumberWithTriviaSyntax> moveNumberWithTrivia)
-            => new LeadingFloatItemsAndMoveNumber(leadingFloatItems, moveNumberWithTrivia);
+            => new ParseTree<PgnMoveNumberWithFloatItemsSyntax> { leadingFloatItems, moveNumberWithTrivia };
 
-        private static LeadingFloatItemsAndMove WithFloats(
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems,
+        private static ParseTree<PgnMoveWithFloatItemsSyntax> WithFloats(
+            ParseTree<PgnPlyFloatItemListSyntax> leadingFloatItems,
             ParseTree<PgnMoveWithTriviaSyntax> moveWithTrivia)
-            => new LeadingFloatItemsAndMove(leadingFloatItems, moveWithTrivia);
+            => new ParseTree<PgnMoveWithFloatItemsSyntax> { leadingFloatItems, moveWithTrivia };
 
-        private static LeadingFloatItemsAndNAG WithFloats(
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> leadingFloatItems,
+        private static ParseTree<PgnNagWithFloatItemsSyntax> WithFloats(
+            ParseTree<PgnPlyFloatItemListSyntax> leadingFloatItems,
             ParseTree<PgnNagWithTriviaSyntax> nagWithTrivia)
-            => new LeadingFloatItemsAndNAG(leadingFloatItems, nagWithTrivia);
+            => new ParseTree<PgnNagWithFloatItemsSyntax> { leadingFloatItems, nagWithTrivia };
 
-        private static LeadingFloatItemsAndMoveNumber NoFloats(ParseTree<PgnMoveNumberWithTriviaSyntax> moveNumberWithTrivia)
+        private static ParseTree<PgnMoveNumberWithFloatItemsSyntax> NoFloats(ParseTree<PgnMoveNumberWithTriviaSyntax> moveNumberWithTrivia)
             => WithFloats(EmptyFloatItems, moveNumberWithTrivia);
 
-        private static LeadingFloatItemsAndMove NoFloats(ParseTree<PgnMoveWithTriviaSyntax> moveWithTrivia)
+        private static ParseTree<PgnMoveWithFloatItemsSyntax> NoFloats(ParseTree<PgnMoveWithTriviaSyntax> moveWithTrivia)
             => WithFloats(EmptyFloatItems, moveWithTrivia);
 
-        private static LeadingFloatItemsAndNAG NoFloats(ParseTree<PgnNagWithTriviaSyntax> nagWithTrivia)
+        private static ParseTree<PgnNagWithFloatItemsSyntax> NoFloats(ParseTree<PgnNagWithTriviaSyntax> nagWithTrivia)
             => WithFloats(EmptyFloatItems, nagWithTrivia);
 
-        private static readonly LeadingFloatItemsAndMoveNumber MoveNumberNoFloats = NoFloats(MoveNumberNoTrivia);
-        private static readonly LeadingFloatItemsAndMove MoveNoFloats = NoFloats(MoveNoTrivia);
-        private static readonly LeadingFloatItemsAndNAG NAGNoFloats = NoFloats(NAGNoTrivia);
+        private static readonly ParseTree<PgnMoveNumberWithFloatItemsSyntax> MoveNumberNoFloats = NoFloats(MoveNumberNoTrivia);
+        private static readonly ParseTree<PgnMoveWithFloatItemsSyntax> MoveNoFloats = NoFloats(MoveNoTrivia);
+        private static readonly ParseTree<PgnNagWithFloatItemsSyntax> NAGNoFloats = NoFloats(NAGNoTrivia);
 
-        private static readonly LeadingFloatItemsAndMoveNumber WS_MoveNumberNoFloats = NoFloats(WS_MoveNumber);
-        private static readonly LeadingFloatItemsAndMove WS_MoveNoFloats = NoFloats(WS_Move);
-        private static readonly LeadingFloatItemsAndNAG WS_NAGNoFloats = NoFloats(WS_NAG);
+        private static readonly ParseTree<PgnMoveNumberWithFloatItemsSyntax> WS_MoveNumberNoFloats = NoFloats(WS_MoveNumber);
+        private static readonly ParseTree<PgnMoveWithFloatItemsSyntax> WS_MoveNoFloats = NoFloats(WS_Move);
+        private static readonly ParseTree<PgnNagWithFloatItemsSyntax> WS_NAGNoFloats = NoFloats(WS_NAG);
 
-        private static SinglePly Ply(
-            LeadingFloatItemsAndMoveNumber moveNumber,
-            LeadingFloatItemsAndMove move,
-            params LeadingFloatItemsAndNAG[] nags)
-            => new SinglePly(moveNumber, move, nags);
+        private static ParseTree<PgnPlySyntax> Ply(
+            ParseTree<PgnMoveNumberWithFloatItemsSyntax> moveNumber,
+            ParseTree<PgnMoveWithFloatItemsSyntax> move,
+            params ParseTree<PgnNagWithFloatItemsSyntax>[] nags)
+        {
+            var plySyntax = new ParseTree<PgnPlySyntax>();
+            if (moveNumber != null) plySyntax.Add(moveNumber); else plySyntax.Add(Missing);
+            if (move != null) plySyntax.Add(move); else plySyntax.Add(Missing);
+            nags.ForEach(plySyntax.Add);
+            return plySyntax;
+        }
 
-        private static SinglePly Ply(
-            LeadingFloatItemsAndMoveNumber moveNumber,
-            params LeadingFloatItemsAndNAG[] nags)
+        private static ParseTree<PgnPlySyntax> Ply(
+            ParseTree<PgnMoveNumberWithFloatItemsSyntax> moveNumber,
+            params ParseTree<PgnNagWithFloatItemsSyntax>[] nags)
             => Ply(moveNumber, null, nags);
 
-        private static SinglePly Ply(
-            LeadingFloatItemsAndMove move,
-            params LeadingFloatItemsAndNAG[] nags)
+        private static ParseTree<PgnPlySyntax> Ply(
+            ParseTree<PgnMoveWithFloatItemsSyntax> move,
+            params ParseTree<PgnNagWithFloatItemsSyntax>[] nags)
             => Ply(null, move, nags);
 
-        private static SinglePly Ply(
-            params LeadingFloatItemsAndNAG[] nags)
+        private static ParseTree<PgnPlySyntax> Ply(
+            params ParseTree<PgnNagWithFloatItemsSyntax>[] nags)
             => Ply(null, null, nags);
 
-        private static MainLineAndTrailingFloats PliesTrailingFloatItems(
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> trailingFloatItems,
-            params SinglePly[] plies)
-            => new MainLineAndTrailingFloats(plies, trailingFloatItems);
+        private static ParseTree<PgnPlyListSyntax> PliesTrailingFloatItems(
+            ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItems,
+            params ParseTree<PgnPlySyntax>[] plies)
+        {
+            var plyListSyntax = new ParseTree<PgnPlyListSyntax>();
+            plies.ForEach(plyListSyntax.Add);
+            if (plies.Any() || trailingFloatItems.Any()) plyListSyntax.Add(trailingFloatItems);
+            return plyListSyntax;
+        }
 
-        private static MainLineAndTrailingFloats Plies(
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> trailingFloatItems)
-            => new MainLineAndTrailingFloats(Array.Empty<SinglePly>(), trailingFloatItems);
+        private static ParseTree<PgnPlyListSyntax> Plies(
+            ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItems)
+            => new ParseTree<PgnPlyListSyntax> { trailingFloatItems };
 
-        private static MainLineAndTrailingFloats Plies(
-            SinglePly ply1,
-            List<ParseTree<PgnPeriodWithTriviaSyntax>> trailingFloatItems)
-            => new MainLineAndTrailingFloats(new SinglePly[] { ply1 }, trailingFloatItems);
+        private static ParseTree<PgnPlyListSyntax> Plies(
+            ParseTree<PgnPlySyntax> ply1,
+            ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItems)
+            => new ParseTree<PgnPlyListSyntax> { ply1, trailingFloatItems };
 
-        private static MainLineAndTrailingFloats Plies(params SinglePly[] plies)
+        private static ParseTree<PgnPlyListSyntax> Plies(params ParseTree<PgnPlySyntax>[] plies)
             => PliesTrailingFloatItems(EmptyFloatItems, plies);
 
-        private static readonly MainLineAndTrailingFloats NoPlies = Plies();
+        private static readonly ParseTree<PgnPlyListSyntax> NoPlies = Plies();
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnGameResultWithTriviaSyntax> result)
@@ -362,12 +263,12 @@ namespace Sandra.Chess.Tests
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnTagSectionSyntax> tagSection,
-            MainLineAndTrailingFloats moveSection)
+            ParseTree<PgnPlyListSyntax> moveSection)
             => new TagSectionAndMoveTreeAndResult(tagSection, moveSection);
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnTagSectionSyntax> tagSection,
-            MainLineAndTrailingFloats moveSection,
+            ParseTree<PgnPlyListSyntax> moveSection,
             ParseTree<PgnGameResultWithTriviaSyntax> result)
             => new TagSectionAndMoveTreeAndResult(tagSection, moveSection, result);
 
@@ -398,18 +299,18 @@ namespace Sandra.Chess.Tests
 
         private static ParseTree<PgnSyntaxNodes> OneGameTrailingTrivia(
             ParseTree<PgnTagSectionSyntax> tagSection,
-            MainLineAndTrailingFloats moveSection,
+            ParseTree<PgnPlyListSyntax> moveSection,
             ParseTree<PgnTriviaSyntax> trailingTrivia)
             => Games(Game(tagSection, moveSection), trailingTrivia);
 
         private static ParseTree<PgnSyntaxNodes> OneGame(
             ParseTree<PgnTagSectionSyntax> tagSection,
-            MainLineAndTrailingFloats moveSection)
+            ParseTree<PgnPlyListSyntax> moveSection)
             => Games(Game(tagSection, moveSection));
 
         private static ParseTree<PgnSyntaxNodes> OneGame(
             ParseTree<PgnTagSectionSyntax> tagSection,
-            MainLineAndTrailingFloats moveSection,
+            ParseTree<PgnPlyListSyntax> moveSection,
             ParseTree<PgnGameResultWithTriviaSyntax> result)
             => Games(Game(tagSection, moveSection, result));
 
