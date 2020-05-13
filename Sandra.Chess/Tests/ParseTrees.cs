@@ -178,7 +178,12 @@ namespace Sandra.Chess.Tests
                     plyListSyntax.Add(plySyntax);
                 }
 
-                MoveSection.TrailingFloatItems.ForEach(plyListSyntax.Add);
+                if (plyListSyntax.Any() || MoveSection.TrailingFloatItems.Any())
+                {
+                    ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
+                    MoveSection.TrailingFloatItems.ForEach(trailingFloatItemsSyntax.Add);
+                    plyListSyntax.Add(trailingFloatItemsSyntax);
+                }
 
                 if (plyListSyntax.Any()) gamesSyntax.Add(plyListSyntax);
 

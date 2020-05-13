@@ -19,9 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -90,14 +87,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the period character '.' in PGN text, together with its leading trivia.
     /// </summary>
-    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<PgnPeriodSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<PgnPeriodSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnPlyFloatItemListSyntax, PgnPlyListSyntax> Parent { get; }
+        public PgnPlyFloatItemListSyntax Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -107,16 +102,16 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Match(whenOption1: x => x.Green.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
+        public override int Start => Parent.Green.GetElementOffset(ParentIndex);
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override PgnSyntax ParentSyntax => Parent;
 
         internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this);
 
-        internal PgnPeriodWithTriviaSyntax(Union<PgnPlyFloatItemListSyntax, PgnPlyListSyntax> parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnPeriodWithTriviaSyntax(PgnPlyFloatItemListSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

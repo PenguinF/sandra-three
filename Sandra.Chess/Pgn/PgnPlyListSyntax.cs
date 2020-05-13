@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
@@ -94,6 +95,13 @@ namespace Sandra.Chess.Pgn
 
         public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
 
+        private readonly SafeLazyObject<PgnPlyFloatItemListSyntax> trailingFloatItems;
+
+        /// <summary>
+        /// Gets the collection of nodes containing the trailing floating items that are not part of a ply.
+        /// </summary>
+        public PgnPlyFloatItemListSyntax TrailingFloatItems => trailingFloatItems.Object;
+
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
@@ -112,17 +120,27 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count;
+        public override int ChildCount => TopLevelNodes.Count + 1;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
+            if (index == TopLevelNodes.Count) return TrailingFloatItems;
+            throw new IndexOutOfRangeException();
+        }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+        public override int GetChildStartPosition(int index)
+        {
+            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
+            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
+            throw new IndexOutOfRangeException();
+        }
 
         internal PgnPlyListSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnPlyListSyntax green)
         {
@@ -137,43 +155,13 @@ namespace Sandra.Chess.Pgn
                 greenTopLevelNodes.Add(plySyntax);
             }
 
-            foreach (var floatItem in green.TrailingFloatItems)
-            {
-                greenTopLevelNodes.Add(new GreenPgnTopLevelSymbolSyntaxTemp(floatItem, (innerParent, index, innerGreen) => new PgnPeriodWithTriviaSyntax(innerParent, index, innerGreen)));
-            }
-
             GreenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(greenTopLevelNodes);
 
             TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
                 greenTopLevelNodes.Count,
-                index =>
-                {
-                    var topLevelNode = GreenTopLevelNodes[index];
+                index => new PgnPlySyntax(this, index, (GreenPgnPlySyntax)GreenTopLevelNodes[index]));
 
-                    if (topLevelNode is GreenPgnPlySyntax plySyntax)
-                    {
-                        return new PgnPlySyntax(this, index, plySyntax);
-                    }
-                    else
-                    {
-                        var topLevelSymbol = (GreenPgnTopLevelSymbolSyntaxTemp)topLevelNode;
-                        return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
-                    }
-                });
-        }
-
-        private class GreenPgnTopLevelSymbolSyntaxTemp : IGreenPgnTopLevelSyntax
-        {
-            internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-            internal readonly Func<PgnPlyListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
-
-            public int Length => GreenNodeWithTrivia.Length;
-
-            public GreenPgnTopLevelSymbolSyntaxTemp(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnPlyListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
-            {
-                GreenNodeWithTrivia = greenNodeWithTrivia;
-                SyntaxNodeConstructor = syntaxNodeConstructor;
-            }
+            trailingFloatItems = new SafeLazyObject<PgnPlyFloatItemListSyntax>(() => new PgnPlyFloatItemListSyntax(this, Green.TrailingFloatItems));
         }
     }
 }
