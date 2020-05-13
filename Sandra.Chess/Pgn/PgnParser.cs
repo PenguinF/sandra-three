@@ -480,7 +480,6 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.MoveNumber:
                     // Move number always starts a new ply, so capture any unfinished ply.
                     floatItems = CapturePly();
-                    CapturePlyList();
                     YieldMoveNumber(floatItems);
                     break;
                 case PgnSymbolType.Period:
@@ -491,7 +490,6 @@ namespace Sandra.Chess.Pgn
                     // Only allow a preceding move number in the same ply.
                     floatItems = CaptureFloatItems();
                     if (Move != null || NagListBuilder.Count > 0) CapturePlyUnchecked(floatItems.Length);
-                    CapturePlyList();
                     YieldMove(floatItems);
                     break;
                 case PgnSymbolType.Nag:
