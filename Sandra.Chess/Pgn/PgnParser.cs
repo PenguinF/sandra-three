@@ -128,14 +128,15 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            foreach (var plySyntax in PlyListBuilder)
+            var plyListSyntax = new GreenPgnPlyListSyntax(PlyListBuilder, trailingFloatItems);
+            PlyListBuilder.Clear();
+
+            foreach (var plySyntax in plyListSyntax.Plies)
             {
                 SymbolBuilder.Add(plySyntax);
             }
 
-            PlyListBuilder.Clear();
-
-            foreach (var floatItem in trailingFloatItems)
+            foreach (var floatItem in plyListSyntax.TrailingFloatItems)
             {
                 SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(floatItem, (parent, index, green) => new PgnPeriodWithTriviaSyntax(parent, index, green)));
             }
