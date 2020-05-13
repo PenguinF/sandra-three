@@ -91,9 +91,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public GreenPgnPlyListSyntax Green { get; }
 
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
-
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the collection of ply nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnPlySyntax> Plies { get; }
 
         private readonly SafeLazyObject<PgnPlyFloatItemListSyntax> trailingFloatItems;
 
@@ -120,15 +121,15 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count + 1;
+        public override int ChildCount => Plies.Count + 1;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
         public override PgnSyntax GetChild(int index)
         {
-            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
-            if (index == TopLevelNodes.Count) return TrailingFloatItems;
+            if (index < Plies.Count) return Plies[index];
+            if (index == Plies.Count) return TrailingFloatItems;
             throw new IndexOutOfRangeException();
         }
 
@@ -137,8 +138,8 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index)
         {
-            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
-            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
+            if (index < Plies.Count) return Green.Plies.GetElementOffset(index);
+            if (index == Plies.Count) return Green.Plies.Length;
             throw new IndexOutOfRangeException();
         }
 
@@ -148,18 +149,9 @@ namespace Sandra.Chess.Pgn
             ParentIndex = parentIndex;
             Green = green;
 
-            List<IGreenPgnTopLevelSyntax> greenTopLevelNodes = new List<IGreenPgnTopLevelSyntax>();
-
-            foreach (var plySyntax in green.Plies)
-            {
-                greenTopLevelNodes.Add(plySyntax);
-            }
-
-            GreenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(greenTopLevelNodes);
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index => new PgnPlySyntax(this, index, (GreenPgnPlySyntax)GreenTopLevelNodes[index]));
+            Plies = new SafeLazyObjectCollection<PgnPlySyntax>(
+                green.Plies.Count,
+                index => new PgnPlySyntax(this, index, Green.Plies[index]));
 
             trailingFloatItems = new SafeLazyObject<PgnPlyFloatItemListSyntax>(() => new PgnPlyFloatItemListSyntax(this, Green.TrailingFloatItems));
         }
