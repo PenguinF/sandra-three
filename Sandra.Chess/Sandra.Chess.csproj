@@ -73,6 +73,7 @@
     <Compile Include="Pgn\PgnParenthesisCloseSyntax.cs" />
     <Compile Include="Pgn\PgnParenthesisOpenSyntax.cs" />
     <Compile Include="Pgn\PgnParser.cs" />
+    <Compile Include="Pgn\PgnParserCharacterClass.cs" />
     <Compile Include="Pgn\PgnPeriodSyntax.cs" />
     <Compile Include="Pgn\PgnPlyFloatItemListSyntax.cs" />
     <Compile Include="Pgn\PgnPlySyntax.cs" />

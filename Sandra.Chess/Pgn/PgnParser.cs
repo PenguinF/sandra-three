@@ -24,7 +24,6 @@ using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -35,88 +34,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        #region PGN character classes
-
-        private const int IllegalCharacter = 0;
-
-        // Symbol characters in discrete partitions of character sets.
-        private const int SymbolCharacterMask = 0x3f;
-
-        private const int SpecialCharacter = 1 << 6;
-        private const int WhitespaceCharacter = 1 << 7;
-
-        /// <summary>
-        /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
-        /// A value of 0 means the character is not allowed.
-        /// </summary>
-        private static readonly int[] PgnCharacterClassTable = new int[0x100];
-
-        static PgnParser()
-        {
-            // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
-            PgnCharacterClassTable['\t'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\n'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\v'] = WhitespaceCharacter;
-            PgnCharacterClassTable['\r'] = WhitespaceCharacter;
-            PgnCharacterClassTable[' '] = WhitespaceCharacter;
-
-            // Treat 0xa0 as a space separator too.
-            PgnCharacterClassTable[0xa0] = WhitespaceCharacter;
-
-            new[]
-            {
-                PgnGameResultSyntax.AsteriskCharacter,
-                PgnBracketOpenSyntax.BracketOpenCharacter,
-                PgnBracketCloseSyntax.BracketCloseCharacter,
-                PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
-                PgnParenthesisOpenSyntax.ParenthesisOpenCharacter,
-                PgnPeriodSyntax.PeriodCharacter,
-                StringLiteral.QuoteCharacter,
-                PgnCommentSyntax.EndOfLineCommentStartCharacter,
-                PgnCommentSyntax.MultiLineCommentStartCharacter,
-                PgnNagSyntax.NagCharacter,
-                PgnEscapeSyntax.EscapeCharacter,
-            }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
-
-            // Digits.
-            PgnCharacterClassTable['0'] = PgnSymbolStateMachine.Digit0;
-            PgnCharacterClassTable['1'] = PgnSymbolStateMachine.Digit1;
-            PgnCharacterClassTable['2'] = PgnSymbolStateMachine.Digit2;
-            for (char c = '3'; c <= '8'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.Digit3_8;
-            PgnCharacterClassTable['9'] = PgnSymbolStateMachine.Digit9;
-
-            // Letters.
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;
-            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xc0-0xd6
-            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xd8-0xde
-            for (char c = 'a'; c <= 'h'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseAtoH;
-            for (char c = 'i'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;
-            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xdf-0xf6
-            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xf8-0xff
-
-            // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.OtherLowercaseLetter;
-
-            // Special cases.
-            PgnCharacterClassTable['O'] = PgnSymbolStateMachine.LetterO;
-            PgnCharacterClassTable['P'] = PgnSymbolStateMachine.LetterP;
-            PgnMoveFormatter.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
-            PgnCharacterClassTable['x'] = PgnSymbolStateMachine.LowercaseX;
-            PgnCharacterClassTable['-'] = PgnSymbolStateMachine.Dash;
-            PgnCharacterClassTable['/'] = PgnSymbolStateMachine.Slash;
-            PgnCharacterClassTable['='] = PgnSymbolStateMachine.EqualitySign;
-            PgnCharacterClassTable['+'] = PgnSymbolStateMachine.PlusOrOctothorpe;
-            PgnCharacterClassTable['#'] = PgnSymbolStateMachine.PlusOrOctothorpe;
-            PgnCharacterClassTable['!'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
-            PgnCharacterClassTable['?'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetCharacterClass(char pgnCharacter)
-            => pgnCharacter <= 0xff ? PgnCharacterClassTable[pgnCharacter] : IllegalCharacter;
-
-        #endregion PGN character classes
-
         /// <summary>
         /// See also <see cref="StringLiteral.EscapeCharacter"/>.
         /// </summary>
@@ -676,9 +593,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                int characterClass = GetCharacterClass(c);
+                int characterClass = PgnParserCharacterClass.GetCharacterClass(c);
 
-                if (characterClass != WhitespaceCharacter)
+                if (characterClass != PgnParserCharacterClass.WhitespaceCharacter)
                 {
                     if (symbolStartIndex < currentIndex)
                     {
@@ -686,9 +603,9 @@ namespace Sandra.Chess.Pgn
                         symbolStartIndex = currentIndex;
                     }
 
-                    if (characterClass != IllegalCharacter)
+                    if (characterClass != PgnParserCharacterClass.IllegalCharacter)
                     {
-                        int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                        int symbolCharacterClass = characterClass & PgnParserCharacterClass.SymbolCharacterMask;
                         if (symbolCharacterClass != 0)
                         {
                             symbolBuilder.Start(symbolCharacterClass);
@@ -769,9 +686,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                int characterClass = GetCharacterClass(c);
+                int characterClass = PgnParserCharacterClass.GetCharacterClass(c);
 
-                if (characterClass == WhitespaceCharacter)
+                if (characterClass == PgnParserCharacterClass.WhitespaceCharacter)
                 {
                     if (symbolStartIndex < currentIndex)
                     {
@@ -783,9 +700,9 @@ namespace Sandra.Chess.Pgn
                     goto inWhitespace;
                 }
 
-                if (characterClass != IllegalCharacter)
+                if (characterClass != PgnParserCharacterClass.IllegalCharacter)
                 {
-                    int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                    int symbolCharacterClass = characterClass & PgnParserCharacterClass.SymbolCharacterMask;
                     if (symbolCharacterClass != 0)
                     {
                         symbolBuilder.Transition(symbolCharacterClass);
