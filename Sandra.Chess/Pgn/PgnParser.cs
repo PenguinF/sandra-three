@@ -168,13 +168,6 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureMainLine()
         {
-            CaptureNestedUnfinishedVariations();
-            var floatItems = CapturePly();
-            SymbolBuilder.Add(CapturePlyList(floatItems));
-        }
-
-        private void CaptureNestedUnfinishedVariations()
-        {
             bool innermostVariation = true;
 
             while (VariationBuilderStack.Count > 0)
@@ -203,6 +196,9 @@ namespace Sandra.Chess.Pgn
                 // Capture floating items from before the variation, then add to VariationListBuilder.
                 CurrentFrame.VariationListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>(CaptureFloatItems(), variationSyntax));
             }
+
+            var floatItems = CapturePly();
+            SymbolBuilder.Add(CapturePlyList(floatItems));
         }
 
         private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
