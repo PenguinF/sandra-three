@@ -29,7 +29,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which is an element of a ply, together with its leading floating items.
     /// </summary>
-    public sealed class GreenWithPlyFloatItemsSyntax : ISpan
+    public abstract class GreenWithPlyFloatItemsSyntax : ISpan
     {
         /// <summary>
         /// Gets the leading floating items of the syntax node.
@@ -39,12 +39,40 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the ply content syntax node which anchors the floating items.
         /// </summary>
-        public GreenWithTriviaSyntax PlyContentNode { get; }
+        public IPlyFloatItemAnchor PlyContentNode => PlyContentNodeUntyped;
+
+        internal abstract IPlyFloatItemAnchor PlyContentNodeUntyped { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length => LeadingFloatItems.Length + PlyContentNode.Length;
+
+        internal GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems)
+        {
+            if (leadingFloatItems == null) throw new ArgumentNullException(nameof(leadingFloatItems));
+            LeadingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(leadingFloatItems);
+        }
+    }
+
+    /// <summary>
+    /// Represents a syntax node which is an element of a ply, together with its leading floating items.
+    /// </summary>
+    /// <typeparam name="TGreenSyntaxNode">
+    /// The type of <see cref="PlyContentNode"/>. It must implement <see cref="IPlyFloatItemAnchor"/>
+    /// </typeparam>
+    public sealed class GreenWithPlyFloatItemsSyntax<TGreenSyntaxNode> : GreenWithPlyFloatItemsSyntax
+        where TGreenSyntaxNode : IPlyFloatItemAnchor
+    {
+        /// <summary>
+        /// Gets the ply content syntax node which anchors the floating items.
+        /// </summary>
+        /// <remarks>
+        /// Intentionally hides the base <see cref="PlyContentNode"/> property.
+        /// </remarks>
+        public new TGreenSyntaxNode PlyContentNode { get; }
+
+        internal sealed override IPlyFloatItemAnchor PlyContentNodeUntyped => PlyContentNode;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenWithPlyFloatItemsSyntax"/>.
@@ -58,11 +86,11 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingFloatItems"/> and/or <paramref name="plyContentNode"/> are null.
         /// </exception>
-        public GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems, GreenWithTriviaSyntax plyContentNode)
+        public GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems, TGreenSyntaxNode plyContentNode)
+            : base(leadingFloatItems)
         {
-            if (leadingFloatItems == null) throw new ArgumentNullException(nameof(leadingFloatItems));
-            LeadingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(leadingFloatItems);
-            PlyContentNode = plyContentNode ?? throw new ArgumentNullException(nameof(plyContentNode));
+            if (plyContentNode == null) throw new ArgumentNullException(nameof(plyContentNode));
+            PlyContentNode = plyContentNode;
         }
     }
 
@@ -97,7 +125,8 @@ namespace Sandra.Chess.Pgn
     /// <typeparam name="TSyntaxNode">
     /// The type of <see cref="PgnSyntax"/> syntax node.
     /// </typeparam>
-    public abstract class WithPlyFloatItemsSyntax<TSyntaxNode> : WithPlyFloatItemsSyntax
+    public abstract class WithPlyFloatItemsSyntax<TGreenSyntaxNode, TSyntaxNode> : WithPlyFloatItemsSyntax
+        where TGreenSyntaxNode : IPlyFloatItemAnchor
         where TSyntaxNode : PgnSyntax
     {
         /// <summary>
@@ -108,7 +137,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public GreenWithPlyFloatItemsSyntax Green { get; }
+        public GreenWithPlyFloatItemsSyntax<TGreenSyntaxNode> Green { get; }
 
         private readonly SafeLazyObject<TSyntaxNode> plyContentNode;
 
@@ -159,7 +188,7 @@ namespace Sandra.Chess.Pgn
 
         internal abstract TSyntaxNode CreatePlyContentNode();
 
-        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
+        internal WithPlyFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax<TGreenSyntaxNode> green)
             : base(green.LeadingFloatItems)
         {
             Parent = parent;
@@ -167,5 +196,20 @@ namespace Sandra.Chess.Pgn
 
             plyContentNode = new SafeLazyObject<TSyntaxNode>(CreatePlyContentNode);
         }
+    }
+
+    /// <summary>
+    /// Marks a green syntax node as a potential anchor for floating items within a ply.
+    /// It is implemented by both <see cref="GreenWithTriviaSyntax"/> and <see cref="GreenPgnVariationSyntax"/>.
+    /// It exposes a method to get the first <see cref="IGreenPgnSymbol"/> node with its leading trivia,
+    /// which is used for error reporting.
+    /// </summary>
+    public interface IPlyFloatItemAnchor : ISpan
+    {
+        /// <summary>
+        /// Gets the first <see cref="GreenWithTriviaSyntax"/> which contains a <see cref="IGreenPgnSymbol"/>
+        /// together with its leading trivia.
+        /// </summary>
+        GreenWithTriviaSyntax FirstWithTriviaNode { get; }
     }
 }

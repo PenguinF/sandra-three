@@ -54,7 +54,11 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.MissingTagBracketClose), "tag is missing ']' character" },
             { GetLocalizedStringKey(PgnErrorCode.MissingMoveNumber), "first move in a main or side line should have a move number" },
             { GetLocalizedStringKey(PgnErrorCode.MissingMove), "move expected but not found" },
-            { GetLocalizedStringKey(PgnErrorCode.OrphanPeriod), "found period '.' character somewhere not between a move number and a move" },
+            { GetLocalizedStringKey(PgnErrorCode.OrphanPeriod), "found '.' character somewhere not between a move number and a move" },
+            { GetLocalizedStringKey(PgnErrorCode.OrphanParenthesisClose), "found ')' character without matching '(' character" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingParenthesisClose), "missing ')' character at the end of side line" },
+            { GetLocalizedStringKey(PgnErrorCode.EmptyVariation), "side line is empty" },
+            { GetLocalizedStringKey(PgnErrorCode.VariationBeforeNAG), "possibly unintentional annotation after side line" },
         };
     }
 }

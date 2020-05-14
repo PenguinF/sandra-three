@@ -69,6 +69,7 @@
     <Compile Include="Pgn\PgnMoveNumberSyntax.cs" />
     <Compile Include="Pgn\PgnMoveSyntax.cs" />
     <Compile Include="Pgn\PgnNagSyntax.cs" />
+    <Compile Include="Pgn\PgnOrphanParenthesisCloseSyntax.cs" />
     <Compile Include="Pgn\PgnOverflowNagSyntax.cs" />
     <Compile Include="Pgn\PgnParenthesisCloseSyntax.cs" />
     <Compile Include="Pgn\PgnParenthesisOpenSyntax.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Pgn\PgnParserCharacterClass.cs" />
     <Compile Include="Pgn\PgnPeriodSyntax.cs" />
     <Compile Include="Pgn\PgnPlyFloatItemListSyntax.cs" />
+    <Compile Include="Pgn\PgnPlyFloatItemSyntax.cs" />
     <Compile Include="Pgn\PgnPlyListSyntax.cs" />
     <Compile Include="Pgn\PgnPlySyntax.cs" />
     <Compile Include="Pgn\PgnSymbolStateMachine.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="Pgn\PgnTriviaSyntax.cs" />
     <Compile Include="Pgn\PgnUnrecognizedMoveSyntax.cs" />
     <Compile Include="Pgn\PgnUnterminatedCommentSyntax.cs" />
+    <Compile Include="Pgn\PgnVariationSyntax.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />

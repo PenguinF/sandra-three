@@ -38,6 +38,7 @@ namespace Sandra.Chess.Pgn
         public virtual void VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => DefaultVisit(node);
         public virtual void VisitMoveSyntax(PgnMoveSyntax node) => DefaultVisit(node);
         public virtual void VisitNagSyntax(PgnNagSyntax node) => DefaultVisit(node);
+        public virtual void VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
@@ -63,6 +64,7 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMoveSyntax(PgnMoveSyntax node) => DefaultVisit(node);
         public virtual TResult VisitNagSyntax(PgnNagSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
@@ -88,6 +90,7 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitMoveNumberSyntax(PgnMoveNumberSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMoveSyntax(PgnMoveSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitNagSyntax(PgnNagSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node, T arg) => DefaultVisit(node, arg);

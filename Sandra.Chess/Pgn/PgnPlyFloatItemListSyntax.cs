@@ -43,7 +43,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the collection of floating items.
         /// </summary>
-        public SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax> FloatItems { get; }
+        public SafeLazyObjectCollection<PgnPlyFloatItemWithTriviaSyntax> FloatItems { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -80,9 +80,9 @@ namespace Sandra.Chess.Pgn
             Parent = parent;
             Green = green;
 
-            FloatItems = new SafeLazyObjectCollection<PgnPeriodWithTriviaSyntax>(
+            FloatItems = new SafeLazyObjectCollection<PgnPlyFloatItemWithTriviaSyntax>(
                 green.Count,
-                index => new PgnPeriodWithTriviaSyntax(this, index, Green[index]));
+                index => new PgnPlyFloatItemWithTriviaSyntax(this, index, Green[index]));
         }
     }
 }

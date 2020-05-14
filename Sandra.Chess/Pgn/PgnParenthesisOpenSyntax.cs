@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -70,7 +68,7 @@ namespace Sandra.Chess.Pgn
         public override int Start => Parent.Green.LeadingTrivia.Length;
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => ParenthesisOpenLength;
 
@@ -86,23 +84,32 @@ namespace Sandra.Chess.Pgn
         TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitParenthesisOpenSyntax(this, arg);
     }
 
-    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisOpenSyntax>, IPgnTopLevelSyntax
+    /// <summary>
+    /// Represents the parenthesis open character '(', together with its leading trivia.
+    /// </summary>
+    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisOpenSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnVariationSyntax Parent { get; }
 
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => 0;
 
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
         internal override PgnParenthesisOpenSyntax CreateContentNode() => new PgnParenthesisOpenSyntax(this);
 
-        internal PgnParenthesisOpenWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnParenthesisOpenWithTriviaSyntax(PgnVariationSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
         }
     }
 }

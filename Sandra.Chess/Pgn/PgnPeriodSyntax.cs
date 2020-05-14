@@ -24,7 +24,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the period character '.' in PGN text.
     /// </summary>
-    public sealed class GreenPgnPeriodSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnPeriodSyntax : GreenPgnPlyFloatItemSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnPeriodSyntax"/> value.
@@ -34,28 +34,25 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnPeriodSyntax.PeriodLength;
+        public override int Length => PgnPeriodSyntax.PeriodLength;
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Period;
+        public override PgnSymbolType SymbolType => PgnSymbolType.Period;
 
         private GreenPgnPeriodSyntax() { }
+
+        internal override PgnPlyFloatItemSyntax CreateRedNode(PgnPlyFloatItemWithTriviaSyntax parent) => new PgnPeriodSyntax(parent);
     }
 
     /// <summary>
     /// Represents the period character '.' in PGN text.
     /// </summary>
-    public sealed class PgnPeriodSyntax : PgnSyntax, IPgnSymbol
+    public sealed class PgnPeriodSyntax : PgnPlyFloatItemSyntax
     {
         public const char PeriodCharacter = '.';
         public const int PeriodLength = 1;
-
-        /// <summary>
-        /// Gets the parent syntax node of this instance.
-        /// </summary>
-        public PgnPeriodWithTriviaSyntax Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -63,59 +60,14 @@ namespace Sandra.Chess.Pgn
         public GreenPgnPeriodSyntax Green => GreenPgnPeriodSyntax.Value;
 
         /// <summary>
-        /// Gets the start position of this syntax node relative to its parent's start position.
-        /// </summary>
-        public override int Start => Parent.Green.LeadingTrivia.Length;
-
-        /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => PeriodLength;
 
-        /// <summary>
-        /// Gets the parent syntax node of this instance.
-        /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        internal PgnPeriodSyntax(PgnPlyFloatItemWithTriviaSyntax parent) : base(parent) { }
 
-        internal PgnPeriodSyntax(PgnPeriodWithTriviaSyntax parent) => Parent = parent;
-
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPeriodSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents the period character '.' in PGN text, together with its leading trivia.
-    /// </summary>
-    public sealed class PgnPeriodWithTriviaSyntax : WithTriviaSyntax<PgnPeriodSyntax>
-    {
-        /// <summary>
-        /// Gets the parent syntax node of this instance.
-        /// </summary>
-        public PgnPlyFloatItemListSyntax Parent { get; }
-
-        /// <summary>
-        /// Gets the index of this syntax node in its parent.
-        /// </summary>
-        public int ParentIndex { get; }
-
-        /// <summary>
-        /// Gets the start position of this syntax node relative to its parent's start position.
-        /// </summary>
-        public override int Start => Parent.Green.GetElementOffset(ParentIndex);
-
-        /// <summary>
-        /// Gets the parent syntax node of this instance.
-        /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
-
-        internal override PgnPeriodSyntax CreateContentNode() => new PgnPeriodSyntax(this);
-
-        internal PgnPeriodWithTriviaSyntax(PgnPlyFloatItemListSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
-            : base(green)
-        {
-            Parent = parent;
-            ParentIndex = parentIndex;
-        }
+        public override void Accept(PgnSymbolVisitor visitor) => visitor.VisitPeriodSyntax(this);
+        public override TResult Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPeriodSyntax(this);
+        public override TResult Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPeriodSyntax(this, arg);
     }
 }

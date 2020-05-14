@@ -32,9 +32,9 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnPlySyntax : ISpan
     {
         /// <summary>
-        /// The move number. The move number can be null.
+        /// Gets the move number. The move number can be null.
         /// </summary>
-        public GreenWithPlyFloatItemsSyntax MoveNumber { get; }
+        public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> MoveNumber { get; }
 
         /// <summary>
         /// Returns the move number's length or 0 if it does not exist.
@@ -42,9 +42,9 @@ namespace Sandra.Chess.Pgn
         public int MoveNumberLength => MoveNumber == null ? 0 : MoveNumber.Length;
 
         /// <summary>
-        /// The move. The move can be null.
+        /// Gets the move. The move can be null.
         /// </summary>
-        public GreenWithPlyFloatItemsSyntax Move { get; }
+        public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> Move { get; }
 
         /// <summary>
         /// Returns the move's length or 0 if it does not exist.
@@ -54,7 +54,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the NAG (Numeric Annotation Glyph) nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenWithPlyFloatItemsSyntax> Nags { get; }
+        public ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> Nags { get; }
+
+        /// <summary>
+        /// Gets the variation nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> Variations { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -73,22 +78,30 @@ namespace Sandra.Chess.Pgn
         /// <param name="nags">
         /// The NAG (Numeric Annotation Glyph) nodes.
         /// </param>
+        /// <param name="variations">
+        /// The variation nodes.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="nags"/> is null.
+        /// <paramref name="nags"/> and/or <paramref name="variations"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and <paramref name="nags"/> is empty.
+        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and both <paramref name="nags"/> and <paramref name="variations"/> are empty.
         /// </exception>
-        public GreenPgnPlySyntax(GreenWithPlyFloatItemsSyntax moveNumber, GreenWithPlyFloatItemsSyntax move, IEnumerable<GreenWithPlyFloatItemsSyntax> nags)
+        public GreenPgnPlySyntax(
+            GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> moveNumber,
+            GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> move,
+            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
+            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
         {
             if (nags == null) throw new ArgumentNullException(nameof(nags));
+            if (variations == null) throw new ArgumentNullException(nameof(variations));
 
             MoveNumber = moveNumber;
             Move = move;
+            Nags = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Create(nags);
+            Variations = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Create(variations);
 
-            Nags = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax>.Create(nags);
-
-            int length = Nags.Length;
+            int length = Nags.Length + Variations.Length;
             if (moveNumber != null) length += moveNumber.Length;
             if (move != null) length += move.Length;
 
@@ -124,24 +137,24 @@ namespace Sandra.Chess.Pgn
         private readonly SafeLazyChildSyntaxOrEmpty<PgnMoveNumberWithFloatItemsSyntax> lazyMoveNumberOrEmpty;
 
         /// <summary>
-        /// The move number. The move number can be null.
+        /// Gets the move number. The move number can be null.
         /// </summary>
         public PgnMoveNumberWithFloatItemsSyntax MoveNumber => lazyMoveNumberOrEmpty.ChildNodeOrNull;
 
         /// <summary>
-        /// The move number. The move number can be <see cref="PgnEmptySyntax"/>.
+        /// Gets the move number. The move number can be <see cref="PgnEmptySyntax"/>.
         /// </summary>
         public PgnSyntax MoveNumberOrEmpty => lazyMoveNumberOrEmpty.ChildNodeOrEmpty;
 
         private readonly SafeLazyChildSyntaxOrEmpty<PgnMoveWithFloatItemsSyntax> lazyMoveOrEmpty;
 
         /// <summary>
-        /// The move. The move can be null.
+        /// Gets the move. The move can be null.
         /// </summary>
         public PgnMoveWithFloatItemsSyntax Move => lazyMoveOrEmpty.ChildNodeOrNull;
 
         /// <summary>
-        /// The move number. The move number can be <see cref="PgnEmptySyntax"/>.
+        /// Gets the move number. The move number can be <see cref="PgnEmptySyntax"/>.
         /// </summary>
         public PgnSyntax MoveOrEmpty => lazyMoveOrEmpty.ChildNodeOrEmpty;
 
@@ -149,6 +162,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the collection of NAG (Numeric Annotation Glyph) nodes.
         /// </summary>
         public SafeLazyObjectCollection<PgnNagWithFloatItemsSyntax> Nags { get; }
+
+        /// <summary>
+        /// Gets the collection of variation nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnVariationWithFloatItemsSyntax> Variations { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -168,7 +186,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => 2 + Nags.Count;
+        public override int ChildCount => 2 + Nags.Count + Variations.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -179,7 +197,9 @@ namespace Sandra.Chess.Pgn
             index--;
             if (index == 0) return MoveOrEmpty;
             index--;
-            return Nags[index];
+            int variationIndex = index - Nags.Count;
+            if (variationIndex < 0) return Nags[index];
+            return Variations[variationIndex];
         }
 
         /// <summary>
@@ -191,7 +211,9 @@ namespace Sandra.Chess.Pgn
             index--;
             if (index == 0) return Green.MoveNumberLength;
             index--;
-            return Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
+            int variationIndex = index - Nags.Count;
+            if (variationIndex < 0) return Length - Green.Variations.Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
+            return Length - Green.Variations.Length + Green.Variations.GetElementOffset(variationIndex);
         }
 
         internal PgnPlySyntax(PgnPlyListSyntax parent, int parentIndex, GreenPgnPlySyntax green)
@@ -224,13 +246,17 @@ namespace Sandra.Chess.Pgn
             Nags = new SafeLazyObjectCollection<PgnNagWithFloatItemsSyntax>(
                 green.Nags.Count,
                 index => new PgnNagWithFloatItemsSyntax(this, index, Green.Nags[index]));
+
+            Variations = new SafeLazyObjectCollection<PgnVariationWithFloatItemsSyntax>(
+                green.Variations.Count,
+                index => new PgnVariationWithFloatItemsSyntax(this, index, Green.Variations[index]));
         }
     }
 
     /// <summary>
     /// Represents a syntax node which contains a move number, together with its leading floating items.
     /// </summary>
-    public sealed class PgnMoveNumberWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnMoveNumberWithTriviaSyntax>
+    public sealed class PgnMoveNumberWithFloatItemsSyntax : WithPlyFloatItemsSyntax<GreenWithTriviaSyntax, PgnMoveNumberWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -239,7 +265,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnMoveNumberWithTriviaSyntax CreatePlyContentNode() => new PgnMoveNumberWithTriviaSyntax(this, Green.PlyContentNode);
 
-        internal PgnMoveNumberWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
+        internal PgnMoveNumberWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> green)
             : base(parent, green)
         {
         }
@@ -248,7 +274,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a move text, together with its leading floating items.
     /// </summary>
-    public sealed class PgnMoveWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnMoveWithTriviaSyntax>
+    public sealed class PgnMoveWithFloatItemsSyntax : WithPlyFloatItemsSyntax<GreenWithTriviaSyntax, PgnMoveWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -257,7 +283,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnMoveWithTriviaSyntax CreatePlyContentNode() => new PgnMoveWithTriviaSyntax(this, Green.PlyContentNode);
 
-        internal PgnMoveWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax green)
+        internal PgnMoveWithFloatItemsSyntax(PgnPlySyntax parent, GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> green)
             : base(parent, green)
         {
         }
@@ -266,7 +292,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node, together with its leading floating items.
     /// </summary>
-    public sealed class PgnNagWithFloatItemsSyntax : WithPlyFloatItemsSyntax<PgnNagWithTriviaSyntax>
+    public sealed class PgnNagWithFloatItemsSyntax : WithPlyFloatItemsSyntax<GreenWithTriviaSyntax, PgnNagWithTriviaSyntax>
     {
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -276,11 +302,35 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Length - Parent.Green.Variations.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
 
         internal override PgnNagWithTriviaSyntax CreatePlyContentNode() => new PgnNagWithTriviaSyntax(this, Green.PlyContentNode);
 
-        internal PgnNagWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax green)
+        internal PgnNagWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> green)
+            : base(parent, green)
+        {
+            ParentIndex = parentIndex;
+        }
+    }
+
+    /// <summary>
+    /// Represents a side line syntax node, together with its leading floating items.
+    /// </summary>
+    public sealed class PgnVariationWithFloatItemsSyntax : WithPlyFloatItemsSyntax<GreenPgnVariationSyntax, PgnVariationSyntax>
+    {
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Length - Parent.Green.Variations.Length + Parent.Green.Variations.GetElementOffset(ParentIndex);
+
+        internal override PgnVariationSyntax CreatePlyContentNode() => new PgnVariationSyntax(this, Green.PlyContentNode);
+
+        internal PgnVariationWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax> green)
             : base(parent, green)
         {
             ParentIndex = parentIndex;
