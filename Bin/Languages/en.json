@@ -128,6 +128,10 @@
     "PgnErrorMissingTagBracketClose": "tag is missing ']' character",
     "PgnErrorMissingMoveNumber": "first move in a main or side line should have a move number",
     "PgnErrorMissingMove": "move expected but not found",
-    "PgnErrorOrphanPeriod": "found period '.' character somewhere not between a move number and a move"
+    "PgnErrorOrphanPeriod": "found '.' character somewhere not between a move number and a move",
+    "PgnErrorOrphanParenthesisClose": "found ')' character without matching '(' character",
+    "PgnErrorMissingParenthesisClose": "missing ')' character at the end of side line",
+    "PgnErrorEmptyVariation": "side line is empty",
+    "PgnErrorVariationBeforeNAG": "possibly unintentional annotation after side line"
   }
 }

@@ -110,11 +110,34 @@ namespace Sandra.Chess.Pgn
         MissingMove,
 
         /// <summary>
-        /// Occurs when a period character is found somewhere not between a move number and a move.
+        /// Occurs when a period character '.' is found somewhere not between a move number and a move.
         /// </summary>
         /// <example>
         /// '1 e4. e6'
         /// </example>
         OrphanPeriod,
+
+        /// <summary>
+        /// Occurs when a closing parenthesis character ')' is found without a matching opening parenthesis character.
+        /// </summary>
+        /// <example>
+        /// '1. e4 )'
+        /// </example>
+        OrphanParenthesisClose,
+
+        /// <summary>
+        /// Occurs when a variation isn't closed by a closing parenthesis character ')'.
+        /// </summary>
+        MissingParenthesisClose,
+
+        /// <summary>
+        /// Occurs when a variation contains no moves.
+        /// </summary>
+        EmptyVariation,
+
+        /// <summary>
+        /// Occurs when a Numeric Annotation Glyph (NAG) is found after a variation.
+        /// </summary>
+        VariationBeforeNAG,
     }
 }
