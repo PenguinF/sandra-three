@@ -171,9 +171,31 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureNestedUnfinishedVariations()
         {
+            bool innermostVariation = true;
+
             while (VariationBuilderStack.Count > 0)
             {
                 var variationSyntax = CaptureVariation(null);
+
+                if (innermostVariation)
+                {
+                    // Report MissingParenthesisClose only once, for the innermost variation.
+                    // The end position of the variation is where we are now.
+                    int variationEndPosition
+                        = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+                        : pgnText.Length - trailingTrivia.Length;
+
+                    // Subtract the leading trivia length.
+                    int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingParenthesisClose,
+                        variationEndPosition - variationLength,
+                        variationLength));
+
+                    innermostVariation = false;
+                }
+
                 SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
                 SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
                 if (variationSyntax.ParenthesisClose != null)
