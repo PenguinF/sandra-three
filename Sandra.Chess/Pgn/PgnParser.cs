@@ -184,15 +184,20 @@ namespace Sandra.Chess.Pgn
 
             // Parent stack frame contains the saved parenthesis open.
             CurrentFrame = VariationBuilderStack.Pop();
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(CurrentFrame.SavedParenthesisOpenWithTrivia, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-            SymbolBuilder.Add(plyListSyntax);
 
-            if (maybeParenthesisClose != null)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-            }
+            var variationSyntax = new GreenPgnVariationSyntax(
+                CurrentFrame.SavedParenthesisOpenWithTrivia,
+                plyListSyntax,
+                maybeParenthesisClose);
 
             CurrentFrame.SavedParenthesisOpenWithTrivia = null;
+
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+            SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
+            if (variationSyntax.ParenthesisClose != null)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+            }
         }
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)

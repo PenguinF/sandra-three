@@ -96,6 +96,7 @@
     <Compile Include="Pgn\PgnTriviaSyntax.cs" />
     <Compile Include="Pgn\PgnUnrecognizedMoveSyntax.cs" />
     <Compile Include="Pgn\PgnUnterminatedCommentSyntax.cs" />
+    <Compile Include="Pgn\PgnVariationSyntax.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
