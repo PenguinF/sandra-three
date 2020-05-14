@@ -36,5 +36,70 @@ namespace Sandra.Chess.Pgn
         /// Gets the type of the underlying symbol.
         /// </summary>
         public abstract PgnSymbolType SymbolType { get; }
+
+        internal abstract PgnPlyFloatItemSyntax CreateRedNode(PgnPlyFloatItemWithTriviaSyntax parent);
+    }
+
+    /// <summary>
+    /// Represents any grammatically significant node that is allowed to freely float around within a ply.
+    /// Other than a period character between a move number and move, this generally represents some kind of error state.
+    /// </summary>
+    public abstract class PgnPlyFloatItemSyntax : PgnSyntax, IPgnSymbol
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnPlyFloatItemWithTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public sealed override int Start => Parent.Green.LeadingTrivia.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public sealed override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnPlyFloatItemSyntax(PgnPlyFloatItemWithTriviaSyntax parent) => Parent = parent;
+
+        public abstract void Accept(PgnSymbolVisitor visitor);
+        public abstract TResult Accept<TResult>(PgnSymbolVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    /// <summary>
+    /// Represents a floating item node within a ply, together with its leading trivia.
+    /// </summary>
+    public sealed class PgnPlyFloatItemWithTriviaSyntax : WithTriviaSyntax<PgnPlyFloatItemSyntax>
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnPlyFloatItemListSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.GetElementOffset(ParentIndex);
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnPlyFloatItemSyntax CreateContentNode() => ((GreenPgnPlyFloatItemSyntax)Green.ContentNode).CreateRedNode(this);
+
+        internal PgnPlyFloatItemWithTriviaSyntax(PgnPlyFloatItemListSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
     }
 }

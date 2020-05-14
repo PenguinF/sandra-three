@@ -104,8 +104,8 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnMoveWithTriviaSyntax> WS_Move = new ParseTree<PgnMoveWithTriviaSyntax> { WhitespaceTrivia, Move };
 
         private static readonly ParseTree<PgnPeriodSyntax> Period = new ParseTree<PgnPeriodSyntax>();
-        private static readonly ParseTree<PgnPeriodWithTriviaSyntax> PeriodNoTrivia = new ParseTree<PgnPeriodWithTriviaSyntax> { EmptyTrivia, Period };
-        private static readonly ParseTree<PgnPeriodWithTriviaSyntax> WS_Period = new ParseTree<PgnPeriodWithTriviaSyntax> { WhitespaceTrivia, Period };
+        private static readonly ParseTree<PgnPlyFloatItemWithTriviaSyntax> PeriodNoTrivia = new ParseTree<PgnPlyFloatItemWithTriviaSyntax> { EmptyTrivia, Period };
+        private static readonly ParseTree<PgnPlyFloatItemWithTriviaSyntax> WS_Period = new ParseTree<PgnPlyFloatItemWithTriviaSyntax> { WhitespaceTrivia, Period };
 
         private static readonly ParseTree<PgnNagSyntax> NAG = new ParseTree<PgnNagSyntax>();
         private static readonly ParseTree<PgnNagWithTriviaSyntax> NAGNoTrivia = new ParseTree<PgnNagWithTriviaSyntax> { EmptyTrivia, NAG };
