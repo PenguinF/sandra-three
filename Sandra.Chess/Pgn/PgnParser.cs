@@ -150,14 +150,14 @@ namespace Sandra.Chess.Pgn
         private void CaptureMainLine()
         {
             var floatItems = CapturePly();
-            CapturePlyList(floatItems);
+            SymbolBuilder.Add(CapturePlyList(floatItems));
         }
 
-        private void CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
+        private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
             var plyListSyntax = new GreenPgnPlyListSyntax(CurrentFrame.PlyListBuilder, trailingFloatItems);
             CurrentFrame.PlyListBuilder.Clear();
-            SymbolBuilder.Add(plyListSyntax);
+            return plyListSyntax;
         }
 
         #endregion Variation parsing
@@ -528,12 +528,12 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     floatItems = CapturePly();
-                    CapturePlyList(floatItems);
+                    SymbolBuilder.Add(CapturePlyList(floatItems));
                     YieldParenthesisOpen();
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     floatItems = CapturePly();
-                    CapturePlyList(floatItems);
+                    SymbolBuilder.Add(CapturePlyList(floatItems));
                     YieldParenthesisClose();
                     break;
                 case PgnSymbolType.Asterisk:
