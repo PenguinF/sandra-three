@@ -42,6 +42,7 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitMoveSyntax(PgnMoveSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitNagSyntax(PgnNagSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node) => GreenPgnParenthesisCloseSyntax.Value;
             public override IGreenPgnSymbol VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitPeriodSyntax(PgnPeriodSyntax node) => node.Green;

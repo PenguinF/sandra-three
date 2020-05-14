@@ -69,6 +69,7 @@
     <Compile Include="Pgn\PgnMoveNumberSyntax.cs" />
     <Compile Include="Pgn\PgnMoveSyntax.cs" />
     <Compile Include="Pgn\PgnNagSyntax.cs" />
+    <Compile Include="Pgn\PgnOrphanParenthesisCloseSyntax.cs" />
     <Compile Include="Pgn\PgnOverflowNagSyntax.cs" />
     <Compile Include="Pgn\PgnParenthesisCloseSyntax.cs" />
     <Compile Include="Pgn\PgnParenthesisOpenSyntax.cs" />

@@ -67,6 +67,7 @@ namespace Sandra.Chess.Pgn
             public override PgnSyntax VisitMoveNumberSyntax(PgnMoveNumberSyntax node) => node;
             public override PgnSyntax VisitMoveSyntax(PgnMoveSyntax node) => node;
             public override PgnSyntax VisitNagSyntax(PgnNagSyntax node) => node;
+            public override PgnSyntax VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node) => node;
             public override PgnSyntax VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node;
             public override PgnSyntax VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node;
             public override PgnSyntax VisitPeriodSyntax(PgnPeriodSyntax node) => node;
