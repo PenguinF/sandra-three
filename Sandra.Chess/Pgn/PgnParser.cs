@@ -504,6 +504,7 @@ namespace Sandra.Chess.Pgn
                     floatItems = CapturePly();
                     CapturePlyList(floatItems);
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 default:
                     throw new UnreachableException();
@@ -546,10 +547,7 @@ namespace Sandra.Chess.Pgn
             else
             {
                 var trailingFloatItems = CapturePly();
-                if (PlyListBuilder.Count > 0 || trailingFloatItems.Count > 0)
-                {
-                    CapturePlyList(trailingFloatItems);
-                }
+                CapturePlyList(trailingFloatItems);
             }
 
             return trailingTrivia;
