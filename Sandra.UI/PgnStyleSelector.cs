@@ -93,6 +93,9 @@ namespace Sandra.UI
         public override Style VisitNagSyntax(PgnNagSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[node.Green.SymbolType == PgnSymbolType.OverflowNag ? errorSymbolStyleIndex : moveTextStyleIndex];
 
+        public override Style VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[illegalCharacterStyleIndex];
+
         public override Style VisitPeriodSyntax(PgnPeriodSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[moveNumberStyleIndex];
 
