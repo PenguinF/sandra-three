@@ -330,6 +330,11 @@ namespace Sandra.Chess.Pgn
 
         private void YieldOrphanParenthesisClose()
         {
+            Errors.Add(new PgnErrorInfo(
+                PgnErrorCode.OrphanParenthesisClose,
+                symbolStartIndex,
+                PgnParenthesisCloseSyntax.ParenthesisCloseLength));
+
             CurrentFrame.FloatItemListBuilder.Add(ConvertToOrphanParenthesisClose(symbolBeingYielded));
         }
 
