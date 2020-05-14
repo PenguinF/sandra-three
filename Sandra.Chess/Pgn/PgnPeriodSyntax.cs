@@ -24,7 +24,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the period character '.' in PGN text.
     /// </summary>
-    public sealed class GreenPgnPeriodSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnPeriodSyntax : GreenPgnPlyFloatItemSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnPeriodSyntax"/> value.
@@ -34,12 +34,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnPeriodSyntax.PeriodLength;
+        public override int Length => PgnPeriodSyntax.PeriodLength;
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Period;
+        public override PgnSymbolType SymbolType => PgnSymbolType.Period;
 
         private GreenPgnPeriodSyntax() { }
     }
