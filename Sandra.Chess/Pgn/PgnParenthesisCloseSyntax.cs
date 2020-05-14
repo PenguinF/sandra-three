@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -89,20 +87,17 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the parenthesis close character ')', together with its leading trivia.
     /// </summary>
-    public sealed class PgnParenthesisCloseWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisCloseSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnParenthesisCloseWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisCloseSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
+        public PgnVariationSyntax Parent { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Green.Length - Green.Length;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -111,11 +106,10 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnParenthesisCloseSyntax CreateContentNode() => new PgnParenthesisCloseSyntax(this);
 
-        internal PgnParenthesisCloseWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnParenthesisCloseWithTriviaSyntax(PgnVariationSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
         }
     }
 }

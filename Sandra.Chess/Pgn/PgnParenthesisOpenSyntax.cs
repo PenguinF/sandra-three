@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -89,20 +87,17 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the parenthesis open character '(', together with its leading trivia.
     /// </summary>
-    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisOpenSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnParenthesisOpenWithTriviaSyntax : WithTriviaSyntax<PgnParenthesisOpenSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
+        public PgnVariationSyntax Parent { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => 0;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -111,11 +106,10 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnParenthesisOpenSyntax CreateContentNode() => new PgnParenthesisOpenSyntax(this);
 
-        internal PgnParenthesisOpenWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnParenthesisOpenWithTriviaSyntax(PgnVariationSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
         }
     }
 }

@@ -164,6 +164,11 @@ namespace Sandra.Chess.Pgn
         public SafeLazyObjectCollection<PgnNagWithFloatItemsSyntax> Nags { get; }
 
         /// <summary>
+        /// Gets the collection of variation nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnVariationWithFloatItemsSyntax> Variations { get; }
+
+        /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Green.Plies.GetElementOffset(ParentIndex);
@@ -181,7 +186,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => 2 + Nags.Count;
+        public override int ChildCount => 2 + Nags.Count + Variations.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -192,7 +197,9 @@ namespace Sandra.Chess.Pgn
             index--;
             if (index == 0) return MoveOrEmpty;
             index--;
-            return Nags[index];
+            int variationIndex = index - Nags.Count;
+            if (variationIndex < 0) return Nags[index];
+            return Variations[variationIndex];
         }
 
         /// <summary>
@@ -204,7 +211,9 @@ namespace Sandra.Chess.Pgn
             index--;
             if (index == 0) return Green.MoveNumberLength;
             index--;
-            return Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
+            int variationIndex = index - Nags.Count;
+            if (variationIndex < 0) return Length - Green.Variations.Length - Green.Nags.Length + Green.Nags.GetElementOffset(index);
+            return Length - Green.Variations.Length + Green.Variations.GetElementOffset(variationIndex);
         }
 
         internal PgnPlySyntax(PgnPlyListSyntax parent, int parentIndex, GreenPgnPlySyntax green)
@@ -237,6 +246,10 @@ namespace Sandra.Chess.Pgn
             Nags = new SafeLazyObjectCollection<PgnNagWithFloatItemsSyntax>(
                 green.Nags.Count,
                 index => new PgnNagWithFloatItemsSyntax(this, index, Green.Nags[index]));
+
+            Variations = new SafeLazyObjectCollection<PgnVariationWithFloatItemsSyntax>(
+                green.Variations.Count,
+                index => new PgnVariationWithFloatItemsSyntax(this, index, Green.Variations[index]));
         }
     }
 
@@ -289,11 +302,35 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Length - Parent.Green.Variations.Length - Parent.Green.Nags.Length + Parent.Green.Nags.GetElementOffset(ParentIndex);
 
         internal override PgnNagWithTriviaSyntax CreatePlyContentNode() => new PgnNagWithTriviaSyntax(this, Green.PlyContentNode);
 
         internal PgnNagWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> green)
+            : base(parent, green)
+        {
+            ParentIndex = parentIndex;
+        }
+    }
+
+    /// <summary>
+    /// Represents a side line syntax node, together with its leading floating items.
+    /// </summary>
+    public sealed class PgnVariationWithFloatItemsSyntax : WithPlyFloatItemsSyntax<GreenPgnVariationSyntax, PgnVariationSyntax>
+    {
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Length - Parent.Green.Variations.Length + Parent.Green.Variations.GetElementOffset(ParentIndex);
+
+        internal override PgnVariationSyntax CreatePlyContentNode() => new PgnVariationSyntax(this, Green.PlyContentNode);
+
+        internal PgnVariationWithFloatItemsSyntax(PgnPlySyntax parent, int parentIndex, GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax> green)
             : base(parent, green)
         {
             ParentIndex = parentIndex;

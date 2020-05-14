@@ -82,7 +82,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public Union<PgnSyntaxNodes, PgnVariationSyntax> Parent { get; }
 
         public int ParentIndex { get; }
 
@@ -106,7 +106,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Match(whenOption1: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex), whenOption2: x => x.Green.ParenthesisOpen.Length);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -116,7 +116,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         /// <summary>
         /// Gets the number of children of this syntax node.
@@ -143,7 +143,7 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnPlyListSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnPlyListSyntax green)
+        internal PgnPlyListSyntax(Union<PgnSyntaxNodes, PgnVariationSyntax> parent, int parentIndex, GreenPgnPlyListSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

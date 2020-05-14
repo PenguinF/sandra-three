@@ -200,12 +200,8 @@ namespace Sandra.Chess.Pgn
                     innermostVariation = false;
                 }
 
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
-                if (variationSyntax.ParenthesisClose != null)
-                {
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-                }
+                // Capture floating items from before the variation, then add to VariationListBuilder.
+                CurrentFrame.VariationListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>(CaptureFloatItems(), variationSyntax));
             }
         }
 
@@ -267,13 +263,11 @@ namespace Sandra.Chess.Pgn
         {
             if (VariationBuilderStack.Count > 0)
             {
+                // Must call CaptureVariation before calling CaptureFloatItems.
                 var variationSyntax = CaptureVariation(symbolBeingYielded);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
-                if (variationSyntax.ParenthesisClose != null)
-                {
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-                }
+
+                // Capture floating items from before the variation, then add to VariationListBuilder.
+                CurrentFrame.VariationListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>(CaptureFloatItems(), variationSyntax));
             }
             else
             {
@@ -663,9 +657,6 @@ namespace Sandra.Chess.Pgn
                     YieldNag(floatItems);
                     break;
                 case PgnSymbolType.ParenthesisOpen:
-                    CaptureNestedUnfinishedVariations();
-                    floatItems = CapturePly();
-                    SymbolBuilder.Add(CapturePlyList(floatItems));
                     YieldParenthesisOpen();
                     break;
                 case PgnSymbolType.ParenthesisClose:

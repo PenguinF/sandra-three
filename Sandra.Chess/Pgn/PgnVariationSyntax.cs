@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -81,5 +82,112 @@ namespace Sandra.Chess.Pgn
         }
 
         GreenWithTriviaSyntax IPlyFloatItemAnchor.FirstWithTriviaNode => ParenthesisOpen;
+    }
+
+    /// <summary>
+    /// Represents a syntax node which contains a side line, i.e. a list of plies and their surrounding parentheses.
+    /// </summary>
+    public sealed class PgnVariationSyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnVariationWithFloatItemsSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnVariationSyntax Green { get; }
+
+        private readonly SafeLazyObject<PgnParenthesisOpenWithTriviaSyntax> parenthesisOpen;
+
+        /// <summary>
+        /// Gets the opening parenthesis.
+        /// </summary>
+        public PgnParenthesisOpenWithTriviaSyntax ParenthesisOpen => parenthesisOpen.Object;
+
+        private readonly SafeLazyObject<PgnPlyListSyntax> pliesWithFloatItems;
+
+        /// <summary>
+        /// Gets the list of plies and trailing floating items that are not captured by a ply.
+        /// </summary>
+        public PgnPlyListSyntax PliesWithFloatItems => pliesWithFloatItems.Object;
+
+        private readonly SafeLazyChildSyntaxOrEmpty<PgnParenthesisCloseWithTriviaSyntax> lazyParenthesisCloseOrEmpty;
+
+        /// <summary>
+        /// Gets the closing parenthesis. The closing parenthesis can be null.
+        /// </summary>
+        public PgnParenthesisCloseWithTriviaSyntax ParenthesisClose => lazyParenthesisCloseOrEmpty.ChildNodeOrNull;
+
+        /// <summary>
+        /// Gets the closing parenthesis. The closing parenthesis can be <see cref="PgnEmptySyntax"/>.
+        /// </summary>
+        public PgnSyntax ParenthesisCloseOrEmpty => lazyParenthesisCloseOrEmpty.ChildNodeOrEmpty;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingFloatItems.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => 3;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return ParenthesisOpen;
+            if (index == 1) return PliesWithFloatItems;
+            if (index == 2) return ParenthesisCloseOrEmpty;
+            throw new IndexOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public sealed override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.ParenthesisOpen.Length;
+            if (index == 2) return Green.ParenthesisOpen.Length + Green.PliesWithFloatItems.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal PgnVariationSyntax(PgnVariationWithFloatItemsSyntax parent, GreenPgnVariationSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+
+            parenthesisOpen = new SafeLazyObject<PgnParenthesisOpenWithTriviaSyntax>(
+                () => new PgnParenthesisOpenWithTriviaSyntax(this, green.ParenthesisOpen));
+
+            pliesWithFloatItems = new SafeLazyObject<PgnPlyListSyntax>(
+                () => new PgnPlyListSyntax(this, 0, Green.PliesWithFloatItems));
+
+            if (green.ParenthesisClose != null)
+            {
+                lazyParenthesisCloseOrEmpty = new SafeLazyChildSyntaxOrEmpty<PgnParenthesisCloseWithTriviaSyntax>(
+                    () => new PgnParenthesisCloseWithTriviaSyntax(this, Green.ParenthesisClose));
+            }
+            else
+            {
+                lazyParenthesisCloseOrEmpty = new SafeLazyChildSyntaxOrEmpty<PgnParenthesisCloseWithTriviaSyntax>(
+                    this, green.ParenthesisOpen.Length + green.PliesWithFloatItems.Length);
+            }
+        }
     }
 }
