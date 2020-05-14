@@ -34,6 +34,35 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
+        private struct VariationStackFrame
+        {
+            // Whether to report a missing move number.
+            public bool HasPly;
+
+            // Current ply being built.
+            public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> MoveNumber;
+            public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> Move;
+
+            // Builds list of floating items within the current ply.
+            public List<GreenWithTriviaSyntax> FloatItemListBuilder;
+
+            // Builds list of NAGs of the current ply.
+            public List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
+
+            // List of already built plies in this variation.
+            public List<GreenPgnPlySyntax> PlyListBuilder;
+
+            public void Reset()
+            {
+                HasPly = false;
+                MoveNumber = null;
+                Move = null;
+                FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
+                NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
+                PlyListBuilder = new List<GreenPgnPlySyntax>();
+            }
+        }
+
         /// <summary>
         /// See also <see cref="StringLiteral.EscapeCharacter"/>.
         /// </summary>
@@ -70,9 +99,6 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
-        private readonly List<GreenWithTriviaSyntax> FloatItemListBuilder;  // Builds list of floating items within the current ply.
-        private readonly List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
-        private readonly List<GreenPgnPlySyntax> PlyListBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private readonly string pgnText;
@@ -89,12 +115,8 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
-        // Whether to report a missing move number.
-        private bool HasPly;
-
-        // Current ply being built.
-        private GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> MoveNumber;
-        private GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> Move;
+        // Contains stack frame for the current variation (main or side line) being built.
+        private VariationStackFrame CurrentFrame;
 
         // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
         private readonly Action YieldInTagSectionAction;
@@ -113,10 +135,9 @@ namespace Sandra.Chess.Pgn
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
-            FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
-            NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
-            PlyListBuilder = new List<GreenPgnPlySyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+
+            CurrentFrame.Reset();
 
             YieldInTagSectionAction = YieldInTagSection;
             YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
@@ -134,8 +155,8 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            var plyListSyntax = new GreenPgnPlyListSyntax(PlyListBuilder, trailingFloatItems);
-            PlyListBuilder.Clear();
+            var plyListSyntax = new GreenPgnPlyListSyntax(CurrentFrame.PlyListBuilder, trailingFloatItems);
+            CurrentFrame.PlyListBuilder.Clear();
             SymbolBuilder.Add(plyListSyntax);
         }
 
@@ -145,9 +166,9 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyUnchecked(int trailingFloatItemsLength)
         {
-            var plySyntax = new GreenPgnPlySyntax(MoveNumber, Move, NagListBuilder);
+            var plySyntax = new GreenPgnPlySyntax(CurrentFrame.MoveNumber, CurrentFrame.Move, CurrentFrame.NagListBuilder);
 
-            if (!HasPly && MoveNumber == null || Move == null)
+            if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
                 // See CaptureTagPair on how to calculate the error position and length.
                 int plyEndPosition
@@ -161,14 +182,14 @@ namespace Sandra.Chess.Pgn
                 // So subtract both the leading float items length plus leading trivia length.
                 GreenWithPlyFloatItemsSyntax firstNode;
 
-                if (MoveNumber != null) firstNode = MoveNumber;
-                else if (Move != null) firstNode = Move;
-                else firstNode = NagListBuilder[0];
+                if (CurrentFrame.MoveNumber != null) firstNode = CurrentFrame.MoveNumber;
+                else if (CurrentFrame.Move != null) firstNode = CurrentFrame.Move;
+                else firstNode = CurrentFrame.NagListBuilder[0];
 
                 int plyLength = plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.FirstWithTriviaNode.LeadingTrivia.Length;
                 int plyStartPosition = plyEndPosition - plyLength;
 
-                if (!HasPly && MoveNumber == null)
+                if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null)
                 {
                     // Only report missing move number for the first ply.
                     Errors.Add(new PgnErrorInfo(
@@ -177,7 +198,7 @@ namespace Sandra.Chess.Pgn
                         plyLength));
                 }
 
-                if (Move == null)
+                if (CurrentFrame.Move == null)
                 {
                     Errors.Add(new PgnErrorInfo(
                         PgnErrorCode.MissingMove,
@@ -186,19 +207,21 @@ namespace Sandra.Chess.Pgn
                 }
             }
 
-            MoveNumber = null;
-            Move = null;
-            NagListBuilder.Clear();
+            CurrentFrame.MoveNumber = null;
+            CurrentFrame.Move = null;
+            CurrentFrame.NagListBuilder.Clear();
 
-            HasPly = true;
-            PlyListBuilder.Add(plySyntax);
+            CurrentFrame.HasPly = true;
+            CurrentFrame.PlyListBuilder.Add(plySyntax);
         }
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CapturePly()
         {
             ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems = CaptureFloatItems();
 
-            if (MoveNumber != null || Move != null || NagListBuilder.Count > 0)
+            if (CurrentFrame.MoveNumber != null
+                || CurrentFrame.Move != null
+                || CurrentFrame.NagListBuilder.Count > 0)
             {
                 CapturePlyUnchecked(trailingFloatItems.Length);
             }
@@ -208,20 +231,20 @@ namespace Sandra.Chess.Pgn
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
         {
-            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(FloatItemListBuilder);
-            FloatItemListBuilder.Clear();
+            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(CurrentFrame.FloatItemListBuilder);
+            CurrentFrame.FloatItemListBuilder.Clear();
             return floatItems;
         }
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            MoveNumber = new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded);
+            CurrentFrame.MoveNumber = new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded);
         }
 
         private void YieldPeriod()
         {
             // Report orphan period if not in between move number and move.
-            if (MoveNumber == null || Move != null)
+            if (CurrentFrame.MoveNumber == null || CurrentFrame.Move != null)
             {
                 Errors.Add(new PgnErrorInfo(
                     PgnErrorCode.OrphanPeriod,
@@ -229,17 +252,17 @@ namespace Sandra.Chess.Pgn
                     PgnPeriodSyntax.PeriodLength));
             }
 
-            FloatItemListBuilder.Add(symbolBeingYielded);
+            CurrentFrame.FloatItemListBuilder.Add(symbolBeingYielded);
         }
 
         private void YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            Move = new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded);
+            CurrentFrame.Move = new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded);
         }
 
         private void YieldNag(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded));
+            CurrentFrame.NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded));
         }
 
         private void YieldParenthesisOpen()
@@ -491,7 +514,11 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.UnrecognizedMove:
                     // Only allow a preceding move number in the same ply.
                     floatItems = CaptureFloatItems();
-                    if (Move != null || NagListBuilder.Count > 0) CapturePlyUnchecked(floatItems.Length);
+                    if (CurrentFrame.Move != null
+                        || CurrentFrame.NagListBuilder.Count > 0)
+                    {
+                        CapturePlyUnchecked(floatItems.Length);
+                    }
                     YieldMove(floatItems);
                     break;
                 case PgnSymbolType.Nag:
