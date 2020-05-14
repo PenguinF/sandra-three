@@ -57,6 +57,11 @@ namespace Sandra.Chess.Pgn
         public ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> Nags { get; }
 
         /// <summary>
+        /// Gets the variation nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> Variations { get; }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length { get; }
@@ -73,25 +78,30 @@ namespace Sandra.Chess.Pgn
         /// <param name="nags">
         /// The NAG (Numeric Annotation Glyph) nodes.
         /// </param>
+        /// <param name="variations">
+        /// The variation nodes.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="nags"/> is null.
+        /// <paramref name="nags"/> and/or <paramref name="variations"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and <paramref name="nags"/> is empty.
+        /// <paramref name="moveNumber"/> is null, <paramref name="move"/> is null, and both <paramref name="nags"/> and <paramref name="variations"/> are empty.
         /// </exception>
         public GreenPgnPlySyntax(
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> moveNumber,
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> move,
-            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags)
+            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
+            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
         {
             if (nags == null) throw new ArgumentNullException(nameof(nags));
+            if (variations == null) throw new ArgumentNullException(nameof(variations));
 
             MoveNumber = moveNumber;
             Move = move;
-
             Nags = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Create(nags);
+            Variations = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Create(variations);
 
-            int length = Nags.Length;
+            int length = Nags.Length + Variations.Length;
             if (moveNumber != null) length += moveNumber.Length;
             if (move != null) length += move.Length;
 

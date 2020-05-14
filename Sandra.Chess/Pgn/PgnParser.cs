@@ -52,6 +52,9 @@ namespace Sandra.Chess.Pgn
             // Builds list of NAGs of the current ply.
             public List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
 
+            // Builds list of variations after the current ply.
+            public List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> VariationListBuilder;
+
             // List of already built plies in this variation.
             public List<GreenPgnPlySyntax> PlyListBuilder;
 
@@ -63,6 +66,7 @@ namespace Sandra.Chess.Pgn
                 Move = null;
                 FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
                 NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
+                VariationListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
                 PlyListBuilder = new List<GreenPgnPlySyntax>();
             }
         }
@@ -283,7 +287,7 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyUnchecked(int trailingFloatItemsLength)
         {
-            var plySyntax = new GreenPgnPlySyntax(CurrentFrame.MoveNumber, CurrentFrame.Move, CurrentFrame.NagListBuilder);
+            var plySyntax = new GreenPgnPlySyntax(CurrentFrame.MoveNumber, CurrentFrame.Move, CurrentFrame.NagListBuilder, CurrentFrame.VariationListBuilder);
 
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
@@ -301,7 +305,8 @@ namespace Sandra.Chess.Pgn
 
                 if (CurrentFrame.MoveNumber != null) firstNode = CurrentFrame.MoveNumber;
                 else if (CurrentFrame.Move != null) firstNode = CurrentFrame.Move;
-                else firstNode = CurrentFrame.NagListBuilder[0];
+                else if (CurrentFrame.NagListBuilder.Count > 0) firstNode = CurrentFrame.NagListBuilder[0];
+                else firstNode = CurrentFrame.VariationListBuilder[0];
 
                 int plyLength = plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.FirstWithTriviaNode.LeadingTrivia.Length;
                 int plyStartPosition = plyEndPosition - plyLength;
@@ -327,6 +332,7 @@ namespace Sandra.Chess.Pgn
             CurrentFrame.MoveNumber = null;
             CurrentFrame.Move = null;
             CurrentFrame.NagListBuilder.Clear();
+            CurrentFrame.VariationListBuilder.Clear();
 
             CurrentFrame.HasPly = true;
             CurrentFrame.PlyListBuilder.Add(plySyntax);
@@ -338,7 +344,8 @@ namespace Sandra.Chess.Pgn
 
             if (CurrentFrame.MoveNumber != null
                 || CurrentFrame.Move != null
-                || CurrentFrame.NagListBuilder.Count > 0)
+                || CurrentFrame.NagListBuilder.Count > 0
+                || CurrentFrame.VariationListBuilder.Count > 0)
             {
                 CapturePlyUnchecked(trailingFloatItems.Length);
             }
@@ -632,7 +639,8 @@ namespace Sandra.Chess.Pgn
                     // Only allow a preceding move number in the same ply.
                     floatItems = CaptureFloatItems();
                     if (CurrentFrame.Move != null
-                        || CurrentFrame.NagListBuilder.Count > 0)
+                        || CurrentFrame.NagListBuilder.Count > 0
+                        || CurrentFrame.VariationListBuilder.Count > 0)
                     {
                         CapturePlyUnchecked(floatItems.Length);
                     }
@@ -641,7 +649,12 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
                 case PgnSymbolType.OverflowNag:
-                    YieldNag(CaptureFloatItems());
+                    floatItems = CaptureFloatItems();
+                    if (CurrentFrame.VariationListBuilder.Count > 0)
+                    {
+                        CapturePlyUnchecked(floatItems.Length);
+                    }
+                    YieldNag(floatItems);
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     CaptureNestedUnfinishedVariations();
