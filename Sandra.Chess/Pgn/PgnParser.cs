@@ -652,6 +652,12 @@ namespace Sandra.Chess.Pgn
                     floatItems = CaptureFloatItems();
                     if (CurrentFrame.VariationListBuilder.Count > 0)
                     {
+                        // Report variation before NAG message.
+                        Errors.Add(new PgnErrorInfo(
+                            PgnErrorCode.VariationBeforeNAG,
+                            symbolStartIndex,
+                            symbolBeingYielded.ContentNode.Length));
+
                         CapturePlyUnchecked(floatItems.Length);
                     }
                     YieldNag(floatItems);
