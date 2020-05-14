@@ -116,7 +116,7 @@ namespace Sandra.Chess.Pgn
         internal sealed override PgnSyntax ContentNodeUntyped => ContentNode;
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public sealed override int Length => Green.Length;
 

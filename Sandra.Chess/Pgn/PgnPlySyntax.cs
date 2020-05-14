@@ -32,7 +32,7 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnPlySyntax : ISpan
     {
         /// <summary>
-        /// The move number. The move number can be null.
+        /// Gets the move number. The move number can be null.
         /// </summary>
         public GreenWithPlyFloatItemsSyntax MoveNumber { get; }
 
@@ -42,7 +42,7 @@ namespace Sandra.Chess.Pgn
         public int MoveNumberLength => MoveNumber == null ? 0 : MoveNumber.Length;
 
         /// <summary>
-        /// The move. The move can be null.
+        /// Gets the move. The move can be null.
         /// </summary>
         public GreenWithPlyFloatItemsSyntax Move { get; }
 
@@ -124,24 +124,24 @@ namespace Sandra.Chess.Pgn
         private readonly SafeLazyChildSyntaxOrEmpty<PgnMoveNumberWithFloatItemsSyntax> lazyMoveNumberOrEmpty;
 
         /// <summary>
-        /// The move number. The move number can be null.
+        /// Gets the move number. The move number can be null.
         /// </summary>
         public PgnMoveNumberWithFloatItemsSyntax MoveNumber => lazyMoveNumberOrEmpty.ChildNodeOrNull;
 
         /// <summary>
-        /// The move number. The move number can be <see cref="PgnEmptySyntax"/>.
+        /// Gets the move number. The move number can be <see cref="PgnEmptySyntax"/>.
         /// </summary>
         public PgnSyntax MoveNumberOrEmpty => lazyMoveNumberOrEmpty.ChildNodeOrEmpty;
 
         private readonly SafeLazyChildSyntaxOrEmpty<PgnMoveWithFloatItemsSyntax> lazyMoveOrEmpty;
 
         /// <summary>
-        /// The move. The move can be null.
+        /// Gets the move. The move can be null.
         /// </summary>
         public PgnMoveWithFloatItemsSyntax Move => lazyMoveOrEmpty.ChildNodeOrNull;
 
         /// <summary>
-        /// The move number. The move number can be <see cref="PgnEmptySyntax"/>.
+        /// Gets the move number. The move number can be <see cref="PgnEmptySyntax"/>.
         /// </summary>
         public PgnSyntax MoveOrEmpty => lazyMoveOrEmpty.ChildNodeOrEmpty;
 
