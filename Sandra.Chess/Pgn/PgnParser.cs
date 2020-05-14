@@ -186,6 +186,7 @@ namespace Sandra.Chess.Pgn
         private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
         {
             var trailingFloatItems = CapturePly();
+            bool reportEmptyVariationMessage = !CurrentFrame.HasPly;
             var plyListSyntax = CapturePlyList(trailingFloatItems);
 
             // Parent stack frame contains the saved parenthesis open.
@@ -197,6 +198,25 @@ namespace Sandra.Chess.Pgn
                 maybeParenthesisClose);
 
             CurrentFrame.SavedParenthesisOpenWithTrivia = null;
+
+            if (reportEmptyVariationMessage)
+            {
+                // The end position of the variation is at the end of the closing parenthesis,
+                // or at the start of the current non-closing parenthesis being yielded,
+                // or at the end of the PGN.
+                int variationEndPosition
+                    = maybeParenthesisClose != null ? symbolStartIndex + PgnParenthesisCloseSyntax.ParenthesisCloseLength
+                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+                    : pgnText.Length - trailingTrivia.Length;
+
+                // Subtract the leading trivia length.
+                int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.EmptyVariation,
+                    variationEndPosition - variationLength,
+                    variationLength));
+            }
 
             return variationSyntax;
         }
