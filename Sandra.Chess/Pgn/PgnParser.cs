@@ -164,14 +164,26 @@ namespace Sandra.Chess.Pgn
         {
             while (VariationBuilderStack.Count > 0)
             {
-                var floatItems = CapturePly();
-                var plyListSyntax = CapturePlyList(floatItems);
-                // Parent stack frame contains the saved parenthesis open.
-                CurrentFrame = VariationBuilderStack.Pop();
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(CurrentFrame.SavedParenthesisOpenWithTrivia, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                SymbolBuilder.Add(plyListSyntax);
-                CurrentFrame.SavedParenthesisOpenWithTrivia = null;
+                CaptureVariation(null);
             }
+        }
+
+        private void CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
+        {
+            var trailingFloatItems = CapturePly();
+            var plyListSyntax = CapturePlyList(trailingFloatItems);
+
+            // Parent stack frame contains the saved parenthesis open.
+            CurrentFrame = VariationBuilderStack.Pop();
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(CurrentFrame.SavedParenthesisOpenWithTrivia, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+            SymbolBuilder.Add(plyListSyntax);
+
+            if (maybeParenthesisClose != null)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+            }
+
+            CurrentFrame.SavedParenthesisOpenWithTrivia = null;
         }
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
@@ -304,14 +316,7 @@ namespace Sandra.Chess.Pgn
         {
             if (VariationBuilderStack.Count > 0)
             {
-                var floatItems = CapturePly();
-                var plyListSyntax = CapturePlyList(floatItems);
-                // Parent stack frame contains the saved parenthesis open.
-                CurrentFrame = VariationBuilderStack.Pop();
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(CurrentFrame.SavedParenthesisOpenWithTrivia, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-                SymbolBuilder.Add(plyListSyntax);
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-                CurrentFrame.SavedParenthesisOpenWithTrivia = null;
+                CaptureVariation(symbolBeingYielded);
             }
             else
             {
