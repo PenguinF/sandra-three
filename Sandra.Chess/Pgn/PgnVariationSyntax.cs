@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -27,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a side line, i.e. a list of plies and their surrounding parentheses.
     /// </summary>
-    public sealed class GreenPgnVariationSyntax : ISpan
+    public sealed class GreenPgnVariationSyntax : IPlyFloatItemAnchor
     {
         /// <summary>
         /// Gets the opening parenthesis.
@@ -80,5 +79,7 @@ namespace Sandra.Chess.Pgn
 
             Length = parenthesisOpen.Length + pliesWithFloatItems.Length + ParenthesisCloseLength;
         }
+
+        GreenWithTriviaSyntax IPlyFloatItemAnchor.FirstWithTriviaNode => ParenthesisOpen;
     }
 }
