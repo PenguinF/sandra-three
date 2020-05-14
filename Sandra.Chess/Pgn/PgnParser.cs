@@ -151,6 +151,15 @@ namespace Sandra.Chess.Pgn
             YieldContentNode = YieldInTagSectionAction;
         }
 
+        #region Conversions from one type of symbol to another
+
+        private GreenWithTriviaSyntax ConvertToOrphanParenthesisClose(GreenWithTriviaSyntax parenthesisClose)
+            => new GreenWithTriviaSyntax(
+                parenthesisClose.LeadingTrivia,
+                GreenPgnOrphanParenthesisCloseSyntax.Value);
+
+        #endregion Conversions from one type of symbol to another
+
         #region Variation parsing
 
         private void CaptureMainLine()
@@ -210,8 +219,6 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                var floatItems = CapturePly();
-                SymbolBuilder.Add(CapturePlyList(floatItems));
                 YieldOrphanParenthesisClose();
             }
         }
@@ -323,7 +330,7 @@ namespace Sandra.Chess.Pgn
 
         private void YieldOrphanParenthesisClose()
         {
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+            CurrentFrame.FloatItemListBuilder.Add(ConvertToOrphanParenthesisClose(symbolBeingYielded));
         }
 
         #endregion Ply parsing
