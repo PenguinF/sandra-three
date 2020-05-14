@@ -173,11 +173,17 @@ namespace Sandra.Chess.Pgn
         {
             while (VariationBuilderStack.Count > 0)
             {
-                CaptureVariation(null);
+                var variationSyntax = CaptureVariation(null);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
+                if (variationSyntax.ParenthesisClose != null)
+                {
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                }
             }
         }
 
-        private void CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
+        private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
         {
             var trailingFloatItems = CapturePly();
             var plyListSyntax = CapturePlyList(trailingFloatItems);
@@ -192,12 +198,7 @@ namespace Sandra.Chess.Pgn
 
             CurrentFrame.SavedParenthesisOpenWithTrivia = null;
 
-            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
-            SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
-            if (variationSyntax.ParenthesisClose != null)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-            }
+            return variationSyntax;
         }
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
@@ -220,7 +221,13 @@ namespace Sandra.Chess.Pgn
         {
             if (VariationBuilderStack.Count > 0)
             {
-                CaptureVariation(symbolBeingYielded);
+                var variationSyntax = CaptureVariation(symbolBeingYielded);
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisOpen, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                SymbolBuilder.Add(variationSyntax.PliesWithFloatItems);
+                if (variationSyntax.ParenthesisClose != null)
+                {
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(variationSyntax.ParenthesisClose, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                }
             }
             else
             {
