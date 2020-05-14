@@ -193,6 +193,29 @@ namespace Sandra.Chess.Pgn
             return plyListSyntax;
         }
 
+        private void YieldParenthesisOpen()
+        {
+            CurrentFrame.SavedParenthesisOpenWithTrivia = symbolBeingYielded;
+            VariationBuilderStack.Push(CurrentFrame);
+
+            // Initialize new frame.
+            CurrentFrame.Reset();
+        }
+
+        private void YieldParenthesisClose()
+        {
+            if (VariationBuilderStack.Count > 0)
+            {
+                CaptureVariation(symbolBeingYielded);
+            }
+            else
+            {
+                var floatItems = CapturePly();
+                SymbolBuilder.Add(CapturePlyList(floatItems));
+                YieldOrphanParenthesisClose();
+            }
+        }
+
         #endregion Variation parsing
 
         #region Ply parsing
@@ -298,32 +321,9 @@ namespace Sandra.Chess.Pgn
             CurrentFrame.NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded));
         }
 
-        private void YieldParenthesisOpen()
-        {
-            CurrentFrame.SavedParenthesisOpenWithTrivia = symbolBeingYielded;
-            VariationBuilderStack.Push(CurrentFrame);
-
-            // Initialize new frame.
-            CurrentFrame.Reset();
-        }
-
         private void YieldOrphanParenthesisClose()
         {
             SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
-        }
-
-        private void YieldParenthesisClose()
-        {
-            if (VariationBuilderStack.Count > 0)
-            {
-                CaptureVariation(symbolBeingYielded);
-            }
-            else
-            {
-                var floatItems = CapturePly();
-                SymbolBuilder.Add(CapturePlyList(floatItems));
-                YieldOrphanParenthesisClose();
-            }
         }
 
         #endregion Ply parsing
