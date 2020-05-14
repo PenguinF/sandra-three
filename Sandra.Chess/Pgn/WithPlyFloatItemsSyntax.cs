@@ -200,7 +200,7 @@ namespace Sandra.Chess.Pgn
 
     /// <summary>
     /// Marks a green syntax node as a potential anchor for floating items within a ply.
-    /// It is implemented by <see cref="GreenWithTriviaSyntax"/>.
+    /// It is implemented by both <see cref="GreenWithTriviaSyntax"/> and <see cref="GreenPgnVariationSyntax"/>.
     /// It exposes a method to get the first <see cref="IGreenPgnSymbol"/> node with its leading trivia,
     /// which is used for error reporting.
     /// </summary>
