@@ -64,6 +64,11 @@ namespace Sandra.Chess.Tests
             ("$-1", OneGame(EmptyTagSection, Plies(Ply(NAGNoFloats), Ply(MoveNoFloats))),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.UnrecognizedMove, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
 
+            ("(", OneGame(EmptyTagSection, Plies(Ply(VariationNoFloats(OpenNoTrivia, RealNoPlies)))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            (")", OneGame(EmptyTagSection, Plies(OneOrphanClose)),
+                new[] { PgnErrorCode.OrphanParenthesisClose }),
+
             // Expect: move number, periods (1 or 3), move, nag, rav*
             // A move by itself is sufficient so shouldn't yield any ply errors, only the missing move number message and missing game result.
             ("Pe4+!", OneGame(EmptyTagSection, Plies(Ply(MoveNoFloats))), new[] { PgnErrorCode.MissingMoveNumber }),
@@ -77,6 +82,8 @@ namespace Sandra.Chess.Tests
                 new PgnErrorCode[0]),  // Not actually an error right now.
             ("1$", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, NAGNoFloats))),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMove }),
+            ("1()", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMove }),
 
             (".1", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OnePeriod, MoveNumberNoTrivia)))),
                 new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMove }),
@@ -86,6 +93,8 @@ namespace Sandra.Chess.Tests
                 new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMoveNumber }),
             (".$", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OnePeriod, NAGNoTrivia)))),
                 new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            (".()", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OnePeriod, Variation(OpenNoTrivia, RealNoPlies, CloseNoTrivia))))),
+                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
 
             ("a3 1", OneGame(EmptyTagSection, Plies(Ply(MoveNoFloats), Ply(WS_MoveNumberNoFloats))),
                 new[] { PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
@@ -95,6 +104,8 @@ namespace Sandra.Chess.Tests
                 new[] { PgnErrorCode.MissingMoveNumber }),
             ("a3$", OneGame(EmptyTagSection, Plies(Ply(MoveNoFloats, NAGNoFloats))),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber }),
+            ("a3()", OneGame(EmptyTagSection, Plies(Ply(MoveNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber }),
 
             // '$' and '1' stick together. So distinguish.
             ("$1", OneGame(EmptyTagSection, Plies(Ply(NAGNoFloats))),
@@ -107,13 +118,51 @@ namespace Sandra.Chess.Tests
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
             ("$$", OneGame(EmptyTagSection, Plies(Ply(NAGNoFloats, NAGNoFloats))),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            ("$()", OneGame(EmptyTagSection, Plies(Ply(NAGNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+
+            ("()1", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose), Ply(MoveNumberNoFloats))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+            ("().", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose), OnePeriod)),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            ("()a3", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose), Ply(MoveNoFloats))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            ("()$", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose), Ply(NAGNoFloats))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.EmptyNag, PgnErrorCode.VariationBeforeNAG, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+            ("()()", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+
+            // Placement of Numeric Annotation Glyph.
+            ("$1.e4()", OneGame(EmptyTagSection, Plies(
+                Ply(NAGNoFloats),
+                Ply(WithFloats(OnePeriod, MoveNoTrivia), VariationOpenClose))),
+                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.EmptyVariation }),
+            ("$ 1.e4()", OneGame(EmptyTagSection, Plies(
+                Ply(NAGNoFloats),
+                Ply(WS_MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.EmptyVariation }),
+            ("1$.e4()", OneGame(EmptyTagSection, Plies(
+                Ply(MoveNumberNoFloats, NAGNoFloats),
+                Ply(WithFloats(OnePeriod, MoveNoTrivia), VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMove, PgnErrorCode.EmptyVariation }),
+            ("1.$e4()", OneGame(EmptyTagSection, Plies(
+                Ply(MoveNumberNoFloats, WithFloats(OnePeriod, NAGNoTrivia)),
+                Ply(MoveNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMove, PgnErrorCode.EmptyVariation }),
+            ("1.e4$()", OneGame(EmptyTagSection, Plies(
+                Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), new[] { NAGNoFloats }, new[] { VariationOpenClose }))),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.EmptyVariation }),
+            ("1.e4()$", OneGame(EmptyTagSection, Plies(
+                Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), VariationOpenClose),
+                Ply(NAGNoFloats))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.EmptyNag, PgnErrorCode.VariationBeforeNAG, PgnErrorCode.MissingMove }),
 
             // Placement of period symbol.
             (".1 e4$", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OnePeriod, MoveNumberNoTrivia), WS_MoveNoFloats, NAGNoFloats))),
                 new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyNag }),
             ("1. e4$", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move), NAGNoFloats))),
                 new[] { PgnErrorCode.EmptyNag }),
-            ("1 e4.$", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, WithFloats(OnePeriod, NAGNoTrivia)))),
+            ("1 e4. $", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, WithFloats(OnePeriod, WS_NAG)))),
                 new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyNag }),
             ("1 e4$.", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, NAGNoFloats), OnePeriod)),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.OrphanPeriod }),
@@ -127,6 +176,14 @@ namespace Sandra.Chess.Tests
                 new[] { PgnErrorCode.MissingMoveNumber }),
             ("$*", OneGame(EmptyTagSection, Plies(Ply(NAGNoFloats)), ResultNoTrivia),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+            ("()*", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose)), ResultNoTrivia),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+
+            // Plies that miss only move number or move.
+            ("e4$1()", OneGame(EmptyTagSection, Plies(Ply(MoveNoFloats, NAGNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber }),
+            ("1$1()", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, NAGNoFloats, VariationOpenClose))),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMove }),
 
             // Moves, both recognized, unrecognized, and which could be tag names too: Qef0 should not trigger a new tag section.
             ("1. e5 2", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move)), Ply(WS_MoveNumberNoFloats))),
