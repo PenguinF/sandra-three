@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Text;
 using System;
 
 namespace Sandra.Chess.Pgn
@@ -28,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node together with its leading trivia.
     /// </summary>
-    public sealed class GreenWithTriviaSyntax : ISpan
+    public sealed class GreenWithTriviaSyntax : IPlyFloatItemAnchor
     {
         /// <summary>
         /// Gets the leading trivia of the syntax node.
@@ -62,6 +61,8 @@ namespace Sandra.Chess.Pgn
             LeadingTrivia = leadingTrivia ?? throw new ArgumentNullException(nameof(leadingTrivia));
             ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
         }
+
+        GreenWithTriviaSyntax IPlyFloatItemAnchor.FirstWithTriviaNode => this;
     }
 
     /// <summary>

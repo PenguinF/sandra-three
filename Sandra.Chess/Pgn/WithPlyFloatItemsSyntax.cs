@@ -168,4 +168,19 @@ namespace Sandra.Chess.Pgn
             plyContentNode = new SafeLazyObject<TSyntaxNode>(CreatePlyContentNode);
         }
     }
+
+    /// <summary>
+    /// Marks a green syntax node as a potential anchor for floating items within a ply.
+    /// It is implemented by <see cref="GreenWithTriviaSyntax"/>.
+    /// It exposes a method to get the first <see cref="IGreenPgnSymbol"/> node with its leading trivia,
+    /// which is used for error reporting.
+    /// </summary>
+    public interface IPlyFloatItemAnchor : ISpan
+    {
+        /// <summary>
+        /// Gets the first <see cref="GreenWithTriviaSyntax"/> which contains a <see cref="IGreenPgnSymbol"/>
+        /// together with its leading trivia.
+        /// </summary>
+        GreenWithTriviaSyntax FirstWithTriviaNode { get; }
+    }
 }
