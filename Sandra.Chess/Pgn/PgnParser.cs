@@ -242,6 +242,16 @@ namespace Sandra.Chess.Pgn
             NagListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(leadingFloatItems, symbolBeingYielded));
         }
 
+        private void YieldParenthesisOpen()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+        }
+
+        private void YieldParenthesisClose()
+        {
+            SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+        }
+
         #endregion Ply parsing
 
         #region Tag section parsing
@@ -414,14 +424,14 @@ namespace Sandra.Chess.Pgn
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    YieldParenthesisOpen();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    YieldParenthesisClose();
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Asterisk:
@@ -492,12 +502,12 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.ParenthesisOpen:
                     floatItems = CapturePly();
                     CapturePlyList(floatItems);
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisOpenWithTriviaSyntax(parent, index, green)));
+                    YieldParenthesisOpen();
                     break;
                 case PgnSymbolType.ParenthesisClose:
                     floatItems = CapturePly();
                     CapturePlyList(floatItems);
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnParenthesisCloseWithTriviaSyntax(parent, index, green)));
+                    YieldParenthesisClose();
                     break;
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:
