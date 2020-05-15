@@ -173,10 +173,10 @@ namespace Sandra.Chess.Pgn
             Green = green;
 
             parenthesisOpen = new SafeLazyObject<PgnParenthesisOpenWithTriviaSyntax>(
-                () => new PgnParenthesisOpenWithTriviaSyntax(this, green.ParenthesisOpen));
+                () => new PgnParenthesisOpenWithTriviaSyntax(this, Green.ParenthesisOpen));
 
             pliesWithFloatItems = new SafeLazyObject<PgnPlyListSyntax>(
-                () => new PgnPlyListSyntax(this, 0, Green.PliesWithFloatItems));
+                () => new PgnPlyListSyntax(this, Green.PliesWithFloatItems));
 
             if (green.ParenthesisClose != null)
             {

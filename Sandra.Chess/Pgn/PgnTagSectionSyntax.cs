@@ -21,7 +21,6 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -30,7 +29,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a collection of <see cref="GreenPgnTagPairSyntax"/> instances.
     /// </summary>
-    public sealed class GreenPgnTagSectionSyntax : IGreenPgnTopLevelSyntax, ISpan
+    public sealed class GreenPgnTagSectionSyntax : ISpan
     {
         /// <summary>
         /// Gets the empty <see cref="GreenPgnTagSectionSyntax"/>.
@@ -76,19 +75,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a collection of <see cref="PgnTagPairSyntax"/> instances.
     /// </summary>
-    public sealed class PgnTagSectionSyntax : PgnSyntax, IPgnTopLevelSyntax
+    public sealed class PgnTagSectionSyntax : PgnSyntax
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public PgnGameSyntax Parent { get; }
-
-        /// <summary>
-        /// Gets the index of this syntax node in its parent.
-        /// </summary>
-        public int ParentIndex { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -103,10 +95,10 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => 0;
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => Green.Length;
 
@@ -130,10 +122,9 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.TagPairNodes.GetElementOffset(index);
 
-        internal PgnTagSectionSyntax(PgnGameSyntax parent, int parentIndex, GreenPgnTagSectionSyntax green)
+        internal PgnTagSectionSyntax(PgnGameSyntax parent, GreenPgnTagSectionSyntax green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
             Green = green;
 
             TagPairNodes = new SafeLazyObjectCollection<PgnTagPairSyntax>(

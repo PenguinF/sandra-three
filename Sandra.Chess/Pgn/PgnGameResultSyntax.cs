@@ -137,12 +137,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public PgnGameSyntax Parent { get; }
-        public int ParentIndex { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Length - Green.Length;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -155,7 +154,6 @@ namespace Sandra.Chess.Pgn
             : base(green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
         }
     }
 }
