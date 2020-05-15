@@ -172,6 +172,25 @@ namespace Sandra.Chess.Pgn
             ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
             : pgnText.Length - trailingTrivia.Length;
 
+        private int GetLengthWithoutLeadingTrivia(GreenPgnVariationSyntax variationSyntax)
+            => variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+
+        private int GetLengthWithoutLeadingFloatsAndTrivia(GreenPgnPlySyntax plySyntax)
+        {
+            // Subtract both the leading float items length plus leading trivia length.
+            GreenWithPlyFloatItemsSyntax firstNode;
+
+            if (plySyntax.MoveNumber != null) firstNode = plySyntax.MoveNumber;
+            else if (plySyntax.Move != null) firstNode = plySyntax.Move;
+            else if (plySyntax.Nags.Count > 0) firstNode = plySyntax.Nags[0];
+            else firstNode = plySyntax.Variations[0];
+
+            return plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.FirstWithTriviaNode.LeadingTrivia.Length;
+        }
+
+        private int GetLengthWithoutLeadingTrivia(GreenPgnTagPairSyntax tagPairSyntax)
+            => tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
+
         #endregion Error reporting helpers
 
         #region Game parsing
@@ -202,9 +221,7 @@ namespace Sandra.Chess.Pgn
                 {
                     // Report MissingParenthesisClose only once, for the innermost variation.
                     int variationEndPosition = GetCurrentTriviaStartPosition();
-
-                    // Subtract the leading trivia length.
-                    int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+                    int variationLength = GetLengthWithoutLeadingTrivia(variationSyntax);
 
                     Errors.Add(new PgnErrorInfo(
                         PgnErrorCode.MissingParenthesisClose,
@@ -249,8 +266,7 @@ namespace Sandra.Chess.Pgn
                     = maybeParenthesisClose != null ? symbolStartIndex + PgnParenthesisCloseSyntax.ParenthesisCloseLength
                     : GetCurrentTriviaStartPosition();
 
-                // Subtract the leading trivia length.
-                int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+                int variationLength = GetLengthWithoutLeadingTrivia(variationSyntax);
 
                 Errors.Add(new PgnErrorInfo(
                     PgnErrorCode.EmptyVariation,
@@ -304,21 +320,9 @@ namespace Sandra.Chess.Pgn
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
                 // The captured ply including its trailing floating items ends at the start of the current trivia.
-                int plyEndPosition = GetCurrentTriviaStartPosition();
-
                 // So we need to subtract the length of the floating items that trail the captured ply.
-                plyEndPosition -= trailingFloatItemsLength;
-
-                // For plies, start at the first content node of the first ply content node.
-                // So subtract both the leading float items length plus leading trivia length.
-                GreenWithPlyFloatItemsSyntax firstNode;
-
-                if (CurrentFrame.MoveNumber != null) firstNode = CurrentFrame.MoveNumber;
-                else if (CurrentFrame.Move != null) firstNode = CurrentFrame.Move;
-                else if (CurrentFrame.NagListBuilder.Count > 0) firstNode = CurrentFrame.NagListBuilder[0];
-                else firstNode = CurrentFrame.VariationListBuilder[0];
-
-                int plyLength = plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.FirstWithTriviaNode.LeadingTrivia.Length;
+                int plyEndPosition = GetCurrentTriviaStartPosition() - trailingFloatItemsLength;
+                int plyLength = GetLengthWithoutLeadingFloatsAndTrivia(plySyntax);
                 int plyStartPosition = plyEndPosition - plyLength;
 
                 if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null)
@@ -427,7 +431,7 @@ namespace Sandra.Chess.Pgn
                     : GetCurrentTriviaStartPosition();
 
                 // To report tag pair errors, start at the '[', not where its leading trivia starts.
-                int tagPairLength = tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
+                int tagPairLength = GetLengthWithoutLeadingTrivia(tagPairSyntax);
                 int tagPairStartPosition = tagPairEndPosition - tagPairLength;
 
                 if (!HasTagPairBracketOpen)
