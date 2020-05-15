@@ -729,7 +729,12 @@ namespace Sandra.Chess.Pgn
             {
                 CaptureTagPairIfNecessary();
                 CaptureTagSection();
-                if (LatestTagSection.TagPairNodes.Count > 0) SymbolBuilder.Add(LatestTagSection);
+
+                // If the last tag section was non-empty, also capture it as a new empty game.
+                if (LatestTagSection.TagPairNodes.Count > 0)
+                {
+                    CaptureGame(null, null);
+                }
             }
             else
             {
