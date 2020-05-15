@@ -124,6 +124,9 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
+        // Saved until an entire game is captured.
+        private GreenPgnTagSectionSyntax LatestTagSection;
+
         // Contains stack frame for the current variation (main or side line) being built.
         private VariationStackFrame CurrentFrame;
 
@@ -146,6 +149,8 @@ namespace Sandra.Chess.Pgn
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+
+            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
             CurrentFrame.Reset();
 
@@ -198,7 +203,13 @@ namespace Sandra.Chess.Pgn
             }
 
             var floatItems = CapturePly();
-            SymbolBuilder.Add(CapturePlyList(floatItems));
+            var plyListSyntax = CapturePlyList(floatItems);
+            if (LatestTagSection.TagPairNodes.Count > 0)
+            {
+                SymbolBuilder.Add(LatestTagSection);
+                LatestTagSection = GreenPgnTagSectionSyntax.Empty;
+            }
+            SymbolBuilder.Add(plyListSyntax);
         }
 
         private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
@@ -474,7 +485,7 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                SymbolBuilder.Add(GreenPgnTagSectionSyntax.Create(TagSectionBuilder));
+                LatestTagSection = GreenPgnTagSectionSyntax.Create(TagSectionBuilder);
                 TagSectionBuilder.Clear();
             }
         }
@@ -577,6 +588,11 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BlackWinMarker:
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
+                    if (LatestTagSection.TagPairNodes.Count > 0)
+                    {
+                        SymbolBuilder.Add(LatestTagSection);
+                        LatestTagSection = GreenPgnTagSectionSyntax.Empty;
+                    }
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
                     break;
                 default:
@@ -703,6 +719,7 @@ namespace Sandra.Chess.Pgn
             {
                 CaptureTagPairIfNecessary();
                 CaptureTagSection();
+                if (LatestTagSection.TagPairNodes.Count > 0) SymbolBuilder.Add(LatestTagSection);
             }
             else
             {
