@@ -96,7 +96,7 @@ namespace Sandra.Chess.Pgn
             GreenPgnTriviaSyntax trailingTrivia = parser.YieldEof();
 
             return new RootPgnSyntax(
-                parser.SymbolBuilder,
+                parser.GameListBuilder,
                 trailingTrivia,
                 parser.Errors);
         }
@@ -107,7 +107,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
-        private readonly List<GreenPgnGameSyntax> SymbolBuilder;
+        private readonly List<GreenPgnGameSyntax> GameListBuilder;
 
         private readonly string pgnText;
 
@@ -147,7 +147,7 @@ namespace Sandra.Chess.Pgn
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
-            SymbolBuilder = new List<GreenPgnGameSyntax>();
+            GameListBuilder = new List<GreenPgnGameSyntax>();
 
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
@@ -181,7 +181,7 @@ namespace Sandra.Chess.Pgn
 
             var gameSyntax = new GreenPgnGameSyntax(LatestTagSection, plyListSyntax, maybeGameResult);
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-            SymbolBuilder.Add(gameSyntax);
+            GameListBuilder.Add(gameSyntax);
         }
 
         private void CaptureMainLine(GreenWithTriviaSyntax maybeGameResult)
