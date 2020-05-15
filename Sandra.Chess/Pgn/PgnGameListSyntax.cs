@@ -22,7 +22,6 @@
 using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -75,9 +74,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public GreenPgnGameListSyntax Green { get; }
 
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
-
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the collection of games.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnGameSyntax> Games { get; }
 
         private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
 
@@ -109,15 +109,15 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count + 1;
+        public override int ChildCount => Games.Count + 1;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
         public override PgnSyntax GetChild(int index)
         {
-            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
-            if (index == TopLevelNodes.Count) return TrailingTrivia;
+            if (index < Games.Count) return Games[index];
+            if (index == Games.Count) return TrailingTrivia;
             throw new IndexOutOfRangeException();
         }
 
@@ -126,8 +126,8 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index)
         {
-            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
-            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
+            if (index < Games.Count) return Green.Games.GetElementOffset(index);
+            if (index == Games.Count) return Green.Games.Length;
             throw new IndexOutOfRangeException();
         }
 
@@ -135,42 +135,9 @@ namespace Sandra.Chess.Pgn
         {
             Green = green;
 
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-
-            foreach (var gameSyntax in green.Games)
-            {
-                flattened.Add(gameSyntax.TagSection);
-                flattened.Add(gameSyntax.PlyList);
-                if (gameSyntax.GameResult != null)
-                {
-                    flattened.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, gameResultGreen) => new PgnGameResultWithTriviaSyntax(parent, index, gameResultGreen)));
-                }
-            }
-
-            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
-
-            GreenTopLevelNodes = greenTopLevelNodes;
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index =>
-                {
-                    var topLevelNode = GreenTopLevelNodes[index];
-
-                    if (topLevelNode is GreenPgnTagSectionSyntax tagSectionSyntax)
-                    {
-                        return new PgnTagSectionSyntax(this, index, tagSectionSyntax);
-                    }
-                    else if (topLevelNode is GreenPgnPlyListSyntax plySyntax)
-                    {
-                        return new PgnPlyListSyntax(this, index, plySyntax);
-                    }
-                    else
-                    {
-                        var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;
-                        return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
-                    }
-                });
+            Games = new SafeLazyObjectCollection<PgnGameSyntax>(
+                green.Games.Count,
+                index => new PgnGameSyntax(this, index, Green.Games[index]));
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, Green.TrailingTrivia));
         }

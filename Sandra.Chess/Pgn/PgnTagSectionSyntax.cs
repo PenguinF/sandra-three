@@ -83,7 +83,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnGameListSyntax Parent { get; }
+        public PgnGameSyntax Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -130,7 +130,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.TagPairNodes.GetElementOffset(index);
 
-        internal PgnTagSectionSyntax(PgnGameListSyntax parent, int parentIndex, GreenPgnTagSectionSyntax green)
+        internal PgnTagSectionSyntax(PgnGameSyntax parent, int parentIndex, GreenPgnTagSectionSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
