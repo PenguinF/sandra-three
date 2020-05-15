@@ -33,7 +33,10 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class RootPgnSyntax
     {
-        public PgnSyntaxNodes Syntax { get; }
+        /// <summary>
+        /// Gets the syntax tree containing the list of PGN games.
+        /// </summary>
+        public PgnSyntaxNodes GameListSyntax { get; }
 
         /// <summary>
         /// Gets the collection of parse errors.
@@ -52,7 +55,7 @@ namespace Sandra.Chess.Pgn
         public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
-            Syntax = new PgnSyntaxNodes(gameListSyntax);
+            GameListSyntax = new PgnSyntaxNodes(gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }

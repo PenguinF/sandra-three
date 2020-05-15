@@ -160,7 +160,7 @@ namespace Sandra.Chess.Tests
 
         private static IEnumerable<IGreenPgnSymbol> TerminalSymbols(string pgn)
         {
-            var rootPgnSyntax = PgnParser.Parse(pgn).Syntax;
+            var rootPgnSyntax = PgnParser.Parse(pgn).GameListSyntax;
             var converter = new ToGreenSymbolConverter();
 
             var totalLength = 0;
@@ -764,7 +764,7 @@ namespace Sandra.Chess.Tests
         public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
         {
             RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
-            AssertParseTree(parseTree, null, 0, rootSyntax.Syntax);
+            AssertParseTree(parseTree, null, 0, rootSyntax.GameListSyntax);
 
             // Assert expected errors.
             Assert.Collection(

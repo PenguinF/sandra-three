@@ -62,7 +62,7 @@ namespace Sandra.UI
         }
 
         public override IEnumerable<IPgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
-            => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
+            => syntaxTree.GameListSyntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<PgnErrorInfo> GetErrors(RootPgnSyntax syntaxTree)
             => syntaxTree.Errors;
