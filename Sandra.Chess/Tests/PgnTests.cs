@@ -191,9 +191,8 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, GreenPgnTriviaSyntax.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -267,6 +266,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("tagSection", () => new GreenPgnGameSyntax(null, GreenPgnPlyListSyntax.Empty, null));
             Assert.Throws<ArgumentNullException>("plyList", () => new GreenPgnGameSyntax(GreenPgnTagSectionSyntax.Empty, null, null));
+
+            Assert.Throws<ArgumentNullException>("games", () => new GreenPgnGameListSyntax(null, GreenPgnTriviaSyntax.Empty));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null));
         }
 
         [Theory]

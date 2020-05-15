@@ -34,16 +34,28 @@ namespace Sandra.Chess.Pgn
     public sealed class RootPgnSyntax
     {
         public PgnSyntaxNodes Syntax { get; }
+
+        /// <summary>
+        /// Gets the collection of parse errors.
+        /// </summary>
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnGameSyntax> syntax, GreenPgnTriviaSyntax trailingTrivia, List<PgnErrorInfo> errors)
+        /// <summary>
+        /// Initializes a new instance of <see cref="RootPgnSyntax"/>.
+        /// </summary>
+        /// <param name="gameListSyntax">
+        /// The syntax tree containing a list of PGN games.
+        /// </param>
+        /// <param name="errors">
+        /// The collection of parse errors.
+        /// </param>
+        public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
-            if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-            if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
+            if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
 
             List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
 
-            foreach (var gameSyntax in syntax)
+            foreach (var gameSyntax in gameListSyntax.Games)
             {
                 flattened.Add(gameSyntax.TagSection);
                 flattened.Add(gameSyntax.PlyList);
@@ -53,7 +65,7 @@ namespace Sandra.Chess.Pgn
                 }
             }
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened), trailingTrivia);
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened), gameListSyntax.TrailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }

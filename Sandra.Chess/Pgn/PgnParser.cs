@@ -93,12 +93,7 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser(pgn);
             parser.ParsePgnText();
-            GreenPgnTriviaSyntax trailingTrivia = parser.YieldEof();
-
-            return new RootPgnSyntax(
-                parser.GameListBuilder,
-                trailingTrivia,
-                parser.Errors);
+            return new RootPgnSyntax(parser.YieldEof(), parser.Errors);
         }
 
         private readonly List<PgnErrorInfo> Errors;
@@ -714,7 +709,7 @@ namespace Sandra.Chess.Pgn
             BackgroundBuilder.Add(backgroundSyntax);
         }
 
-        private GreenPgnTriviaSyntax YieldEof()
+        private GreenPgnGameListSyntax YieldEof()
         {
             trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
             symbolBeingYielded = null;
@@ -735,7 +730,7 @@ namespace Sandra.Chess.Pgn
                 CaptureMainLine(null);
             }
 
-            return trailingTrivia;
+            return new GreenPgnGameListSyntax(GameListBuilder, trailingTrivia);
         }
 
         #endregion Yield tokens and EOF
