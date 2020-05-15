@@ -45,35 +45,6 @@ namespace Sandra.Chess.Tests
             public override Type ExpectedType => typeof(T);
         }
 
-        private class TagSectionAndMoveTreeAndResult
-        {
-            public ParseTree<PgnTagSectionSyntax> TagSection;
-            public ParseTree<PgnPlyListSyntax> MoveSection;
-            public ParseTree<PgnGameResultWithTriviaSyntax> Result;
-
-            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnPlyListSyntax> moveSection)
-            {
-                TagSection = tagSection;
-                MoveSection = moveSection;
-            }
-
-            public TagSectionAndMoveTreeAndResult(ParseTree<PgnTagSectionSyntax> tagSection, ParseTree<PgnPlyListSyntax> moveSection, ParseTree<PgnGameResultWithTriviaSyntax> result)
-            {
-                TagSection = tagSection;
-                MoveSection = moveSection;
-                Result = result;
-            }
-
-            public void AddTo(ParseTree<PgnGameListSyntax> gamesSyntax)
-            {
-                ParseTree<PgnGameSyntax> gameSyntax = new ParseTree<PgnGameSyntax>();
-                gameSyntax.Add(TagSection);
-                gameSyntax.Add(MoveSection);
-                if (Result != null) gameSyntax.Add(Result);
-                gamesSyntax.Add(gameSyntax);
-            }
-        }
-
         private static readonly ParseTree<PgnEmptySyntax> Missing = new ParseTree<PgnEmptySyntax>();
 
         private static readonly ParseTree<PgnWhitespaceSyntax> WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
@@ -375,42 +346,31 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnVariationWithFloatItemsSyntax> VariationOpenClose
             = VariationNoFloats(OpenNoTrivia, NoPlies, CloseNoTrivia);
 
-        private static TagSectionAndMoveTreeAndResult Game(
+        private static ParseTree<PgnGameSyntax> Game(
             ParseTree<PgnGameResultWithTriviaSyntax> result)
-            => new TagSectionAndMoveTreeAndResult(EmptyTagSection, NoPlies, result);
+            => new ParseTree<PgnGameSyntax> { EmptyTagSection, NoPlies, result };
 
-        private static TagSectionAndMoveTreeAndResult Game(
+        private static ParseTree<PgnGameSyntax> Game(
             ParseTree<PgnTagSectionSyntax> tagSection,
             ParseTree<PgnPlyListSyntax> moveSection)
-            => new TagSectionAndMoveTreeAndResult(tagSection, moveSection);
+            => new ParseTree<PgnGameSyntax> { tagSection, moveSection, Missing };
 
-        private static TagSectionAndMoveTreeAndResult Game(
+        private static ParseTree<PgnGameSyntax> Game(
             ParseTree<PgnTagSectionSyntax> tagSection,
             ParseTree<PgnPlyListSyntax> moveSection,
             ParseTree<PgnGameResultWithTriviaSyntax> result)
-            => new TagSectionAndMoveTreeAndResult(tagSection, moveSection, result);
+            => new ParseTree<PgnGameSyntax> { tagSection, moveSection, result };
 
-        private static ParseTree<PgnGameListSyntax> Games(TagSectionAndMoveTreeAndResult game1, ParseTree<PgnTriviaSyntax> trailingTrivia)
+        private static ParseTree<PgnGameListSyntax> Games(ParseTree<PgnGameSyntax> game1, ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => new ParseTree<PgnGameListSyntax> { game1, trailingTrivia };
+
+        private static ParseTree<PgnGameListSyntax> Games(ParseTree<PgnGameSyntax> game1, ParseTree<PgnGameSyntax> game2, ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => new ParseTree<PgnGameListSyntax> { game1, game2, trailingTrivia };
+
+        private static ParseTree<PgnGameListSyntax> Games(params ParseTree<PgnGameSyntax>[] games)
         {
             var gamesSyntax = new ParseTree<PgnGameListSyntax>();
-            game1.AddTo(gamesSyntax);
-            gamesSyntax.Add(trailingTrivia);
-            return gamesSyntax;
-        }
-
-        private static ParseTree<PgnGameListSyntax> Games(TagSectionAndMoveTreeAndResult game1, TagSectionAndMoveTreeAndResult game2, ParseTree<PgnTriviaSyntax> trailingTrivia)
-        {
-            var gamesSyntax = new ParseTree<PgnGameListSyntax>();
-            game1.AddTo(gamesSyntax);
-            game2.AddTo(gamesSyntax);
-            gamesSyntax.Add(trailingTrivia);
-            return gamesSyntax;
-        }
-
-        private static ParseTree<PgnGameListSyntax> Games(params TagSectionAndMoveTreeAndResult[] games)
-        {
-            var gamesSyntax = new ParseTree<PgnGameListSyntax>();
-            games.ForEach(x => x.AddTo(gamesSyntax));
+            games.ForEach(gamesSyntax.Add);
             gamesSyntax.Add(EmptyTrivia);
             return gamesSyntax;
         }
