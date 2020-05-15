@@ -52,20 +52,7 @@ namespace Sandra.Chess.Pgn
         public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
-
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-
-            foreach (var gameSyntax in gameListSyntax.Games)
-            {
-                flattened.Add(gameSyntax.TagSection);
-                flattened.Add(gameSyntax.PlyList);
-                if (gameSyntax.GameResult != null)
-                {
-                    flattened.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
-                }
-            }
-
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened), gameListSyntax.TrailingTrivia);
+            Syntax = new PgnSyntaxNodes(gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -128,8 +115,23 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes, GreenPgnTriviaSyntax greenTrailingTrivia)
+        internal PgnSyntaxNodes(GreenPgnGameListSyntax gameListSyntax)
         {
+            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
+
+            foreach (var gameSyntax in gameListSyntax.Games)
+            {
+                flattened.Add(gameSyntax.TagSection);
+                flattened.Add(gameSyntax.PlyList);
+                if (gameSyntax.GameResult != null)
+                {
+                    flattened.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                }
+            }
+
+            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
+            GreenPgnTriviaSyntax greenTrailingTrivia = gameListSyntax.TrailingTrivia;
+
             GreenTopLevelNodes = greenTopLevelNodes;
             GreenTrailingTrivia = greenTrailingTrivia;
 
