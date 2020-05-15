@@ -169,9 +169,28 @@ namespace Sandra.Chess.Pgn
 
         #endregion Conversions from one type of symbol to another
 
-        #region Variation parsing
+        #region Game parsing
 
-        private void CaptureMainLine()
+        private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
+        {
+            if (LatestTagSection.TagPairNodes.Count > 0)
+            {
+                SymbolBuilder.Add(LatestTagSection);
+                LatestTagSection = GreenPgnTagSectionSyntax.Empty;
+            }
+
+            if (plyListSyntax != null)
+            {
+                SymbolBuilder.Add(plyListSyntax);
+            }
+
+            if (maybeGameResult != null)
+            {
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+            }
+        }
+
+        private void CaptureMainLine(GreenWithTriviaSyntax maybeGameResult)
         {
             bool innermostVariation = true;
 
@@ -202,15 +221,12 @@ namespace Sandra.Chess.Pgn
                 CurrentFrame.VariationListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>(CaptureFloatItems(), variationSyntax));
             }
 
-            var floatItems = CapturePly();
-            var plyListSyntax = CapturePlyList(floatItems);
-            if (LatestTagSection.TagPairNodes.Count > 0)
-            {
-                SymbolBuilder.Add(LatestTagSection);
-                LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-            }
-            SymbolBuilder.Add(plyListSyntax);
+            CaptureGame(CapturePlyList(CapturePly()), maybeGameResult);
         }
+
+        #endregion Game parsing
+
+        #region Variation parsing
 
         private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
         {
@@ -588,12 +604,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BlackWinMarker:
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    if (LatestTagSection.TagPairNodes.Count > 0)
-                    {
-                        SymbolBuilder.Add(LatestTagSection);
-                        LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-                    }
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    CaptureGame(null, symbolBeingYielded);
                     break;
                 default:
                     throw new UnreachableException();
@@ -607,27 +618,27 @@ namespace Sandra.Chess.Pgn
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', switch to tag section and immediately open and close a tag pair.
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagName:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairTagValue = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
@@ -678,8 +689,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
-                    CaptureMainLine();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    CaptureMainLine(symbolBeingYielded);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 default:
@@ -723,7 +733,7 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                CaptureMainLine();
+                CaptureMainLine(null);
             }
 
             return trailingTrivia;
