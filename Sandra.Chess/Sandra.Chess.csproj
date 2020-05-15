@@ -64,6 +64,7 @@
     <Compile Include="Pgn\PgnEscapeSyntax.cs" />
     <Compile Include="Pgn\PgnGameResult.cs" />
     <Compile Include="Pgn\PgnGameResultSyntax.cs" />
+    <Compile Include="Pgn\PgnGameSyntax.cs" />
     <Compile Include="Pgn\PgnIllegalCharacterSyntax.cs" />
     <Compile Include="Pgn\PgnMoveFormatter.cs" />
     <Compile Include="Pgn\PgnMoveNumberSyntax.cs" />

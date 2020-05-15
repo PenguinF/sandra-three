@@ -265,6 +265,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(null, GreenPgnPlyListSyntax.Empty, null));
             Assert.Throws<ArgumentNullException>("pliesWithFloatItems", () => new GreenPgnVariationSyntax(new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnPeriodSyntax.Value), null, null));
+
+            Assert.Throws<ArgumentNullException>("tagSection", () => new GreenPgnGameSyntax(null, GreenPgnPlyListSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("plyList", () => new GreenPgnGameSyntax(GreenPgnTagSectionSyntax.Empty, null, null));
         }
 
         [Theory]

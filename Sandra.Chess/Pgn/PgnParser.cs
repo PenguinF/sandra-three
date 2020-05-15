@@ -173,23 +173,21 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
         {
-            SymbolBuilder.Add(LatestTagSection);
-            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-
-            if (plyListSyntax != null)
-            {
-                SymbolBuilder.Add(plyListSyntax);
-            }
-            else
+            if (plyListSyntax == null)
             {
                 // We were still in the tag section and no ply list has been built.
                 // So use the default empty one.
-                SymbolBuilder.Add(GreenPgnPlyListSyntax.Empty);
+                plyListSyntax = GreenPgnPlyListSyntax.Empty;
             }
 
-            if (maybeGameResult != null)
+            var gameSyntax = new GreenPgnGameSyntax(LatestTagSection, plyListSyntax, maybeGameResult);
+            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
+
+            SymbolBuilder.Add(gameSyntax.TagSection);
+            SymbolBuilder.Add(gameSyntax.PlyList);
+            if (gameSyntax.GameResult != null)
             {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
             }
         }
 
