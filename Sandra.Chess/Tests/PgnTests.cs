@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -193,8 +192,8 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, GreenPgnTriviaSyntax.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 

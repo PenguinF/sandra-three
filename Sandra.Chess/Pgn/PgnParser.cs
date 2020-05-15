@@ -21,7 +21,6 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -108,7 +107,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
-        private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
+        private readonly List<GreenPgnGameSyntax> SymbolBuilder;
 
         private readonly string pgnText;
 
@@ -148,7 +147,7 @@ namespace Sandra.Chess.Pgn
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
-            SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+            SymbolBuilder = new List<GreenPgnGameSyntax>();
 
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
@@ -182,13 +181,7 @@ namespace Sandra.Chess.Pgn
 
             var gameSyntax = new GreenPgnGameSyntax(LatestTagSection, plyListSyntax, maybeGameResult);
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-
-            SymbolBuilder.Add(gameSyntax.TagSection);
-            SymbolBuilder.Add(gameSyntax.PlyList);
-            if (gameSyntax.GameResult != null)
-            {
-                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
-            }
+            SymbolBuilder.Add(gameSyntax);
         }
 
         private void CaptureMainLine(GreenWithTriviaSyntax maybeGameResult)
