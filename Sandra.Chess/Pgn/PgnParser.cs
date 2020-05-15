@@ -163,6 +163,17 @@ namespace Sandra.Chess.Pgn
 
         #endregion Conversions from one type of symbol to another
 
+        #region Error reporting helpers
+
+        // At the end of the file, symbolBeingYielded is null; return the start position of the trailing trivia.
+        // Otherwise, symbolStartIndex is at the end of the leading trivia of symbolBeingYielded.
+        private int GetCurrentTriviaStartPosition()
+            => symbolBeingYielded != null
+            ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+            : pgnText.Length - trailingTrivia.Length;
+
+        #endregion Error reporting helpers
+
         #region Game parsing
 
         private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
@@ -190,10 +201,7 @@ namespace Sandra.Chess.Pgn
                 if (innermostVariation)
                 {
                     // Report MissingParenthesisClose only once, for the innermost variation.
-                    // The end position of the variation is where we are now.
-                    int variationEndPosition
-                        = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                        : pgnText.Length - trailingTrivia.Length;
+                    int variationEndPosition = GetCurrentTriviaStartPosition();
 
                     // Subtract the leading trivia length.
                     int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
@@ -236,12 +244,10 @@ namespace Sandra.Chess.Pgn
             if (reportEmptyVariationMessage)
             {
                 // The end position of the variation is at the end of the closing parenthesis,
-                // or at the start of the current non-closing parenthesis being yielded,
-                // or at the end of the PGN.
+                // or at the start of the current trivia.
                 int variationEndPosition
                     = maybeParenthesisClose != null ? symbolStartIndex + PgnParenthesisCloseSyntax.ParenthesisCloseLength
-                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
+                    : GetCurrentTriviaStartPosition();
 
                 // Subtract the leading trivia length.
                 int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
@@ -297,12 +303,10 @@ namespace Sandra.Chess.Pgn
 
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
-                // See CaptureTagPair on how to calculate the error position and length.
-                int plyEndPosition
-                    = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
+                // The captured ply including its trailing floating items ends at the start of the current trivia.
+                int plyEndPosition = GetCurrentTriviaStartPosition();
 
-                // For a ply though we need to subtract the length of the floating items that trail the captured ply.
+                // So we need to subtract the length of the floating items that trail the captured ply.
                 plyEndPosition -= trailingFloatItemsLength;
 
                 // For plies, start at the first content node of the first ply content node.
@@ -418,13 +422,9 @@ namespace Sandra.Chess.Pgn
             if (!HasTagPairBracketOpen || !HasTagPairTagName || !HasTagPairTagValue || !hasTagPairBracketClose)
             {
                 // Calculate the end position of the tag pair syntax.
-                // - At the end of the file, contentNodeBeingYielded is null; the end position is the length of the pgn minus its trailing trivia.
-                // - If hasTagPairBracketClose is true, symbolStartIndex is at the start of the closing bracket.
-                // - If hasTagPairBracketClose is false, symbolStartIndex is at the start of the first symbol not in the tag pair.
                 int tagPairEndPosition
-                    = hasTagPairBracketClose ? symbolStartIndex + 1
-                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
+                    = hasTagPairBracketClose ? symbolStartIndex + PgnBracketCloseSyntax.BracketCloseLength
+                    : GetCurrentTriviaStartPosition();
 
                 // To report tag pair errors, start at the '[', not where its leading trivia starts.
                 int tagPairLength = tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
