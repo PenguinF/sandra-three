@@ -22,7 +22,6 @@
 using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 

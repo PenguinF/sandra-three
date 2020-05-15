@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Tests

@@ -19,7 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
+using Eutherion.Utils;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -59,6 +62,117 @@ namespace Sandra.Chess.Pgn
             if (games == null) throw new ArgumentNullException(nameof(games));
             Games = ReadOnlySpanList<GreenPgnGameSyntax>.Create(games);
             TrailingTrivia = trailingTrivia ?? throw new ArgumentNullException(nameof(trailingTrivia));
+        }
+    }
+
+    /// <summary>
+    /// Represents the root of an abstract PGN syntax tree. It contains a list of games together with its trailing trivia.
+    /// </summary>
+    public sealed class PgnGameListSyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnGameListSyntax Green { get; }
+
+        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
+
+        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+
+        private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
+
+        /// <summary>
+        /// Gets the trailing trivia of the syntax node.
+        /// </summary>
+        public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
+
+        /// <summary>
+        /// Returns 0, which is the default start position of the root node.
+        /// </summary>
+        public override int Start => 0;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Returns null, as this is the root node.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => null;
+
+        /// <summary>
+        /// Returns 0, which is the absolute start position of this syntax node.
+        /// </summary>
+        public override int AbsoluteStart => 0;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => TopLevelNodes.Count + 1;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
+            if (index == TopLevelNodes.Count) return TrailingTrivia;
+            throw new IndexOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public override int GetChildStartPosition(int index)
+        {
+            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
+            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal PgnGameListSyntax(GreenPgnGameListSyntax green)
+        {
+            Green = green;
+
+            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
+
+            foreach (var gameSyntax in green.Games)
+            {
+                flattened.Add(gameSyntax.TagSection);
+                flattened.Add(gameSyntax.PlyList);
+                if (gameSyntax.GameResult != null)
+                {
+                    flattened.Add(new GreenPgnTopLevelSymbolSyntax(gameSyntax.GameResult, (parent, index, gameResultGreen) => new PgnGameResultWithTriviaSyntax(parent, index, gameResultGreen)));
+                }
+            }
+
+            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
+
+            GreenTopLevelNodes = greenTopLevelNodes;
+
+            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
+                greenTopLevelNodes.Count,
+                index =>
+                {
+                    var topLevelNode = GreenTopLevelNodes[index];
+
+                    if (topLevelNode is GreenPgnTagSectionSyntax tagSectionSyntax)
+                    {
+                        return new PgnTagSectionSyntax(this, index, tagSectionSyntax);
+                    }
+                    else if (topLevelNode is GreenPgnPlyListSyntax plySyntax)
+                    {
+                        return new PgnPlyListSyntax(this, index, plySyntax);
+                    }
+                    else
+                    {
+                        var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;
+                        return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
+                    }
+                });
+
+            trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, Green.TrailingTrivia));
         }
     }
 }
