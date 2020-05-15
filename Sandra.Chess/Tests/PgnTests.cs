@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -161,7 +160,7 @@ namespace Sandra.Chess.Tests
 
         private static IEnumerable<IGreenPgnSymbol> TerminalSymbols(string pgn)
         {
-            var rootPgnSyntax = PgnParser.Parse(pgn).Syntax;
+            var rootPgnSyntax = PgnParser.Parse(pgn).GameListSyntax;
             var converter = new ToGreenSymbolConverter();
 
             var totalLength = 0;
@@ -192,9 +191,8 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, GreenPgnTriviaSyntax.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -260,13 +258,17 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));
             Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
 
-            Assert.Throws<ArgumentNullException>("plies", () => new GreenPgnPlyListSyntax(null, EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
-            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => new GreenPgnPlyListSyntax(EmptyEnumerable<GreenPgnPlySyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(EmptyEnumerable<GreenPgnPlySyntax>.Instance, null));
 
-            Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(
-                null, new GreenPgnPlyListSyntax(EmptyEnumerable<GreenPgnPlySyntax>.Instance, EmptyEnumerable<GreenWithTriviaSyntax>.Instance), null));
-            Assert.Throws<ArgumentNullException>("pliesWithFloatItems", () => new GreenPgnVariationSyntax(
-                new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnPeriodSyntax.Value), null, null));
+            Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(null, GreenPgnPlyListSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("pliesWithFloatItems", () => new GreenPgnVariationSyntax(new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnPeriodSyntax.Value), null, null));
+
+            Assert.Throws<ArgumentNullException>("tagSection", () => new GreenPgnGameSyntax(null, GreenPgnPlyListSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("plyList", () => new GreenPgnGameSyntax(GreenPgnTagSectionSyntax.Empty, null, null));
+
+            Assert.Throws<ArgumentNullException>("games", () => new GreenPgnGameListSyntax(null, GreenPgnTriviaSyntax.Empty));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null));
         }
 
         [Theory]
@@ -762,7 +764,7 @@ namespace Sandra.Chess.Tests
         public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
         {
             RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
-            AssertParseTree(parseTree, null, 0, rootSyntax.Syntax);
+            AssertParseTree(parseTree, null, 0, rootSyntax.GameListSyntax);
 
             // Assert expected errors.
             Assert.Collection(

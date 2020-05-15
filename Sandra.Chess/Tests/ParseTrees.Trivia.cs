@@ -20,15 +20,14 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
-        private static ParseTree<PgnSyntaxNodes> NoGame(ParseTree<PgnTriviaSyntax> trailingTrivia)
-            => new ParseTree<PgnSyntaxNodes> { trailingTrivia };
+        private static ParseTree<PgnGameListSyntax> NoGame(ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => new ParseTree<PgnGameListSyntax> { trailingTrivia };
 
         internal static List<(string, ParseTree)> TriviaParseTrees() => new List<(string, ParseTree)>
         {
@@ -40,32 +39,51 @@ namespace Sandra.Chess.Tests
             ("\n%", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } })),
 
             ("{}", NoGame(CommentTrivia)),
-            ("  {}   * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
-            (" *   {}  ", Games(Game(WS_Result), WhitespaceCommentWhitespace)),
             (" {} {} ", NoGame(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace })),
-
-            (" * {} {} ", Games(Game(WS_Result), new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace })),
-            (" {} * {} ", Games(Game(ResultWithTrivia(WhitespaceCommentWhitespace)), WhitespaceCommentWhitespace)),
-            (" {} {} * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
-
-            (" {} * * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), Game(WS_Result), WhitespaceTrivia)),
-            (" * {} * ", Games(Game(WS_Result), Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia)),
-            (" * * {} ", Games(Game(WS_Result), Game(WS_Result), WhitespaceCommentWhitespace)),
-
-            ("{}{}*{}", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), CommentTrivia)),
-            ("{}{}**", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia))),
-            ("{}*{}{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } )),
-            ("{}*{}*", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)))),
-            ("{}**{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia), CommentTrivia)),
-            ("*{}{}*", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)))),
-            ("*{}*{}", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), CommentTrivia)),
-            ("*{}**", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia))),
-            ("**{}{}", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } )),
-            ("**{}*", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)))),
         };
 
         internal static List<(string, ParseTree, PgnErrorCode[])> TriviaParseTreesWithErrors() => new List<(string, ParseTree, PgnErrorCode[])>
         {
+            ("  {}   * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia),
+                new[] { PgnErrorCode.MissingTagSection }),
+            (" *   {}  ", Games(Game(WS_Result), WhitespaceCommentWhitespace),
+                new[] { PgnErrorCode.MissingTagSection }),
+
+            (" * {} {} ", Games(Game(WS_Result), new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace }),
+                new[] { PgnErrorCode.MissingTagSection }),
+            (" {} * {} ", Games(Game(ResultWithTrivia(WhitespaceCommentWhitespace)), WhitespaceCommentWhitespace),
+                new[] { PgnErrorCode.MissingTagSection }),
+            (" {} {} * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, WhitespaceThenComment, Whitespace)), WhitespaceTrivia),
+                new[] { PgnErrorCode.MissingTagSection }),
+
+            (" {} * * ", Games(Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), Game(WS_Result), WhitespaceTrivia),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            (" * {} * ", Games(Game(WS_Result), Game(ResultWithTrivia(WhitespaceThenComment, Whitespace)), WhitespaceTrivia),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            (" * * {} ", Games(Game(WS_Result), Game(WS_Result), WhitespaceCommentWhitespace),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+
+            ("{}{}*{}", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), CommentTrivia),
+                new[] { PgnErrorCode.MissingTagSection }),
+            ("{}{}**", Games(Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia)),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("{}*{}{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } ),
+                new[] { PgnErrorCode.MissingTagSection }),
+            ("{}*{}*", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground))),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("{}**{}", Games(Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia), CommentTrivia),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("*{}{}*", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground))),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("*{}*{}", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), CommentTrivia),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("*{}**", Games(Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground)), Game(ResultNoTrivia)),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("**{}{}", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } ),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+            ("**{}*", Games(Game(ResultNoTrivia), Game(ResultNoTrivia), Game(ResultWithTrivia(CommentNoBackground, EmptyBackground))),
+                new[] { PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingTagSection }),
+
             (" %", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } }),
                 new[] { PgnErrorCode.IllegalCharacter }),
             (" % ", NoGame(new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } }),
@@ -77,12 +95,24 @@ namespace Sandra.Chess.Tests
             (" { ", NoGame(WhitespaceThenCommentTrivia), new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
             ("0 0", OneGame(EmptyTagSection, Plies(Ply(NoFloats(MoveNumberNoTrivia)), Ply(NoFloats(WS_MoveNumber)))),
-                new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+                new[]
+                {
+                    PgnErrorCode.MissingMove, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker
+                }),
             (" 0  00   000    0 ", OneGameTrailingTrivia(EmptyTagSection, Plies(Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber)), Ply(NoFloats(WS_MoveNumber))), WhitespaceTrivia),
-                new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+                new[]
+                {
+                    PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker
+                }),
 
             ("0%%0", OneGame(EmptyTagSection, Plies(Ply(NoFloats(MoveNumberNoTrivia)), Ply(NoFloats(new ParseTree<PgnMoveNumberWithTriviaSyntax> { TwoIllegalCharactersTrivia, MoveNumber })))),
-                new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove }),
+                new[]
+                {
+                    PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter, PgnErrorCode.MissingMove, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker
+                }),
         };
     }
 }

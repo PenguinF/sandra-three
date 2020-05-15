@@ -139,5 +139,15 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a Numeric Annotation Glyph (NAG) is found after a variation.
         /// </summary>
         VariationBeforeNAG,
+
+        /// <summary>
+        /// Occurs whem a game has an empty tag section.
+        /// </summary>
+        MissingTagSection,
+
+        /// <summary>
+        /// Occurs whem a game ends but its termination marker ('*', '0-1', '1/2-1/2' or '1-0') is missing.
+        /// </summary>
+        MissingGameTerminationMarker,
     }
 }

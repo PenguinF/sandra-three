@@ -21,7 +21,6 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -94,12 +93,7 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser(pgn);
             parser.ParsePgnText();
-            GreenPgnTriviaSyntax trailingTrivia = parser.YieldEof();
-
-            return new RootPgnSyntax(
-                parser.SymbolBuilder,
-                trailingTrivia,
-                parser.Errors);
+            return new RootPgnSyntax(parser.YieldEof(), parser.Errors);
         }
 
         private readonly List<PgnErrorInfo> Errors;
@@ -108,7 +102,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
-        private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
+        private readonly List<GreenPgnGameSyntax> GameListBuilder;
 
         private readonly string pgnText;
 
@@ -123,6 +117,9 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairBracketOpen;
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
+
+        // Saved until an entire game is captured.
+        private GreenPgnTagSectionSyntax LatestTagSection;
 
         // Contains stack frame for the current variation (main or side line) being built.
         private VariationStackFrame CurrentFrame;
@@ -145,7 +142,9 @@ namespace Sandra.Chess.Pgn
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
-            SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
+            GameListBuilder = new List<GreenPgnGameSyntax>();
+
+            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
             CurrentFrame.Reset();
 
@@ -164,16 +163,103 @@ namespace Sandra.Chess.Pgn
 
         #endregion Conversions from one type of symbol to another
 
-        #region Variation parsing
+        #region Error reporting helpers
 
-        private void CaptureMainLine()
+        // At the end of the file, symbolBeingYielded is null; return the start position of the trailing trivia.
+        // Otherwise, symbolStartIndex is at the end of the leading trivia of symbolBeingYielded.
+        private int GetCurrentTriviaStartPosition()
+            => symbolBeingYielded != null
+            ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
+            : pgnText.Length - trailingTrivia.Length;
+
+        private GreenWithTriviaSyntax HeadNode(GreenPgnGameSyntax gameSyntax)
         {
-            CaptureNestedUnfinishedVariations();
-            var floatItems = CapturePly();
-            SymbolBuilder.Add(CapturePlyList(floatItems));
+            if (gameSyntax.TagSection.Length > 0) return HeadNode(gameSyntax.TagSection.TagPairNodes[0]);
+            else if (gameSyntax.PlyList.Length > 0) return HeadNode(gameSyntax.PlyList);
+            else return gameSyntax.GameResult;
         }
 
-        private void CaptureNestedUnfinishedVariations()
+        private GreenWithTriviaSyntax HeadNode(GreenPgnVariationSyntax variationSyntax)
+            => variationSyntax.ParenthesisOpen;
+
+        private GreenWithTriviaSyntax HeadNode(GreenPgnPlyListSyntax plyListSyntax)
+        {
+            if (plyListSyntax.Plies.Count > 0) return HeadNode(plyListSyntax.Plies[0]);
+            else return plyListSyntax.TrailingFloatItems[0];
+        }
+
+        private GreenWithPlyFloatItemsSyntax HeadFloatItemAnchorNode(GreenPgnPlySyntax plySyntax)
+        {
+            if (plySyntax.MoveNumber != null) return plySyntax.MoveNumber;
+            else if (plySyntax.Move != null) return plySyntax.Move;
+            else if (plySyntax.Nags.Count > 0) return plySyntax.Nags[0];
+            else return plySyntax.Variations[0];
+        }
+
+        private GreenWithTriviaSyntax HeadNode(GreenWithPlyFloatItemsSyntax plyAnchorNode)
+            => plyAnchorNode.PlyContentNode.FirstWithTriviaNode;
+
+        private GreenWithTriviaSyntax HeadNode(GreenPgnPlySyntax plySyntax)
+            => HeadNode(HeadFloatItemAnchorNode(plySyntax));
+
+        private GreenWithTriviaSyntax HeadNode(GreenPgnTagPairSyntax tagPairSyntax)
+            => tagPairSyntax.TagElementNodes[0];
+
+        private int GetLengthWithoutLeadingTrivia(GreenPgnGameSyntax gameSyntax)
+            => gameSyntax.Length - HeadNode(gameSyntax).LeadingTrivia.Length;
+
+        private int GetLengthWithoutLeadingTrivia(GreenPgnVariationSyntax variationSyntax)
+            => variationSyntax.Length - HeadNode(variationSyntax).LeadingTrivia.Length;
+
+        private int GetLengthWithoutLeadingFloatsAndTrivia(GreenPgnPlySyntax plySyntax)
+        {
+            // Subtract both the leading float items length plus leading trivia length.
+            GreenWithPlyFloatItemsSyntax headAnchorNode = HeadFloatItemAnchorNode(plySyntax);
+            return plySyntax.Length - headAnchorNode.LeadingFloatItems.Length - HeadNode(headAnchorNode).LeadingTrivia.Length;
+        }
+
+        private int GetLengthWithoutLeadingTrivia(GreenPgnTagPairSyntax tagPairSyntax)
+            => tagPairSyntax.Length - HeadNode(tagPairSyntax).LeadingTrivia.Length;
+
+        #endregion Error reporting helpers
+
+        #region Game parsing
+
+        private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
+        {
+            var gameSyntax = new GreenPgnGameSyntax(LatestTagSection, plyListSyntax, maybeGameResult);
+            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
+            GameListBuilder.Add(gameSyntax);
+
+            if (gameSyntax.TagSection.Length == 0 || maybeGameResult == null)
+            {
+                // The end position of the game is before the latest trivia.
+                int gameEndPosition
+                    = maybeGameResult != null ? symbolStartIndex + maybeGameResult.ContentNode.Length
+                    : GetCurrentTriviaStartPosition();
+
+                // Subtract the length of the trivia before the game.
+                int gameLength = GetLengthWithoutLeadingTrivia(gameSyntax);
+
+                if (gameSyntax.TagSection.Length == 0)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingTagSection,
+                        gameEndPosition - gameLength,
+                        gameLength));
+                }
+
+                if (maybeGameResult == null)
+                {
+                    Errors.Add(new PgnErrorInfo(
+                        PgnErrorCode.MissingGameTerminationMarker,
+                        gameEndPosition - gameLength,
+                        gameLength));
+                }
+            }
+        }
+
+        private void CaptureMainLine(GreenWithTriviaSyntax maybeGameResult)
         {
             bool innermostVariation = true;
 
@@ -184,13 +270,8 @@ namespace Sandra.Chess.Pgn
                 if (innermostVariation)
                 {
                     // Report MissingParenthesisClose only once, for the innermost variation.
-                    // The end position of the variation is where we are now.
-                    int variationEndPosition
-                        = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                        : pgnText.Length - trailingTrivia.Length;
-
-                    // Subtract the leading trivia length.
-                    int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+                    int variationEndPosition = GetCurrentTriviaStartPosition();
+                    int variationLength = GetLengthWithoutLeadingTrivia(variationSyntax);
 
                     Errors.Add(new PgnErrorInfo(
                         PgnErrorCode.MissingParenthesisClose,
@@ -203,7 +284,13 @@ namespace Sandra.Chess.Pgn
                 // Capture floating items from before the variation, then add to VariationListBuilder.
                 CurrentFrame.VariationListBuilder.Add(new GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>(CaptureFloatItems(), variationSyntax));
             }
+
+            CaptureGame(CapturePlyList(CapturePly()), maybeGameResult);
         }
+
+        #endregion Game parsing
+
+        #region Variation parsing
 
         private GreenPgnVariationSyntax CaptureVariation(GreenWithTriviaSyntax maybeParenthesisClose)
         {
@@ -224,15 +311,12 @@ namespace Sandra.Chess.Pgn
             if (reportEmptyVariationMessage)
             {
                 // The end position of the variation is at the end of the closing parenthesis,
-                // or at the start of the current non-closing parenthesis being yielded,
-                // or at the end of the PGN.
+                // or at the start of the current trivia.
                 int variationEndPosition
                     = maybeParenthesisClose != null ? symbolStartIndex + PgnParenthesisCloseSyntax.ParenthesisCloseLength
-                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
+                    : GetCurrentTriviaStartPosition();
 
-                // Subtract the leading trivia length.
-                int variationLength = variationSyntax.Length - variationSyntax.ParenthesisOpen.LeadingTrivia.Length;
+                int variationLength = GetLengthWithoutLeadingTrivia(variationSyntax);
 
                 Errors.Add(new PgnErrorInfo(
                     PgnErrorCode.EmptyVariation,
@@ -245,7 +329,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            var plyListSyntax = new GreenPgnPlyListSyntax(CurrentFrame.PlyListBuilder, trailingFloatItems);
+            var plyListSyntax = GreenPgnPlyListSyntax.Create(CurrentFrame.PlyListBuilder, trailingFloatItems);
             CurrentFrame.PlyListBuilder.Clear();
             return plyListSyntax;
         }
@@ -285,24 +369,10 @@ namespace Sandra.Chess.Pgn
 
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
-                // See CaptureTagPair on how to calculate the error position and length.
-                int plyEndPosition
-                    = symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
-
-                // For a ply though we need to subtract the length of the floating items that trail the captured ply.
-                plyEndPosition -= trailingFloatItemsLength;
-
-                // For plies, start at the first content node of the first ply content node.
-                // So subtract both the leading float items length plus leading trivia length.
-                GreenWithPlyFloatItemsSyntax firstNode;
-
-                if (CurrentFrame.MoveNumber != null) firstNode = CurrentFrame.MoveNumber;
-                else if (CurrentFrame.Move != null) firstNode = CurrentFrame.Move;
-                else if (CurrentFrame.NagListBuilder.Count > 0) firstNode = CurrentFrame.NagListBuilder[0];
-                else firstNode = CurrentFrame.VariationListBuilder[0];
-
-                int plyLength = plySyntax.Length - firstNode.LeadingFloatItems.Length - firstNode.PlyContentNode.FirstWithTriviaNode.LeadingTrivia.Length;
+                // The captured ply including its trailing floating items ends at the start of the current trivia.
+                // So we need to subtract the length of the floating items that trail the captured ply.
+                int plyEndPosition = GetCurrentTriviaStartPosition() - trailingFloatItemsLength;
+                int plyLength = GetLengthWithoutLeadingFloatsAndTrivia(plySyntax);
                 int plyStartPosition = plyEndPosition - plyLength;
 
                 if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null)
@@ -406,16 +476,12 @@ namespace Sandra.Chess.Pgn
             if (!HasTagPairBracketOpen || !HasTagPairTagName || !HasTagPairTagValue || !hasTagPairBracketClose)
             {
                 // Calculate the end position of the tag pair syntax.
-                // - At the end of the file, contentNodeBeingYielded is null; the end position is the length of the pgn minus its trailing trivia.
-                // - If hasTagPairBracketClose is true, symbolStartIndex is at the start of the closing bracket.
-                // - If hasTagPairBracketClose is false, symbolStartIndex is at the start of the first symbol not in the tag pair.
                 int tagPairEndPosition
-                    = hasTagPairBracketClose ? symbolStartIndex + 1
-                    : symbolBeingYielded != null ? symbolStartIndex - symbolBeingYielded.LeadingTrivia.Length
-                    : pgnText.Length - trailingTrivia.Length;
+                    = hasTagPairBracketClose ? symbolStartIndex + PgnBracketCloseSyntax.BracketCloseLength
+                    : GetCurrentTriviaStartPosition();
 
                 // To report tag pair errors, start at the '[', not where its leading trivia starts.
-                int tagPairLength = tagPairSyntax.Length - tagPairSyntax.TagElementNodes[0].LeadingTrivia.Length;
+                int tagPairLength = GetLengthWithoutLeadingTrivia(tagPairSyntax);
                 int tagPairStartPosition = tagPairEndPosition - tagPairLength;
 
                 if (!HasTagPairBracketOpen)
@@ -478,7 +544,7 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                SymbolBuilder.Add(GreenPgnTagSectionSyntax.Create(TagSectionBuilder));
+                LatestTagSection = GreenPgnTagSectionSyntax.Create(TagSectionBuilder);
                 TagSectionBuilder.Clear();
             }
         }
@@ -581,7 +647,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BlackWinMarker:
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    CaptureGame(GreenPgnPlyListSyntax.Empty, symbolBeingYielded);
                     break;
                 default:
                     throw new UnreachableException();
@@ -595,27 +661,27 @@ namespace Sandra.Chess.Pgn
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairBracketOpen = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.BracketClose:
                     // When encountering a ']', switch to tag section and immediately open and close a tag pair.
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     AddTagElementToBuilder();
                     CaptureTagPair(hasTagPairBracketClose: true);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagName:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairTagName = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    CaptureMainLine();
+                    CaptureMainLine(null);
                     HasTagPairTagValue = true;
                     AddTagElementToBuilder();
                     YieldContentNode = YieldInTagSectionAction;
@@ -666,8 +732,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
-                    CaptureMainLine();
-                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(symbolBeingYielded, (parent, index, green) => new PgnGameResultWithTriviaSyntax(parent, index, green)));
+                    CaptureMainLine(symbolBeingYielded);
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 default:
@@ -698,7 +763,7 @@ namespace Sandra.Chess.Pgn
             BackgroundBuilder.Add(backgroundSyntax);
         }
 
-        private GreenPgnTriviaSyntax YieldEof()
+        private GreenPgnGameListSyntax YieldEof()
         {
             trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
             symbolBeingYielded = null;
@@ -707,13 +772,19 @@ namespace Sandra.Chess.Pgn
             {
                 CaptureTagPairIfNecessary();
                 CaptureTagSection();
+
+                // If the last tag section was non-empty, also capture it as a new empty game.
+                if (LatestTagSection.TagPairNodes.Count > 0)
+                {
+                    CaptureGame(GreenPgnPlyListSyntax.Empty, null);
+                }
             }
             else
             {
-                CaptureMainLine();
+                CaptureMainLine(null);
             }
 
-            return trailingTrivia;
+            return new GreenPgnGameListSyntax(GameListBuilder, trailingTrivia);
         }
 
         #endregion Yield tokens and EOF

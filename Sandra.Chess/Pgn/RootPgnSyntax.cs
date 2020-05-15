@@ -19,10 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
-using Eutherion.Text;
-using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -33,104 +29,33 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class RootPgnSyntax
     {
-        public PgnSyntaxNodes Syntax { get; }
+        /// <summary>
+        /// Gets the syntax tree containing the list of PGN games.
+        /// </summary>
+        public PgnGameListSyntax GameListSyntax { get; }
+
+        /// <summary>
+        /// Gets the collection of parse errors.
+        /// </summary>
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<IGreenPgnTopLevelSyntax> syntax, GreenPgnTriviaSyntax trailingTrivia, List<PgnErrorInfo> errors)
+        /// <summary>
+        /// Initializes a new instance of <see cref="RootPgnSyntax"/>.
+        /// </summary>
+        /// <param name="gameListSyntax">
+        /// The syntax tree containing a list of PGN games.
+        /// </param>
+        /// <param name="errors">
+        /// The collection of parse errors.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="gameListSyntax"/> and/or <paramref name="errors"/> is null.
+        /// </exception>
+        public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
-            if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-            if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
-
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(syntax), trailingTrivia);
+            if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
+            GameListSyntax = new PgnGameListSyntax(gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
-        }
-    }
-}
-
-namespace Sandra.Chess.Pgn.Temp
-{
-    // Helps with top level syntax node flexibility while developing the syntax tree.
-    public interface IGreenPgnTopLevelSyntax : ISpan
-    {
-    }
-
-    // Helps with top level syntax node flexibility while developing the syntax tree.
-    public interface IPgnTopLevelSyntax : ISpan
-    {
-        PgnSyntax ToPgnSyntax();
-    }
-
-    public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
-    {
-        internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-        internal readonly Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
-
-        public int Length => GreenNodeWithTrivia.Length;
-
-        public GreenPgnTopLevelSymbolSyntax(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
-        {
-            GreenNodeWithTrivia = greenNodeWithTrivia;
-            SyntaxNodeConstructor = syntaxNodeConstructor;
-        }
-    }
-
-    public class PgnSyntaxNodes : PgnSyntax
-    {
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
-        public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
-
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
-
-        private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
-        public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
-
-        public override int Start => 0;
-        public override int Length => GreenTopLevelNodes.Length + GreenTrailingTrivia.Length;
-        public override PgnSyntax ParentSyntax => null;
-        public override int AbsoluteStart => 0;
-        public override int ChildCount => TopLevelNodes.Count + 1;
-
-        public override PgnSyntax GetChild(int index)
-        {
-            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
-            if (index == TopLevelNodes.Count) return TrailingTrivia;
-            throw new IndexOutOfRangeException();
-        }
-
-        public override int GetChildStartPosition(int index)
-        {
-            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
-            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
-            throw new IndexOutOfRangeException();
-        }
-
-        internal PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes, GreenPgnTriviaSyntax greenTrailingTrivia)
-        {
-            GreenTopLevelNodes = greenTopLevelNodes;
-            GreenTrailingTrivia = greenTrailingTrivia;
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index =>
-                {
-                    var topLevelNode = GreenTopLevelNodes[index];
-
-                    if (topLevelNode is GreenPgnTagSectionSyntax tagSectionSyntax)
-                    {
-                        return new PgnTagSectionSyntax(this, index, tagSectionSyntax);
-                    }
-                    else if (topLevelNode is GreenPgnPlyListSyntax plySyntax)
-                    {
-                        return new PgnPlyListSyntax(this, index, plySyntax);
-                    }
-                    else
-                    {
-                        var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;
-                        return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
-                    }
-                });
-
-            trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
     }
 }

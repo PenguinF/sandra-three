@@ -22,7 +22,6 @@
 using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -98,7 +97,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<WithTriviaSyntax, PgnSyntaxNodes> Parent { get; }
+        public Union<WithTriviaSyntax, PgnGameListSyntax> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -120,7 +119,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.GreenTopLevelNodes.Length);
+        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.Green.Games.Length);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -157,7 +156,7 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnTriviaSyntax(Union<WithTriviaSyntax, PgnSyntaxNodes> parent, GreenPgnTriviaSyntax green)
+        internal PgnTriviaSyntax(Union<WithTriviaSyntax, PgnGameListSyntax> parent, GreenPgnTriviaSyntax green)
         {
             Parent = parent;
             Green = green;
