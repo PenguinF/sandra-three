@@ -183,6 +183,14 @@ namespace Sandra.Chess.Pgn
             {
                 SymbolBuilder.Add(plyListSyntax);
             }
+            else
+            {
+                // We were still in the tag section and no ply list has been built.
+                // So create a default empty one.
+                SymbolBuilder.Add(new GreenPgnPlyListSyntax(
+                    EmptyEnumerable<GreenPgnPlySyntax>.Instance,
+                    EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+            }
 
             if (maybeGameResult != null)
             {

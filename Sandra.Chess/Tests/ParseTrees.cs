@@ -331,7 +331,7 @@ namespace Sandra.Chess.Tests
         {
             var plyListSyntax = new ParseTree<PgnPlyListSyntax>();
             plies.ForEach(plyListSyntax.Add);
-            if (plies.Any() || trailingFloatItems.Any()) plyListSyntax.Add(trailingFloatItems);
+            plyListSyntax.Add(trailingFloatItems);
             return plyListSyntax;
         }
 
@@ -347,10 +347,7 @@ namespace Sandra.Chess.Tests
         private static ParseTree<PgnPlyListSyntax> Plies(params ParseTree<PgnPlySyntax>[] plies)
             => PliesTrailingFloatItems(EmptyFloatItems, plies);
 
-        private static readonly ParseTree<PgnPlyListSyntax> NoPlies = Plies();
-
-        // Separate from NoPlies, because the main line isn't wrapped up that nicely yet.
-        private static readonly ParseTree<PgnPlyListSyntax> RealNoPlies = new ParseTree<PgnPlyListSyntax> { EmptyFloatItems };
+        private static readonly ParseTree<PgnPlyListSyntax> NoPlies = new ParseTree<PgnPlyListSyntax> { EmptyFloatItems };
 
         private static ParseTree<PgnVariationSyntax> Variation(
             ParseTree<PgnParenthesisOpenWithTriviaSyntax> open,
@@ -375,7 +372,7 @@ namespace Sandra.Chess.Tests
             => NoFloats(Variation(open, plies, close));
 
         private static readonly ParseTree<PgnVariationWithFloatItemsSyntax> VariationOpenClose
-            = VariationNoFloats(OpenNoTrivia, RealNoPlies, CloseNoTrivia);
+            = VariationNoFloats(OpenNoTrivia, NoPlies, CloseNoTrivia);
 
         private static TagSectionAndMoveTreeAndResult Game(
             ParseTree<PgnGameResultWithTriviaSyntax> result)
