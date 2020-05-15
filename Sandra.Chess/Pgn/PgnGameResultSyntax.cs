@@ -136,7 +136,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public PgnGameListSyntax Parent { get; }
         public int ParentIndex { get; }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnGameResultSyntax CreateContentNode() => new PgnGameResultSyntax(this, (GreenPgnGameResultSyntax)Green.ContentNode);
 
-        internal PgnGameResultWithTriviaSyntax(PgnSyntaxNodes parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnGameResultWithTriviaSyntax(PgnGameListSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

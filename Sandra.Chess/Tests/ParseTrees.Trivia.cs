@@ -27,8 +27,8 @@ namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
-        private static ParseTree<PgnSyntaxNodes> NoGame(ParseTree<PgnTriviaSyntax> trailingTrivia)
-            => new ParseTree<PgnSyntaxNodes> { trailingTrivia };
+        private static ParseTree<PgnGameListSyntax> NoGame(ParseTree<PgnTriviaSyntax> trailingTrivia)
+            => new ParseTree<PgnGameListSyntax> { trailingTrivia };
 
         internal static List<(string, ParseTree)> TriviaParseTrees() => new List<(string, ParseTree)>
         {

@@ -102,7 +102,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnSyntaxNodes, PgnVariationSyntax> Parent { get; }
+        public Union<PgnGameListSyntax, PgnVariationSyntax> Parent { get; }
 
         public int ParentIndex { get; }
 
@@ -163,7 +163,7 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnPlyListSyntax(Union<PgnSyntaxNodes, PgnVariationSyntax> parent, int parentIndex, GreenPgnPlyListSyntax green)
+        internal PgnPlyListSyntax(Union<PgnGameListSyntax, PgnVariationSyntax> parent, int parentIndex, GreenPgnPlyListSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the syntax tree containing the list of PGN games.
         /// </summary>
-        public PgnSyntaxNodes GameListSyntax { get; }
+        public PgnGameListSyntax GameListSyntax { get; }
 
         /// <summary>
         /// Gets the collection of parse errors.
@@ -55,7 +55,7 @@ namespace Sandra.Chess.Pgn
         public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
-            GameListSyntax = new PgnSyntaxNodes(gameListSyntax);
+            GameListSyntax = new PgnGameListSyntax(gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -77,18 +77,18 @@ namespace Sandra.Chess.Pgn.Temp
     public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
     {
         internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-        internal readonly Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
+        internal readonly Func<PgnGameListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
 
         public int Length => GreenNodeWithTrivia.Length;
 
-        public GreenPgnTopLevelSymbolSyntax(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnSyntaxNodes, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
+        public GreenPgnTopLevelSymbolSyntax(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnGameListSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
         {
             GreenNodeWithTrivia = greenNodeWithTrivia;
             SyntaxNodeConstructor = syntaxNodeConstructor;
         }
     }
 
-    public class PgnSyntaxNodes : PgnSyntax
+    public class PgnGameListSyntax : PgnSyntax
     {
         public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
         public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
@@ -118,7 +118,7 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSyntaxNodes(GreenPgnGameListSyntax gameListSyntax)
+        internal PgnGameListSyntax(GreenPgnGameListSyntax gameListSyntax)
         {
             List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
 
