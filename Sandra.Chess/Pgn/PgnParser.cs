@@ -173,11 +173,8 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
         {
-            if (LatestTagSection.TagPairNodes.Count > 0)
-            {
-                SymbolBuilder.Add(LatestTagSection);
-                LatestTagSection = GreenPgnTagSectionSyntax.Empty;
-            }
+            SymbolBuilder.Add(LatestTagSection);
+            LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
             if (plyListSyntax != null)
             {

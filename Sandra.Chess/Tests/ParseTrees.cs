@@ -67,7 +67,7 @@ namespace Sandra.Chess.Tests
 
             public void AddTo(ParseTree<PgnSyntaxNodes> gamesSyntax)
             {
-                if (TagSection.Any()) gamesSyntax.Add(TagSection);
+                gamesSyntax.Add(TagSection);
                 if (MoveSection.Any()) gamesSyntax.Add(MoveSection);
                 if (Result != null) gamesSyntax.Add(Result);
             }
