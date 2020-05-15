@@ -132,6 +132,8 @@
     "PgnErrorOrphanParenthesisClose": "')' karakter zonder bijbehorend '(' karakter gevonden",
     "PgnErrorMissingParenthesisClose": "')' karakter ontbreekt aan het eind van variant",
     "PgnErrorEmptyVariation": "variant is leeg",
-    "PgnErrorVariationBeforeNAG": "mogelijk onbedoelde annotatie na variant"
+    "PgnErrorVariationBeforeNAG": "mogelijk onbedoelde annotatie na variant",
+    "PgnErrorMissingTagSection": "partij heeft geen labels",
+    "PgnErrorMissingGameTerminationMarker": "'*', '0-1', '1/2-1/2' of '1-0' aan het einde van de partij verwacht"
   }
 }

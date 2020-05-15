@@ -132,6 +132,8 @@
     "PgnErrorOrphanParenthesisClose": "found ')' character without matching '(' character",
     "PgnErrorMissingParenthesisClose": "missing ')' character at the end of side line",
     "PgnErrorEmptyVariation": "side line is empty",
-    "PgnErrorVariationBeforeNAG": "possibly unintentional annotation after side line"
+    "PgnErrorVariationBeforeNAG": "possibly unintentional annotation after side line",
+    "PgnErrorMissingTagSection": "game without tags",
+    "PgnErrorMissingGameTerminationMarker": "expected either '*', '0-1', '1/2-1/2' or '1-0' at the end of the game"
   }
 }

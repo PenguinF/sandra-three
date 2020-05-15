@@ -50,6 +50,8 @@ namespace Sandra.Chess.Pgn
                     return PgnErrorLevel.Error;
                 case PgnErrorCode.UnterminatedMultiLineComment:
                 case PgnErrorCode.EmptyVariation:
+                case PgnErrorCode.MissingTagSection:
+                case PgnErrorCode.MissingGameTerminationMarker:
                     return PgnErrorLevel.Warning;
                 case PgnErrorCode.EmptyNag:
                 case PgnErrorCode.OverflowNag:

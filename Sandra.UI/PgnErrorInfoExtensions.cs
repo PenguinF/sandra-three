@@ -59,6 +59,9 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.MissingParenthesisClose), "missing ')' character at the end of side line" },
             { GetLocalizedStringKey(PgnErrorCode.EmptyVariation), "side line is empty" },
             { GetLocalizedStringKey(PgnErrorCode.VariationBeforeNAG), "possibly unintentional annotation after side line" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingTagSection), "game without tags" },
+            { GetLocalizedStringKey(PgnErrorCode.MissingGameTerminationMarker),
+                $"expected either '{PgnGameResultSyntax.AsteriskCharacter}', '{PgnGameResultSyntax.BlackWinMarkerText}', '{PgnGameResultSyntax.DrawMarkerText}' or '{PgnGameResultSyntax.WhiteWinMarkerText}' at the end of the game" },
         };
     }
 }
