@@ -183,10 +183,8 @@ namespace Sandra.Chess.Pgn
             else
             {
                 // We were still in the tag section and no ply list has been built.
-                // So create a default empty one.
-                SymbolBuilder.Add(new GreenPgnPlyListSyntax(
-                    EmptyEnumerable<GreenPgnPlySyntax>.Instance,
-                    EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+                // So use the default empty one.
+                SymbolBuilder.Add(GreenPgnPlyListSyntax.Empty);
             }
 
             if (maybeGameResult != null)
@@ -273,7 +271,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            var plyListSyntax = new GreenPgnPlyListSyntax(CurrentFrame.PlyListBuilder, trailingFloatItems);
+            var plyListSyntax = GreenPgnPlyListSyntax.Create(CurrentFrame.PlyListBuilder, trailingFloatItems);
             CurrentFrame.PlyListBuilder.Clear();
             return plyListSyntax;
         }

@@ -35,6 +35,41 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnPlyListSyntax : IGreenPgnTopLevelSyntax
     {
         /// <summary>
+        /// Gets the empty <see cref="GreenPgnPlyListSyntax"/>.
+        /// </summary>
+        public static readonly GreenPgnPlyListSyntax Empty = new GreenPgnPlyListSyntax(
+            ReadOnlySpanList<GreenPgnPlySyntax>.Empty,
+            ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnPlyListSyntax"/>.
+        /// </summary>
+        /// <param name="plies">
+        /// The ply nodes.
+        /// </param>
+        /// <param name="trailingFloatItems">
+        /// The nodes containing the trailing floating items that are not part of a ply.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="GreenPgnPlyListSyntax"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="plies"/> and/or <paramref name="trailingFloatItems"/> is null.
+        /// </exception>
+        public static GreenPgnPlyListSyntax Create(IEnumerable<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
+        {
+            if (plies == null) throw new ArgumentNullException(nameof(plies));
+            if (trailingFloatItems == null) throw new ArgumentNullException(nameof(trailingFloatItems));
+
+            var plyList = ReadOnlySpanList<GreenPgnPlySyntax>.Create(plies);
+            var trailingFloatItemList = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(trailingFloatItems);
+
+            return plyList.Count == 0 && trailingFloatItemList.Count == 0
+                ? Empty
+                : new GreenPgnPlyListSyntax(plyList, trailingFloatItemList);
+        }
+
+        /// <summary>
         /// Gets the ply nodes.
         /// </summary>
         public ReadOnlySpanList<GreenPgnPlySyntax> Plies { get; }
@@ -49,25 +84,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => Plies.Length + TrailingFloatItems.Length;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnPlyListSyntax"/>.
-        /// </summary>
-        /// <param name="plies">
-        /// The ply nodes.
-        /// </param>
-        /// <param name="trailingFloatItems">
-        /// The nodes containing the trailing floating items that are not part of a ply.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="plies"/> and/or <paramref name="trailingFloatItems"/> is null.
-        /// </exception>
-        public GreenPgnPlyListSyntax(IEnumerable<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
+        private GreenPgnPlyListSyntax(ReadOnlySpanList<GreenPgnPlySyntax> plies, ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            if (plies == null) throw new ArgumentNullException(nameof(plies));
-            if (trailingFloatItems == null) throw new ArgumentNullException(nameof(trailingFloatItems));
-
-            Plies = ReadOnlySpanList<GreenPgnPlySyntax>.Create(plies);
-            TrailingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(trailingFloatItems);
+            Plies = plies;
+            TrailingFloatItems = trailingFloatItems;
         }
     }
 
