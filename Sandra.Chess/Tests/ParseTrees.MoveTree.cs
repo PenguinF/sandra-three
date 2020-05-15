@@ -26,49 +26,45 @@ namespace Sandra.Chess.Tests
 {
     public static partial class ParseTrees
     {
-        internal static List<(string, ParseTree)> MoveTreeParseTrees() => new List<(string, ParseTree)>
-        {
-        };
-
         internal static List<(string, ParseTree, PgnErrorCode[])> MoveTreeParseTreesWithErrors() => new List<(string, ParseTree, PgnErrorCode[])>
         {
             // Recursive annotated variations.
             ("()", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose))),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             (" ()", OneGame(EmptyTagSection, Plies(Ply(VariationNoFloats(WS_Open, NoPlies, CloseNoTrivia)))),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
             ("( )", OneGame(EmptyTagSection, Plies(Ply(VariationNoFloats(OpenNoTrivia, NoPlies, WS_Close)))),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
             ("() ", OneGameTrailingTrivia(EmptyTagSection, Plies(Ply(VariationOpenClose)), WhitespaceTrivia),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             (".()", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OnePeriod, Variation(OpenNoTrivia, NoPlies, CloseNoTrivia))))),
-                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
             ("(.)", OneGame(EmptyTagSection, Plies(Ply(VariationNoFloats(OpenNoTrivia, Plies(OnePeriod), CloseNoTrivia)))),
-                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.OrphanPeriod, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
             ("().", OneGame(EmptyTagSection, Plies(Ply(VariationOpenClose), OnePeriod)),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             ("[A\"\"]1.e4(", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), VariationNoFloats(OpenNoTrivia, NoPlies)))),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingGameTerminationMarker }),
             ("[A\"\"]1.e4)", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia)), OneOrphanClose)),
-                new[] { PgnErrorCode.OrphanParenthesisClose }),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.MissingGameTerminationMarker }),
             ("[A\"\"]1.e4()", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), VariationOpenClose))),
-                new[] { PgnErrorCode.EmptyVariation }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingGameTerminationMarker }),
             ("[A\"\"]1.e4((", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia),
                     VariationNoFloats(OpenNoTrivia, Plies(Ply(VariationNoFloats(OpenNoTrivia, NoPlies))))))),
-                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] { PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove, PgnErrorCode.MissingGameTerminationMarker }),
             ("[A\"\"]1.e4)(", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia), WithFloats(OneOrphanClose, Variation(OpenNoTrivia, NoPlies))))),
-                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose }),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingGameTerminationMarker }),
             ("[A\"\"]1.e4))", OneGame(SmallestCorrectTagSection, Plies(
                 Ply(MoveNumberNoFloats, WithFloats(OnePeriod, MoveNoTrivia)), TwoOrphanClose)),
-                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.OrphanParenthesisClose }),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.MissingGameTerminationMarker }),
 
             // Deeper nesting.
             ("(((", OneGame(EmptyTagSection, Plies(Ply(
@@ -79,7 +75,8 @@ namespace Sandra.Chess.Tests
                     PgnErrorCode.EmptyVariation, PgnErrorCode.MissingParenthesisClose,
                     PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
                     PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
-                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection,PgnErrorCode.MissingGameTerminationMarker }),
 
             ("((((", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(Ply(
@@ -91,7 +88,8 @@ namespace Sandra.Chess.Tests
                     PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
                     PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
                     PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
-                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection,PgnErrorCode.MissingGameTerminationMarker }),
 
             ("(1. a3+(1. b3+(1. c3+(1. d3+", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(Ply(
@@ -102,7 +100,10 @@ namespace Sandra.Chess.Tests
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move),
                             VariationNoFloats(OpenNoTrivia, Plies(Ply(
                                 MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move)))))))))))))))),
-                new[] { PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] {
+                    PgnErrorCode.MissingParenthesisClose,
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             ("(1. a3+(1. b3+(1. c3+(1. d3+)", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(Ply(
@@ -113,7 +114,10 @@ namespace Sandra.Chess.Tests
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move),
                             VariationNoFloats(OpenNoTrivia, Plies(Ply(
                                 MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move))), CloseNoTrivia))))))))))))),
-                new[] { PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] {
+                    PgnErrorCode.MissingParenthesisClose,
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             ("(1. a3+(1. b3+(1. c3+)(1. d3+", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(Ply(
@@ -124,7 +128,10 @@ namespace Sandra.Chess.Tests
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move))), CloseNoTrivia),
                         VariationNoFloats(OpenNoTrivia, Plies(Ply(
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move))))))))))))),
-                new[] { PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] {
+                    PgnErrorCode.MissingParenthesisClose,
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             ("(1. a3+(1. b3+)(1. c3+(1. d3+", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(PlyVariations(
@@ -135,7 +142,10 @@ namespace Sandra.Chess.Tests
                         MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move),
                         VariationNoFloats(OpenNoTrivia, Plies(Ply(
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move))))))))))))),
-                new[] { PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] {
+                    PgnErrorCode.MissingParenthesisClose,
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
             ("(1. a3+)(1. b3+(1. c3+(1. d3+", OneGame(EmptyTagSection, Plies(Ply(
                 VariationNoFloats(OpenNoTrivia, Plies(Ply(
@@ -146,7 +156,10 @@ namespace Sandra.Chess.Tests
                         MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move),
                         VariationNoFloats(OpenNoTrivia, Plies(Ply(
                             MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move))))))))))))),
-                new[] { PgnErrorCode.MissingParenthesisClose, PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove }),
+                new[] {
+                    PgnErrorCode.MissingParenthesisClose,
+                    PgnErrorCode.MissingMoveNumber, PgnErrorCode.MissingMove,
+                    PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
         };
     }
 }

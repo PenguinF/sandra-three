@@ -397,9 +397,6 @@ namespace Sandra.Chess.Tests
 
         internal static readonly List<(string, ParseTree)> TestParseTrees
             = TriviaParseTrees()
-            .Union(TagSectionParseTrees())
-            .Union(PlyParseTrees())
-            .Union(MoveTreeParseTrees())
             .ToList();
 
         internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors
