@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -129,10 +127,8 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a game termination marker, together with its leading trivia.
     /// </summary>
-    public sealed class PgnGameResultWithTriviaSyntax : WithTriviaSyntax<PgnGameResultSyntax>, IPgnTopLevelSyntax
+    public sealed class PgnGameResultWithTriviaSyntax : WithTriviaSyntax<PgnGameResultSyntax>
     {
-        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -150,7 +146,7 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnGameResultSyntax CreateContentNode() => new PgnGameResultSyntax(this, (GreenPgnGameResultSyntax)Green.ContentNode);
 
-        internal PgnGameResultWithTriviaSyntax(PgnGameSyntax parent, int parentIndex, GreenWithTriviaSyntax green)
+        internal PgnGameResultWithTriviaSyntax(PgnGameSyntax parent, GreenWithTriviaSyntax green)
             : base(green)
         {
             Parent = parent;

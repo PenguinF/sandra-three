@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 
@@ -49,39 +48,14 @@ namespace Sandra.Chess.Pgn
         /// <param name="errors">
         /// The collection of parse errors.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="gameListSyntax"/> and/or <paramref name="errors"/> is null.
+        /// </exception>
         public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
         {
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
             GameListSyntax = new PgnGameListSyntax(gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
-        }
-    }
-}
-
-namespace Sandra.Chess.Pgn.Temp
-{
-    // Helps with top level syntax node flexibility while developing the syntax tree.
-    public interface IGreenPgnTopLevelSyntax : ISpan
-    {
-    }
-
-    // Helps with top level syntax node flexibility while developing the syntax tree.
-    public interface IPgnTopLevelSyntax : ISpan
-    {
-        PgnSyntax ToPgnSyntax();
-    }
-
-    public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
-    {
-        internal readonly GreenWithTriviaSyntax GreenNodeWithTrivia;
-        internal readonly Func<PgnGameSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> SyntaxNodeConstructor;
-
-        public int Length => GreenNodeWithTrivia.Length;
-
-        public GreenPgnTopLevelSymbolSyntax(GreenWithTriviaSyntax greenNodeWithTrivia, Func<PgnGameSyntax, int, GreenWithTriviaSyntax, IPgnTopLevelSyntax> syntaxNodeConstructor)
-        {
-            GreenNodeWithTrivia = greenNodeWithTrivia;
-            SyntaxNodeConstructor = syntaxNodeConstructor;
         }
     }
 }

@@ -21,10 +21,7 @@
 
 using Eutherion;
 using Eutherion.Text;
-using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -71,6 +68,9 @@ namespace Sandra.Chess.Pgn
         /// <param name="gameResult">
         /// The result of the game. This is an optional parameter.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="tagSection"/> and/or <paramref name="plyList"/> is null.
+        /// </exception>
         public GreenPgnGameSyntax(
             GreenPgnTagSectionSyntax tagSection,
             GreenPgnPlyListSyntax plyList,
@@ -119,9 +119,17 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public PgnPlyListSyntax PlyList => plyList.Object;
 
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
+        private readonly SafeLazyChildSyntaxOrEmpty<PgnGameResultWithTriviaSyntax> lazyGameResultOrEmpty;
 
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the result of the game. The game result can be null.
+        /// </summary>
+        public PgnGameResultWithTriviaSyntax GameResult => lazyGameResultOrEmpty.ChildNodeOrNull;
+
+        /// <summary>
+        /// Gets the result of the game. The game result can be <see cref="PgnEmptySyntax"/>.
+        /// </summary>
+        public PgnSyntax GameResultOrEmpty => lazyGameResultOrEmpty.ChildNodeOrEmpty;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -141,7 +149,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => 2 + TopLevelNodes.Count;
+        public override int ChildCount => 3;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -150,7 +158,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return TagSection;
             if (index == 1) return PlyList;
-            if (index == 2 && GreenTopLevelNodes.Count == 1) return TopLevelNodes[0].ToPgnSyntax();
+            if (index == 2) return GameResultOrEmpty;
             throw new IndexOutOfRangeException();
         }
 
@@ -161,7 +169,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return 0;
             if (index == 1) return Green.TagSection.Length;
-            if (index == 2 && GreenTopLevelNodes.Count == 1) return Green.TagSection.Length + Green.PlyList.Length;
+            if (index == 2) return Green.TagSection.Length + Green.PlyList.Length;
             throw new IndexOutOfRangeException();
         }
 
@@ -174,25 +182,16 @@ namespace Sandra.Chess.Pgn
             tagSection = new SafeLazyObject<PgnTagSectionSyntax>(() => new PgnTagSectionSyntax(this, green.TagSection));
             plyList = new SafeLazyObject<PgnPlyListSyntax>(() => new PgnPlyListSyntax(this, green.PlyList));
 
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-
             if (green.GameResult != null)
             {
-                flattened.Add(new GreenPgnTopLevelSymbolSyntax(green.GameResult, (innerParent, index, gameResultGreen) => new PgnGameResultWithTriviaSyntax(innerParent, index, gameResultGreen)));
+                lazyGameResultOrEmpty = new SafeLazyChildSyntaxOrEmpty<PgnGameResultWithTriviaSyntax>(
+                    () => new PgnGameResultWithTriviaSyntax(this, Green.GameResult));
             }
-
-            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
-
-            GreenTopLevelNodes = greenTopLevelNodes;
-
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index =>
-                {
-                    var topLevelNode = GreenTopLevelNodes[index];
-                    var topLevelSymbol = (GreenPgnTopLevelSymbolSyntax)topLevelNode;
-                    return topLevelSymbol.SyntaxNodeConstructor(this, index, topLevelSymbol.GreenNodeWithTrivia);
-                });
+            else
+            {
+                lazyGameResultOrEmpty = new SafeLazyChildSyntaxOrEmpty<PgnGameResultWithTriviaSyntax>(
+                    this, green.TagSection.Length + green.PlyList.Length);
+            }
         }
     }
 }
