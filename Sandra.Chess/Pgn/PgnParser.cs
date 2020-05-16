@@ -119,8 +119,10 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagValue;
 
         // Saved in case tag elements are found in a move tree and it's yet undecided whether or not to switch to a new tag section.
+        // Start positions must be saved if errors on the saved symbols must still be reported.
+        private int savedBracketOpenStartPosition;
         private GreenWithTriviaSyntax savedBracketOpen;
-        private int savedTagNameStartPosition; // In case it gets reinterpreted as an unrecognized move.
+        private int savedTagNameStartPosition;
         private GreenWithTriviaSyntax savedTagName;
 
         // Saved until an entire game is captured.
@@ -793,6 +795,7 @@ namespace Sandra.Chess.Pgn
                     // that one will trigger the tag section switch (and this '[' character wouldn't yield a valid tag pair anyway), -or-
                     // user genuinely forgets the game termination marker, and proceeds to starts a new game, in which case the tag section
                     // switch is triggered once valid tag name and values are entered.
+                    savedBracketOpenStartPosition = symbolStartIndex;
                     savedBracketOpen = symbolBeingYielded;
                     YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
                     break;
@@ -844,11 +847,12 @@ namespace Sandra.Chess.Pgn
             {
                 case PgnSymbolType.BracketOpen:
                     CaptureSavedBracketOpen();
+                    savedBracketOpenStartPosition = symbolStartIndex;
                     savedBracketOpen = symbolBeingYielded;
                     break;
                 case PgnSymbolType.TagName:
-                    savedTagName = symbolBeingYielded;
                     savedTagNameStartPosition = symbolStartIndex;
+                    savedTagName = symbolBeingYielded;
                     YieldContentNode = YieldAfterTagNameInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.BracketClose:
@@ -910,6 +914,7 @@ namespace Sandra.Chess.Pgn
             {
                 case PgnSymbolType.BracketOpen:
                     CaptureSavedTagName();
+                    savedBracketOpenStartPosition = symbolStartIndex;
                     savedBracketOpen = symbolBeingYielded;
                     YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
                     break;
@@ -925,9 +930,32 @@ namespace Sandra.Chess.Pgn
                     goto unrecognizedMove;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    CaptureSavedTagName();
-                    YieldTagElementInMoveTree(symbolBeingYielded);
-                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    // '[' + tag name + tag value triggers end of the game and a new tag section.
+                    // Like in CaptureSavedTagName, for error reporting we need to pretend we're
+                    // still at the saved symbols and not already 2 symbols ahead.
+                    int savedSymbolStartIndex = symbolStartIndex;
+                    GreenWithTriviaSyntax savedSymbolBeingYielded = symbolBeingYielded;
+
+                    // Now replay what would have happened had we switched to a tag section directly at the '[' character.
+                    symbolStartIndex = savedBracketOpenStartPosition;
+                    symbolBeingYielded = savedBracketOpen;
+                    CaptureMainLine(null);
+                    HasTagPairBracketOpen = true;
+                    AddTagElementToBuilder();
+                    savedBracketOpen = null;
+
+                    symbolStartIndex = savedTagNameStartPosition;
+                    symbolBeingYielded = savedTagName;
+                    HasTagPairTagName = true;
+                    AddTagElementToBuilder();
+                    savedTagName = null;
+
+                    // Restore now we're at the current symbol.
+                    symbolStartIndex = savedSymbolStartIndex;
+                    symbolBeingYielded = savedSymbolBeingYielded;
+                    HasTagPairTagValue = true;
+                    AddTagElementToBuilder();
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
                     CaptureSavedTagName();
