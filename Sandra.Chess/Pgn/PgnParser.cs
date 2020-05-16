@@ -166,6 +166,11 @@ namespace Sandra.Chess.Pgn
                 moveSyntax.LeadingTrivia,
                 new GreenPgnTagNameSyntax(moveSyntax.ContentNode.Length, isConvertedFromMove: true));
 
+        private GreenWithTriviaSyntax ConvertToTagElementInMoveTree(GreenWithTriviaSyntax tagElementSyntax)
+            => new GreenWithTriviaSyntax(
+                tagElementSyntax.LeadingTrivia,
+                new GreenPgnTagElementInMoveTreeSyntax(tagElementSyntax.ContentNode));
+
         #endregion Conversions from one type of symbol to another
 
         #region Error reporting helpers
@@ -468,6 +473,11 @@ namespace Sandra.Chess.Pgn
             CurrentFrame.FloatItemListBuilder.Add(ConvertToOrphanParenthesisClose(symbolBeingYielded));
         }
 
+        private void YieldTagElementInMoveTree()
+        {
+            CurrentFrame.FloatItemListBuilder.Add(ConvertToTagElementInMoveTree(symbolBeingYielded));
+        }
+
         #endregion Ply parsing
 
         #region Tag section parsing
@@ -722,30 +732,17 @@ namespace Sandra.Chess.Pgn
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
-                    CaptureMainLine(null);
-                    HasTagPairBracketOpen = true;
-                    AddTagElementToBuilder();
-                    YieldContentNode = YieldInTagSectionAction;
+                    YieldTagElementInMoveTree();
                     break;
                 case PgnSymbolType.BracketClose:
-                    // When encountering a ']', switch to tag section and immediately open and close a tag pair.
-                    CaptureMainLine(null);
-                    AddTagElementToBuilder();
-                    CaptureTagPair(hasTagPairBracketClose: true);
-                    YieldContentNode = YieldInTagSectionAction;
+                    YieldTagElementInMoveTree();
                     break;
                 case PgnSymbolType.TagName:
-                    CaptureMainLine(null);
-                    HasTagPairTagName = true;
-                    AddTagElementToBuilder();
-                    YieldContentNode = YieldInTagSectionAction;
+                    YieldTagElementInMoveTree();
                     break;
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    CaptureMainLine(null);
-                    HasTagPairTagValue = true;
-                    AddTagElementToBuilder();
-                    YieldContentNode = YieldInTagSectionAction;
+                    YieldTagElementInMoveTree();
                     break;
                 case PgnSymbolType.MoveNumber:
                     YieldMoveNumberInMoveTreeSection();
