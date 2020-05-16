@@ -404,6 +404,7 @@ namespace Sandra.Chess.Tests
             .Union(TagSectionParseTreesWithErrors())
             .Union(PlyParseTreesWithErrors())
             .Union(MoveTreeParseTreesWithErrors())
+            .Union(MiscParseTrees())
             .ToList();
     }
 }
