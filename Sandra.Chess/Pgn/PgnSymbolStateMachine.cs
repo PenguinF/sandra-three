@@ -351,7 +351,7 @@ namespace Sandra.Chess.Pgn
                 if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
                 bool isValidTagName = ValidTagNameStates.Test(resultState);
                 if (ValidMoveTextStates.Test(resultState)) return new GreenPgnMoveSyntax(length, isValidTagName);
-                if (isValidTagName) return new GreenPgnTagNameSyntax(length);
+                if (isValidTagName) return new GreenPgnTagNameSyntax(length, isConvertedFromMove: false);
             }
 
             return null;

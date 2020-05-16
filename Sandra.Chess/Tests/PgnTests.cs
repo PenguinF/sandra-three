@@ -196,8 +196,8 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1, false));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0, false));
 
             Assert.Throws<ArgumentNullException>("value", () => new GreenPgnTagValueSyntax(null, 1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, -1));
