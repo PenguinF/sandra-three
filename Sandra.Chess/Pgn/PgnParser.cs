@@ -676,10 +676,49 @@ namespace Sandra.Chess.Pgn
             }
         }
 
+        private void YieldMoveNumberInMoveTreeSection()
+        {
+            // Move number always starts a new ply, so capture any unfinished ply.
+            YieldMoveNumber(CapturePly());
+        }
+
+        private void YieldMoveInMoveTreeSection()
+        {
+            // Only allow a preceding move number in the same ply.
+            var floatItems = CaptureFloatItems();
+            if (CurrentFrame.Move != null
+                || CurrentFrame.NagListBuilder.Count > 0
+                || CurrentFrame.VariationListBuilder.Count > 0)
+            {
+                CapturePlyUnchecked(floatItems.Length);
+            }
+            YieldMove(floatItems);
+        }
+
+        private void YieldNagInMoveTreeSection()
+        {
+            var floatItems = CaptureFloatItems();
+            if (CurrentFrame.VariationListBuilder.Count > 0)
+            {
+                // Report variation before NAG message.
+                Errors.Add(new PgnErrorInfo(
+                    PgnErrorCode.VariationBeforeNAG,
+                    symbolStartIndex,
+                    symbolBeingYielded.ContentNode.Length));
+
+                CapturePlyUnchecked(floatItems.Length);
+            }
+            YieldNag(floatItems);
+        }
+
+        private void YieldGameResultInMoveTreeSection()
+        {
+            CaptureMainLine(symbolBeingYielded);
+            YieldContentNode = YieldInTagSectionAction;
+        }
+
         private void YieldInMoveTreeSection()
         {
-            ReadOnlySpanList<GreenWithTriviaSyntax> floatItems;
-
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
@@ -709,40 +748,19 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldInTagSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
-                    // Move number always starts a new ply, so capture any unfinished ply.
-                    floatItems = CapturePly();
-                    YieldMoveNumber(floatItems);
+                    YieldMoveNumberInMoveTreeSection();
                     break;
                 case PgnSymbolType.Period:
                     YieldPeriod();
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
-                    // Only allow a preceding move number in the same ply.
-                    floatItems = CaptureFloatItems();
-                    if (CurrentFrame.Move != null
-                        || CurrentFrame.NagListBuilder.Count > 0
-                        || CurrentFrame.VariationListBuilder.Count > 0)
-                    {
-                        CapturePlyUnchecked(floatItems.Length);
-                    }
-                    YieldMove(floatItems);
+                    YieldMoveInMoveTreeSection();
                     break;
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
                 case PgnSymbolType.OverflowNag:
-                    floatItems = CaptureFloatItems();
-                    if (CurrentFrame.VariationListBuilder.Count > 0)
-                    {
-                        // Report variation before NAG message.
-                        Errors.Add(new PgnErrorInfo(
-                            PgnErrorCode.VariationBeforeNAG,
-                            symbolStartIndex,
-                            symbolBeingYielded.ContentNode.Length));
-
-                        CapturePlyUnchecked(floatItems.Length);
-                    }
-                    YieldNag(floatItems);
+                    YieldNagInMoveTreeSection();
                     break;
                 case PgnSymbolType.ParenthesisOpen:
                     YieldParenthesisOpen();
@@ -754,8 +772,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
-                    CaptureMainLine(symbolBeingYielded);
-                    YieldContentNode = YieldInTagSectionAction;
+                    YieldGameResultInMoveTreeSection();
                     break;
                 default:
                     throw new UnreachableException();
