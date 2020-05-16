@@ -42,6 +42,7 @@ namespace Sandra.Chess.Pgn
         public virtual void VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
+        public virtual void VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node) => DefaultVisit(node);
         public virtual void VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
         public virtual void VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
         public virtual void VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
@@ -68,6 +69,7 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node) => DefaultVisit(node);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
         public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
@@ -94,6 +96,7 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitPeriodSyntax(PgnPeriodSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);

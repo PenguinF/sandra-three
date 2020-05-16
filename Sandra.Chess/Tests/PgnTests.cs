@@ -45,6 +45,7 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitPeriodSyntax(PgnPeriodSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node) => node.Green.TagElement;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagValueSyntax(PgnTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
@@ -253,6 +254,10 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
             Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(null));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnUnterminatedCommentSyntax(1)));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnMoveNumberSyntax(1)));
 
             Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
             Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));
