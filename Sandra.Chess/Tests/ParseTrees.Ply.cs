@@ -190,9 +190,8 @@ namespace Sandra.Chess.Tests
                 new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
             ("1. e9+ 2", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move)), Ply(WS_MoveNumberNoFloats))),
                 new[] { PgnErrorCode.UnrecognizedMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
-            // Below is what you'd expect. But right now Qef0 still triggers a new tag section.
-            //("1. Qef0 2", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move)), Ply(WS_MoveNumberNoFloats))),
-            //    new[] { PgnErrorCode.UnrecognizedMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
+            ("1. Qef0 2", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OnePeriod, WS_Move)), Ply(WS_MoveNumberNoFloats))),
+                new[] { PgnErrorCode.UnrecognizedMove, PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
         };
     }
 }
