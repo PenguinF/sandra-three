@@ -843,7 +843,7 @@ namespace Sandra.Chess.Pgn
             if (symbol == null)
             {
                 Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(pgnText.Substring(symbolStartIndex, length), symbolStartIndex));
-                Yield(new GreenPgnUnrecognizedMoveSyntax(length));
+                Yield(new GreenPgnUnrecognizedMoveSyntax(length, isConvertedFromTagName: false));
             }
             else
             {
