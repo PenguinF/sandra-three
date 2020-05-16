@@ -611,6 +611,12 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Move:
+                    // Switch to move tree section.
+                    CaptureTagPairIfNecessary();
+                    CaptureTagSection();
+                    YieldMove(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
                 case PgnSymbolType.UnrecognizedMove:
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
