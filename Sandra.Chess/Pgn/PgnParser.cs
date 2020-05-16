@@ -260,6 +260,9 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureGame(GreenPgnPlyListSyntax plyListSyntax, GreenWithTriviaSyntax maybeGameResult)
         {
+            // Reset HasPly for the next game.
+            CurrentFrame.HasPly = false;
+
             var gameSyntax = new GreenPgnGameSyntax(LatestTagSection, plyListSyntax, maybeGameResult);
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
             GameListBuilder.Add(gameSyntax);
