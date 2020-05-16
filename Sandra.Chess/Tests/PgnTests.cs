@@ -386,49 +386,49 @@ namespace Sandra.Chess.Tests
                 }
             }
 
-            // Here Assert.Collection is used so if such a test fails,
-            // it gives the index of the third token that was tested.
-            Assert.Collection(
-                _PgnTestSymbols,
-                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
-                {
-                    // Put the third symbol in front, because the last symbol may eat it.
-                    string pgn0 = x0.Item1;
-                    Type type0 = x0.Item2;
+            //// Here Assert.Collection is used so if such a test fails,
+            //// it gives the index of the third token that was tested.
+            //Assert.Collection(
+            //    _PgnTestSymbols,
+            //    Enumerable.Repeat<Action<(string, Type)>>(x0 =>
+            //    {
+            //        // Put the third symbol in front, because the last symbol may eat it.
+            //        string pgn0 = x0.Item1;
+            //        Type type0 = x0.Item2;
 
-                    // Exceptions for when 2 or 3 PGN tokens go together and make 1.
-                    if (WillCombine(type0, type1, out Type type01))
-                    {
-                        if (WillCombine(type01, type2, out Type type012))
-                        {
-                            AssertTokens(
-                                pgn0 + pgn1 + pgn2,
-                                ExpectToken(type012, pgn0.Length + pgn1.Length + pgn2.Length));
-                        }
-                        else
-                        {
-                            AssertTokens(
-                                pgn0 + pgn1 + pgn2,
-                                ExpectToken(type01, pgn0.Length + pgn1.Length),
-                                ExpectToken(type2, pgn2.Length));
-                        }
-                    }
-                    else if (WillCombine(type1, type2, out Type type12))
-                    {
-                        AssertTokens(
-                            pgn0 + pgn1 + pgn2,
-                            ExpectToken(type0, pgn0.Length),
-                            ExpectToken(type12, pgn1.Length + pgn2.Length));
-                    }
-                    else
-                    {
-                        AssertTokens(
-                            pgn0 + pgn1 + pgn2,
-                            ExpectToken(type0, pgn0.Length),
-                            ExpectToken(type1, pgn1.Length),
-                            ExpectToken(type2, pgn2.Length));
-                    }
-                }, _PgnTestSymbols.Count()).ToArray());
+            //        // Exceptions for when 2 or 3 PGN tokens go together and make 1.
+            //        if (WillCombine(type0, type1, out Type type01))
+            //        {
+            //            if (WillCombine(type01, type2, out Type type012))
+            //            {
+            //                AssertTokens(
+            //                    pgn0 + pgn1 + pgn2,
+            //                    ExpectToken(type012, pgn0.Length + pgn1.Length + pgn2.Length));
+            //            }
+            //            else
+            //            {
+            //                AssertTokens(
+            //                    pgn0 + pgn1 + pgn2,
+            //                    ExpectToken(type01, pgn0.Length + pgn1.Length),
+            //                    ExpectToken(type2, pgn2.Length));
+            //            }
+            //        }
+            //        else if (WillCombine(type1, type2, out Type type12))
+            //        {
+            //            AssertTokens(
+            //                pgn0 + pgn1 + pgn2,
+            //                ExpectToken(type0, pgn0.Length),
+            //                ExpectToken(type12, pgn1.Length + pgn2.Length));
+            //        }
+            //        else
+            //        {
+            //            AssertTokens(
+            //                pgn0 + pgn1 + pgn2,
+            //                ExpectToken(type0, pgn0.Length),
+            //                ExpectToken(type1, pgn1.Length),
+            //                ExpectToken(type2, pgn2.Length));
+            //        }
+            //    }, _PgnTestSymbols.Count()).ToArray());
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbols

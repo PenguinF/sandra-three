@@ -118,6 +118,9 @@ namespace Sandra.Chess.Pgn
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
+        // Saved in case tag elements are found in a move tree and it's yet undecided whether or not to switch to a new tag section.
+        private GreenWithTriviaSyntax savedBracketOpen;
+
         // Saved until an entire game is captured.
         private GreenPgnTagSectionSyntax LatestTagSection;
 
@@ -127,6 +130,7 @@ namespace Sandra.Chess.Pgn
         // All content node yielders. They depend on the position in the parse tree, i.e. the current parser state.
         private readonly Action YieldInTagSectionAction;
         private readonly Action YieldInMoveTreeSectionAction;
+        private readonly Action YieldAfterBracketOpenInMoveTreeSectionAction;
 
         // This is either YieldInTagSectionAction or YieldInMoveTreeSectionAction.
         // It is important that this action is an instance method, since invocation of such delegates is the fastest.
@@ -150,6 +154,7 @@ namespace Sandra.Chess.Pgn
 
             YieldInTagSectionAction = YieldInTagSection;
             YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
+            YieldAfterBracketOpenInMoveTreeSectionAction = YieldAfterBracketOpenInMoveTreeSection;
 
             YieldContentNode = YieldInTagSectionAction;
         }
@@ -478,9 +483,9 @@ namespace Sandra.Chess.Pgn
             CurrentFrame.FloatItemListBuilder.Add(ConvertToOrphanParenthesisClose(symbolBeingYielded));
         }
 
-        private void YieldTagElementInMoveTree()
+        private void YieldTagElementInMoveTree(GreenWithTriviaSyntax tagElementInMoveTree)
         {
-            CurrentFrame.FloatItemListBuilder.Add(ConvertToTagElementInMoveTree(symbolBeingYielded));
+            CurrentFrame.FloatItemListBuilder.Add(ConvertToTagElementInMoveTree(tagElementInMoveTree));
         }
 
         #endregion Ply parsing
@@ -729,7 +734,12 @@ namespace Sandra.Chess.Pgn
         private void YieldGameResultInMoveTreeSection()
         {
             CaptureMainLine(symbolBeingYielded);
-            YieldContentNode = YieldInTagSectionAction;
+        }
+
+        private void CaptureSavedBracketOpen()
+        {
+            YieldTagElementInMoveTree(savedBracketOpen);
+            savedBracketOpen = null;
         }
 
         private void YieldInMoveTreeSection()
@@ -737,7 +747,21 @@ namespace Sandra.Chess.Pgn
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
-                    YieldTagElementInMoveTree();
+                    // Only switch to a new tag section if encountering a '[', followed by a tag name, then a tag value.
+                    //
+                    // Rationale:
+                    //
+                    // a) There's overlap between tag names and move texts, especially if a move contains a typo and yields a valid tag name. ("Bf9")
+                    // b) '{' or '}' are easily typoed if one forgets pressing SHIFT, yielding '[' and ']'.
+                    //
+                    // If most of the PGN text is valid, a tag section has two or more tag pairs, -and- new tag sections are also triggered
+                    // by a game termination marker. If the '[' was meant to start a new tag pair after all, we were likely already in
+                    // a tag section (first game, or preceding termination marker), -or- another valid tag pair will follow in which case
+                    // that one will trigger the tag section switch (and this '[' character wouldn't yield a valid tag pair anyway), -or-
+                    // user genuinely forgets the game termination marker, and proceeds to starts a new game, in which case the tag section
+                    // switch is triggered once valid tag name and values are entered.
+                    savedBracketOpen = symbolBeingYielded;
+                    YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.TagName:
                     // Reinterpret as an unrecognized move. Also report its error.
@@ -749,7 +773,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    YieldTagElementInMoveTree();
+                    YieldTagElementInMoveTree(symbolBeingYielded);
                     break;
                 case PgnSymbolType.MoveNumber:
                     YieldMoveNumberInMoveTreeSection();
@@ -777,10 +801,68 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
                     YieldGameResultInMoveTreeSection();
+                    YieldContentNode = YieldInTagSectionAction;
                     break;
                 default:
                     throw new UnreachableException();
             }
+        }
+
+        private void YieldAfterBracketOpenInMoveTreeSection()
+        {
+            CaptureSavedBracketOpen();
+
+            switch (symbolBeingYielded.ContentNode.SymbolType)
+            {
+                case PgnSymbolType.BracketOpen:
+                    savedBracketOpen = symbolBeingYielded;
+                    YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
+                    return;
+                case PgnSymbolType.TagName:
+                    // Reinterpret as an unrecognized move. Also report its error.
+                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolBeingYielded);
+                    Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
+                        pgnText.Substring(symbolStartIndex, symbolBeingYielded.ContentNode.Length),
+                        symbolStartIndex));
+                    goto case PgnSymbolType.UnrecognizedMove;
+                case PgnSymbolType.BracketClose:
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    YieldTagElementInMoveTree(symbolBeingYielded);
+                    break;
+                case PgnSymbolType.MoveNumber:
+                    YieldMoveNumberInMoveTreeSection();
+                    break;
+                case PgnSymbolType.Period:
+                    YieldPeriod();
+                    break;
+                case PgnSymbolType.Move:
+                case PgnSymbolType.UnrecognizedMove:
+                    YieldMoveInMoveTreeSection();
+                    break;
+                case PgnSymbolType.Nag:
+                case PgnSymbolType.EmptyNag:
+                case PgnSymbolType.OverflowNag:
+                    YieldNagInMoveTreeSection();
+                    break;
+                case PgnSymbolType.ParenthesisOpen:
+                    YieldParenthesisOpen();
+                    break;
+                case PgnSymbolType.ParenthesisClose:
+                    YieldParenthesisClose();
+                    break;
+                case PgnSymbolType.Asterisk:
+                case PgnSymbolType.DrawMarker:
+                case PgnSymbolType.WhiteWinMarker:
+                case PgnSymbolType.BlackWinMarker:
+                    YieldGameResultInMoveTreeSection();
+                    YieldContentNode = YieldInTagSectionAction;
+                    return;
+                default:
+                    throw new UnreachableException();
+            }
+
+            YieldContentNode = YieldInMoveTreeSectionAction;
         }
 
         #endregion Yield content nodes
@@ -824,6 +906,11 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
+                if (YieldContentNode == YieldAfterBracketOpenInMoveTreeSectionAction)
+                {
+                    CaptureSavedBracketOpen();
+                }
+
                 CaptureMainLine(null);
             }
 
