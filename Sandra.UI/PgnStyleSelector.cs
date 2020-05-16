@@ -99,6 +99,19 @@ namespace Sandra.UI
         public override Style VisitPeriodSyntax(PgnPeriodSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[moveNumberStyleIndex];
 
+        public override Style VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+        {
+            switch (node.Green.TagElement.SymbolType)
+            {
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    return syntaxEditor.Styles[errorTagValueStyleIndex];
+            }
+
+            // Display [ and ] like illegal characters.
+            return syntaxEditor.Styles[illegalCharacterStyleIndex];
+        }
+
         public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[tagNameStyleIndex];
 
