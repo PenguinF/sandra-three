@@ -913,12 +913,16 @@ namespace Sandra.Chess.Pgn
                     savedBracketOpen = symbolBeingYielded;
                     YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
                     break;
+                case PgnSymbolType.BracketClose:
+                    CaptureSavedTagName();
+                    YieldTagElementInMoveTree(symbolBeingYielded);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
+                    break;
                 case PgnSymbolType.TagName:
                     CaptureSavedTagName();
                     // Reinterpret as an unrecognized move.
                     symbolBeingYielded = ConvertToUnrecognizedMove(symbolStartIndex, symbolBeingYielded);
                     goto unrecognizedMove;
-                case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
                     CaptureSavedTagName();
