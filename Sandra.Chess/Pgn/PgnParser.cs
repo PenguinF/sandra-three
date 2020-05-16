@@ -176,10 +176,17 @@ namespace Sandra.Chess.Pgn
                 tagElementSyntax.LeadingTrivia,
                 new GreenPgnTagElementInMoveTreeSyntax(tagElementSyntax.ContentNode));
 
-        private GreenWithTriviaSyntax ConvertToUnrecognizedMove(GreenWithTriviaSyntax tagNameSyntax)
-            => new GreenWithTriviaSyntax(
+        private GreenWithTriviaSyntax ConvertToUnrecognizedMove(int startPosition, GreenWithTriviaSyntax tagNameSyntax)
+        {
+            // Report the error here.
+            Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
+                pgnText.Substring(startPosition, tagNameSyntax.ContentNode.Length),
+                startPosition));
+
+            return new GreenWithTriviaSyntax(
                 tagNameSyntax.LeadingTrivia,
                 new GreenPgnUnrecognizedMoveSyntax(tagNameSyntax.ContentNode.Length, isConvertedFromTagName: true));
+        }
 
         #endregion Conversions from one type of symbol to another
 
@@ -764,11 +771,8 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.TagName:
-                    // Reinterpret as an unrecognized move. Also report its error.
-                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolBeingYielded);
-                    Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
-                        pgnText.Substring(symbolStartIndex, symbolBeingYielded.ContentNode.Length),
-                        symbolStartIndex));
+                    // Reinterpret as an unrecognized move.
+                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolStartIndex, symbolBeingYielded);
                     goto case PgnSymbolType.UnrecognizedMove;
                 case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
@@ -818,11 +822,8 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.TagName:
                     CaptureSavedBracketOpen();
-                    // Reinterpret as an unrecognized move. Also report its error.
-                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolBeingYielded);
-                    Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
-                        pgnText.Substring(symbolStartIndex, symbolBeingYielded.ContentNode.Length),
-                        symbolStartIndex));
+                    // Reinterpret as an unrecognized move.
+                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolStartIndex, symbolBeingYielded);
                     goto unrecognizedMove;
                 case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
