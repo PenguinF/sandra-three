@@ -85,6 +85,10 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnOrphanParenthesisCloseSyntax> OrphanClose = new ParseTree<PgnOrphanParenthesisCloseSyntax>();
         private static readonly ParseTree<PgnPlyFloatItemWithTriviaSyntax> OrphanCloseNoTrivia = new ParseTree<PgnPlyFloatItemWithTriviaSyntax> { EmptyTrivia, OrphanClose };
 
+        private static readonly ParseTree<PgnTagElementInMoveTreeSyntax> OrphanTagElement = new ParseTree<PgnTagElementInMoveTreeSyntax>();
+        private static readonly ParseTree<PgnPlyFloatItemWithTriviaSyntax> OrphanTagElementNoTrivia = new ParseTree<PgnPlyFloatItemWithTriviaSyntax>() { EmptyTrivia, OrphanTagElement };
+        private static readonly ParseTree<PgnPlyFloatItemWithTriviaSyntax> WS_OrphanTagElement = new ParseTree<PgnPlyFloatItemWithTriviaSyntax>() { WhitespaceTrivia, OrphanTagElement };
+
         private static readonly ParseTree<PgnGameResultSyntax> GameResult = new ParseTree<PgnGameResultSyntax>();
 
         private static readonly ParseTree<PgnGameResultWithTriviaSyntax> ResultNoTrivia = new ParseTree<PgnGameResultWithTriviaSyntax> { EmptyTrivia, GameResult };
@@ -143,20 +147,31 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnTagSectionSyntax> SmallestCorrectTagSection
             = TagSection(TagPair(BracketOpen, TagName, TagValue, BracketClose));
 
+        private static readonly ParseTree<PgnTagSectionSyntax> SmallestTagSectionWithWhitespace
+            = TagSection(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose));
+
+        private static ParseTree<PgnPlyFloatItemListSyntax> Floats(
+            params ParseTree<PgnPlyFloatItemWithTriviaSyntax>[] floatItems)
+        {
+            var floatItemsSyntax = new ParseTree<PgnPlyFloatItemListSyntax>();
+            floatItems.ForEach(floatItemsSyntax.Add);
+            return floatItemsSyntax;
+        }
+
         private static readonly ParseTree<PgnPlyFloatItemListSyntax> EmptyFloatItems
-            = new ParseTree<PgnPlyFloatItemListSyntax>();
+            = Floats();
 
         private static readonly ParseTree<PgnPlyFloatItemListSyntax> OnePeriod
-            = new ParseTree<PgnPlyFloatItemListSyntax> { PeriodNoTrivia };
+            = Floats(PeriodNoTrivia);
 
         private static readonly ParseTree<PgnPlyFloatItemListSyntax> TwoPeriods
-            = new ParseTree<PgnPlyFloatItemListSyntax> { PeriodNoTrivia, PeriodNoTrivia };
+            = Floats(PeriodNoTrivia, PeriodNoTrivia);
 
         private static readonly ParseTree<PgnPlyFloatItemListSyntax> OneOrphanClose
-            = new ParseTree<PgnPlyFloatItemListSyntax> { OrphanCloseNoTrivia };
+            = Floats(OrphanCloseNoTrivia);
 
         private static readonly ParseTree<PgnPlyFloatItemListSyntax> TwoOrphanClose
-            = new ParseTree<PgnPlyFloatItemListSyntax> { OrphanCloseNoTrivia, OrphanCloseNoTrivia };
+            = Floats(OrphanCloseNoTrivia, OrphanCloseNoTrivia);
 
         private static ParseTree<PgnMoveNumberWithFloatItemsSyntax> WithFloats(
             ParseTree<PgnPlyFloatItemListSyntax> leadingFloatItems,
@@ -315,6 +330,12 @@ namespace Sandra.Chess.Tests
             ParseTree<PgnPlySyntax> ply1,
             ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItems)
             => new ParseTree<PgnPlyListSyntax> { ply1, trailingFloatItems };
+
+        private static ParseTree<PgnPlyListSyntax> Plies(
+            ParseTree<PgnPlySyntax> ply1,
+            ParseTree<PgnPlySyntax> ply2,
+            ParseTree<PgnPlyFloatItemListSyntax> trailingFloatItems)
+            => new ParseTree<PgnPlyListSyntax> { ply1, ply2, trailingFloatItems };
 
         private static ParseTree<PgnPlyListSyntax> Plies(params ParseTree<PgnPlySyntax>[] plies)
             => PliesTrailingFloatItems(EmptyFloatItems, plies);
