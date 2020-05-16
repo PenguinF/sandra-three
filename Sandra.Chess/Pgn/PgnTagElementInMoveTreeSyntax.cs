@@ -53,13 +53,15 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="tagElement"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="tagElement"/> is not a tag element.
+        /// <paramref name="tagElement"/> is not a tag element, -or- it is a tag name which should have been converted to an unrecognized move instead.
         /// </exception>
         public GreenPgnTagElementInMoveTreeSyntax(IGreenPgnSymbol tagElement)
         {
             TagElement = tagElement ?? throw new ArgumentNullException(nameof(tagElement));
 
-            if (tagElement.SymbolType < PgnSymbolType.BracketOpen || tagElement.SymbolType > PgnSymbolType.ErrorTagValue)
+            if (tagElement.SymbolType < PgnSymbolType.BracketOpen
+                || tagElement.SymbolType > PgnSymbolType.ErrorTagValue
+                || tagElement.SymbolType == PgnSymbolType.TagName)
             {
                 throw new ArgumentException($"{nameof(tagElement)} has illegal symbol type {tagElement.SymbolType}", nameof(tagElement));
             }

@@ -171,6 +171,11 @@ namespace Sandra.Chess.Pgn
                 tagElementSyntax.LeadingTrivia,
                 new GreenPgnTagElementInMoveTreeSyntax(tagElementSyntax.ContentNode));
 
+        private GreenWithTriviaSyntax ConvertToUnrecognizedMove(GreenWithTriviaSyntax tagNameSyntax)
+            => new GreenWithTriviaSyntax(
+                tagNameSyntax.LeadingTrivia,
+                new GreenPgnUnrecognizedMoveSyntax(tagNameSyntax.ContentNode.Length, isConvertedFromTagName: true));
+
         #endregion Conversions from one type of symbol to another
 
         #region Error reporting helpers
@@ -734,12 +739,14 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BracketOpen:
                     YieldTagElementInMoveTree();
                     break;
-                case PgnSymbolType.BracketClose:
-                    YieldTagElementInMoveTree();
-                    break;
                 case PgnSymbolType.TagName:
-                    YieldTagElementInMoveTree();
-                    break;
+                    // Reinterpret as an unrecognized move. Also report its error.
+                    symbolBeingYielded = ConvertToUnrecognizedMove(symbolBeingYielded);
+                    Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
+                        pgnText.Substring(symbolStartIndex, symbolBeingYielded.ContentNode.Length),
+                        symbolStartIndex));
+                    goto case PgnSymbolType.UnrecognizedMove;
+                case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
                     YieldTagElementInMoveTree();

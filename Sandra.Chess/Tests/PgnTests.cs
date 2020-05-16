@@ -181,7 +181,24 @@ namespace Sandra.Chess.Tests
             return symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType(expectedTokenType, symbol);
+
+                if (expectedTokenType == typeof(GreenPgnTagNameSyntax))
+                {
+                    // Exception: symbol could have been converted to an unrecognized move.
+                    if (symbol is GreenPgnUnrecognizedMoveSyntax unrecognizedMove)
+                    {
+                        Assert.True(unrecognizedMove.IsConvertedFromTagName);
+                    }
+                    else
+                    {
+                        Assert.IsType(expectedTokenType, symbol);
+                    }
+                }
+                else
+                {
+                    Assert.IsType(expectedTokenType, symbol);
+                }
+
                 Assert.Equal(expectedLength, symbol.Length);
             };
         }
@@ -258,6 +275,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(null));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnUnterminatedCommentSyntax(1)));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnMoveNumberSyntax(1)));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnTagNameSyntax(1, false)));
 
             Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
             Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));
