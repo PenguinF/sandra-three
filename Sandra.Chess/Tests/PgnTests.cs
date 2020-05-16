@@ -45,6 +45,7 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitParenthesisCloseSyntax(PgnParenthesisCloseSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitParenthesisOpenSyntax(PgnParenthesisOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitPeriodSyntax(PgnPeriodSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node) => node.Green.TagElement;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagValueSyntax(PgnTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
@@ -180,7 +181,24 @@ namespace Sandra.Chess.Tests
             return symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType(expectedTokenType, symbol);
+
+                if (expectedTokenType == typeof(GreenPgnTagNameSyntax))
+                {
+                    // Exception: symbol could have been converted to an unrecognized move.
+                    if (symbol is GreenPgnUnrecognizedMoveSyntax unrecognizedMove)
+                    {
+                        Assert.True(unrecognizedMove.IsConvertedFromTagName);
+                    }
+                    else
+                    {
+                        Assert.IsType(expectedTokenType, symbol);
+                    }
+                }
+                else
+                {
+                    Assert.IsType(expectedTokenType, symbol);
+                }
+
                 Assert.Equal(expectedLength, symbol.Length);
             };
         }
@@ -196,8 +214,8 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1, false));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0, false));
 
             Assert.Throws<ArgumentNullException>("value", () => new GreenPgnTagValueSyntax(null, 1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, -1));
@@ -233,8 +251,8 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0, false));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1, false));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(-1, false));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(0, false));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
@@ -253,6 +271,11 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
             Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(null));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnUnterminatedCommentSyntax(1)));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnMoveNumberSyntax(1)));
+            Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnTagNameSyntax(1, false)));
 
             Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
             Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));

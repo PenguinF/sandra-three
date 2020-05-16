@@ -56,6 +56,9 @@ namespace Sandra.Chess.Pgn
         /// <param name="trailingTrivia">
         /// The trailing trivia of the syntax node.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="games"/> and/or <paramref name="trailingTrivia"/> is null.
+        /// </exception>
         public GreenPgnGameListSyntax(IEnumerable<GreenPgnGameSyntax> games, GreenPgnTriviaSyntax trailingTrivia)
         {
             if (games == null) throw new ArgumentNullException(nameof(games));

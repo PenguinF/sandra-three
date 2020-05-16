@@ -39,18 +39,27 @@ namespace Sandra.Chess.Pgn
         public override PgnSymbolType SymbolType => PgnSymbolType.TagName;
 
         /// <summary>
+        /// Gets if this symbol was originally parsed as a move but reinterpreted as a tag name.
+        /// </summary>
+        public bool IsConvertedFromMove { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagNameSyntax"/>.
         /// </summary>
         /// <param name="length">
         /// The length of the text span corresponding with the node to create.
         /// </param>
+        /// <param name="isConvertedFromMove">
+        /// If this symbol was originally parsed as a move but reinterpreted as a tag name.
+        /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
-        public GreenPgnTagNameSyntax(int length)
+        public GreenPgnTagNameSyntax(int length, bool isConvertedFromMove)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
+            IsConvertedFromMove = isConvertedFromMove;
         }
 
         internal override PgnTagElementSyntax CreateRedNode(PgnTagElementWithTriviaSyntax parent) => new PgnTagNameSyntax(parent, this);
@@ -65,6 +74,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenPgnTagNameSyntax Green { get; }
+
+        /// <summary>
+        /// Gets if this tag name syntax is a valid (<see cref="PgnMoveSyntax"/>) as well, but reinterpreted as a tag name.
+        /// </summary>
+        public bool IsConvertedFromMove => Green.IsConvertedFromMove;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.

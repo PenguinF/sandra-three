@@ -47,7 +47,7 @@ namespace Eutherion.Win.AppTemplate
             private readonly LocalizedString errorLocationString;
             private readonly LocalizedString titleString;
 
-            public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm, string fileName, int errorCount, int width, int maxHeight)
+            public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm, int errorCount, int width, int maxHeight)
             {
                 OwnerEditorForm = ownerEditorForm;
 
@@ -77,7 +77,7 @@ namespace Eutherion.Win.AppTemplate
 
                 noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditorForm.SyntaxEditor);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditorForm.SyntaxEditor);
-                titleString.DisplayText.ValueChanged += displayText => Text = StringUtilities.ConditionalFormat(displayText, new[] { fileName });
+                titleString.DisplayText.ValueChanged += _ => UpdateText();
 
                 errorsListBox.DoubleClick += (_, __) => OwnerEditorForm.ActivateSelectedError(errorsListBox.SelectedIndex);
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
@@ -120,6 +120,11 @@ namespace Eutherion.Win.AppTemplate
 
                 ClientSize = new Size(width, estimatedHeight);
                 ShowIcon = false;
+            }
+
+            public void UpdateText()
+            {
+                Text = StringUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditorForm.CodeFilePathDisplayString });
             }
 
             public int SelectedErrorIndex
@@ -280,7 +285,14 @@ namespace Eutherion.Win.AppTemplate
 
             // Changed marker.
             untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
-            untitledString.DisplayText.ValueChanged += _ => UpdateChangedMarker();
+            untitledString.DisplayText.ValueChanged += _ =>
+            {
+                UpdateChangedMarker();
+                if (errorListFormBox.Value is ErrorListForm errorListForm)
+                {
+                    errorListForm.UpdateText();
+                }
+            };
 
             // Save points.
             SyntaxEditor.SavePointLeft += (_, __) => UpdateChangedMarker();
@@ -545,7 +557,7 @@ namespace Eutherion.Win.AppTemplate
                 Session.Current.OpenOrActivateToolForm(
                     this,
                     errorListFormBox,
-                    () => new ErrorListForm(this, CodeFilePathDisplayString, SyntaxEditor.CurrentErrors.Count, Width, ClientSize.Height));
+                    () => new ErrorListForm(this, SyntaxEditor.CurrentErrors.Count, Width, ClientSize.Height));
             }
 
             return UIActionVisibility.Enabled;

@@ -52,6 +52,12 @@ namespace Sandra.Chess.Pgn
         public virtual bool IsUnrecognizedMove => false;
 
         /// <summary>
+        /// Gets if this move syntax was parsed as a tag name but found outside of a tag section, and reinterpreted as an unknown move.
+        /// If this property returns true, both <see cref="IsUnrecognizedMove"/> and <see cref="IsValidTagName"/> return true as well.
+        /// </summary>
+        public virtual bool IsConvertedFromTagName => false;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnMoveSyntax"/>.
         /// </summary>
         /// <param name="length">
@@ -63,13 +69,16 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 1 or lower.
         /// </exception>
-        public GreenPgnMoveSyntax(int length, bool isValidTagName) : this(length)
+        public GreenPgnMoveSyntax(int length, bool isValidTagName) : this(isValidTagName, length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
-            IsValidTagName = isValidTagName;
         }
 
-        internal GreenPgnMoveSyntax(int length) => Length = length;
+        internal GreenPgnMoveSyntax(bool isValidTagName, int length)
+        {
+            Length = length;
+            IsValidTagName = isValidTagName;
+        }
     }
 
     /// <summary>
@@ -112,6 +121,12 @@ namespace Sandra.Chess.Pgn
         /// Gets if this is an unrecognized move.
         /// </summary>
         public bool IsUnrecognizedMove => Green.IsUnrecognizedMove;
+
+        /// <summary>
+        /// Gets if this move syntax was parsed as a tag name but found outside of a tag section, and reinterpreted as an unknown move.
+        /// If this property returns true, both <see cref="IsUnrecognizedMove"/> and <see cref="IsValidTagName"/> return true as well.
+        /// </summary>
+        public bool IsConvertedFromTagName => Green.IsConvertedFromTagName;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
