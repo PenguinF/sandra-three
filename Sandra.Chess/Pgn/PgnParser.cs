@@ -810,59 +810,72 @@ namespace Sandra.Chess.Pgn
 
         private void YieldAfterBracketOpenInMoveTreeSection()
         {
-            CaptureSavedBracketOpen();
-
             switch (symbolBeingYielded.ContentNode.SymbolType)
             {
                 case PgnSymbolType.BracketOpen:
+                    CaptureSavedBracketOpen();
                     savedBracketOpen = symbolBeingYielded;
-                    YieldContentNode = YieldAfterBracketOpenInMoveTreeSectionAction;
-                    return;
+                    break;
                 case PgnSymbolType.TagName:
+                    CaptureSavedBracketOpen();
                     // Reinterpret as an unrecognized move. Also report its error.
                     symbolBeingYielded = ConvertToUnrecognizedMove(symbolBeingYielded);
                     Errors.Add(PgnMoveSyntax.CreateUnrecognizedMoveError(
                         pgnText.Substring(symbolStartIndex, symbolBeingYielded.ContentNode.Length),
                         symbolStartIndex));
-                    goto case PgnSymbolType.UnrecognizedMove;
+                    goto unrecognizedMove;
                 case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
+                    CaptureSavedBracketOpen();
                     YieldTagElementInMoveTree(symbolBeingYielded);
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
+                    CaptureSavedBracketOpen();
                     YieldMoveNumberInMoveTreeSection();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Period:
+                    CaptureSavedBracketOpen();
                     YieldPeriod();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Move:
                 case PgnSymbolType.UnrecognizedMove:
+                    CaptureSavedBracketOpen();
+                unrecognizedMove:
                     YieldMoveInMoveTreeSection();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Nag:
                 case PgnSymbolType.EmptyNag:
                 case PgnSymbolType.OverflowNag:
+                    CaptureSavedBracketOpen();
                     YieldNagInMoveTreeSection();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisOpen:
+                    CaptureSavedBracketOpen();
                     YieldParenthesisOpen();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.ParenthesisClose:
+                    CaptureSavedBracketOpen();
                     YieldParenthesisClose();
+                    YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
+                    CaptureSavedBracketOpen();
                     YieldGameResultInMoveTreeSection();
                     YieldContentNode = YieldInTagSectionAction;
-                    return;
+                    break;
                 default:
                     throw new UnreachableException();
             }
-
-            YieldContentNode = YieldInMoveTreeSectionAction;
         }
 
         #endregion Yield content nodes
