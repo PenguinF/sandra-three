@@ -161,6 +161,11 @@ namespace Sandra.Chess.Pgn
                 parenthesisClose.LeadingTrivia,
                 GreenPgnOrphanParenthesisCloseSyntax.Value);
 
+        private GreenWithTriviaSyntax ConvertToTagName(GreenWithTriviaSyntax moveSyntax)
+            => new GreenWithTriviaSyntax(
+                moveSyntax.LeadingTrivia,
+                new GreenPgnTagNameSyntax(moveSyntax.ContentNode.Length, isConvertedFromMove: true));
+
         #endregion Conversions from one type of symbol to another
 
         #region Error reporting helpers
@@ -611,6 +616,17 @@ namespace Sandra.Chess.Pgn
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.Move:
+                    if (HasTagPairBracketOpen)
+                    {
+                        // Reinterpret as a tag name?
+                        GreenPgnMoveSyntax moveSyntax = (GreenPgnMoveSyntax)symbolBeingYielded.ContentNode;
+                        if (moveSyntax.IsValidTagName)
+                        {
+                            // Replace symbolBeingYielded, then go to the tag name case.
+                            symbolBeingYielded = ConvertToTagName(symbolBeingYielded);
+                            goto case PgnSymbolType.TagName;
+                        }
+                    }
                     // Switch to move tree section.
                     CaptureTagPairIfNecessary();
                     CaptureTagSection();
