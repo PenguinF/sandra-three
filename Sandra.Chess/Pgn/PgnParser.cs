@@ -496,8 +496,31 @@ namespace Sandra.Chess.Pgn
             CurrentFrame.FloatItemListBuilder.Add(ConvertToOrphanParenthesisClose(symbolBeingYielded));
         }
 
-        private void YieldTagElementInMoveTree(GreenWithTriviaSyntax tagElementInMoveTree)
+        private void YieldTagElementInMoveTree(int tagElementStartPosition, GreenWithTriviaSyntax tagElementInMoveTree)
         {
+            PgnErrorCode errorCode;
+
+            switch (tagElementInMoveTree.ContentNode.SymbolType)
+            {
+                case PgnSymbolType.BracketOpen:
+                    errorCode = PgnErrorCode.OrphanBracketOpen;
+                    break;
+                case PgnSymbolType.BracketClose:
+                    errorCode = PgnErrorCode.OrphanBracketClose;
+                    break;
+                case PgnSymbolType.TagValue:
+                case PgnSymbolType.ErrorTagValue:
+                    errorCode = PgnErrorCode.OrphanTagValue;
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+
+            Errors.Add(new PgnErrorInfo(
+                errorCode,
+                tagElementStartPosition,
+                tagElementInMoveTree.ContentNode.Length));
+
             CurrentFrame.FloatItemListBuilder.Add(ConvertToTagElementInMoveTree(tagElementInMoveTree));
         }
 
@@ -751,7 +774,7 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureSavedBracketOpen()
         {
-            YieldTagElementInMoveTree(savedBracketOpen);
+            YieldTagElementInMoveTree(savedBracketOpenStartPosition, savedBracketOpen);
             savedBracketOpen = null;
         }
 
@@ -806,7 +829,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.BracketClose:
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    YieldTagElementInMoveTree(symbolBeingYielded);
+                    YieldTagElementInMoveTree(symbolStartIndex, symbolBeingYielded);
                     break;
                 case PgnSymbolType.MoveNumber:
                     YieldMoveNumberInMoveTreeSection();
@@ -859,7 +882,7 @@ namespace Sandra.Chess.Pgn
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
                     CaptureSavedBracketOpen();
-                    YieldTagElementInMoveTree(symbolBeingYielded);
+                    YieldTagElementInMoveTree(symbolStartIndex, symbolBeingYielded);
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.MoveNumber:
@@ -920,7 +943,7 @@ namespace Sandra.Chess.Pgn
                     break;
                 case PgnSymbolType.BracketClose:
                     CaptureSavedTagName();
-                    YieldTagElementInMoveTree(symbolBeingYielded);
+                    YieldTagElementInMoveTree(symbolStartIndex, symbolBeingYielded);
                     YieldContentNode = YieldInMoveTreeSectionAction;
                     break;
                 case PgnSymbolType.TagName:

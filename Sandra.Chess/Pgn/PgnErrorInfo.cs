@@ -46,6 +46,9 @@ namespace Sandra.Chess.Pgn
                 case PgnErrorCode.MissingTagBracketClose:
                 case PgnErrorCode.MissingMove:
                 case PgnErrorCode.OrphanParenthesisClose:
+                case PgnErrorCode.OrphanBracketOpen:
+                case PgnErrorCode.OrphanTagValue:
+                case PgnErrorCode.OrphanBracketClose:
                 case PgnErrorCode.MissingParenthesisClose:
                     return PgnErrorLevel.Error;
                 case PgnErrorCode.UnterminatedMultiLineComment:

@@ -126,6 +126,30 @@ namespace Sandra.Chess.Pgn
         OrphanParenthesisClose,
 
         /// <summary>
+        /// Occurs when a '[' character is found in the middle of a move section.
+        /// </summary>
+        /// <example>
+        /// '1. e4 [ e5'
+        /// </example>
+        OrphanBracketOpen,
+
+        /// <summary>
+        /// Occurs when a tag value is found in the middle of a move section.
+        /// </summary>
+        /// <example>
+        /// '1. e4 "?" e5'
+        /// </example>
+        OrphanTagValue,
+
+        /// <summary>
+        /// Occurs when a ']' character is found in the middle of a move section.
+        /// </summary>
+        /// <example>
+        /// '1. e4 ] e5'
+        /// </example>
+        OrphanBracketClose,
+
+        /// <summary>
         /// Occurs when a variation isn't closed by a closing parenthesis character ')'.
         /// </summary>
         MissingParenthesisClose,
