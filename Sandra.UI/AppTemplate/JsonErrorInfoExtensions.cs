@@ -95,6 +95,7 @@ namespace Eutherion.Win.AppTemplate
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeySections), "unexpected ':', expected ',' or '}'" },
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
+            { GetLocalizedStringKey(JsonErrorCode.ParseTreeTooDeep), $"the syntactic structure exceeded its maximum complexity and can therefore not be analyzed" },
 
             { PType.JsonBoolean, "'" + JsonValue.False + "' or '" + JsonValue.True + "' value" },
             { PType.JsonInteger, "integer value" },

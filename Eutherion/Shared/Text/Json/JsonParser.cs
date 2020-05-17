@@ -48,6 +48,24 @@ namespace Eutherion.Text.Json
             IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
         }
 
+        private class MaximumDepthExceededException : Exception { }
+
+        /// <summary>
+        /// Gets the maximum allowed depth of any Json parse tree. As this is a simple recursive parser,
+        /// it would otherwise be vulnerable to StackOverflowExceptions.
+        /// </summary>
+        public const int MaximumDepth = 40;
+
+        private static RootJsonSyntax CreateParseTreeTooDeepRootSyntax(int startPosition, int length)
+            => new RootJsonSyntax(
+                new GreenJsonMultiValueSyntax(
+                    new[] { new GreenJsonValueWithBackgroundSyntax(
+                        GreenJsonBackgroundListSyntax.Empty,
+                        GreenJsonMissingValueSyntax.Value) },
+                    GreenJsonBackgroundListSyntax.Create(
+                        new GreenJsonBackgroundSyntax[] { GreenJsonWhitespaceSyntax.Create(length) })),
+                new List<JsonErrorInfo> { new JsonErrorInfo(JsonErrorCode.ParseTreeTooDeep, startPosition, 1) });
+
         internal const JsonSymbolType ForegroundThreshold = JsonSymbolType.BooleanLiteral;
         internal const JsonSymbolType ValueDelimiterThreshold = JsonSymbolType.Colon;
 
@@ -60,6 +78,8 @@ namespace Eutherion.Text.Json
 
         // Used for parse error reporting.
         private int CurrentLength;
+
+        private int CurrentDepth;
 
         private JsonParser(string json)
         {
@@ -322,8 +342,13 @@ namespace Eutherion.Text.Json
 
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
+            CurrentDepth++;
+            if (CurrentDepth >= MaximumDepth) throw new MaximumDepthExceededException();
+
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
             ParseValues(valueNodesBuilder, multipleValuesErrorCode);
+
+            CurrentDepth--;
             return CreateMultiValueNode(valueNodesBuilder);
         }
 
@@ -335,7 +360,16 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                ParseValues(valueNodesBuilder, JsonErrorCode.ExpectedEof);
+                try
+                {
+                    ParseValues(valueNodesBuilder, JsonErrorCode.ExpectedEof);
+                }
+                catch (MaximumDepthExceededException)
+                {
+                    // Just ignore everything so far and return a default parse tree.
+                    return CreateParseTreeTooDeepRootSyntax(CurrentLength - 1, Json.Length);
+                }
+
                 if (CurrentToken.SymbolType == JsonSymbolType.Eof) return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
 
                 // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.

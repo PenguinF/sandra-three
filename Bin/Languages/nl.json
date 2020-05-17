@@ -94,6 +94,7 @@
     "JsonErrorMultiplePropertyKeySections": "onverwacht karakter ':', in plaats daarvan ',' of '}' verwacht",
     "JsonErrorMultiplePropertyKeys": "':' verwacht",
     "JsonErrorMultipleValues": "',' verwacht",
+    "JsonErrorParseTreeTooDeep": "de syntactische structuur heeft zijn maximale complexiteit overschreden en kan daarom niet worden geanalyseerd",
     "JsonBoolean": "'false' of 'true' waarde",
     "JsonInteger": "geheel getal",
     "JsonString": "stringwaarde",
