@@ -94,6 +94,7 @@
     "JsonErrorMultiplePropertyKeySections": "unexpected ':', expected ',' or '}'",
     "JsonErrorMultiplePropertyKeys": "':' expected",
     "JsonErrorMultipleValues": "',' expected",
+    "JsonErrorParseTreeTooDeep": "the syntactic structure exceeded its maximum complexity and can therefore not be analyzed",
     "JsonBoolean": "'false' or 'true' value",
     "JsonInteger": "integer value",
     "JsonString": "string value",

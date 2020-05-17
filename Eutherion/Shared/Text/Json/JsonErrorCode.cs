@@ -122,6 +122,12 @@ namespace Eutherion.Text.Json
         MultipleValues,
 
         /// <summary>
+        /// Occurs when a Json parse tree exceeds the maximum allowed depth.
+        /// See also <seealso cref="JsonParser.MaximumDepth"/>.
+        /// </summary>
+        ParseTreeTooDeep,
+
+        /// <summary>
         /// Minimum error code value for custom error messages.
         /// </summary>
         Custom,
