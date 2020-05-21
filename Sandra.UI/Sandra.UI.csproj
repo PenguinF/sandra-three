@@ -155,6 +155,10 @@
       <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
       <Name>Eutherion.Shared</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Eutherion\Win.MdiAppTemplate\Eutherion.Win.MdiAppTemplate.csproj">
+      <Project>{72a45cf1-2c79-4f11-9f22-ed5508c5e97a}</Project>
+      <Name>Eutherion.Win.MdiAppTemplate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Eutherion\Win\Eutherion.Win.csproj">
       <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
       <Name>Eutherion.Win</Name>
