@@ -116,13 +116,8 @@ namespace Eutherion.Win.Forms
         /// <summary>
         /// Calculates an array of visible vertical or horizontal segments, given a list of possibly overlapping rectangles.
         /// </summary>
-        LineSegment[] CalculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
+        void CalculateSegments(List<LineSegment> segments, List<RECT> mdiChildRectangles, bool isVertical)
         {
-            // Create snap line segments for each MDI child, and add extra segments for the MDI client rectangle.
-            List<LineSegment> segments = isVertical
-                ? GetVerticalBorders(ref mdiClientRectangle, 0)
-                : GetHorizontalBorders(ref mdiClientRectangle, 0);
-
             // Loop over MDI child rectangles, to cut away hidden sections of segments.
             for (int mdiChildRectangleIndex = mdiChildRectangles.Count - 1; mdiChildRectangleIndex >= 0; --mdiChildRectangleIndex)
             {
@@ -190,8 +185,6 @@ namespace Eutherion.Win.Forms
                     if (segment.Near < segment.Far) segments.Add(segment);
                 }
             }
-
-            return segments.ToArray();
         }
 
         /// <summary>
@@ -247,9 +240,14 @@ namespace Eutherion.Win.Forms
             }
 
             // Calculate snappable segments and save them to arrays which can be used efficiently from within the WndProc() override.
-            return new SnapGrid(
-                CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, true),
-                CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, false));
+            List<LineSegment> verticalSegments = GetVerticalBorders(ref mdiClientRectangle, 0);
+            List<LineSegment> horizontalSegments = GetHorizontalBorders(ref mdiClientRectangle, 0);
+
+            // Add snap line segments for each MDI child.
+            CalculateSegments(verticalSegments, mdiChildRectangles, true);
+            CalculateSegments(horizontalSegments, mdiChildRectangles, false);
+
+            return new SnapGrid(verticalSegments.ToArray(), horizontalSegments.ToArray());
         }
 
         /// <summary>
