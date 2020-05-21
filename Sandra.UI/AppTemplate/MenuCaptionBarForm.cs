@@ -262,7 +262,6 @@ namespace Eutherion.Win.AppTemplate
         /// Returns the style of the title bar which can be observed for changes.
         /// </summary>
         public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
-        public Color TitleBarBackColor => ObservableStyle.BackColor;
 
         /// <summary>
         /// Occurs after the value of <see cref="TitleBarBackColor"/> was updated.

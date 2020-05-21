@@ -306,7 +306,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 Dock = DockStyle.Fill,
                 Padding = new Padding(2),
-                BackColor = TitleBarBackColor,
+                BackColor = ObservableStyle.BackColor,
             };
 
             fillPanel.Controls.Add(SyntaxEditor);
@@ -367,7 +367,7 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnTitleBarBackColorChanged(EventArgs e)
         {
-            fillPanel.BackColor = TitleBarBackColor;
+            fillPanel.BackColor = ObservableStyle.BackColor;
             base.OnTitleBarBackColorChanged(e);
         }
 
