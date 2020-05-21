@@ -23,9 +23,7 @@ using Eutherion.Utils;
 using Microsoft.Win32;
 using System;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Utils
@@ -78,69 +76,6 @@ namespace Eutherion.Win.Utils
             }
         }
 
-        /// <summary>
-        /// Retrieves a value of a specific type from the registry.
-        /// </summary>
-        /// <typeparam name="TResult">
-        /// The expected type of value in the registry.
-        /// </typeparam>
-        /// <param name="registryKey">
-        /// The registry key in which to look for the sub key.
-        /// </param>
-        /// <param name="subKey">
-        /// The path to the sub key with the registry value.
-        /// </param>
-        /// <param name="valueName">
-        /// The name of the registry value.
-        /// </param>
-        /// <returns>
-        /// The registry value, if it exists and is of the expected type, otherwise <see cref="Maybe{TResult}.Nothing"/>.
-        /// </returns>
-        public static Maybe<TResult> GetRegistryValue<TResult>(RegistryKey registryKey, string subKey, string valueName)
-        {
-            try
-            {
-                using (RegistryKey key = registryKey.OpenSubKey(subKey))
-                {
-                    if (key != null && key.GetValue(valueName) is TResult value)
-                    {
-                        return Maybe<TResult>.Just(value);
-                    }
-                }
-            }
-            catch (SecurityException) { }
-            catch (UnauthorizedAccessException) { }
-            catch (IOException) { }
-
-            return Maybe<TResult>.Nothing;
-        }
-
-        /// <summary>
-        /// Retrieves a value of a specific type from the registry, or a default value if it does not exist.
-        /// </summary>
-        /// <typeparam name="TResult">
-        /// The expected type of value in the registry.
-        /// </typeparam>
-        /// <param name="registryKey">
-        /// The registry key in which to look for the sub key.
-        /// </param>
-        /// <param name="subKey">
-        /// The path to the sub key with the registry value.
-        /// </param>
-        /// <param name="valueName">
-        /// The name of the registry value.
-        /// </param>
-        /// <param name="defaultValue">
-        /// The default value in case the registry value does not exist or is not of the expected type.
-        /// </param>
-        /// <returns>
-        /// The registry value, if it exists and is of the expected type, otherwise <paramref name="defaultValue"/>.
-        /// </returns>
-        public static TResult GetRegistryValue<TResult>(RegistryKey registryKey, string subKey, string valueName, TResult defaultValue)
-            => GetRegistryValue<TResult>(registryKey, subKey, valueName).Match(
-                whenNothing: () => defaultValue,
-                whenJust: value => value);
-
         private static void ResetAccentColors()
         {
             accentColors = new SafeLazy<(Color, Color)>(GetDwmAccentColors);
@@ -158,9 +93,9 @@ namespace Eutherion.Win.Utils
             Color accentInactiveColor = Color.White;
 
             if (DwmEnabled
-                && GetRegistryValue(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "ColorPrevalence", 0) != 0)
+                && RegistryHelper.GetRegistryValue(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "ColorPrevalence", 0) != 0)
             {
-                Maybe<int> maybeAccentActiveColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColor");
+                Maybe<int> maybeAccentActiveColor = RegistryHelper.GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColor");
                 if (maybeAccentActiveColor.IsJust(out int accentActiveColorIntValue))
                 {
                     // Use alpha == 255. Format is ABGR.
@@ -170,7 +105,7 @@ namespace Eutherion.Win.Utils
                         (accentActiveColorIntValue & 0xff0000) >> 16);
                 }
 
-                Maybe<int> maybeAccentInctiveColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColorInactive");
+                Maybe<int> maybeAccentInctiveColor = RegistryHelper.GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColorInactive");
                 if (maybeAccentInctiveColor.IsJust(out int accentInactiveColorIntValue))
                 {
                     // Use alpha == 255. Format is ABGR.
