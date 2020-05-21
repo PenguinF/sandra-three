@@ -242,15 +242,27 @@ namespace Eutherion.Win.Forms
         }
 
         /// <summary>
-        /// Gets the array of vertical line segments the resizing/moving window can snap onto.
+        /// Gets the list of vertical line segments the resizing/moving window can snap onto.
         /// </summary>
         public readonly ReadOnlyList<LineSegment> VerticalSegments;
 
         /// <summary>
-        /// Gets the array of horizontal line segments the resizing/moving window can snap onto.
+        /// Gets the list of horizontal line segments the resizing/moving window can snap onto.
         /// </summary>
         public readonly ReadOnlyList<LineSegment> HorizontalSegments;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SnapGrid"/>.
+        /// </summary>
+        /// <param name="verticalSegments">
+        /// The enumeration of vertical line segments the resizing/moving window can snap onto.
+        /// </param>
+        /// <param name="horizontalSegments">
+        /// The enumeration of horizontal line segments the resizing/moving window can snap onto.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="verticalSegments"/> and/or <paramref name="horizontalSegments"/> is null.
+        /// </exception>
         public SnapGrid(IEnumerable<LineSegment> verticalSegments, IEnumerable<LineSegment> horizontalSegments)
         {
             VerticalSegments = ReadOnlyList<LineSegment>.Create(verticalSegments);
