@@ -111,8 +111,7 @@ namespace Eutherion.Win.Forms
         // Size/move precalculated information.
         bool m_canSnap;                                // Guard boolean, which is only true if the window is sizing/moving and has an MDI parent.
         Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
-        LineSegment[] m_verticalSegments;              // Precalculated array of vertical line segments the sizing/moving window can snap onto.
-        LineSegment[] m_horizontalSegments;            // Precalculated array of horizontal line segments the sizing/moving window can snap onto.
+        SnapGrid m_snapGrid;
         RECT m_rectangleBeforeSizeMove;                // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
 
         /// <summary>
@@ -199,7 +198,7 @@ namespace Eutherion.Win.Forms
         /// <summary>
         /// Precalculates and caches line segments that this form can snap onto.
         /// </summary>
-        void PrepareSizeMove(Control.ControlCollection mdiChildren)
+        SnapGrid PrepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
             RECT mdiClientRectangle = new RECT
@@ -249,8 +248,9 @@ namespace Eutherion.Win.Forms
             }
 
             // Calculate snappable segments and save them to arrays which can be used efficiently from within the WndProc() override.
-            m_verticalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, true);
-            m_horizontalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, false);
+            return new SnapGrid(
+                CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, true),
+                CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, false));
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace Eutherion.Win.Forms
                         {
                             m_canSnap = true;
                             m_currentMdiClientScreenRectangle = currentMdiClientScreenRectangle;
-                            PrepareSizeMove(c.Controls);
+                            m_snapGrid = PrepareSizeMove(c.Controls);
                         }
                         // No need to check 'other' MdiClients, so stop looping.
                         return;
@@ -291,8 +291,7 @@ namespace Eutherion.Win.Forms
         protected override void OnResizeEnd(EventArgs e)
         {
             m_canSnap = false;
-            m_verticalSegments = null;
-            m_horizontalSegments = null;
+            m_snapGrid = null;
             base.OnResizeEnd(e);
         }
 
@@ -319,7 +318,7 @@ namespace Eutherion.Win.Forms
                 int originalWidth = m_rectangleBeforeSizeMove.Right - m_rectangleBeforeSizeMove.Left;
 
                 // Check vertical segments to snap against.
-                foreach (LineSegment verticalSegment in m_verticalSegments)
+                foreach (LineSegment verticalSegment in m_snapGrid.VerticalSegments)
                 {
                     if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                     {
@@ -349,7 +348,7 @@ namespace Eutherion.Win.Forms
                 int originalHeight = m_rectangleBeforeSizeMove.Bottom - m_rectangleBeforeSizeMove.Top;
 
                 // Check horizontal segments to snap against.
-                foreach (LineSegment horizontalSegment in m_horizontalSegments)
+                foreach (LineSegment horizontalSegment in m_snapGrid.HorizontalSegments)
                 {
                     if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                     {
@@ -388,7 +387,7 @@ namespace Eutherion.Win.Forms
                     LineSegment leftBorder = GetLeftBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != leftBorder)
                     {
-                        foreach (LineSegment verticalSegment in m_verticalSegments)
+                        foreach (LineSegment verticalSegment in m_snapGrid.VerticalSegments)
                         {
                             if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                             {
@@ -405,7 +404,7 @@ namespace Eutherion.Win.Forms
                     LineSegment rightBorder = GetRightBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != rightBorder)
                     {
-                        foreach (LineSegment verticalSegment in m_verticalSegments)
+                        foreach (LineSegment verticalSegment in m_snapGrid.VerticalSegments)
                         {
                             if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                             {
@@ -429,7 +428,7 @@ namespace Eutherion.Win.Forms
                     LineSegment topBorder = GetTopBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != topBorder)
                     {
-                        foreach (LineSegment horizontalSegment in m_horizontalSegments)
+                        foreach (LineSegment horizontalSegment in m_snapGrid.HorizontalSegments)
                         {
                             if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                             {
@@ -446,7 +445,7 @@ namespace Eutherion.Win.Forms
                     LineSegment bottomBorder = GetBottomBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != bottomBorder)
                     {
-                        foreach (LineSegment horizontalSegment in m_horizontalSegments)
+                        foreach (LineSegment horizontalSegment in m_snapGrid.HorizontalSegments)
                         {
                             if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                             {
