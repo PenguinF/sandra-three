@@ -116,7 +116,7 @@ namespace Eutherion.Win.Forms
         /// <summary>
         /// Calculates an array of visible vertical or horizontal segments, given a list of possibly overlapping rectangles.
         /// </summary>
-        void CalculateSegments(List<LineSegment> segments, List<RECT> mdiChildRectangles, bool isVertical)
+        void CalculateSegments(List<LineSegment> segments, List<RECT> mdiChildRectangles, bool isVertical, int insensitiveBorderEndLength)
         {
             // Loop over MDI child rectangles, to cut away hidden sections of segments.
             for (int mdiChildRectangleIndex = mdiChildRectangles.Count - 1; mdiChildRectangleIndex >= 0; --mdiChildRectangleIndex)
@@ -125,8 +125,8 @@ namespace Eutherion.Win.Forms
 
                 // Calculate segments for this MDI child, and start with initial full segments.
                 List<LineSegment> childSegments = isVertical
-                    ? GetVerticalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength)
-                    : GetHorizontalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength);
+                    ? GetVerticalBorders(ref mdiChildRectangle, insensitiveBorderEndLength)
+                    : GetHorizontalBorders(ref mdiChildRectangle, insensitiveBorderEndLength);
 
                 // Loop over MDI child rectangles that are higher in the z-order, since they can overlap.
                 for (int overlappingRectangleIndex = mdiChildRectangleIndex - 1; overlappingRectangleIndex >= 0; --overlappingRectangleIndex)
@@ -140,15 +140,15 @@ namespace Eutherion.Win.Forms
                     {
                         overlappingRectanglePositionMin = overlappingRectangle.Left;
                         overlappingRectanglePositionMax = overlappingRectangle.Right;
-                        minInflated = overlappingRectangle.Top - InsensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Bottom + InsensitiveBorderEndLength;
+                        minInflated = overlappingRectangle.Top - insensitiveBorderEndLength;
+                        maxInflated = overlappingRectangle.Bottom + insensitiveBorderEndLength;
                     }
                     else
                     {
                         overlappingRectanglePositionMin = overlappingRectangle.Top;
                         overlappingRectanglePositionMax = overlappingRectangle.Bottom;
-                        minInflated = overlappingRectangle.Left - InsensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Right + InsensitiveBorderEndLength;
+                        minInflated = overlappingRectangle.Left - insensitiveBorderEndLength;
+                        maxInflated = overlappingRectangle.Right + insensitiveBorderEndLength;
                     }
 
                     // Start with the end of the list and work back to the beginning, because segments that are split in two by this overlapping rectangle don't need to be checked again.
@@ -244,8 +244,8 @@ namespace Eutherion.Win.Forms
             List<LineSegment> horizontalSegments = GetHorizontalBorders(ref mdiClientRectangle, 0);
 
             // Add snap line segments for each MDI child.
-            CalculateSegments(verticalSegments, mdiChildRectangles, true);
-            CalculateSegments(horizontalSegments, mdiChildRectangles, false);
+            CalculateSegments(verticalSegments, mdiChildRectangles, true, InsensitiveBorderEndLength);
+            CalculateSegments(horizontalSegments, mdiChildRectangles, false, InsensitiveBorderEndLength);
 
             return new SnapGrid(verticalSegments.ToArray(), horizontalSegments.ToArray());
         }
