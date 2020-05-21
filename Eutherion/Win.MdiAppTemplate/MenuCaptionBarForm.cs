@@ -179,6 +179,9 @@ namespace Eutherion.Win.MdiAppTemplate
             ResumeLayout();
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
+
+            AllowTransparency = true;
+            TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
         }
 
         private NonSelectableButton CreateCaptionButton()
@@ -299,6 +302,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
+            if (TransparencyKey != ObservableStyle.SuggestedTransparencyKey)
+            {
+                TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+            }
+
             UpdateCaptionAreaButtonsBackColor();
         }
 
@@ -522,9 +530,20 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             var g = e.Graphics;
 
-            if (currentMetrics.IsMaximized)
+            if (currentMetrics.IsMaximized && !IsMdiContainer)
             {
-                // Draw only the visible area of the window.
+                // Draw the window using the current transparency key.
+                // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
+                using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
+                {
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
+                }
+
+                // Block out only the visible area of the window.
                 using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
                 {
                     int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;

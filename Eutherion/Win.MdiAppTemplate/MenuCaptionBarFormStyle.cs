@@ -47,6 +47,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private Color hoverBorderColor;
         public Color HoverBorderColor { get => hoverBorderColor; set { if (hoverBorderColor != value) { hoverBorderColor = value; Recalculate(); } } }
 
+        public Color SuggestedTransparencyKey { get; private set; }
+
         private Font font = new Font("Segoe UI", 9, FontStyle.Regular, GraphicsUnit.Point);
         public Font Font { get => font; set { if (font != value) { font = value; Recalculate(); } } }
 
@@ -55,6 +57,9 @@ namespace Eutherion.Win.MdiAppTemplate
         public MenuCaptionBarFormStyle()
         {
             ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
+
+            // Initial calculation to get into a valid state; won't raise the events.
+            Recalculate();
         }
 
         public event EventHandler NotifyChange;
@@ -66,6 +71,19 @@ namespace Eutherion.Win.MdiAppTemplate
                 BackColor = ThemeHelper.GetDwmAccentColor(isActive);
                 InDarkMode = BackColor.GetBrightness() < 0.5f;
                 ForeColor = !isActive ? SystemColors.GrayText : InDarkMode ? Color.White : Color.Black;
+
+                // Choose a transparency key different from all the calculated colors.
+                // We need 5 candidates, one of them is different from the 4 it's compared to.
+                var candidateTransparencyKeys = new[] { Color.Red, Color.Green, Color.Blue, Color.Orange };
+                SuggestedTransparencyKey = Color.Yellow;
+                foreach (var candidate in candidateTransparencyKeys)
+                {
+                    if (candidate != BackColor && candidate != ForeColor && candidate != HoverBorderColor && candidate != HoverColor)
+                    {
+                        SuggestedTransparencyKey = candidate;
+                        break;
+                    }
+                }
 
                 NotifyChange?.Invoke(this, EventArgs.Empty);
             }
