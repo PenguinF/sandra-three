@@ -566,15 +566,44 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     Point position = PointToClient(new Point(m.LParam.ToInt32()));
 
-                    if (position.Y >= 0
-                        && position.Y < currentMetrics.CaptionHeight
-                        && position.X >= 0
-                        && position.X < currentMetrics.TotalWidth)
+                    // Any of the resize borders?
+                    if (position.Y < currentMetrics.VerticalResizeBorderThickness)
+                    {
+                        if (position.X < currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.TOPLEFT;
+                        else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.TOPRIGHT;
+                        else m.Result = (IntPtr)HT.TOP;
+                    }
+                    else if (position.Y >= currentMetrics.TotalHeight - currentMetrics.VerticalResizeBorderThickness)
+                    {
+                        if (position.X < currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.BOTTOMLEFT;
+                        else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.BOTTOMRIGHT;
+                        else m.Result = (IntPtr)HT.BOTTOM;
+                    }
+                    else if (position.X < currentMetrics.HorizontalResizeBorderThickness)
+                    {
+                        m.Result = (IntPtr)HT.LEFT;
+                    }
+                    else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness)
+                    {
+                        m.Result = (IntPtr)HT.RIGHT;
+                    }
+                    else if (position.Y >= currentMetrics.CaptionHeight)
+                    {
+                        // Client area.
+                        m.Result = (IntPtr)HT.CLIENT;
+                    }
+                    else if (position.X < currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth || position.X >= currentMetrics.MinimizeButtonLeft)
+                    {
+                        // Main menu or system button.
+                        m.Result = (IntPtr)HT.CLIENT;
+                    }
+                    else
                     {
                         // This is the draggable 'caption' area.
                         m.Result = (IntPtr)HT.CAPTION;
-                        return;
                     }
+
+                    return;
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)

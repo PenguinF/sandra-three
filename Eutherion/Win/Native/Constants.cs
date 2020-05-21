@@ -26,7 +26,16 @@ namespace Eutherion.Win.Native
     /// </summary>
     public static class HT
     {
+        public const int CLIENT = 1;
         public const int CAPTION = 2;
+        public const int LEFT = 10;
+        public const int RIGHT = 11;
+        public const int TOP = 12;
+        public const int TOPLEFT = 13;
+        public const int TOPRIGHT = 14;
+        public const int BOTTOM = 15;
+        public const int BOTTOMLEFT = 16;
+        public const int BOTTOMRIGHT = 17;
     }
 
     /// <summary>
