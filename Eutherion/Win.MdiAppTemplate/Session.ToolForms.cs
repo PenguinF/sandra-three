@@ -269,8 +269,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
             fillPanel.Controls.Add(textBox);
 
-            var readOnlyTextForm = new UIActionForm
+            var readOnlyTextForm = new MenuCaptionBarForm
             {
+                CaptionHeight = 24,
                 ClientSize = new Size(width, height),
                 Text = Path.GetFileName(fileName),
                 ShowIcon = false,

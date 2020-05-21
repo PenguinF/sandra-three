@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
+using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -212,6 +213,25 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             closeButtonHoverColorOverride = null;
             closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
+        }
+
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        /// <summary>
+        /// Binds the regular UIActions to this Form.
+        /// </summary>
+        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
         }
 
         protected override void OnTextChanged(EventArgs e)
