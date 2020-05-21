@@ -21,7 +21,6 @@
 
 using Eutherion;
 using Eutherion.Utils;
-using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
@@ -1089,10 +1088,10 @@ namespace Sandra.UI
             }
         }
 
-        protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
+        protected override void OnResizing(ResizeEventArgs e)
         {
             // Snap to auto-fit.
-            PerformAutoFit(ref resizeRect, resizeMode);
+            PerformAutoFit(ref e.MoveResizeRect, e.ResizeMode);
         }
 
         protected override void Dispose(bool disposing)

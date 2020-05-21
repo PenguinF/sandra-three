@@ -53,10 +53,11 @@ namespace Eutherion.Win.Forms
                 // Marshal the size/move rectangle from the message.
                 RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
 
-                OnResizing(ref rc, (ResizeMode)m.WParam.ToInt32());
+                var e = new ResizeEventArgs(rc, (ResizeMode)m.WParam.ToInt32());
+                OnResizing(e);
 
                 // Marshal back the result.
-                Marshal.StructureToPtr(rc, m.LParam, true);
+                Marshal.StructureToPtr(e.MoveResizeRect, m.LParam, true);
             }
             else if (m.Msg == WM.MOVING)
             {
@@ -69,17 +70,15 @@ namespace Eutherion.Win.Forms
                 rc.Right += m_displacement.X;
                 rc.Bottom += m_displacement.Y;
 
-                // Store result rectangle in a different variable, to be able to calculate the displacement later.
-                RECT newRC = rc;
-
-                OnMoving(ref newRC);
+                var e = new MoveResizeEventArgs(rc);
+                OnMoving(e);
 
                 // Calculate new displacement for the next WndProc() iteration.
-                m_displacement.X = rc.Left - newRC.Left;
-                m_displacement.Y = rc.Top - newRC.Top;
+                m_displacement.X = rc.Left - e.MoveResizeRect.Left;
+                m_displacement.Y = rc.Top - e.MoveResizeRect.Top;
 
                 // Marshal back the result.
-                Marshal.StructureToPtr(newRC, m.LParam, true);
+                Marshal.StructureToPtr(e.MoveResizeRect, m.LParam, true);
             }
 
             base.WndProc(ref m);
@@ -94,26 +93,29 @@ namespace Eutherion.Win.Forms
         }
 
         /// <summary>
-        /// Called when the form is being moved.
+        /// Occurs when the form is being moved.
         /// </summary>
-        /// <param name="moveRect">
-        /// The bounding rectangle of the form, relative to the edges of the screen.
-        /// </param>
-        protected virtual void OnMoving(ref RECT moveRect)
-        {
-        }
+        public event EventHandler<MoveResizeEventArgs> Moving;
 
         /// <summary>
-        /// Called when the form is being resized.
+        /// Raises the <see cref="Moving"/> event.
         /// </summary>
-        /// <param name="resizeRect">
-        /// The bounding rectangle of the form, relative to the edges of the screen.
+        /// <param name="e">
+        /// The <see cref="MoveResizeEventArgs"/> containing the event data.
         /// </param>
-        /// <param name="resizeMode">
-        /// The mode in which the form is being resized.
+        protected virtual void OnMoving(MoveResizeEventArgs e) => Moving?.Invoke(this, e);
+
+        /// <summary>
+        /// Occurs when the form is being resized.
+        /// </summary>
+        public event EventHandler<ResizeEventArgs> Resizing;
+
+        /// <summary>
+        /// Raises the <see cref="Resizing"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="ResizeEventArgs"/> containing the event data.
         /// </param>
-        protected virtual void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
-        {
-        }
+        protected virtual void OnResizing(ResizeEventArgs e) => Resizing?.Invoke(this, e);
     }
 }

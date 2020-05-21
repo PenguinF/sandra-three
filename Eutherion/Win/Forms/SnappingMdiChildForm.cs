@@ -163,7 +163,7 @@ namespace Eutherion.Win.Forms
             base.OnResizeEnd(e);
         }
 
-        protected override void OnMoving(ref RECT moveRect)
+        protected override void OnMoving(MoveResizeEventArgs e)
         {
             if (m_snapGrid != null)
             {
@@ -173,8 +173,8 @@ namespace Eutherion.Win.Forms
                 // Evaluate left/right borders, then top/bottom borders.
 
                 // Create line segments for each border of this window.
-                LineSegment leftBorder = SnapGrid.LeftEdge(ref moveRect, InsensitiveBorderEndLength);
-                LineSegment rightBorder = SnapGrid.RightEdge(ref moveRect, InsensitiveBorderEndLength);
+                LineSegment leftBorder = SnapGrid.LeftEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
+                LineSegment rightBorder = SnapGrid.RightEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
 
                 if (null != leftBorder && null != rightBorder)
                 {
@@ -190,21 +190,21 @@ namespace Eutherion.Win.Forms
                         if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                         {
                             // Snap left border, preserve original width.
-                            moveRect.Left = verticalSegment.Position;
-                            moveRect.Right = verticalSegment.Position + originalWidth;
+                            e.MoveResizeRect.Left = verticalSegment.Position;
+                            e.MoveResizeRect.Right = verticalSegment.Position + originalWidth;
                         }
                         if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                         {
                             // Snap right border, preserve original width.
-                            moveRect.Left = verticalSegment.Position - originalWidth;
-                            moveRect.Right = verticalSegment.Position;
+                            e.MoveResizeRect.Left = verticalSegment.Position - originalWidth;
+                            e.MoveResizeRect.Right = verticalSegment.Position;
                         }
                     }
                 }
 
                 // Create line segments for each border of this window.
-                LineSegment topBorder = SnapGrid.TopEdge(ref moveRect, InsensitiveBorderEndLength);
-                LineSegment bottomBorder = SnapGrid.BottomEdge(ref moveRect, InsensitiveBorderEndLength);
+                LineSegment topBorder = SnapGrid.TopEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
+                LineSegment bottomBorder = SnapGrid.BottomEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
 
                 if (null != topBorder && null != bottomBorder)
                 {
@@ -220,21 +220,21 @@ namespace Eutherion.Win.Forms
                         if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                         {
                             // Snap top border, preserve original height.
-                            moveRect.Top = horizontalSegment.Position;
-                            moveRect.Bottom = horizontalSegment.Position + originalHeight;
+                            e.MoveResizeRect.Top = horizontalSegment.Position;
+                            e.MoveResizeRect.Bottom = horizontalSegment.Position + originalHeight;
                         }
                         if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                         {
                             // Snap bottom border, preserve original height.
-                            moveRect.Top = horizontalSegment.Position - originalHeight;
-                            moveRect.Bottom = horizontalSegment.Position;
+                            e.MoveResizeRect.Top = horizontalSegment.Position - originalHeight;
+                            e.MoveResizeRect.Bottom = horizontalSegment.Position;
                         }
                     }
                 }
             }
         }
 
-        protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
+        protected override void OnResizing(ResizeEventArgs e)
         {
             if (m_snapGrid != null)
             {
@@ -246,12 +246,12 @@ namespace Eutherion.Win.Forms
                 // Initialize snap threshold.
                 int snapThresholdX = MaxSnapDistance + 1;
 
-                switch (resizeMode)
+                switch (e.ResizeMode)
                 {
                     case ResizeMode.Left:
                     case ResizeMode.TopLeft:
                     case ResizeMode.BottomLeft:
-                        LineSegment leftBorder = SnapGrid.LeftEdge(ref resizeRect, InsensitiveBorderEndLength);
+                        LineSegment leftBorder = SnapGrid.LeftEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
                         if (null != leftBorder)
                         {
                             foreach (LineSegment verticalSegment in m_snapGrid.VerticalSegments)
@@ -259,8 +259,8 @@ namespace Eutherion.Win.Forms
                                 if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                                 {
                                     // Snap left border, preserve original location of right border of the window.
-                                    resizeRect.Left = verticalSegment.Position;
-                                    resizeRect.Right = m_rectangleBeforeSizeMove.Right;
+                                    e.MoveResizeRect.Left = verticalSegment.Position;
+                                    e.MoveResizeRect.Right = m_rectangleBeforeSizeMove.Right;
                                 }
                             }
                         }
@@ -268,7 +268,7 @@ namespace Eutherion.Win.Forms
                     case ResizeMode.Right:
                     case ResizeMode.TopRight:
                     case ResizeMode.BottomRight:
-                        LineSegment rightBorder = SnapGrid.RightEdge(ref resizeRect, InsensitiveBorderEndLength);
+                        LineSegment rightBorder = SnapGrid.RightEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
                         if (null != rightBorder)
                         {
                             foreach (LineSegment verticalSegment in m_snapGrid.VerticalSegments)
@@ -276,8 +276,8 @@ namespace Eutherion.Win.Forms
                                 if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
                                 {
                                     // Snap right border, preserve original location of left border of the window.
-                                    resizeRect.Left = m_rectangleBeforeSizeMove.Left;
-                                    resizeRect.Right = verticalSegment.Position;
+                                    e.MoveResizeRect.Left = m_rectangleBeforeSizeMove.Left;
+                                    e.MoveResizeRect.Right = verticalSegment.Position;
                                 }
                             }
                         }
@@ -287,12 +287,12 @@ namespace Eutherion.Win.Forms
                 // Initialize snap threshold.
                 int snapThresholdY = MaxSnapDistance + 1;
 
-                switch (resizeMode)
+                switch (e.ResizeMode)
                 {
                     case ResizeMode.Top:
                     case ResizeMode.TopLeft:
                     case ResizeMode.TopRight:
-                        LineSegment topBorder = SnapGrid.TopEdge(ref resizeRect, InsensitiveBorderEndLength);
+                        LineSegment topBorder = SnapGrid.TopEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
                         if (null != topBorder)
                         {
                             foreach (LineSegment horizontalSegment in m_snapGrid.HorizontalSegments)
@@ -300,8 +300,8 @@ namespace Eutherion.Win.Forms
                                 if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                                 {
                                     // Snap top border, preserve original location of bottom border of the window.
-                                    resizeRect.Top = horizontalSegment.Position;
-                                    resizeRect.Bottom = m_rectangleBeforeSizeMove.Bottom;
+                                    e.MoveResizeRect.Top = horizontalSegment.Position;
+                                    e.MoveResizeRect.Bottom = m_rectangleBeforeSizeMove.Bottom;
                                 }
                             }
                         }
@@ -309,7 +309,7 @@ namespace Eutherion.Win.Forms
                     case ResizeMode.Bottom:
                     case ResizeMode.BottomLeft:
                     case ResizeMode.BottomRight:
-                        LineSegment bottomBorder = SnapGrid.BottomEdge(ref resizeRect, InsensitiveBorderEndLength);
+                        LineSegment bottomBorder = SnapGrid.BottomEdge(ref e.MoveResizeRect, InsensitiveBorderEndLength);
                         if (null != bottomBorder)
                         {
                             foreach (LineSegment horizontalSegment in m_snapGrid.HorizontalSegments)
@@ -317,8 +317,8 @@ namespace Eutherion.Win.Forms
                                 if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
                                 {
                                     // Snap bottom border, preserve original location of top border of the window.
-                                    resizeRect.Top = m_rectangleBeforeSizeMove.Top;
-                                    resizeRect.Bottom = horizontalSegment.Position;
+                                    e.MoveResizeRect.Top = m_rectangleBeforeSizeMove.Top;
+                                    e.MoveResizeRect.Bottom = horizontalSegment.Position;
                                 }
                             }
                         }
