@@ -50,6 +50,15 @@ namespace Eutherion.Win.Native
     }
 
     /// <summary>
+    /// Constains constants for the <see cref="NativeMethods.TrackPopupMenuEx"/> P/Invoke call.
+    /// </summary>
+    public static class TPM
+    {
+        public const uint RETURNCMD = 0x0100;
+        public const uint LEFTBUTTON = 0x0;
+    }
+
+    /// <summary>
     /// Contains constants for native Windows messages.
     /// </summary>
     public static class WM
@@ -58,6 +67,8 @@ namespace Eutherion.Win.Native
 
         public const int NCCALCSIZE = 0x83;
         public const int NCHITTEST = 0x84;
+        public const int NCRBUTTONUP = 0xa5;
+
         public const int SYSCOMMAND = 0x0112;
 
         public const int SIZING = 0x214;

@@ -37,6 +37,10 @@ namespace Eutherion.Win.MdiAppTemplate
     /// It is advisable to give the main menu strip a back color so it does not display
     /// a gradient which clashes with the custom drawn caption bar area.
     /// </summary>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
     public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
@@ -603,6 +607,15 @@ namespace Eutherion.Win.MdiAppTemplate
                         m.Result = (IntPtr)HT.CAPTION;
                     }
 
+                    return;
+                }
+            }
+            else if (m.Msg == WM.NCRBUTTONUP)
+            {
+                // Emulate the system behavior of clicking the right mouse button over the caption area to bring up the system menu.
+                if (m.WParam.ToInt32() == HT.CAPTION)
+                {
+                    this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                     return;
                 }
             }
