@@ -268,5 +268,189 @@ namespace Eutherion.Win.Forms
             VerticalSegments = ReadOnlyList<LineSegment>.Create(verticalSegments);
             HorizontalSegments = ReadOnlyList<LineSegment>.Create(horizontalSegments);
         }
+
+        /// <summary>
+        /// Modifies a <see cref="MoveResizeEventArgs"/> so a window will snap to segments
+        /// defined in this <see cref="SnapGrid"/> while it's being moved.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="MoveResizeEventArgs"/> to modify.
+        /// </param>
+        /// <param name="rectangleBeforeSizeMove">
+        /// The bounds of the rectangle of the window before it was being moved.
+        /// </param>
+        /// <param name="maxSnapDistance">
+        /// The maximum distance from a line segment within which the window will snap to a line segment.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of line segments representing the edges of the window being moved.
+        /// </param>
+        public void SnapWhileMoving(MoveResizeEventArgs e, ref RECT rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
+        {
+            // Evaluate left/right borders, then top/bottom borders.
+
+            // Create line segments for each border of the rectangle.
+            LineSegment leftBorder = LeftEdge(ref e.MoveResizeRect, cutoff);
+            LineSegment rightBorder = RightEdge(ref e.MoveResizeRect, cutoff);
+
+            if (null != leftBorder && null != rightBorder)
+            {
+                // Initialize snap threshold.
+                int snapThresholdX = maxSnapDistance + 1;
+
+                // Preserve original width of the rectangle.
+                int originalWidth = rectangleBeforeSizeMove.Right - rectangleBeforeSizeMove.Left;
+
+                // Check vertical segments to snap against.
+                foreach (LineSegment verticalSegment in VerticalSegments)
+                {
+                    if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
+                    {
+                        // Snap left border, preserve original width.
+                        e.MoveResizeRect.Left = verticalSegment.Position;
+                        e.MoveResizeRect.Right = verticalSegment.Position + originalWidth;
+                    }
+                    if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
+                    {
+                        // Snap right border, preserve original width.
+                        e.MoveResizeRect.Left = verticalSegment.Position - originalWidth;
+                        e.MoveResizeRect.Right = verticalSegment.Position;
+                    }
+                }
+            }
+
+            // Create line segments for each border of the rectangle.
+            LineSegment topBorder = TopEdge(ref e.MoveResizeRect, cutoff);
+            LineSegment bottomBorder = BottomEdge(ref e.MoveResizeRect, cutoff);
+
+            if (null != topBorder && null != bottomBorder)
+            {
+                // Initialize snap threshold.
+                int snapThresholdY = maxSnapDistance + 1;
+
+                // Preserve original height of the rectangle.
+                int originalHeight = rectangleBeforeSizeMove.Bottom - rectangleBeforeSizeMove.Top;
+
+                // Check horizontal segments to snap against.
+                foreach (LineSegment horizontalSegment in HorizontalSegments)
+                {
+                    if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
+                    {
+                        // Snap top border, preserve original height.
+                        e.MoveResizeRect.Top = horizontalSegment.Position;
+                        e.MoveResizeRect.Bottom = horizontalSegment.Position + originalHeight;
+                    }
+                    if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
+                    {
+                        // Snap bottom border, preserve original height.
+                        e.MoveResizeRect.Top = horizontalSegment.Position - originalHeight;
+                        e.MoveResizeRect.Bottom = horizontalSegment.Position;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Modifies a <see cref="ResizeEventArgs"/> so a window will snap to segments
+        /// defined in this <see cref="SnapGrid"/> while it's being resized.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="ResizeEventArgs"/> to modify.
+        /// </param>
+        /// <param name="rectangleBeforeSizeMove">
+        /// The bounds of the rectangle of the window before it was being resized.
+        /// </param>
+        /// <param name="maxSnapDistance">
+        /// The maximum distance from a line segment within which the window will snap to a line segment.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of line segments representing the edges of the window being resized.
+        /// </param>
+        public void SnapWhileResizing(ResizeEventArgs e, ref RECT rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
+        {
+            // Evaluate left/right borders, then top/bottom borders.
+
+            // Initialize snap threshold.
+            int snapThresholdX = maxSnapDistance + 1;
+
+            switch (e.ResizeMode)
+            {
+                case ResizeMode.Left:
+                case ResizeMode.TopLeft:
+                case ResizeMode.BottomLeft:
+                    LineSegment leftBorder = LeftEdge(ref e.MoveResizeRect, cutoff);
+                    if (null != leftBorder)
+                    {
+                        foreach (LineSegment verticalSegment in VerticalSegments)
+                        {
+                            if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
+                            {
+                                // Snap left border, preserve original location of right border of the rectangle.
+                                e.MoveResizeRect.Left = verticalSegment.Position;
+                                e.MoveResizeRect.Right = rectangleBeforeSizeMove.Right;
+                            }
+                        }
+                    }
+                    break;
+                case ResizeMode.Right:
+                case ResizeMode.TopRight:
+                case ResizeMode.BottomRight:
+                    LineSegment rightBorder = RightEdge(ref e.MoveResizeRect, cutoff);
+                    if (null != rightBorder)
+                    {
+                        foreach (LineSegment verticalSegment in VerticalSegments)
+                        {
+                            if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
+                            {
+                                // Snap right border, preserve original location of left border of the rectangle.
+                                e.MoveResizeRect.Left = rectangleBeforeSizeMove.Left;
+                                e.MoveResizeRect.Right = verticalSegment.Position;
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            // Initialize snap threshold.
+            int snapThresholdY = maxSnapDistance + 1;
+
+            switch (e.ResizeMode)
+            {
+                case ResizeMode.Top:
+                case ResizeMode.TopLeft:
+                case ResizeMode.TopRight:
+                    LineSegment topBorder = TopEdge(ref e.MoveResizeRect, cutoff);
+                    if (null != topBorder)
+                    {
+                        foreach (LineSegment horizontalSegment in HorizontalSegments)
+                        {
+                            if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
+                            {
+                                // Snap top border, preserve original location of bottom border of the rectangle.
+                                e.MoveResizeRect.Top = horizontalSegment.Position;
+                                e.MoveResizeRect.Bottom = rectangleBeforeSizeMove.Bottom;
+                            }
+                        }
+                    }
+                    break;
+                case ResizeMode.Bottom:
+                case ResizeMode.BottomLeft:
+                case ResizeMode.BottomRight:
+                    LineSegment bottomBorder = BottomEdge(ref e.MoveResizeRect, cutoff);
+                    if (null != bottomBorder)
+                    {
+                        foreach (LineSegment horizontalSegment in HorizontalSegments)
+                        {
+                            if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
+                            {
+                                // Snap bottom border, preserve original location of top border of the rectangle.
+                                e.MoveResizeRect.Top = rectangleBeforeSizeMove.Top;
+                                e.MoveResizeRect.Bottom = horizontalSegment.Position;
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }
