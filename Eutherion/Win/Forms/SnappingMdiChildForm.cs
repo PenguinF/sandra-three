@@ -120,7 +120,7 @@ namespace Eutherion.Win.Forms
             SnapGrid.AddVisibleSegments(verticalSegments, mdiChildRectangles, true, InsensitiveBorderEndLength);
             SnapGrid.AddVisibleSegments(horizontalSegments, mdiChildRectangles, false, InsensitiveBorderEndLength);
 
-            return new SnapGrid(verticalSegments.ToArray(), horizontalSegments.ToArray());
+            return new SnapGrid(verticalSegments, horizontalSegments);
         }
 
         /// <summary>

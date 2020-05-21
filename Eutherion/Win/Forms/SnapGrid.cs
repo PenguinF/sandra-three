@@ -244,17 +244,17 @@ namespace Eutherion.Win.Forms
         /// <summary>
         /// Gets the array of vertical line segments the resizing/moving window can snap onto.
         /// </summary>
-        public readonly LineSegment[] VerticalSegments;
+        public readonly ReadOnlyList<LineSegment> VerticalSegments;
 
         /// <summary>
         /// Gets the array of horizontal line segments the resizing/moving window can snap onto.
         /// </summary>
-        public readonly LineSegment[] HorizontalSegments;
+        public readonly ReadOnlyList<LineSegment> HorizontalSegments;
 
-        public SnapGrid(LineSegment[] verticalSegments, LineSegment[] horizontalSegments)
+        public SnapGrid(IEnumerable<LineSegment> verticalSegments, IEnumerable<LineSegment> horizontalSegments)
         {
-            VerticalSegments = verticalSegments;
-            HorizontalSegments = horizontalSegments;
+            VerticalSegments = ReadOnlyList<LineSegment>.Create(verticalSegments);
+            HorizontalSegments = ReadOnlyList<LineSegment>.Create(horizontalSegments);
         }
     }
 }
