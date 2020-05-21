@@ -363,12 +363,13 @@ namespace Eutherion.Win.AppTemplate
             }
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
         }
 
-        protected override void OnTitleBarBackColorChanged(EventArgs e)
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
             fillPanel.BackColor = ObservableStyle.BackColor;
-            base.OnTitleBarBackColorChanged(e);
         }
 
         private void UpdateErrorListForm()
@@ -495,6 +496,7 @@ namespace Eutherion.Win.AppTemplate
         protected override void OnLoad(EventArgs e)
         {
             Session.Current.AttachFormStateAutoSaver(this, formStateSetting, null);
+            base.OnLoad(e);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

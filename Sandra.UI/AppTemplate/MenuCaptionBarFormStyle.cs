@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
 
@@ -31,15 +32,65 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarFormStyle : IDisposable, IWeakEventTarget
     {
-        public Color BackColor;
-        public Color ForeColor;
-        public Color HoverColor;
-        public Color HoverBorderColor;
+        private int blockNotifyChangeCounter;
+
+        public bool InDarkMode { get; private set; }
+        public Color BackColor { get; private set; }
+        public Color ForeColor { get; private set; }
+
+        private bool isActive;
+        public bool IsActive { get => isActive; set { if (isActive != value) { isActive = value; Recalculate(); } } }
+
+        private Color hoverColor;
+        public Color HoverColor { get => hoverColor; set { if (hoverColor != value) { hoverColor = value; Recalculate(); } } }
+
+        private Color hoverBorderColor;
+        public Color HoverBorderColor { get => hoverBorderColor; set { if (hoverBorderColor != value) { hoverBorderColor = value; Recalculate(); } } }
+
+        private Font font = new Font("Segoe UI", 9, FontStyle.Regular, GraphicsUnit.Point);
+        public Font Font { get => font; set { if (font != value) { font = value; Recalculate(); } } }
 
         public bool IsDisposed { get; private set; }
 
+        public MenuCaptionBarFormStyle()
+        {
+            ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
+        }
+
+        public event EventHandler NotifyChange;
+
+        private void Recalculate()
+        {
+            if (blockNotifyChangeCounter == 0)
+            {
+                BackColor = ThemeHelper.GetDwmAccentColor(isActive);
+                InDarkMode = BackColor.GetBrightness() < 0.5f;
+                ForeColor = !isActive ? SystemColors.GrayText : InDarkMode ? Color.White : Color.Black;
+
+                NotifyChange?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e) => Recalculate();
+
+        public void Update(Action updateAction)
+        {
+            blockNotifyChangeCounter++;
+
+            try
+            {
+                updateAction();
+            }
+            finally
+            {
+                blockNotifyChangeCounter--;
+                Recalculate();
+            }
+        }
+
         public void Dispose()
         {
+            ThemeHelper.UserPreferencesChanged -= ThemeHelper_UserPreferencesChanged;
             IsDisposed = true;
         }
     }

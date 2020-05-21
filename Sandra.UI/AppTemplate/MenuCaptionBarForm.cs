@@ -23,7 +23,6 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
-using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -95,9 +94,6 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton closeButton;
 
         private Button currentHoverButton;
-
-        private bool isActive;
-        private bool inDarkMode;
         private Color? closeButtonHoverColorOverride;
 
         private Metrics currentMetrics;
@@ -163,7 +159,7 @@ namespace Eutherion.Win.AppTemplate
 
             ResumeLayout();
 
-            ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
         }
 
         protected override CreateParams CreateParams
@@ -235,11 +231,17 @@ namespace Eutherion.Win.AppTemplate
 
                 if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
                 {
-                    ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                    ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                    ObservableStyle.Update(() =>
+                    {
+                        ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                        ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                        ObservableStyle.Font = MainMenuStrip.Font;
+                    });
                 }
-
-                UpdateCaptionAreaButtonsBackColor();
+                else
+                {
+                    ObservableStyle.Font = MainMenuStrip.Font;
+                }
             }
         }
 
@@ -269,29 +271,13 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
-        /// <summary>
-        /// Occurs after the value of <see cref="TitleBarBackColor"/> was updated.
-        /// </summary>
-        public event EventHandler TitleBarBackColorChanged;
-
-        /// <summary>
-        /// Raises the <see cref="TitleBarBackColorChanged"/> event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnTitleBarBackColorChanged(EventArgs e) => TitleBarBackColorChanged?.Invoke(this, e);
-
-        private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e)
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
             UpdateCaptionAreaButtonsBackColor();
         }
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            Color oldTitleBarBackColor = ObservableStyle.BackColor;
-            ObservableStyle.BackColor = ThemeHelper.GetDwmAccentColor(isActive);
-            inDarkMode = ObservableStyle.BackColor.GetBrightness() < 0.5f;
-            ObservableStyle.ForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
-
             if (MainMenuStrip != null)
             {
                 MainMenuStrip.BackColor = ObservableStyle.BackColor;
@@ -311,7 +297,7 @@ namespace Eutherion.Win.AppTemplate
                 closeButton.FlatAppearance.MouseOverBackColor = closeButtonHoverColorOverride.Value;
             }
 
-            if (inDarkMode)
+            if (ObservableStyle.InDarkMode)
             {
                 closeButton.Image = SharedResources.close_white;
                 minimizeButton.Image = SharedResources.minimize_white;
@@ -327,12 +313,6 @@ namespace Eutherion.Win.AppTemplate
             UpdateMaximizeButtonIcon();
 
             Invalidate();
-
-            if (oldTitleBarBackColor != ObservableStyle.BackColor)
-            {
-                // Raise event only after everything is updated.
-                OnTitleBarBackColorChanged(EventArgs.Empty);
-            }
         }
 
         private void StyleButton(Button titleBarButton)
@@ -398,21 +378,19 @@ namespace Eutherion.Win.AppTemplate
         {
             maximizeButton.Image
                 = WindowState == FormWindowState.Maximized
-                ? (inDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
-                : (inDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
+                ? (ObservableStyle.InDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
+                : (ObservableStyle.InDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
         }
 
         protected override void OnActivated(EventArgs e)
         {
-            isActive = true;
-            UpdateCaptionAreaButtonsBackColor();
+            ObservableStyle.IsActive = true;
             base.OnActivated(e);
         }
 
         protected override void OnDeactivate(EventArgs e)
         {
-            isActive = false;
-            UpdateCaptionAreaButtonsBackColor();
+            ObservableStyle.IsActive = false;
             base.OnDeactivate(e);
         }
 
@@ -511,8 +489,6 @@ namespace Eutherion.Win.AppTemplate
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                Font font = MainMenuStrip == null ? Font : MainMenuStrip.Font;
-
                 // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
                 int textAreaLeftEdge = 0;
                 int textAreaWidth = currentMetrics.TotalWidth;
@@ -521,7 +497,7 @@ namespace Eutherion.Win.AppTemplate
                 // use a different Rectangle to center the text in.
                 // See also e.g. Visual Studio Code where it works the same way.
                 // Also use an extra MainMenuHorizontalMargin.
-                Size measuredTextSize = TextRenderer.MeasureText(text, font);
+                Size measuredTextSize = TextRenderer.MeasureText(text, ObservableStyle.Font);
                 int probableLeftTextEdge = (textAreaWidth - measuredTextSize.Width) / 2;
 
                 if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
@@ -537,7 +513,7 @@ namespace Eutherion.Win.AppTemplate
                 TextRenderer.DrawText(
                     g,
                     text,
-                    font,
+                    ObservableStyle.Font,
                     textAreaRectangle,
                     ObservableStyle.ForeColor,
                     ObservableStyle.BackColor,
