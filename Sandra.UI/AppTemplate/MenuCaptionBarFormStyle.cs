@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Drawing;
+
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
@@ -27,5 +29,9 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarFormStyle
     {
+        public Color BackColor;
+        public Color ForeColor;
+        public Color HoverColor;
+        public Color HoverBorderColor;
     }
 }

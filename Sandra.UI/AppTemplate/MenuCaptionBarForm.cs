@@ -98,10 +98,6 @@ namespace Eutherion.Win.AppTemplate
 
         private bool isActive;
         private bool inDarkMode;
-        private Color titleBarBackColor;
-        private Color titleBarForeColor;
-        private Color titleBarHoverColor;
-        private Color titleBarHoverBorderColor;
         private Color? closeButtonHoverColorOverride;
 
         private Metrics currentMetrics;
@@ -152,7 +148,7 @@ namespace Eutherion.Win.AppTemplate
                 UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
                 saveButton.Visible = currentActionState.Visible;
                 saveButton.Enabled = currentActionState.Enabled;
-                if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = titleBarBackColor;
+                if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = ObservableStyle.BackColor;
             };
 
             closeButton = CreateCaptionButton();
@@ -216,7 +212,7 @@ namespace Eutherion.Win.AppTemplate
         public void ResetCloseButtonHoverColor()
         {
             closeButtonHoverColorOverride = null;
-            closeButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -263,9 +259,10 @@ namespace Eutherion.Win.AppTemplate
         }
 
         /// <summary>
-        /// Returns the current color of the title bar.
+        /// Returns the style of the title bar which can be observed for changes.
         /// </summary>
-        public Color TitleBarBackColor => titleBarBackColor;
+        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
+        public Color TitleBarBackColor => ObservableStyle.BackColor;
 
         /// <summary>
         /// Occurs after the value of <see cref="TitleBarBackColor"/> was updated.
@@ -285,25 +282,25 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            Color oldTitleBarBackColor = titleBarBackColor;
-            titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
-            inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
-            titleBarForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
+            Color oldTitleBarBackColor = ObservableStyle.BackColor;
+            ObservableStyle.BackColor = ThemeHelper.GetDwmAccentColor(isActive);
+            inDarkMode = ObservableStyle.BackColor.GetBrightness() < 0.5f;
+            ObservableStyle.ForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
 
             if (MainMenuStrip != null)
             {
-                MainMenuStrip.BackColor = titleBarBackColor;
-                MainMenuStrip.ForeColor = titleBarForeColor;
+                MainMenuStrip.BackColor = ObservableStyle.BackColor;
+                MainMenuStrip.ForeColor = ObservableStyle.ForeColor;
 
                 foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
                 {
-                    mainMenuItem.ForeColor = titleBarForeColor;
+                    mainMenuItem.ForeColor = ObservableStyle.ForeColor;
                 }
 
                 if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
                 {
-                    titleBarHoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                    titleBarHoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                    ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                    ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
                 }
             }
 
@@ -332,7 +329,7 @@ namespace Eutherion.Win.AppTemplate
 
             Invalidate();
 
-            if (oldTitleBarBackColor != titleBarBackColor)
+            if (oldTitleBarBackColor != ObservableStyle.BackColor)
             {
                 // Raise event only after everything is updated.
                 OnTitleBarBackColorChanged(EventArgs.Empty);
@@ -341,9 +338,9 @@ namespace Eutherion.Win.AppTemplate
 
         private void StyleButton(Button titleBarButton)
         {
-            titleBarButton.BackColor = titleBarBackColor;
-            titleBarButton.ForeColor = titleBarForeColor;
-            titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            titleBarButton.BackColor = ObservableStyle.BackColor;
+            titleBarButton.ForeColor = ObservableStyle.ForeColor;
+            titleBarButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
             StyleTitleBarButtonBorder(titleBarButton);
         }
 
@@ -353,8 +350,8 @@ namespace Eutherion.Win.AppTemplate
             {
                 titleBarButton.FlatAppearance.BorderColor
                     = titleBarButton == currentHoverButton && titleBarButton.Enabled
-                    ? titleBarHoverBorderColor
-                    : titleBarBackColor;
+                    ? ObservableStyle.HoverBorderColor
+                    : ObservableStyle.BackColor;
             }
         }
 
@@ -395,7 +392,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
         {
-            ((ToolStripDropDownItem)sender).ForeColor = titleBarForeColor;
+            ((ToolStripDropDownItem)sender).ForeColor = ObservableStyle.ForeColor;
         }
 
         private void UpdateMaximizeButtonIcon()
@@ -506,7 +503,7 @@ namespace Eutherion.Win.AppTemplate
             var g = e.Graphics;
 
             // Block out the entire caption area.
-            using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
+            using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
             {
                 g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, Metrics.CaptionHeight));
             }
@@ -543,8 +540,8 @@ namespace Eutherion.Win.AppTemplate
                     text,
                     font,
                     textAreaRectangle,
-                    titleBarForeColor,
-                    titleBarBackColor,
+                    ObservableStyle.ForeColor,
+                    ObservableStyle.BackColor,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
         }
