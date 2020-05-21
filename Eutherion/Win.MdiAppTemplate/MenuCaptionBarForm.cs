@@ -49,9 +49,20 @@ namespace Eutherion.Win.MdiAppTemplate
             public int TotalWidth;
             public int TotalHeight;
 
+            public int HorizontalResizeBorderThickness;
+            public int VerticalResizeBorderThickness;
+
             public int CaptionHeight;
 
+            public int MainMenuTop => VerticalResizeBorderThickness;
+            public int MainMenuLeft => HorizontalResizeBorderThickness;
             public int MainMenuWidth;
+            public int MainMenuHeight => CaptionHeight;
+
+            public int ClientAreaLeft => HorizontalResizeBorderThickness;
+            public int ClientAreaTop => VerticalResizeBorderThickness + CaptionHeight;
+            public int ClientAreaWidth => TotalWidth - HorizontalResizeBorderThickness * 2;
+            public int ClientAreaHeight => TotalHeight - CaptionHeight - VerticalResizeBorderThickness * 2;
 
             public int SystemButtonTop;
             public int SystemButtonWidth => captionButtonWidth;
@@ -78,8 +89,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     SystemButtonHeight = captionButtonHeight;
                 }
 
+                SystemButtonTop += VerticalResizeBorderThickness;
+
                 // Calculate button positions can from right to left.
-                CloseButtonLeft = TotalWidth - captionButtonWidth - buttonOuterRightMargin;
+                CloseButtonLeft = TotalWidth - HorizontalResizeBorderThickness - captionButtonWidth - buttonOuterRightMargin;
                 SaveButtonLeft = CloseButtonLeft;
                 if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
                 MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
@@ -408,6 +421,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
             currentMetrics.TotalWidth = clientSize.Width;
             currentMetrics.TotalHeight = clientSize.Height;
+            currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness;
+            currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness;
             currentMetrics.CaptionHeight = CaptionHeight;
 
             if (MainMenuStrip != null && MainMenuStrip.Visible)
@@ -427,10 +442,10 @@ namespace Eutherion.Win.MdiAppTemplate
             if (currentMetrics.MainMenuWidth > 0)
             {
                 MainMenuStrip.SetBounds(
-                    0,
-                    0,
+                    currentMetrics.MainMenuLeft,
+                    currentMetrics.MainMenuTop,
                     currentMetrics.MainMenuWidth,
-                    currentMetrics.CaptionHeight);
+                    currentMetrics.MainMenuHeight);
             }
 
             currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
@@ -472,10 +487,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     && control.Visible)
                 {
                     control.SetBounds(
-                        0,
-                        currentMetrics.CaptionHeight,
-                        currentMetrics.TotalWidth,
-                        currentMetrics.TotalHeight - currentMetrics.CaptionHeight);
+                        currentMetrics.ClientAreaLeft,
+                        currentMetrics.ClientAreaTop,
+                        currentMetrics.ClientAreaWidth,
+                        currentMetrics.ClientAreaHeight);
                 }
             }
 
@@ -491,7 +506,11 @@ namespace Eutherion.Win.MdiAppTemplate
             // Block out the entire caption area.
             using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
             {
-                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, currentMetrics.CaptionHeight));
+                g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                    currentMetrics.HorizontalResizeBorderThickness,
+                    currentMetrics.VerticalResizeBorderThickness,
+                    currentMetrics.ClientAreaWidth,
+                    currentMetrics.CaptionHeight));
             }
 
             string text = Text;
@@ -499,8 +518,8 @@ namespace Eutherion.Win.MdiAppTemplate
             if (!string.IsNullOrWhiteSpace(text))
             {
                 // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                int textAreaLeftEdge = 0;
-                int textAreaWidth = currentMetrics.TotalWidth;
+                int textAreaLeftEdge = currentMetrics.MainMenuLeft;
+                int textAreaWidth = currentMetrics.ClientAreaWidth;
 
                 // Measure the text. If its left edge is about to disappear under the main menu,
                 // use a different Rectangle to center the text in.
@@ -512,11 +531,15 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
                 {
                     // Now place it in the middle between the outer menu right edge and the system buttons.
-                    textAreaLeftEdge = currentMetrics.MainMenuWidth;
+                    textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
                     textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
                 }
 
-                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, currentMetrics.CaptionHeight - 2);
+                Rectangle textAreaRectangle = new Rectangle(
+                    textAreaLeftEdge,
+                    currentMetrics.MainMenuTop,
+                    textAreaWidth,
+                    currentMetrics.MainMenuHeight - 2);
 
                 g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                 TextRenderer.DrawText(
