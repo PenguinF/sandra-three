@@ -51,7 +51,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 OwnerEditorForm = ownerEditorForm;
 
-                CaptionHeight = 24;
+                CaptionHeight = 26;
 
                 errorsListBox = new ListBoxEx
                 {
@@ -243,6 +243,8 @@ namespace Eutherion.Win.MdiAppTemplate
                                 SettingProperty<int> zoomSetting)
         {
             this.formStateSetting = formStateSetting;
+
+            CaptionHeight = 32;
 
             SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {

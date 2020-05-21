@@ -271,7 +271,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             var readOnlyTextForm = new MenuCaptionBarForm
             {
-                CaptionHeight = 24,
+                CaptionHeight = 26,
                 ClientSize = new Size(width, height),
                 Text = Path.GetFileName(fileName),
                 ShowIcon = false,

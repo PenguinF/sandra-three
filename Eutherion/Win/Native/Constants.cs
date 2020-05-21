@@ -47,6 +47,7 @@ namespace Eutherion.Win.Native
     {
         public const int COPYDATA = 0x4A;
 
+        public const int NCCALCSIZE = 0x83;
         public const int NCHITTEST = 0x84;
         public const int SYSCOMMAND = 0x0112;
 

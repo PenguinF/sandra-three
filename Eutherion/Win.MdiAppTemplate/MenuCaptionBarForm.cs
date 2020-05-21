@@ -113,9 +113,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 | ControlStyles.ResizeRedraw
                 | ControlStyles.Opaque, true);
 
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
-
             minimizeButton = CreateCaptionButton();
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
 
@@ -164,18 +161,6 @@ namespace Eutherion.Win.MdiAppTemplate
             ResumeLayout();
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
-        }
-
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                // Enables borders regardless of ControlBox and FormBorderStyle settings.
-                const int WS_SIZEBOX = 0x40000;
-                CreateParams cp = base.CreateParams;
-                cp.Style |= WS_SIZEBOX;
-                return cp;
-            }
         }
 
         private NonSelectableButton CreateCaptionButton()
@@ -547,18 +532,26 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM.NCHITTEST)
+            if (m.Msg >= WM.NCCALCSIZE && m.Msg <= WM.NCHITTEST)
             {
-                Point position = PointToClient(new Point(m.LParam.ToInt32()));
-
-                if (position.Y >= 0
-                    && position.Y < currentMetrics.CaptionHeight
-                    && position.X >= 0
-                    && position.X < currentMetrics.TotalWidth)
+                if (m.Msg == WM.NCCALCSIZE)
                 {
-                    // This is the draggable 'caption' area.
-                    m.Result = (IntPtr)HT.CAPTION;
+                    m.Result = IntPtr.Zero;
                     return;
+                }
+                else
+                {
+                    Point position = PointToClient(new Point(m.LParam.ToInt32()));
+
+                    if (position.Y >= 0
+                        && position.Y < currentMetrics.CaptionHeight
+                        && position.X >= 0
+                        && position.X < currentMetrics.TotalWidth)
+                    {
+                        // This is the draggable 'caption' area.
+                        m.Result = (IntPtr)HT.CAPTION;
+                        return;
+                    }
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
