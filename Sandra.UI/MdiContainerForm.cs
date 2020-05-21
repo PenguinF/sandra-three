@@ -28,7 +28,6 @@ using Sandra.Chess;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -39,18 +38,12 @@ namespace Sandra.UI
     /// </summary>
     public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
     {
-        public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
-
         // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
         private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
 
         public MdiContainerForm()
         {
-#if DEBUG
-            DeployRuntimeConfigurationFiles();
-#endif
-
             IsMdiContainer = true;
             Icon = Session.Current.ApplicationIcon;
             Text = Session.ExecutableFileNameWithoutExtension;
@@ -457,73 +450,7 @@ namespace Sandra.UI
                     SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
 
-            // Load chess piece images from a fixed path.
-            PieceImages = LoadChessPieceImages();
-
             NewPlayingBoard();
         }
-
-        private string RuntimePath(string imageFileKey)
-            => Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png");
-
-        private Bitmap DefaultResourceImage(string imageFileKey)
-            => (Bitmap)Properties.Resources.ResourceManager.GetObject(imageFileKey, Properties.Resources.Culture);
-
-        private Image LoadChessPieceImage(string imageFileKey)
-        {
-            try
-            {
-                return Image.FromFile(RuntimePath(imageFileKey));
-            }
-            catch
-            {
-                return DefaultResourceImage(imageFileKey);
-            }
-        }
-
-        private EnumIndexedArray<ColoredPiece, Image> LoadChessPieceImages()
-        {
-            var array = EnumIndexedArray<ColoredPiece, Image>.New();
-            array[ColoredPiece.BlackPawn] = LoadChessPieceImage("bp");
-            array[ColoredPiece.BlackKnight] = LoadChessPieceImage("bn");
-            array[ColoredPiece.BlackBishop] = LoadChessPieceImage("bb");
-            array[ColoredPiece.BlackRook] = LoadChessPieceImage("br");
-            array[ColoredPiece.BlackQueen] = LoadChessPieceImage("bq");
-            array[ColoredPiece.BlackKing] = LoadChessPieceImage("bk");
-            array[ColoredPiece.WhitePawn] = LoadChessPieceImage("wp");
-            array[ColoredPiece.WhiteKnight] = LoadChessPieceImage("wn");
-            array[ColoredPiece.WhiteBishop] = LoadChessPieceImage("wb");
-            array[ColoredPiece.WhiteRook] = LoadChessPieceImage("wr");
-            array[ColoredPiece.WhiteQueen] = LoadChessPieceImage("wq");
-            array[ColoredPiece.WhiteKing] = LoadChessPieceImage("wk");
-            return array;
-        }
-
-#if DEBUG
-        private void DeployRuntimePieceImage(string imageFileKey)
-        {
-            var runtimePath = RuntimePath(imageFileKey);
-            Directory.CreateDirectory(Path.GetDirectoryName(runtimePath));
-
-            try
-            {
-                DefaultResourceImage(imageFileKey).Save(runtimePath);
-            }
-            catch
-            {
-                // Likely the image file has been locked.
-            }
-        }
-
-        /// <summary>
-        /// Deploys piece images to the Images folder.
-        /// </summary>
-        private void DeployRuntimeConfigurationFiles()
-        {
-            new[] { "bp", "bn", "bb", "br", "bq", "bk",
-                    "wp", "wn", "wb", "wr", "wq", "wk",
-            }.ForEach(DeployRuntimePieceImage);
-        }
-#endif
     }
 }

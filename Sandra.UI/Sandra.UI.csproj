@@ -124,6 +124,7 @@
     <Compile Include="PgnErrorInfoExtensions.cs" />
     <Compile Include="PgnStyleSelector.cs" />
     <Compile Include="PgnSyntaxDescriptor.cs" />
+    <Compile Include="PieceImages.cs" />
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>
