@@ -46,10 +46,13 @@ namespace Eutherion.Win.Native
     public static class WM
     {
         public const int COPYDATA = 0x4A;
-        public const int SIZING = 0x214;
-        public const int MOVING = 0x216;
 
         public const int NCHITTEST = 0x84;
         public const int SYSCOMMAND = 0x0112;
+
+        public const int SIZING = 0x214;
+        public const int MOVING = 0x216;
+
+        public const int DWMCOMPOSITIONCHANGED = 0x031e;
     }
 }

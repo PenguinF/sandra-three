@@ -510,19 +510,28 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM.NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            if (m.Msg == WM.NCHITTEST)
             {
-                Point position = PointToClient(new Point(m.LParam.ToInt32()));
-
-                if (position.Y >= 0
-                    && position.Y < MainMenuStrip.Height
-                    && position.X >= 0
-                    && position.X < ClientSize.Width)
+                if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
                 {
-                    // This is the draggable 'caption' area.
-                    m.Result = (IntPtr)HT.CAPTION;
-                    return;
+                    Point position = PointToClient(new Point(m.LParam.ToInt32()));
+
+                    if (position.Y >= 0
+                        && position.Y < MainMenuStrip.Height
+                        && position.X >= 0
+                        && position.X < ClientSize.Width)
+                    {
+                        // This is the draggable 'caption' area.
+                        m.Result = (IntPtr)HT.CAPTION;
+                        return;
+                    }
                 }
+            }
+            else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
+            {
+                // Windows 7 and lower only. This message is not used in Windows 8 and higher.
+                // Make sure to update the accent colors as well.
+                UpdateCaptionAreaButtonsBackColor();
             }
 
             base.WndProc(ref m);
