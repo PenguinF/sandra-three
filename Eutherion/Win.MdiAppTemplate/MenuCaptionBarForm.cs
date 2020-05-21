@@ -674,7 +674,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (m.WParam.ToInt32() == HT.CAPTION)
                 {
                     this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
-                    return;
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
