@@ -34,7 +34,7 @@ namespace Eutherion.Win.MdiAppTemplate
 {
     public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
-        private class ErrorListForm : UIActionForm
+        private class ErrorListForm : MenuCaptionBarForm
         {
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);
@@ -50,6 +50,8 @@ namespace Eutherion.Win.MdiAppTemplate
             public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm, int errorCount, int width, int maxHeight)
             {
                 OwnerEditorForm = ownerEditorForm;
+
+                CaptionHeight = 26;
 
                 errorsListBox = new ListBoxEx
                 {
@@ -241,6 +243,8 @@ namespace Eutherion.Win.MdiAppTemplate
                                 SettingProperty<int> zoomSetting)
         {
             this.formStateSetting = formStateSetting;
+
+            CaptionHeight = 32;
 
             SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {

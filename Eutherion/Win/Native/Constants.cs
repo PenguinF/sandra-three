@@ -26,7 +26,16 @@ namespace Eutherion.Win.Native
     /// </summary>
     public static class HT
     {
+        public const int CLIENT = 1;
         public const int CAPTION = 2;
+        public const int LEFT = 10;
+        public const int RIGHT = 11;
+        public const int TOP = 12;
+        public const int TOPLEFT = 13;
+        public const int TOPRIGHT = 14;
+        public const int BOTTOM = 15;
+        public const int BOTTOMLEFT = 16;
+        public const int BOTTOMRIGHT = 17;
     }
 
     /// <summary>
@@ -41,13 +50,25 @@ namespace Eutherion.Win.Native
     }
 
     /// <summary>
+    /// Constains constants for the <see cref="NativeMethods.TrackPopupMenuEx"/> P/Invoke call.
+    /// </summary>
+    public static class TPM
+    {
+        public const uint RETURNCMD = 0x0100;
+        public const uint LEFTBUTTON = 0x0;
+    }
+
+    /// <summary>
     /// Contains constants for native Windows messages.
     /// </summary>
     public static class WM
     {
         public const int COPYDATA = 0x4A;
 
+        public const int NCCALCSIZE = 0x83;
         public const int NCHITTEST = 0x84;
+        public const int NCRBUTTONUP = 0xa5;
+
         public const int SYSCOMMAND = 0x0112;
 
         public const int SIZING = 0x214;

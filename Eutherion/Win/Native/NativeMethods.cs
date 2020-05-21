@@ -56,7 +56,14 @@ namespace Eutherion.Win.Native
         public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr GetSystemMenu(HandleRef hWnd, [MarshalAs(UnmanagedType.Bool)] bool bRevert);
+
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool HideCaret(HandleRef hWnd);
+
+        [DllImport(User32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PostMessage(HandleRef hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport(User32, CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, IntPtr wParam, IntPtr lParam);
@@ -66,5 +73,8 @@ namespace Eutherion.Win.Native
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool ShowWindow(HandleRef hWnd, int nCmdShow);
+
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern uint TrackPopupMenuEx(HandleRef hmenu, uint fuFlags, int x, int y, HandleRef hwnd, IntPtr lptpm);
     }
 }

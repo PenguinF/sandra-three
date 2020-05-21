@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
+using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -36,6 +37,10 @@ namespace Eutherion.Win.MdiAppTemplate
     /// It is advisable to give the main menu strip a back color so it does not display
     /// a gradient which clashes with the custom drawn caption bar area.
     /// </summary>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
     public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
@@ -48,9 +53,21 @@ namespace Eutherion.Win.MdiAppTemplate
             public int TotalWidth;
             public int TotalHeight;
 
-            public const int CaptionHeight = 30;
+            public bool IsMaximized;
+            public int HorizontalResizeBorderThickness;
+            public int VerticalResizeBorderThickness;
 
+            public int CaptionHeight;
+
+            public int MainMenuTop => VerticalResizeBorderThickness;
+            public int MainMenuLeft => HorizontalResizeBorderThickness;
             public int MainMenuWidth;
+            public int MainMenuHeight => CaptionHeight;
+
+            public int ClientAreaLeft => HorizontalResizeBorderThickness;
+            public int ClientAreaTop => VerticalResizeBorderThickness + CaptionHeight;
+            public int ClientAreaWidth => TotalWidth - HorizontalResizeBorderThickness * 2;
+            public int ClientAreaHeight => TotalHeight - CaptionHeight - VerticalResizeBorderThickness * 2;
 
             public int SystemButtonTop;
             public int SystemButtonWidth => captionButtonWidth;
@@ -77,8 +94,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     SystemButtonHeight = captionButtonHeight;
                 }
 
+                SystemButtonTop += VerticalResizeBorderThickness;
+
                 // Calculate button positions can from right to left.
-                CloseButtonLeft = TotalWidth - captionButtonWidth - buttonOuterRightMargin;
+                CloseButtonLeft = TotalWidth - HorizontalResizeBorderThickness - captionButtonWidth - buttonOuterRightMargin;
                 SaveButtonLeft = CloseButtonLeft;
                 if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
                 MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
@@ -87,6 +106,9 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         private const int MainMenuHorizontalMargin = 8;
+
+        public const int DefaultCaptionHeight = 30;
+        public int CaptionHeight { get; set; } = DefaultCaptionHeight;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
@@ -108,9 +130,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 | ControlStyles.FixedWidth
                 | ControlStyles.ResizeRedraw
                 | ControlStyles.Opaque, true);
-
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
 
             minimizeButton = CreateCaptionButton();
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
@@ -160,18 +179,9 @@ namespace Eutherion.Win.MdiAppTemplate
             ResumeLayout();
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
-        }
 
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                // Enables borders regardless of ControlBox and FormBorderStyle settings.
-                const int WS_SIZEBOX = 0x40000;
-                CreateParams cp = base.CreateParams;
-                cp.Style |= WS_SIZEBOX;
-                return cp;
-            }
+            AllowTransparency = true;
+            TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
         }
 
         private NonSelectableButton CreateCaptionButton()
@@ -209,6 +219,25 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             closeButtonHoverColorOverride = null;
             closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
+        }
+
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        /// <summary>
+        /// Binds the regular UIActions to this Form.
+        /// </summary>
+        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -273,6 +302,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
+            if (TransparencyKey != ObservableStyle.SuggestedTransparencyKey)
+            {
+                TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+            }
+
             UpdateCaptionAreaButtonsBackColor();
         }
 
@@ -401,6 +435,23 @@ namespace Eutherion.Win.MdiAppTemplate
             currentMetrics.TotalWidth = clientSize.Width;
             currentMetrics.TotalHeight = clientSize.Height;
 
+            // If maximized, Windows will make a Form bigger than the screen to hide the drop shadow used for resizing.
+            // If a Form such as this one is drawn without that drop shadow, we need to compensate for that.
+            if (WindowState == FormWindowState.Maximized)
+            {
+                currentMetrics.IsMaximized = true;
+                currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness * 2;
+                currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness * 2;
+            }
+            else
+            {
+                currentMetrics.IsMaximized = false;
+                currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness;
+                currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness;
+            }
+
+            currentMetrics.CaptionHeight = CaptionHeight;
+
             if (MainMenuStrip != null && MainMenuStrip.Visible)
             {
                 currentMetrics.MainMenuWidth = MainMenuHorizontalMargin +
@@ -418,10 +469,10 @@ namespace Eutherion.Win.MdiAppTemplate
             if (currentMetrics.MainMenuWidth > 0)
             {
                 MainMenuStrip.SetBounds(
-                    0,
-                    0,
+                    currentMetrics.MainMenuLeft,
+                    currentMetrics.MainMenuTop,
                     currentMetrics.MainMenuWidth,
-                    Metrics.CaptionHeight);
+                    currentMetrics.MainMenuHeight);
             }
 
             currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
@@ -463,10 +514,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     && control.Visible)
                 {
                     control.SetBounds(
-                        0,
-                        Metrics.CaptionHeight,
-                        currentMetrics.TotalWidth,
-                        currentMetrics.TotalHeight - Metrics.CaptionHeight);
+                        currentMetrics.ClientAreaLeft,
+                        currentMetrics.ClientAreaTop,
+                        currentMetrics.ClientAreaWidth,
+                        currentMetrics.ClientAreaHeight);
                 }
             }
 
@@ -479,10 +530,49 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             var g = e.Graphics;
 
-            // Block out the entire caption area.
-            using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+            if (currentMetrics.IsMaximized && !IsMdiContainer)
             {
-                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, Metrics.CaptionHeight));
+                // Draw the window using the current transparency key.
+                // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
+                using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
+                {
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
+                }
+
+                // Block out only the visible area of the window.
+                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                {
+                    int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
+                    int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
+
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        horizontalInvisibleBorderWidth,
+                        verticalInvisibleBorderWidth,
+                        currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
+                        currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
+                }
+            }
+            else
+            {
+                // Block out the entire client area, then draw a 1-pizel border around it.
+                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                {
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
+                }
+
+                g.DrawRectangle(Pens.DimGray,
+                    0,
+                    0,
+                    currentMetrics.TotalWidth - 1,
+                    currentMetrics.TotalHeight - 1);
             }
 
             string text = Text;
@@ -490,8 +580,8 @@ namespace Eutherion.Win.MdiAppTemplate
             if (!string.IsNullOrWhiteSpace(text))
             {
                 // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                int textAreaLeftEdge = 0;
-                int textAreaWidth = currentMetrics.TotalWidth;
+                int textAreaLeftEdge = currentMetrics.MainMenuLeft;
+                int textAreaWidth = currentMetrics.ClientAreaWidth;
 
                 // Measure the text. If its left edge is about to disappear under the main menu,
                 // use a different Rectangle to center the text in.
@@ -503,11 +593,15 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
                 {
                     // Now place it in the middle between the outer menu right edge and the system buttons.
-                    textAreaLeftEdge = currentMetrics.MainMenuWidth;
+                    textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
                     textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
                 }
 
-                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, Metrics.CaptionHeight - 2);
+                Rectangle textAreaRectangle = new Rectangle(
+                    textAreaLeftEdge,
+                    currentMetrics.MainMenuTop,
+                    textAreaWidth,
+                    currentMetrics.MainMenuHeight - 2);
 
                 g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                 TextRenderer.DrawText(
@@ -523,18 +617,63 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM.NCHITTEST)
+            if (m.Msg >= WM.NCCALCSIZE && m.Msg <= WM.NCHITTEST)
             {
-                Point position = PointToClient(new Point(m.LParam.ToInt32()));
-
-                if (position.Y >= 0
-                    && position.Y < Metrics.CaptionHeight
-                    && position.X >= 0
-                    && position.X < currentMetrics.TotalWidth)
+                if (m.Msg == WM.NCCALCSIZE)
                 {
-                    // This is the draggable 'caption' area.
-                    m.Result = (IntPtr)HT.CAPTION;
+                    m.Result = IntPtr.Zero;
                     return;
+                }
+                else
+                {
+                    Point position = PointToClient(new Point(m.LParam.ToInt32()));
+
+                    // Any of the resize borders?
+                    if (position.Y < currentMetrics.VerticalResizeBorderThickness)
+                    {
+                        if (position.X < currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.TOPLEFT;
+                        else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.TOPRIGHT;
+                        else m.Result = (IntPtr)HT.TOP;
+                    }
+                    else if (position.Y >= currentMetrics.TotalHeight - currentMetrics.VerticalResizeBorderThickness)
+                    {
+                        if (position.X < currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.BOTTOMLEFT;
+                        else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness) m.Result = (IntPtr)HT.BOTTOMRIGHT;
+                        else m.Result = (IntPtr)HT.BOTTOM;
+                    }
+                    else if (position.X < currentMetrics.HorizontalResizeBorderThickness)
+                    {
+                        m.Result = (IntPtr)HT.LEFT;
+                    }
+                    else if (position.X >= currentMetrics.TotalWidth - currentMetrics.HorizontalResizeBorderThickness)
+                    {
+                        m.Result = (IntPtr)HT.RIGHT;
+                    }
+                    else if (position.Y >= currentMetrics.CaptionHeight)
+                    {
+                        // Client area.
+                        m.Result = (IntPtr)HT.CLIENT;
+                    }
+                    else if (position.X < currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth || position.X >= currentMetrics.MinimizeButtonLeft)
+                    {
+                        // Main menu or system button.
+                        m.Result = (IntPtr)HT.CLIENT;
+                    }
+                    else
+                    {
+                        // This is the draggable 'caption' area.
+                        m.Result = (IntPtr)HT.CAPTION;
+                    }
+
+                    return;
+                }
+            }
+            else if (m.Msg == WM.NCRBUTTONUP)
+            {
+                // Emulate the system behavior of clicking the right mouse button over the caption area to bring up the system menu.
+                if (m.WParam.ToInt32() == HT.CAPTION)
+                {
+                    this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
