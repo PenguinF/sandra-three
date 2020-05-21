@@ -39,12 +39,55 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
-        private const int MainMenuHorizontalMargin = 8;
+        private struct Metrics
+        {
+            private const int buttonOuterRightMargin = 4;
+            private const int closeButtonMargin = 4;
+            private const int captionButtonWidth = 30;
+            private const int captionButtonHeight = 24;
 
-        private const int buttonOuterRightMargin = 4;
-        private const int closeButtonMargin = 4;
-        private const int captionButtonWidth = 30;
-        private const int captionButtonHeight = 24;
+            public int TotalWidth;
+            public int TotalHeight;
+
+            public const int CaptionHeight = 30;
+
+            public int MainMenuWidth;
+
+            public int SystemButtonTop;
+            public int SystemButtonWidth => captionButtonWidth;
+            public int SystemButtonHeight;
+
+            public int MinimizeButtonLeft;
+            public int MaximizeButtonLeft;
+            public int SaveButtonLeft;
+            public int CloseButtonLeft;
+
+            public void UpdateSystemButtonMetrics(bool saveButtonVisible)
+            {
+                // Calculate top edge position for all caption buttons: 1 pixel above center.
+                SystemButtonTop = CaptionHeight - captionButtonHeight - 2;
+
+                if (SystemButtonTop < 0)
+                {
+                    SystemButtonTop = 0;
+                    SystemButtonHeight = CaptionHeight;
+                }
+                else
+                {
+                    SystemButtonTop = SystemButtonTop / 2;
+                    SystemButtonHeight = captionButtonHeight;
+                }
+
+                // Calculate button positions can from right to left.
+                CloseButtonLeft = TotalWidth - captionButtonWidth - buttonOuterRightMargin;
+                SaveButtonLeft = CloseButtonLeft;
+                if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
+                MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
+                MinimizeButtonLeft = MaximizeButtonLeft - captionButtonWidth;
+            }
+        }
+
+        private const int MainMenuHorizontalMargin = 8;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
@@ -60,6 +103,8 @@ namespace Eutherion.Win.AppTemplate
         private Color titleBarHoverColor;
         private Color titleBarHoverBorderColor;
         private Color? closeButtonHoverColorOverride;
+
+        private Metrics currentMetrics;
 
         public MenuCaptionBarForm()
         {
@@ -379,74 +424,58 @@ namespace Eutherion.Win.AppTemplate
         {
             base.OnLayout(levent);
 
-            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            var clientSize = ClientSize;
+
+            currentMetrics.TotalWidth = clientSize.Width;
+            currentMetrics.TotalHeight = clientSize.Height;
+
+            if (MainMenuStrip != null && MainMenuStrip.Visible)
             {
-                MainMenuStrip.Width = MainMenuHorizontalMargin +
+                currentMetrics.MainMenuWidth = MainMenuHorizontalMargin +
                     MainMenuStrip.Items
                     .OfType<ToolStripItem>()
                     .Where(x => x.Visible)
                     .Select(x => x.Width)
                     .Sum();
-
-                // Calculate top edge position for all caption buttons: 1 pixel above center.
-                int topEdge = MainMenuStrip.Height - captionButtonHeight - 2;
-                int actualCaptionButtonHeight;
-
-                if (topEdge < 0)
-                {
-                    topEdge = 0;
-                    actualCaptionButtonHeight = MainMenuStrip.Height - 2;
-                }
-                else
-                {
-                    topEdge = topEdge / 2;
-                    actualCaptionButtonHeight = captionButtonHeight;
-                }
-
-                // Use a vertical edge variable so buttons can be placed from right to left.
-                int currentVerticalEdge = ClientSize.Width - captionButtonWidth - buttonOuterRightMargin;
-
-                closeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
-
-                if (saveButton.Visible)
-                {
-                    currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
-
-                    saveButton.SetBounds(
-                        currentVerticalEdge,
-                        topEdge,
-                        captionButtonWidth,
-                        actualCaptionButtonHeight);
-                }
-
-                currentVerticalEdge = currentVerticalEdge - captionButtonWidth - closeButtonMargin;
-
-                maximizeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
-
-                currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
-
-                minimizeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
             }
             else
             {
-                // Don't mess with visibility, so put buttons outside of the client rectangle.
-                closeButton.SetBounds(-2, -2, 1, 1);
-                saveButton.SetBounds(-2, -2, 1, 1);
-                maximizeButton.SetBounds(-2, -2, 1, 1);
-                minimizeButton.SetBounds(-2, -2, 1, 1);
+                currentMetrics.MainMenuWidth = 0;
             }
+
+            if (currentMetrics.MainMenuWidth > 0)
+            {
+                MainMenuStrip.Width = currentMetrics.MainMenuWidth;
+            }
+
+            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
+
+            closeButton.SetBounds(
+                currentMetrics.CloseButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
+
+            if (saveButton.Visible)
+            {
+                saveButton.SetBounds(
+                    currentMetrics.SaveButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
+
+            maximizeButton.SetBounds(
+                currentMetrics.MaximizeButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
+
+            minimizeButton.SetBounds(
+                currentMetrics.MinimizeButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
 
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
