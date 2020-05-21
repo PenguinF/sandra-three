@@ -27,11 +27,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Contains all ambient state which is global to a single user session.
@@ -74,7 +75,7 @@ namespace Eutherion.Win.AppTemplate
         static Session()
         {
             // Store executable folder/filename for later use.
-            string exePath = typeof(Session).Assembly.Location;
+            string exePath = Assembly.GetEntryAssembly().Location;
 
             ExecutableFolder = Path.GetDirectoryName(exePath);
             ExecutableFileName = Path.GetFileName(exePath);

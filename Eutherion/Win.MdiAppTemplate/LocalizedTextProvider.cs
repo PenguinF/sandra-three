@@ -22,7 +22,7 @@
 using Eutherion.Localization;
 using System;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// <see cref="ITextProvider"/> which provides a localized text to a UI element.

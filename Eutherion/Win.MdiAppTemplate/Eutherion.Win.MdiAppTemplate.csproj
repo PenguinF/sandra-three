@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>$(SolutionDir)Bin\</OutputPath>
@@ -31,21 +33,109 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="ScintillaNET, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\jacobslusser.ScintillaNET.3.6.3\lib\net40\ScintillaNET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoSaveFileNamePair.cs" />
+    <Compile Include="BuiltInEnglishLocalizer.cs" />
+    <Compile Include="CombinedUIActionInterface.cs" />
+    <Compile Include="ErrorLevel.cs" />
+    <Compile Include="FileLocalizer.cs" />
+    <Compile Include="FormStateAutoSaver.cs" />
+    <Compile Include="JsonErrorInfoExtensions.cs" />
+    <Compile Include="JsonStyleSelector.cs" />
+    <Compile Include="JsonSyntaxDescriptor.cs" />
+    <Compile Include="ListBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LocalizedConsoleKeys.cs" />
+    <Compile Include="LocalizedString.cs" />
+    <Compile Include="LocalizedTextProvider.cs" />
+    <Compile Include="Localizers.cs" />
+    <Compile Include="MenuCaptionBarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuCaptionBarFormStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RichTextBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ScintillaEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Session.cs" />
+    <Compile Include="Session.ToolForms.cs" />
+    <Compile Include="SettingSyntaxDescriptor.cs" />
+    <Compile Include="SharedLocalizedStringKeys.cs" />
+    <Compile Include="SharedResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SharedSettings.cs" />
+    <Compile Include="SharedUIAction.cs" />
+    <Compile Include="SingleInstanceMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SyntaxEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SyntaxEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UIActionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkingCopyTextFileAutoSaver.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Eutherion.Shared.csproj">
       <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
       <Name>Eutherion.Shared</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Win\Eutherion.Win.csproj">
+      <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
+      <Name>Eutherion.Win</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="close.png" />
+    <None Include="close_white.png" />
+    <None Include="copy.png" />
+    <None Include="cut.png" />
+    <None Include="demaximize.png" />
+    <None Include="demaximize_white.png" />
+    <None Include="globe.png" />
+    <None Include="maximize.png" />
+    <None Include="maximize_white.png" />
+    <None Include="minimize.png" />
+    <None Include="minimize_white.png" />
+    <None Include="paste.png" />
+    <None Include="redo.png" />
+    <None Include="save.png" />
+    <None Include="save_white.png" />
+    <None Include="settings.png" />
+    <None Include="speech.png" />
+    <None Include="undo.png" />
+    <None Include="zoom_in.png" />
+    <None Include="zoom_out.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SharedResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SharedResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Eutherion.Win.MdiAppTemplate</CustomToolNamespace>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

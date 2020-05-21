@@ -23,7 +23,7 @@ using Eutherion.Text.Json;
 using ScintillaNET;
 using System.Drawing;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// A style selector for json syntax highlighting.

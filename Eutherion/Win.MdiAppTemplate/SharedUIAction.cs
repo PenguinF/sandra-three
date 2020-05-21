@@ -23,9 +23,9 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using System;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
-    internal static class SharedUIAction
+    public static class SharedUIAction
     {
         public const string SharedUIActionPrefix = nameof(SharedUIAction) + ".";
 

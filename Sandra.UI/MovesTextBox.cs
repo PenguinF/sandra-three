@@ -20,7 +20,7 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.Win.AppTemplate;
+using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using Sandra.PgnDeprecated;
 using ScintillaNET;

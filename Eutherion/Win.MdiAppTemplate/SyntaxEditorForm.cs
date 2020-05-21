@@ -30,7 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {

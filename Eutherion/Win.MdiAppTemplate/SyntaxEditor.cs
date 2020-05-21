@@ -29,7 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting.

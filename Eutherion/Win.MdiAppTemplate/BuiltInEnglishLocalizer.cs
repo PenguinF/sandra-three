@@ -24,7 +24,7 @@ using Eutherion.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public sealed class BuiltInEnglishLocalizer : Localizer
     {

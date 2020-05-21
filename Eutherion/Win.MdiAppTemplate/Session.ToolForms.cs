@@ -32,7 +32,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Contains all ambient state which is global to a single user session.

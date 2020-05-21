@@ -21,7 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.AppTemplate;
+using Eutherion.Win.MdiAppTemplate;
 using System;
 
 namespace Sandra.UI

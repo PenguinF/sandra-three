@@ -23,7 +23,7 @@ using Eutherion.Win.Storage;
 using System;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public class FormStateAutoSaver
     {

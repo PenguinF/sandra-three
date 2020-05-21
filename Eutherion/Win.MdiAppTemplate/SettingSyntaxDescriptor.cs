@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSyntaxDescriptor.cs
+ * SettingSyntaxDescriptor.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -21,33 +21,48 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
+using Eutherion.Win.Storage;
 using ScintillaNET;
+using System;
 using System.Collections.Generic;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
-    /// Describes the interaction between json syntax and a syntax editor.
+    /// Describes the interaction between json syntax used for setting objects and a syntax editor.
     /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo>
+    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>
     {
-        public static readonly string JsonFileExtension = "json";
+        /// <summary>
+        /// Schema which defines what kind of keys and values are valid in the parsed json.
+        /// </summary>
+        private readonly SettingSchema schema;
 
-        public static readonly JsonSyntaxDescriptor Instance = new JsonSyntaxDescriptor();
+        /// <summary>
+        /// Initializes a new instance of a <see cref="SettingSyntaxDescriptor"/>.
+        /// </summary>
+        /// <param name="schema">
+        /// The schema which defines what kind of keys and values are valid in the parsed json.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> is null.
+        /// </exception>
+        public SettingSyntaxDescriptor(SettingSchema schema)
+        {
+            this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
+        }
 
-        private JsonSyntaxDescriptor() { }
-
-        public override string FileExtension => JsonFileExtension;
+        public override string FileExtension => JsonSyntaxDescriptor.JsonFileExtension;
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override RootJsonSyntax Parse(string code)
+        public override SettingSyntaxTree Parse(string code)
         {
-            var rootNode = JsonParser.Parse(code);
+            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
 
-            if (rootNode.Errors.Count > 0)
+            if (settingSyntaxTree.Errors.Count > 0)
             {
-                rootNode.Errors.Sort((x, y)
+                settingSyntaxTree.Errors.Sort((x, y)
                     => x.Start < y.Start ? -1
                     : x.Start > y.Start ? 1
                     : x.Length < y.Length ? -1
@@ -57,17 +72,17 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return rootNode;
+            return settingSyntaxTree;
         }
 
-        public override IEnumerable<IJsonSymbol> GetTerminalsInRange(RootJsonSyntax syntaxTree, int start, int length)
-            => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
+        public override IEnumerable<IJsonSymbol> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
+            => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
+        public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
-            => JsonStyleSelector<RootJsonSyntax>.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
+            => JsonStyleSelector<SettingSyntaxTree>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);

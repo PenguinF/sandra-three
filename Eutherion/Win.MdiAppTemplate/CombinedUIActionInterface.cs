@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Defines how a <see cref="UIAction"/> can be invoked by a keyboard shortcut and how it is shown in a context menu.

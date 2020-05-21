@@ -24,7 +24,7 @@ using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Holds the current style properties of a <see cref="MenuCaptionBarForm"/>, and exposes an event to signal

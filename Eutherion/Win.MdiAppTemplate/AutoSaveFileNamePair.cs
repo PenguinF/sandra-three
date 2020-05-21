@@ -21,7 +21,7 @@
 
 using Eutherion.Win.Storage;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents two file names in the local application data folder.

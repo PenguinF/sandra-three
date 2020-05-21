@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Enumerates three different severity levels for error messages.

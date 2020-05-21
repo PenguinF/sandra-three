@@ -26,7 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public static class JsonErrorInfoExtensions
     {

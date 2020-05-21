@@ -25,7 +25,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents a Windows rich text box which exposes a number of <see cref="UIAction"/> hooks.

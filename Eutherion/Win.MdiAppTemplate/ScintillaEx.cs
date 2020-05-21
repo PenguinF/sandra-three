@@ -27,7 +27,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks

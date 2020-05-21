@@ -27,7 +27,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public static class Localizers
     {

@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Apart from being a <see cref="Localizer"/>, contains properties

@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.

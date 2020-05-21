@@ -24,7 +24,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Top level <see cref="Form"/> which ties in with the UIAction framework.

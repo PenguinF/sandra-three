@@ -23,7 +23,7 @@ using Eutherion.Localization;
 using Eutherion.Utils;
 using System;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Represents a localized string, which is updated on a change to <see cref="Session.CurrentLocalizer"/>.

@@ -21,7 +21,7 @@
 
 using Eutherion.Win.Storage;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public static class SharedSettings
     {

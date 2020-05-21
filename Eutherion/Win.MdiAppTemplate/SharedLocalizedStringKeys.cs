@@ -22,7 +22,7 @@
 using Eutherion.Localization;
 using System.Collections.Generic;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     public static class SharedLocalizedStringKeys
     {

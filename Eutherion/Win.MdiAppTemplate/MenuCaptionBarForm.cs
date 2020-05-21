@@ -29,7 +29,7 @@ using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Eutherion.Win.AppTemplate
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// <see cref="UIActionForm"/> which displays a main menu inside a custom caption bar.
