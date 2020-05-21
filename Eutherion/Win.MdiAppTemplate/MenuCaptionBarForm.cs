@@ -48,7 +48,7 @@ namespace Eutherion.Win.MdiAppTemplate
             public int TotalWidth;
             public int TotalHeight;
 
-            public const int CaptionHeight = 30;
+            public int CaptionHeight;
 
             public int MainMenuWidth;
 
@@ -87,6 +87,9 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         private const int MainMenuHorizontalMargin = 8;
+
+        public const int DefaultCaptionHeight = 30;
+        public int CaptionHeight { get; set; } = DefaultCaptionHeight;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
@@ -400,6 +403,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             currentMetrics.TotalWidth = clientSize.Width;
             currentMetrics.TotalHeight = clientSize.Height;
+            currentMetrics.CaptionHeight = CaptionHeight;
 
             if (MainMenuStrip != null && MainMenuStrip.Visible)
             {
@@ -421,7 +425,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     0,
                     0,
                     currentMetrics.MainMenuWidth,
-                    Metrics.CaptionHeight);
+                    currentMetrics.CaptionHeight);
             }
 
             currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
@@ -464,9 +468,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     control.SetBounds(
                         0,
-                        Metrics.CaptionHeight,
+                        currentMetrics.CaptionHeight,
                         currentMetrics.TotalWidth,
-                        currentMetrics.TotalHeight - Metrics.CaptionHeight);
+                        currentMetrics.TotalHeight - currentMetrics.CaptionHeight);
                 }
             }
 
@@ -482,7 +486,7 @@ namespace Eutherion.Win.MdiAppTemplate
             // Block out the entire caption area.
             using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
             {
-                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, Metrics.CaptionHeight));
+                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, currentMetrics.CaptionHeight));
             }
 
             string text = Text;
@@ -507,7 +511,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
                 }
 
-                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, Metrics.CaptionHeight - 2);
+                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, currentMetrics.CaptionHeight - 2);
 
                 g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                 TextRenderer.DrawText(
@@ -528,7 +532,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 Point position = PointToClient(new Point(m.LParam.ToInt32()));
 
                 if (position.Y >= 0
-                    && position.Y < Metrics.CaptionHeight
+                    && position.Y < currentMetrics.CaptionHeight
                     && position.X >= 0
                     && position.X < currentMetrics.TotalWidth)
                 {

@@ -51,6 +51,8 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 OwnerEditorForm = ownerEditorForm;
 
+                CaptionHeight = 24;
+
                 errorsListBox = new ListBoxEx
                 {
                     Dock = DockStyle.Fill,
