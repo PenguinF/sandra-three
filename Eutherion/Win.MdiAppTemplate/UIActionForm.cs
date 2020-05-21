@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Win.Forms;
 using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
@@ -29,7 +30,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// <summary>
     /// Top level <see cref="Form"/> which ties in with the UIAction framework.
     /// </summary>
-    public class UIActionForm : Form, IUIActionHandlerProvider
+    public class UIActionForm : ConstrainedMoveResizeForm, IUIActionHandlerProvider
     {
         /// <summary>
         /// Gets the action handler for this control.
