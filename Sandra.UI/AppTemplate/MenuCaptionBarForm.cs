@@ -73,7 +73,7 @@ namespace Eutherion.Win.AppTemplate
                 }
                 else
                 {
-                    SystemButtonTop = SystemButtonTop / 2;
+                    SystemButtonTop /= 2;
                     SystemButtonHeight = captionButtonHeight;
                 }
 
