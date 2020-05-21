@@ -59,7 +59,7 @@ namespace Sandra.UI
                     {
                         MdiParent = OwnerForm,
                         Game = this,
-                        PieceImages = OwnerForm.PieceImages
+                        PieceImages = PieceImages.ImageArray
                     };
 
                     newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;

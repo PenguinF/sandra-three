@@ -306,7 +306,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 Dock = DockStyle.Fill,
                 Padding = new Padding(2),
-                BackColor = TitleBarBackColor,
+                BackColor = ObservableStyle.BackColor,
             };
 
             fillPanel.Controls.Add(SyntaxEditor);
@@ -363,12 +363,13 @@ namespace Eutherion.Win.AppTemplate
             }
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
         }
 
-        protected override void OnTitleBarBackColorChanged(EventArgs e)
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
-            fillPanel.BackColor = TitleBarBackColor;
-            base.OnTitleBarBackColorChanged(e);
+            fillPanel.BackColor = ObservableStyle.BackColor;
         }
 
         private void UpdateErrorListForm()
@@ -495,6 +496,7 @@ namespace Eutherion.Win.AppTemplate
         protected override void OnLoad(EventArgs e)
         {
             Session.Current.AttachFormStateAutoSaver(this, formStateSetting, null);
+            base.OnLoad(e);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

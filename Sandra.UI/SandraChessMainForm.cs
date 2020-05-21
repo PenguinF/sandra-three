@@ -105,6 +105,13 @@ namespace Sandra.UI
             }
             else
             {
+#if DEBUG
+                PieceImages.DeployRuntimePieceImageFiles();
+#endif
+
+                // Load chess piece images.
+                PieceImages.LoadChessPieceImages();
+
                 mdiContainerForm = new MdiContainerForm();
 
                 mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);

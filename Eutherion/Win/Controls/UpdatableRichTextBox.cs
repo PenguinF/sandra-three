@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -79,8 +80,8 @@ namespace Eutherion.Win.Controls
         {
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
-                WinAPI.HideCaret(new HandleRef(this, Handle));
-                WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
+                NativeMethods.HideCaret(new HandleRef(this, Handle));
+                NativeMethods.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
             ++blockingUpdateTokenCount;
 
@@ -95,8 +96,8 @@ namespace Eutherion.Win.Controls
             --blockingUpdateTokenCount;
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
-                WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
-                WinAPI.ShowCaret(new HandleRef(this, Handle));
+                NativeMethods.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+                NativeMethods.ShowCaret(new HandleRef(this, Handle));
                 Invalidate();
             }
         }

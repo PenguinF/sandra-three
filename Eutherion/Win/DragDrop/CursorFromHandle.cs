@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -61,7 +62,7 @@ namespace Eutherion.Win.DragDrop
         public void Dispose()
         {
             Cursor.Dispose();
-            WinAPI.DestroyIcon(new HandleRef(null, cursorIconHandle));
+            NativeMethods.DestroyIcon(new HandleRef(null, cursorIconHandle));
             GC.SuppressFinalize(this);
         }
 
@@ -70,7 +71,7 @@ namespace Eutherion.Win.DragDrop
             // Release cursorIconHandle, which is an unmanaged resource.
             if (cursorIconHandle != IntPtr.Zero)
             {
-                WinAPI.DestroyIcon(new HandleRef(null, cursorIconHandle));
+                NativeMethods.DestroyIcon(new HandleRef(null, cursorIconHandle));
             }
         }
     }

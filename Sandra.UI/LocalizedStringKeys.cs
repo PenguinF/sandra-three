@@ -36,7 +36,6 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
         internal static readonly LocalizedStringKey FirstMove = new LocalizedStringKey(nameof(FirstMove));
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
-        internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
         internal static readonly LocalizedStringKey GoTo = new LocalizedStringKey(nameof(GoTo));
         internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
         internal static readonly LocalizedStringKey Moves = new LocalizedStringKey(nameof(Moves));
@@ -66,7 +65,6 @@ namespace Sandra.UI
             { FastForward, "Fast forward" },
             { FirstMove, "First move" },
             { FlipBoard, "Flip board" },
-            { Game, "Game" },
             { GoTo, "Go to" },
             { LastMove, "Last move" },
             { Moves, "Moves" },

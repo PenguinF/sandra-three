@@ -22,7 +22,7 @@
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
-using Eutherion.Win.Utils;
+using Eutherion.Win.Native;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -38,12 +38,55 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
-        private const int MainMenuHorizontalMargin = 8;
+        private struct Metrics
+        {
+            private const int buttonOuterRightMargin = 4;
+            private const int closeButtonMargin = 4;
+            private const int captionButtonWidth = 30;
+            private const int captionButtonHeight = 24;
 
-        private const int buttonOuterRightMargin = 4;
-        private const int closeButtonMargin = 4;
-        private const int captionButtonWidth = 30;
-        private const int captionButtonHeight = 24;
+            public int TotalWidth;
+            public int TotalHeight;
+
+            public const int CaptionHeight = 30;
+
+            public int MainMenuWidth;
+
+            public int SystemButtonTop;
+            public int SystemButtonWidth => captionButtonWidth;
+            public int SystemButtonHeight;
+
+            public int MinimizeButtonLeft;
+            public int MaximizeButtonLeft;
+            public int SaveButtonLeft;
+            public int CloseButtonLeft;
+
+            public void UpdateSystemButtonMetrics(bool saveButtonVisible)
+            {
+                // Calculate top edge position for all caption buttons: 1 pixel above center.
+                SystemButtonTop = CaptionHeight - captionButtonHeight - 2;
+
+                if (SystemButtonTop < 0)
+                {
+                    SystemButtonTop = 0;
+                    SystemButtonHeight = CaptionHeight;
+                }
+                else
+                {
+                    SystemButtonTop /= 2;
+                    SystemButtonHeight = captionButtonHeight;
+                }
+
+                // Calculate button positions can from right to left.
+                CloseButtonLeft = TotalWidth - captionButtonWidth - buttonOuterRightMargin;
+                SaveButtonLeft = CloseButtonLeft;
+                if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
+                MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
+                MinimizeButtonLeft = MaximizeButtonLeft - captionButtonWidth;
+            }
+        }
+
+        private const int MainMenuHorizontalMargin = 8;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
@@ -51,14 +94,9 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton closeButton;
 
         private Button currentHoverButton;
-
-        private bool isActive;
-        private bool inDarkMode;
-        private Color titleBarBackColor;
-        private Color titleBarForeColor;
-        private Color titleBarHoverColor;
-        private Color titleBarHoverBorderColor;
         private Color? closeButtonHoverColorOverride;
+
+        private Metrics currentMetrics;
 
         public MenuCaptionBarForm()
         {
@@ -106,7 +144,7 @@ namespace Eutherion.Win.AppTemplate
                 UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
                 saveButton.Visible = currentActionState.Visible;
                 saveButton.Enabled = currentActionState.Enabled;
-                if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = titleBarBackColor;
+                if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = ObservableStyle.BackColor;
             };
 
             closeButton = CreateCaptionButton();
@@ -121,7 +159,7 @@ namespace Eutherion.Win.AppTemplate
 
             ResumeLayout();
 
-            ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
         }
 
         protected override CreateParams CreateParams
@@ -170,7 +208,7 @@ namespace Eutherion.Win.AppTemplate
         public void ResetCloseButtonHoverColor()
         {
             closeButtonHoverColorOverride = null;
-            closeButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -191,7 +229,19 @@ namespace Eutherion.Win.AppTemplate
                     mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
                 }
 
-                UpdateCaptionAreaButtonsBackColor();
+                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
+                {
+                    ObservableStyle.Update(() =>
+                    {
+                        ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                        ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                        ObservableStyle.Font = MainMenuStrip.Font;
+                    });
+                }
+                else
+                {
+                    ObservableStyle.Font = MainMenuStrip.Font;
+                }
             }
         }
 
@@ -217,47 +267,25 @@ namespace Eutherion.Win.AppTemplate
         }
 
         /// <summary>
-        /// Returns the current color of the title bar.
+        /// Returns the style of the title bar which can be observed for changes.
         /// </summary>
-        public Color TitleBarBackColor => titleBarBackColor;
+        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
-        /// <summary>
-        /// Occurs after the value of <see cref="TitleBarBackColor"/> was updated.
-        /// </summary>
-        public event EventHandler TitleBarBackColorChanged;
-
-        /// <summary>
-        /// Raises the <see cref="TitleBarBackColorChanged"/> event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnTitleBarBackColorChanged(EventArgs e) => TitleBarBackColorChanged?.Invoke(this, e);
-
-        private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e)
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
             UpdateCaptionAreaButtonsBackColor();
         }
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            Color oldTitleBarBackColor = titleBarBackColor;
-            titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
-            inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
-            titleBarForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
-
             if (MainMenuStrip != null)
             {
-                MainMenuStrip.BackColor = titleBarBackColor;
-                MainMenuStrip.ForeColor = titleBarForeColor;
+                MainMenuStrip.BackColor = ObservableStyle.BackColor;
+                MainMenuStrip.ForeColor = ObservableStyle.ForeColor;
 
                 foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
                 {
-                    mainMenuItem.ForeColor = titleBarForeColor;
-                }
-
-                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
-                {
-                    titleBarHoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                    titleBarHoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                    mainMenuItem.ForeColor = ObservableStyle.ForeColor;
                 }
             }
 
@@ -269,7 +297,7 @@ namespace Eutherion.Win.AppTemplate
                 closeButton.FlatAppearance.MouseOverBackColor = closeButtonHoverColorOverride.Value;
             }
 
-            if (inDarkMode)
+            if (ObservableStyle.InDarkMode)
             {
                 closeButton.Image = SharedResources.close_white;
                 minimizeButton.Image = SharedResources.minimize_white;
@@ -285,19 +313,13 @@ namespace Eutherion.Win.AppTemplate
             UpdateMaximizeButtonIcon();
 
             Invalidate();
-
-            if (oldTitleBarBackColor != titleBarBackColor)
-            {
-                // Raise event only after everything is updated.
-                OnTitleBarBackColorChanged(EventArgs.Empty);
-            }
         }
 
         private void StyleButton(Button titleBarButton)
         {
-            titleBarButton.BackColor = titleBarBackColor;
-            titleBarButton.ForeColor = titleBarForeColor;
-            titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            titleBarButton.BackColor = ObservableStyle.BackColor;
+            titleBarButton.ForeColor = ObservableStyle.ForeColor;
+            titleBarButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
             StyleTitleBarButtonBorder(titleBarButton);
         }
 
@@ -307,8 +329,8 @@ namespace Eutherion.Win.AppTemplate
             {
                 titleBarButton.FlatAppearance.BorderColor
                     = titleBarButton == currentHoverButton && titleBarButton.Enabled
-                    ? titleBarHoverBorderColor
-                    : titleBarBackColor;
+                    ? ObservableStyle.HoverBorderColor
+                    : ObservableStyle.BackColor;
             }
         }
 
@@ -349,102 +371,103 @@ namespace Eutherion.Win.AppTemplate
 
         private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
         {
-            ((ToolStripDropDownItem)sender).ForeColor = titleBarForeColor;
+            ((ToolStripDropDownItem)sender).ForeColor = ObservableStyle.ForeColor;
         }
 
         private void UpdateMaximizeButtonIcon()
         {
             maximizeButton.Image
                 = WindowState == FormWindowState.Maximized
-                ? (inDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
-                : (inDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
+                ? (ObservableStyle.InDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
+                : (ObservableStyle.InDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
         }
 
         protected override void OnActivated(EventArgs e)
         {
-            isActive = true;
-            UpdateCaptionAreaButtonsBackColor();
+            ObservableStyle.IsActive = true;
             base.OnActivated(e);
         }
 
         protected override void OnDeactivate(EventArgs e)
         {
-            isActive = false;
-            UpdateCaptionAreaButtonsBackColor();
+            ObservableStyle.IsActive = false;
             base.OnDeactivate(e);
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
         {
-            base.OnLayout(levent);
+            var clientSize = ClientSize;
 
-            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            currentMetrics.TotalWidth = clientSize.Width;
+            currentMetrics.TotalHeight = clientSize.Height;
+
+            if (MainMenuStrip != null && MainMenuStrip.Visible)
             {
-                MainMenuStrip.Width = MainMenuHorizontalMargin +
+                currentMetrics.MainMenuWidth = MainMenuHorizontalMargin +
                     MainMenuStrip.Items
                     .OfType<ToolStripItem>()
                     .Where(x => x.Visible)
                     .Select(x => x.Width)
                     .Sum();
-
-                // Calculate top edge position for all caption buttons: 1 pixel above center.
-                int topEdge = MainMenuStrip.Height - captionButtonHeight - 2;
-                int actualCaptionButtonHeight;
-
-                if (topEdge < 0)
-                {
-                    topEdge = 0;
-                    actualCaptionButtonHeight = MainMenuStrip.Height - 2;
-                }
-                else
-                {
-                    topEdge = topEdge / 2;
-                    actualCaptionButtonHeight = captionButtonHeight;
-                }
-
-                // Use a vertical edge variable so buttons can be placed from right to left.
-                int currentVerticalEdge = ClientSize.Width - captionButtonWidth - buttonOuterRightMargin;
-
-                closeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
-
-                if (saveButton.Visible)
-                {
-                    currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
-
-                    saveButton.SetBounds(
-                        currentVerticalEdge,
-                        topEdge,
-                        captionButtonWidth,
-                        actualCaptionButtonHeight);
-                }
-
-                currentVerticalEdge = currentVerticalEdge - captionButtonWidth - closeButtonMargin;
-
-                maximizeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
-
-                currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
-
-                minimizeButton.SetBounds(
-                    currentVerticalEdge,
-                    topEdge,
-                    captionButtonWidth,
-                    actualCaptionButtonHeight);
             }
             else
             {
-                // Don't mess with visibility, so put buttons outside of the client rectangle.
-                closeButton.SetBounds(-2, -2, 1, 1);
-                saveButton.SetBounds(-2, -2, 1, 1);
-                maximizeButton.SetBounds(-2, -2, 1, 1);
-                minimizeButton.SetBounds(-2, -2, 1, 1);
+                currentMetrics.MainMenuWidth = 0;
+            }
+
+            if (currentMetrics.MainMenuWidth > 0)
+            {
+                MainMenuStrip.SetBounds(
+                    0,
+                    0,
+                    currentMetrics.MainMenuWidth,
+                    Metrics.CaptionHeight);
+            }
+
+            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
+
+            closeButton.SetBounds(
+                currentMetrics.CloseButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
+
+            if (saveButton.Visible)
+            {
+                saveButton.SetBounds(
+                    currentMetrics.SaveButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
+
+            maximizeButton.SetBounds(
+                currentMetrics.MaximizeButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
+
+            minimizeButton.SetBounds(
+                currentMetrics.MinimizeButtonLeft,
+                currentMetrics.SystemButtonTop,
+                currentMetrics.SystemButtonWidth,
+                currentMetrics.SystemButtonHeight);
+
+            foreach (Control control in Controls)
+            {
+                if (control != MainMenuStrip
+                    && control != closeButton
+                    && control != saveButton
+                    && control != maximizeButton
+                    && control != minimizeButton
+                    && control.Visible)
+                {
+                    control.SetBounds(
+                        0,
+                        Metrics.CaptionHeight,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight - Metrics.CaptionHeight);
+                }
             }
 
             // Update maximize button because Aero snap changes the client size directly and updates
@@ -454,97 +477,90 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            var g = e.Graphics;
+
+            // Block out the entire caption area.
+            using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
             {
-                var g = e.Graphics;
-                int width = Width;
-                int mainMenuWidth = MainMenuStrip.Width;
+                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, Metrics.CaptionHeight));
+            }
 
-                using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
+            string text = Text;
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
+                int textAreaLeftEdge = 0;
+                int textAreaWidth = currentMetrics.TotalWidth;
+
+                // Measure the text. If its left edge is about to disappear under the main menu,
+                // use a different Rectangle to center the text in.
+                // See also e.g. Visual Studio Code where it works the same way.
+                // Also use an extra MainMenuHorizontalMargin.
+                Size measuredTextSize = TextRenderer.MeasureText(text, ObservableStyle.Font);
+                int probableLeftTextEdge = (textAreaWidth - measuredTextSize.Width) / 2;
+
+                if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
+                    // Now place it in the middle between the outer menu right edge and the system buttons.
+                    textAreaLeftEdge = currentMetrics.MainMenuWidth;
+                    textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
                 }
 
-                string text = Text;
+                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, Metrics.CaptionHeight - 2);
 
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    Font menuFont = MainMenuStrip.Font;
-
-                    // Measure the text. If its left edge is about to disappear under the main menu,
-                    // use a different Rectangle to center the text in.
-                    // See also e.g. Visual Studio Code where it works the same way.
-                    // Also use an extra MainMenuHorizontalMargin.
-                    Size measuredTextSize = TextRenderer.MeasureText(text, menuFont);
-                    int probableLeftTextEdge = (width - measuredTextSize.Width) / 2;
-
-                    // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                    int textAreaLeftEdge = 0;
-                    int textAreaWidth = width;
-
-                    int outerMenuRightEdge = mainMenuWidth + MainMenuHorizontalMargin;
-                    if (probableLeftTextEdge < outerMenuRightEdge)
-                    {
-                        // Now place it in the middle between the outer menu right edge and the system buttons.
-                        textAreaLeftEdge = outerMenuRightEdge;
-                        textAreaWidth = minimizeButton.Left - textAreaLeftEdge;
-                    }
-
-                    // Take Y and Height from first menu item so text can be aligned with it.
-                    var firstMenuItemBounds = MainMenuStrip.Items[0].Bounds;
-                    var textAreaRectangle = new Rectangle(textAreaLeftEdge, firstMenuItemBounds.Y, textAreaWidth, firstMenuItemBounds.Height);
-
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                    TextRenderer.DrawText(
-                        g,
-                        text,
-                        MainMenuStrip.Font,
-                        textAreaRectangle,
-                        titleBarForeColor,
-                        titleBarBackColor,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                }
+                g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                TextRenderer.DrawText(
+                    g,
+                    text,
+                    ObservableStyle.Font,
+                    textAreaRectangle,
+                    ObservableStyle.ForeColor,
+                    ObservableStyle.BackColor,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
         }
 
         protected override void WndProc(ref Message m)
         {
-            const int WM_NCHITTEST = 0x84;
-            const int WM_SYSCOMMAND = 0x0112;
-
-            const int HTCAPTION = 2;
-
-            const int SC_MASK = 0xfff0;
-            const int SC_RESTORE = 0xf120;
-            const int SC_MAXIMIZE = 0xf030;
-            const int SC_MINIMIZE = 0xf020;
-
-            if (m.Msg == WM_NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            if (m.Msg == WM.NCHITTEST)
             {
                 Point position = PointToClient(new Point(m.LParam.ToInt32()));
 
                 if (position.Y >= 0
-                    && position.Y < MainMenuStrip.Height
+                    && position.Y < Metrics.CaptionHeight
                     && position.X >= 0
-                    && position.X < ClientSize.Width)
+                    && position.X < currentMetrics.TotalWidth)
                 {
                     // This is the draggable 'caption' area.
-                    m.Result = (IntPtr)HTCAPTION;
+                    m.Result = (IntPtr)HT.CAPTION;
                     return;
                 }
+            }
+            else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
+            {
+                // Windows 7 and lower only. This message is not used in Windows 8 and higher.
+                // Make sure to update the accent colors as well.
+                UpdateCaptionAreaButtonsBackColor();
             }
 
             base.WndProc(ref m);
 
             // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
-            if (m.Msg == WM_SYSCOMMAND)
+            if (m.Msg == WM.SYSCOMMAND)
             {
-                int wParam = SC_MASK & m.WParam.ToInt32();
-                if (wParam == SC_MAXIMIZE || wParam == SC_MINIMIZE || wParam == SC_RESTORE)
+                int wParam = SC.MASK & m.WParam.ToInt32();
+                if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
                 {
                     UpdateMaximizeButtonIcon();
                 }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) ObservableStyle.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

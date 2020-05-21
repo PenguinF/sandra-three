@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,59 +33,6 @@ namespace Eutherion.Win.Forms
     /// </summary>
     public class SnappingMdiChildForm : ConstrainedMoveResizeForm
     {
-        LineSegment CreateIfNonEmpty(int position, int min, int max)
-        {
-            if (min < max) return new LineSegment(position, min, max);
-            return null;
-        }
-
-        LineSegment GetLeftBorder(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only yield the left border if it's non-empty.
-            return CreateIfNonEmpty(rectangle.Left, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
-        }
-
-        LineSegment GetRightBorder(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only yield the right border if it's non-empty.
-            return CreateIfNonEmpty(rectangle.Right, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
-        }
-
-        LineSegment GetTopBorder(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only yield the top border if it's non-empty.
-            return CreateIfNonEmpty(rectangle.Top, rectangle.Left + cutoff, rectangle.Right - cutoff);
-        }
-
-        LineSegment GetBottomBorder(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only yield the bpttom border if it's non-empty.
-            return CreateIfNonEmpty(rectangle.Bottom, rectangle.Left + cutoff, rectangle.Right - cutoff);
-        }
-
-        void AddIfNonEmpty(List<LineSegment> list, LineSegment segment)
-        {
-            if (segment != null) list.Add(segment);
-        }
-
-        List<LineSegment> GetVerticalBorders(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only add left and right borders if they are non-empty.
-            List<LineSegment> verticalBorders = new List<LineSegment>();
-            AddIfNonEmpty(verticalBorders, GetLeftBorder(ref rectangle, cutoff));
-            AddIfNonEmpty(verticalBorders, GetRightBorder(ref rectangle, cutoff));
-            return verticalBorders;
-        }
-
-        List<LineSegment> GetHorizontalBorders(ref RECT rectangle, int cutoff)
-        {
-            // Cut off the given length and only add top and bottom borders if they are non-empty.
-            List<LineSegment> horizontalBorders = new List<LineSegment>();
-            AddIfNonEmpty(horizontalBorders, GetTopBorder(ref rectangle, cutoff));
-            AddIfNonEmpty(horizontalBorders, GetBottomBorder(ref rectangle, cutoff));
-            return horizontalBorders;
-        }
-
         /// <summary>
         /// Gets the default value for the <see cref="MaxSnapDistance"/> property.
         /// </summary>
@@ -108,97 +56,14 @@ namespace Eutherion.Win.Forms
         public int InsensitiveBorderEndLength { get; set; } = DefaultInsensitiveBorderEndLength;
 
         // Size/move precalculated information.
-        bool m_canSnap;                                // Guard boolean, which is only true if the window is sizing/moving and has an MDI parent.
         Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
-        LineSegment[] m_verticalSegments;              // Precalculated array of vertical line segments the sizing/moving window can snap onto.
-        LineSegment[] m_horizontalSegments;            // Precalculated array of horizontal line segments the sizing/moving window can snap onto.
         RECT m_rectangleBeforeSizeMove;                // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
-
-        /// <summary>
-        /// Calculates an array of visible vertical or horizontal segments, given a list of possibly overlapping rectangles.
-        /// </summary>
-        LineSegment[] CalculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
-        {
-            // Create snap line segments for each MDI child, and add extra segments for the MDI client rectangle.
-            List<LineSegment> segments = isVertical
-                ? GetVerticalBorders(ref mdiClientRectangle, 0)
-                : GetHorizontalBorders(ref mdiClientRectangle, 0);
-
-            // Loop over MDI child rectangles, to cut away hidden sections of segments.
-            for (int mdiChildRectangleIndex = mdiChildRectangles.Count - 1; mdiChildRectangleIndex >= 0; --mdiChildRectangleIndex)
-            {
-                RECT mdiChildRectangle = mdiChildRectangles[mdiChildRectangleIndex];
-
-                // Calculate segments for this MDI child, and start with initial full segments.
-                List<LineSegment> childSegments = isVertical
-                    ? GetVerticalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength)
-                    : GetHorizontalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength);
-
-                // Loop over MDI child rectangles that are higher in the z-order, since they can overlap.
-                for (int overlappingRectangleIndex = mdiChildRectangleIndex - 1; overlappingRectangleIndex >= 0; --overlappingRectangleIndex)
-                {
-                    // Cut away whatever is hidden by the MDI child higher in the z-order.
-                    RECT overlappingRectangle = mdiChildRectangles[overlappingRectangleIndex];
-
-                    // Calculate inflated rectangle coordinates.
-                    int overlappingRectanglePositionMin, overlappingRectanglePositionMax, minInflated, maxInflated;
-                    if (isVertical)
-                    {
-                        overlappingRectanglePositionMin = overlappingRectangle.Left;
-                        overlappingRectanglePositionMax = overlappingRectangle.Right;
-                        minInflated = overlappingRectangle.Top - InsensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Bottom + InsensitiveBorderEndLength;
-                    }
-                    else
-                    {
-                        overlappingRectanglePositionMin = overlappingRectangle.Top;
-                        overlappingRectanglePositionMax = overlappingRectangle.Bottom;
-                        minInflated = overlappingRectangle.Left - InsensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Right + InsensitiveBorderEndLength;
-                    }
-
-                    // Start with the end of the list and work back to the beginning, because segments that are split in two by this overlapping rectangle don't need to be checked again.
-                    for (int index = childSegments.Count - 1; index >= 0; --index)
-                    {
-                        LineSegment segment = childSegments[index];
-
-                        // Is the segment somewhere between the left and right edges of the inflated overlapping rectangle?
-                        if (segment.Near < segment.Far && overlappingRectanglePositionMin < segment.Position && segment.Position < overlappingRectanglePositionMax)
-                        {
-                            if (minInflated <= segment.Near)
-                            {
-                                // Cut off the top of the segment.
-                                if (segment.Near < maxInflated) segment.Near = maxInflated;
-                            }
-                            else if (segment.Far <= maxInflated)
-                            {
-                                // Cut off the bottom of the segment.
-                                if (minInflated < segment.Far) segment.Far = minInflated;
-                            }
-                            else
-                            {
-                                // Split the segment in two.
-                                childSegments.Add(new LineSegment(segment.Position, segment.Near, minInflated));
-                                segment.Near = maxInflated;
-                            }
-                        }
-                    }
-                }
-
-                // Only keep those segments that are non-empty.
-                foreach (LineSegment segment in childSegments)
-                {
-                    if (segment.Near < segment.Far) segments.Add(segment);
-                }
-            }
-
-            return segments.ToArray();
-        }
+        SnapGrid m_snapGrid;
 
         /// <summary>
         /// Precalculates and caches line segments that this form can snap onto.
         /// </summary>
-        void PrepareSizeMove(Control.ControlCollection mdiChildren)
+        SnapGrid PrepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
             RECT mdiClientRectangle = new RECT
@@ -248,8 +113,14 @@ namespace Eutherion.Win.Forms
             }
 
             // Calculate snappable segments and save them to arrays which can be used efficiently from within the WndProc() override.
-            m_verticalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, true);
-            m_horizontalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, false);
+            List<LineSegment> verticalSegments = SnapGrid.GetVerticalEdges(ref mdiClientRectangle, 0);
+            List<LineSegment> horizontalSegments = SnapGrid.GetHorizontalEdges(ref mdiClientRectangle, 0);
+
+            // Add snap line segments for each MDI child.
+            SnapGrid.AddVisibleSegments(verticalSegments, mdiChildRectangles, true, InsensitiveBorderEndLength);
+            SnapGrid.AddVisibleSegments(horizontalSegments, mdiChildRectangles, false, InsensitiveBorderEndLength);
+
+            return new SnapGrid(verticalSegments, horizontalSegments);
         }
 
         /// <summary>
@@ -266,11 +137,10 @@ namespace Eutherion.Win.Forms
                     {
                         // Get the bounds of the MDI client relative to the screen coordinates, because that is also how the size/move rectangles will be passed into WndProc().
                         Rectangle currentMdiClientScreenRectangle = c.RectangleToScreen(c.ClientRectangle);
-                        if (!m_canSnap || currentMdiClientScreenRectangle != m_currentMdiClientScreenRectangle)
+                        if (m_snapGrid == null || currentMdiClientScreenRectangle != m_currentMdiClientScreenRectangle)
                         {
-                            m_canSnap = true;
                             m_currentMdiClientScreenRectangle = currentMdiClientScreenRectangle;
-                            PrepareSizeMove(c.Controls);
+                            m_snapGrid = PrepareSizeMove(c.Controls);
                         }
                         // No need to check 'other' MdiClients, so stop looping.
                         return;
@@ -289,173 +159,29 @@ namespace Eutherion.Win.Forms
 
         protected override void OnResizeEnd(EventArgs e)
         {
-            m_canSnap = false;
-            m_verticalSegments = null;
-            m_horizontalSegments = null;
+            m_snapGrid = null;
             base.OnResizeEnd(e);
         }
 
-        protected override void OnMoving(ref RECT moveRect)
+        protected override void OnMoving(MoveResizeEventArgs e)
         {
-            // Only if an MDI child.
-            if (!m_canSnap) return;
-
-            // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
-            CheckUpdateSizeMove();
-
-            // Evaluate left/right borders, then top/bottom borders.
-
-            // Create line segments for each border of this window.
-            LineSegment leftBorder = GetLeftBorder(ref moveRect, InsensitiveBorderEndLength);
-            LineSegment rightBorder = GetRightBorder(ref moveRect, InsensitiveBorderEndLength);
-
-            if (null != leftBorder && null != rightBorder)
+            if (m_snapGrid != null)
             {
-                // Initialize snap threshold.
-                int snapThresholdX = MaxSnapDistance + 1;
+                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
+                CheckUpdateSizeMove();
 
-                // Preserve original width of the window.
-                int originalWidth = m_rectangleBeforeSizeMove.Right - m_rectangleBeforeSizeMove.Left;
-
-                // Check vertical segments to snap against.
-                foreach (LineSegment verticalSegment in m_verticalSegments)
-                {
-                    if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
-                    {
-                        // Snap left border, preserve original width.
-                        moveRect.Left = verticalSegment.Position;
-                        moveRect.Right = verticalSegment.Position + originalWidth;
-                    }
-                    if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
-                    {
-                        // Snap right border, preserve original width.
-                        moveRect.Left = verticalSegment.Position - originalWidth;
-                        moveRect.Right = verticalSegment.Position;
-                    }
-                }
-            }
-
-            // Create line segments for each border of this window.
-            LineSegment topBorder = GetTopBorder(ref moveRect, InsensitiveBorderEndLength);
-            LineSegment bottomBorder = GetBottomBorder(ref moveRect, InsensitiveBorderEndLength);
-
-            if (null != topBorder && null != bottomBorder)
-            {
-                // Initialize snap threshold.
-                int snapThresholdY = MaxSnapDistance + 1;
-
-                // Preserve original height of the window.
-                int originalHeight = m_rectangleBeforeSizeMove.Bottom - m_rectangleBeforeSizeMove.Top;
-
-                // Check horizontal segments to snap against.
-                foreach (LineSegment horizontalSegment in m_horizontalSegments)
-                {
-                    if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
-                    {
-                        // Snap top border, preserve original height.
-                        moveRect.Top = horizontalSegment.Position;
-                        moveRect.Bottom = horizontalSegment.Position + originalHeight;
-                    }
-                    if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
-                    {
-                        // Snap bottom border, preserve original height.
-                        moveRect.Top = horizontalSegment.Position - originalHeight;
-                        moveRect.Bottom = horizontalSegment.Position;
-                    }
-                }
+                m_snapGrid.SnapWhileMoving(e, ref m_rectangleBeforeSizeMove, MaxSnapDistance, InsensitiveBorderEndLength);
             }
         }
 
-        protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
+        protected override void OnResizing(ResizeEventArgs e)
         {
-            // Only if an MDI child.
-            if (!m_canSnap) return;
-
-            // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
-            CheckUpdateSizeMove();
-
-            // Evaluate left/right borders, then top/bottom borders.
-
-            // Initialize snap threshold.
-            int snapThresholdX = MaxSnapDistance + 1;
-
-            switch (resizeMode)
+            if (m_snapGrid != null)
             {
-                case ResizeMode.Left:
-                case ResizeMode.TopLeft:
-                case ResizeMode.BottomLeft:
-                    LineSegment leftBorder = GetLeftBorder(ref resizeRect, InsensitiveBorderEndLength);
-                    if (null != leftBorder)
-                    {
-                        foreach (LineSegment verticalSegment in m_verticalSegments)
-                        {
-                            if (leftBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
-                            {
-                                // Snap left border, preserve original location of right border of the window.
-                                resizeRect.Left = verticalSegment.Position;
-                                resizeRect.Right = m_rectangleBeforeSizeMove.Right;
-                            }
-                        }
-                    }
-                    break;
-                case ResizeMode.Right:
-                case ResizeMode.TopRight:
-                case ResizeMode.BottomRight:
-                    LineSegment rightBorder = GetRightBorder(ref resizeRect, InsensitiveBorderEndLength);
-                    if (null != rightBorder)
-                    {
-                        foreach (LineSegment verticalSegment in m_verticalSegments)
-                        {
-                            if (rightBorder.SnapSensitive(ref snapThresholdX, verticalSegment))
-                            {
-                                // Snap right border, preserve original location of left border of the window.
-                                resizeRect.Left = m_rectangleBeforeSizeMove.Left;
-                                resizeRect.Right = verticalSegment.Position;
-                            }
-                        }
-                    }
-                    break;
-            }
+                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
+                CheckUpdateSizeMove();
 
-            // Initialize snap threshold.
-            int snapThresholdY = MaxSnapDistance + 1;
-
-            switch (resizeMode)
-            {
-                case ResizeMode.Top:
-                case ResizeMode.TopLeft:
-                case ResizeMode.TopRight:
-                    LineSegment topBorder = GetTopBorder(ref resizeRect, InsensitiveBorderEndLength);
-                    if (null != topBorder)
-                    {
-                        foreach (LineSegment horizontalSegment in m_horizontalSegments)
-                        {
-                            if (topBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
-                            {
-                                // Snap top border, preserve original location of bottom border of the window.
-                                resizeRect.Top = horizontalSegment.Position;
-                                resizeRect.Bottom = m_rectangleBeforeSizeMove.Bottom;
-                            }
-                        }
-                    }
-                    break;
-                case ResizeMode.Bottom:
-                case ResizeMode.BottomLeft:
-                case ResizeMode.BottomRight:
-                    LineSegment bottomBorder = GetBottomBorder(ref resizeRect, InsensitiveBorderEndLength);
-                    if (null != bottomBorder)
-                    {
-                        foreach (LineSegment horizontalSegment in m_horizontalSegments)
-                        {
-                            if (bottomBorder.SnapSensitive(ref snapThresholdY, horizontalSegment))
-                            {
-                                // Snap bottom border, preserve original location of top border of the window.
-                                resizeRect.Top = m_rectangleBeforeSizeMove.Top;
-                                resizeRect.Bottom = horizontalSegment.Position;
-                            }
-                        }
-                    }
-                    break;
+                m_snapGrid.SnapWhileResizing(e, ref m_rectangleBeforeSizeMove, MaxSnapDistance, InsensitiveBorderEndLength);
             }
         }
     }
