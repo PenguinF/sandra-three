@@ -553,19 +553,16 @@ namespace Eutherion.Win.AppTemplate
         {
             if (m.Msg == WM.NCHITTEST)
             {
-                if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
-                {
-                    Point position = PointToClient(new Point(m.LParam.ToInt32()));
+                Point position = PointToClient(new Point(m.LParam.ToInt32()));
 
-                    if (position.Y >= 0
-                        && position.Y < MainMenuStrip.Height
-                        && position.X >= 0
-                        && position.X < ClientSize.Width)
-                    {
-                        // This is the draggable 'caption' area.
-                        m.Result = (IntPtr)HT.CAPTION;
-                        return;
-                    }
+                if (position.Y >= 0
+                    && position.Y < Metrics.CaptionHeight
+                    && position.X >= 0
+                    && position.X < currentMetrics.TotalWidth)
+                {
+                    // This is the draggable 'caption' area.
+                    m.Result = (IntPtr)HT.CAPTION;
+                    return;
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
