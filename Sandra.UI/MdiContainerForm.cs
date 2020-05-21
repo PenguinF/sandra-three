@@ -250,18 +250,18 @@ namespace Sandra.UI
                                         SandraChessMainForm.OpenPgnFile,
                                         SharedUIAction.Exit);
 
-            UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game.ToTextProvider());
-            mainMenuRootNodes.Add(gameMenu);
+            UIMenuNode.Container editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
+            mainMenuRootNodes.Add(editMenu);
 
             // Add these actions to the "Game" dropdown list.
-            BindFocusDependentUIActions(gameMenu,
+            BindFocusDependentUIActions(editMenu,
                                         OpenNewPlayingBoard);
 
             UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo.ToTextProvider())
             {
                 IsFirstInGroup = true,
             };
-            gameMenu.Nodes.Add(goToMenu);
+            editMenu.Nodes.Add(goToMenu);
 
             // Add all these to a submenu.
             BindFocusDependentUIActions(goToMenu,
@@ -276,7 +276,7 @@ namespace Sandra.UI
                                         InteractiveGame.GotoPreviousVariation,
                                         InteractiveGame.GotoNextVariation);
 
-            BindFocusDependentUIActions(gameMenu,
+            BindFocusDependentUIActions(editMenu,
                                         InteractiveGame.PromoteActiveVariation,
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
