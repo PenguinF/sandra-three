@@ -31,6 +31,11 @@ namespace Eutherion.Win.Native
     [SuppressUnmanagedCodeSecurity]
     public static class NativeMethods
     {
+        const string DwmApi = "dwmapi.dll";
+
+        [DllImport(DwmApi, PreserveSig = false)]
+        public static extern void DwmIsCompositionEnabled(out bool enabled);
+
         const string Gdi32 = "gdi32.dll";
 
         [DllImport(Gdi32, CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]

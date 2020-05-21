@@ -20,10 +20,10 @@
 #endregion
 
 using Eutherion.Utils;
+using Eutherion.Win.Native;
 using Microsoft.Win32;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Utils
@@ -46,9 +46,6 @@ namespace Eutherion.Win.Utils
             ResetAccentColors();
         }
 
-        [DllImport("dwmapi.dll", PreserveSig = false)]
-        private static extern void DwmIsCompositionEnabled(out bool enabled);
-
         /// <summary>
         /// Gets if DWN composition is currently enabled.
         /// </summary>
@@ -66,7 +63,7 @@ namespace Eutherion.Win.Utils
                     // DWM is off in terminal sessions before Windows 10.
                     if (SystemInformation.TerminalServerSession) return false;
 
-                    DwmIsCompositionEnabled(out bool enabled);
+                    NativeMethods.DwmIsCompositionEnabled(out bool enabled);
                     return enabled;
                 }
                 catch
