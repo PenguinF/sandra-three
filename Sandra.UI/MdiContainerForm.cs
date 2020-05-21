@@ -22,7 +22,7 @@
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
-using Eutherion.Win.AppTemplate;
+using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;

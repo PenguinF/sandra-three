@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnSyntaxDescriptor.cs
+ * JsonSyntaxDescriptor.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -20,31 +20,30 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Win.MdiAppTemplate;
-using Sandra.Chess.Pgn;
+using Eutherion.Text.Json;
 using ScintillaNET;
 using System.Collections.Generic;
 
-namespace Sandra.UI
+namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
-    /// Describes the interaction between PGN syntax and a syntax editor.
+    /// Describes the interaction between json syntax and a syntax editor.
     /// </summary>
-    public class PgnSyntaxDescriptor : SyntaxDescriptor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo>
     {
-        public static readonly string PgnFileExtension = "pgn";
+        public static readonly string JsonFileExtension = "json";
 
-        public static readonly PgnSyntaxDescriptor Instance = new PgnSyntaxDescriptor();
+        public static readonly JsonSyntaxDescriptor Instance = new JsonSyntaxDescriptor();
 
-        private PgnSyntaxDescriptor() { }
+        private JsonSyntaxDescriptor() { }
 
-        public override string FileExtension => PgnFileExtension;
+        public override string FileExtension => JsonFileExtension;
 
-        public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
+        public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override RootPgnSyntax Parse(string code)
+        public override RootJsonSyntax Parse(string code)
         {
-            var rootNode = PgnParser.Parse(code);
+            var rootNode = JsonParser.Parse(code);
 
             if (rootNode.Errors.Count > 0)
             {
@@ -61,25 +60,25 @@ namespace Sandra.UI
             return rootNode;
         }
 
-        public override IEnumerable<IPgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
-            => syntaxTree.GameListSyntax.TerminalSymbolsInRange(start, length);
+        public override IEnumerable<IJsonSymbol> GetTerminalsInRange(RootJsonSyntax syntaxTree, int start, int length)
+            => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
-        public override IEnumerable<PgnErrorInfo> GetErrors(RootPgnSyntax syntaxTree)
+        public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor, IPgnSymbol terminalSymbol)
-            => PgnStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(SyntaxEditor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
+            => JsonStyleSelector<RootJsonSyntax>.Instance.Visit(terminalSymbol, syntaxEditor);
 
-        public override (int, int) GetTokenSpan(IPgnSymbol terminalSymbol)
+        public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
-        public override (int, int) GetErrorRange(PgnErrorInfo error)
+        public override (int, int) GetErrorRange(JsonErrorInfo error)
             => (error.Start, error.Length);
 
-        public override ErrorLevel GetErrorLevel(PgnErrorInfo error)
+        public override ErrorLevel GetErrorLevel(JsonErrorInfo error)
             => (ErrorLevel)error.ErrorLevel;
 
-        public override string GetErrorMessage(PgnErrorInfo error)
+        public override string GetErrorMessage(JsonErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);
     }
 }

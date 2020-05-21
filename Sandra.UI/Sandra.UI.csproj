@@ -53,56 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppTemplate\AutoSaveFileNamePair.cs" />
-    <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
-    <Compile Include="AppTemplate\CombinedUIActionInterface.cs" />
-    <Compile Include="AppTemplate\ErrorLevel.cs" />
-    <Compile Include="AppTemplate\FileLocalizer.cs" />
-    <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
-    <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />
-    <Compile Include="AppTemplate\JsonStyleSelector.cs" />
-    <Compile Include="AppTemplate\JsonSyntaxDescriptor.cs" />
-    <Compile Include="AppTemplate\ListBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\LocalizedConsoleKeys.cs" />
-    <Compile Include="AppTemplate\LocalizedString.cs" />
-    <Compile Include="AppTemplate\LocalizedTextProvider.cs" />
-    <Compile Include="AppTemplate\Localizers.cs" />
-    <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\MenuCaptionBarFormStyle.cs" />
-    <Compile Include="AppTemplate\RichTextBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\ScintillaEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\Session.cs" />
-    <Compile Include="AppTemplate\Session.ToolForms.cs" />
-    <Compile Include="AppTemplate\SettingSyntaxDescriptor.cs" />
-    <Compile Include="AppTemplate\SharedLocalizedStringKeys.cs" />
-    <Compile Include="AppTemplate\SharedResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SharedResources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="AppTemplate\SharedSettings.cs" />
-    <Compile Include="AppTemplate\SharedUIAction.cs" />
-    <Compile Include="AppTemplate\SingleInstanceMainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\SyntaxEditor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\SyntaxEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\UIActionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AppTemplate\WorkingCopyTextFileAutoSaver.cs" />
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
@@ -155,6 +105,10 @@
       <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
       <Name>Eutherion.Shared</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Eutherion\Win.MdiAppTemplate\Eutherion.Win.MdiAppTemplate.csproj">
+      <Project>{72a45cf1-2c79-4f11-9f22-ed5508c5e97a}</Project>
+      <Name>Eutherion.Win.MdiAppTemplate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Eutherion\Win\Eutherion.Win.csproj">
       <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
       <Name>Eutherion.Win</Name>
@@ -166,26 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="AppTemplate\close.png" />
-    <None Include="AppTemplate\close_white.png" />
-    <None Include="AppTemplate\copy.png" />
-    <None Include="AppTemplate\cut.png" />
-    <None Include="AppTemplate\demaximize.png" />
-    <None Include="AppTemplate\demaximize_white.png" />
-    <None Include="AppTemplate\globe.png" />
-    <None Include="AppTemplate\maximize.png" />
-    <None Include="AppTemplate\maximize_white.png" />
-    <None Include="AppTemplate\minimize.png" />
-    <None Include="AppTemplate\minimize_white.png" />
-    <None Include="AppTemplate\paste.png" />
-    <None Include="AppTemplate\redo.png" />
-    <None Include="AppTemplate\save.png" />
-    <None Include="AppTemplate\save_white.png" />
-    <None Include="AppTemplate\settings.png" />
-    <None Include="AppTemplate\speech.png" />
-    <None Include="AppTemplate\undo.png" />
-    <None Include="AppTemplate\zoom_in.png" />
-    <None Include="AppTemplate\zoom_out.png" />
     <None Include="Properties\bb.png" />
     <None Include="Properties\bk.png" />
     <None Include="Properties\bn.png" />
@@ -202,11 +136,6 @@
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AppTemplate\SharedResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SharedResources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Eutherion.Win.AppTemplate</CustomToolNamespace>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

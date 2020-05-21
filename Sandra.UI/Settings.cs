@@ -21,7 +21,7 @@
 
 using Eutherion;
 using Eutherion.Utils;
-using Eutherion.Win.AppTemplate;
+using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System.Drawing;
 

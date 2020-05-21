@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.AppTemplate;
+using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using ScintillaNET;
 using System.Drawing;
