@@ -422,8 +422,6 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnLayout(LayoutEventArgs levent)
         {
-            base.OnLayout(levent);
-
             var clientSize = ClientSize;
 
             currentMetrics.TotalWidth = clientSize.Width;
@@ -445,7 +443,11 @@ namespace Eutherion.Win.AppTemplate
 
             if (currentMetrics.MainMenuWidth > 0)
             {
-                MainMenuStrip.Width = currentMetrics.MainMenuWidth;
+                MainMenuStrip.SetBounds(
+                    0,
+                    0,
+                    currentMetrics.MainMenuWidth,
+                    Metrics.CaptionHeight);
             }
 
             currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
@@ -477,6 +479,23 @@ namespace Eutherion.Win.AppTemplate
                 currentMetrics.SystemButtonWidth,
                 currentMetrics.SystemButtonHeight);
 
+            foreach (Control control in Controls)
+            {
+                if (control != MainMenuStrip
+                    && control != closeButton
+                    && control != saveButton
+                    && control != maximizeButton
+                    && control != minimizeButton
+                    && control.Visible)
+                {
+                    control.SetBounds(
+                        0,
+                        Metrics.CaptionHeight,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight - Metrics.CaptionHeight);
+                }
+            }
+
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
             UpdateMaximizeButtonIcon();
@@ -484,56 +503,49 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            var g = e.Graphics;
+
+            // Block out the entire caption area.
+            using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
             {
-                var g = e.Graphics;
-                int width = Width;
-                int mainMenuWidth = MainMenuStrip.Width;
+                g.FillRectangle(captionAreaColorBrush, new Rectangle(0, 0, currentMetrics.TotalWidth, Metrics.CaptionHeight));
+            }
 
-                using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
+            string text = Text;
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                Font font = MainMenuStrip == null ? Font : MainMenuStrip.Font;
+
+                // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
+                int textAreaLeftEdge = 0;
+                int textAreaWidth = currentMetrics.TotalWidth;
+
+                // Measure the text. If its left edge is about to disappear under the main menu,
+                // use a different Rectangle to center the text in.
+                // See also e.g. Visual Studio Code where it works the same way.
+                // Also use an extra MainMenuHorizontalMargin.
+                Size measuredTextSize = TextRenderer.MeasureText(text, font);
+                int probableLeftTextEdge = (textAreaWidth - measuredTextSize.Width) / 2;
+
+                if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
+                    // Now place it in the middle between the outer menu right edge and the system buttons.
+                    textAreaLeftEdge = currentMetrics.MainMenuWidth;
+                    textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
                 }
 
-                string text = Text;
+                Rectangle textAreaRectangle = new Rectangle(textAreaLeftEdge, 0, textAreaWidth, Metrics.CaptionHeight - 2);
 
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    Font menuFont = MainMenuStrip.Font;
-
-                    // Measure the text. If its left edge is about to disappear under the main menu,
-                    // use a different Rectangle to center the text in.
-                    // See also e.g. Visual Studio Code where it works the same way.
-                    // Also use an extra MainMenuHorizontalMargin.
-                    Size measuredTextSize = TextRenderer.MeasureText(text, menuFont);
-                    int probableLeftTextEdge = (width - measuredTextSize.Width) / 2;
-
-                    // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                    int textAreaLeftEdge = 0;
-                    int textAreaWidth = width;
-
-                    int outerMenuRightEdge = mainMenuWidth + MainMenuHorizontalMargin;
-                    if (probableLeftTextEdge < outerMenuRightEdge)
-                    {
-                        // Now place it in the middle between the outer menu right edge and the system buttons.
-                        textAreaLeftEdge = outerMenuRightEdge;
-                        textAreaWidth = minimizeButton.Left - textAreaLeftEdge;
-                    }
-
-                    // Take Y and Height from first menu item so text can be aligned with it.
-                    var firstMenuItemBounds = MainMenuStrip.Items[0].Bounds;
-                    var textAreaRectangle = new Rectangle(textAreaLeftEdge, firstMenuItemBounds.Y, textAreaWidth, firstMenuItemBounds.Height);
-
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                    TextRenderer.DrawText(
-                        g,
-                        text,
-                        MainMenuStrip.Font,
-                        textAreaRectangle,
-                        titleBarForeColor,
-                        titleBarBackColor,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                }
+                g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                TextRenderer.DrawText(
+                    g,
+                    text,
+                    font,
+                    textAreaRectangle,
+                    titleBarForeColor,
+                    titleBarBackColor,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             }
         }
 
