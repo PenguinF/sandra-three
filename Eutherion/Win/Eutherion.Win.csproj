@@ -65,6 +65,7 @@
     <Compile Include="ITextProvider.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="LiveTextFile.cs" />
+    <Compile Include="Native\Constants.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\ResizeMode.cs" />
     <Compile Include="Native\Structures.cs" />

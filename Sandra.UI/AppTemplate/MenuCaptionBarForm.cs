@@ -22,6 +22,7 @@
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
+using Eutherion.Win.Native;
 using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
@@ -509,17 +510,7 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            const int WM_NCHITTEST = 0x84;
-            const int WM_SYSCOMMAND = 0x0112;
-
-            const int HTCAPTION = 2;
-
-            const int SC_MASK = 0xfff0;
-            const int SC_RESTORE = 0xf120;
-            const int SC_MAXIMIZE = 0xf030;
-            const int SC_MINIMIZE = 0xf020;
-
-            if (m.Msg == WM_NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            if (m.Msg == WM.NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
             {
                 Point position = PointToClient(new Point(m.LParam.ToInt32()));
 
@@ -529,7 +520,7 @@ namespace Eutherion.Win.AppTemplate
                     && position.X < ClientSize.Width)
                 {
                     // This is the draggable 'caption' area.
-                    m.Result = (IntPtr)HTCAPTION;
+                    m.Result = (IntPtr)HT.CAPTION;
                     return;
                 }
             }
@@ -537,10 +528,10 @@ namespace Eutherion.Win.AppTemplate
             base.WndProc(ref m);
 
             // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
-            if (m.Msg == WM_SYSCOMMAND)
+            if (m.Msg == WM.SYSCOMMAND)
             {
-                int wParam = SC_MASK & m.WParam.ToInt32();
-                if (wParam == SC_MAXIMIZE || wParam == SC_MINIMIZE || wParam == SC_RESTORE)
+                int wParam = SC.MASK & m.WParam.ToInt32();
+                if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
                 {
                     UpdateMaximizeButtonIcon();
                 }

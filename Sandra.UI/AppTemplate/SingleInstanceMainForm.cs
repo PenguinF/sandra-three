@@ -34,8 +34,6 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public abstract class SingleInstanceMainForm : Form
     {
-        private const int WM_COPYDATA = 0x4A;
-
         private class SafePinnedByteArray : IDisposable
         {
             private readonly GCHandle gcHandle;
@@ -149,7 +147,7 @@ namespace Eutherion.Win.AppTemplate
                     Marshal.StructureToPtr(copyData, copyDataBuffer, false);
 
                     // SendMessage only returns when the receiving process has completed the call.
-                    NativeMethods.SendMessage(remoteWindowHandle, WM_COPYDATA, IntPtr.Zero, copyDataBuffer);
+                    NativeMethods.SendMessage(remoteWindowHandle, WM.COPYDATA, IntPtr.Zero, copyDataBuffer);
 
                     int error = Marshal.GetLastWin32Error();
                     if (error != 0) throw new Win32Exception(error);
@@ -205,7 +203,7 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_COPYDATA)
+            if (m.Msg == WM.COPYDATA)
             {
                 if (session != null)
                 {

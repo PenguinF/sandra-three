@@ -48,10 +48,7 @@ namespace Eutherion.Win.Forms
 
         protected override void WndProc(ref Message m)
         {
-            const int WM_SIZING = 0x214;
-            const int WM_MOVING = 0x216;
-
-            if (m.Msg == WM_SIZING)
+            if (m.Msg == WM.SIZING)
             {
                 // Marshal the size/move rectangle from the message.
                 RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
@@ -61,7 +58,7 @@ namespace Eutherion.Win.Forms
                 // Marshal back the result.
                 Marshal.StructureToPtr(rc, m.LParam, true);
             }
-            else if (m.Msg == WM_MOVING)
+            else if (m.Msg == WM.MOVING)
             {
                 // Marshal the size/move rectangle from the message.
                 RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
