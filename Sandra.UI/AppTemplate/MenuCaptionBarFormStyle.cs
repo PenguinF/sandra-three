@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
+using System;
 using System.Drawing;
 
 namespace Eutherion.Win.AppTemplate
@@ -27,11 +29,18 @@ namespace Eutherion.Win.AppTemplate
     /// Holds the current style properties of a <see cref="MenuCaptionBarForm"/>, and exposes an event to signal
     /// a change, for example if the system user preferences changed, or the window was activated.
     /// </summary>
-    public class MenuCaptionBarFormStyle
+    public class MenuCaptionBarFormStyle : IDisposable, IWeakEventTarget
     {
         public Color BackColor;
         public Color ForeColor;
         public Color HoverColor;
         public Color HoverBorderColor;
+
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
     }
 }

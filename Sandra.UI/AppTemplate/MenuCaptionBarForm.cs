@@ -580,5 +580,11 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) ObservableStyle.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
