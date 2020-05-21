@@ -233,6 +233,12 @@ namespace Eutherion.Win.AppTemplate
                     mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
                 }
 
+                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
+                {
+                    ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                    ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                }
+
                 UpdateCaptionAreaButtonsBackColor();
             }
         }
@@ -294,12 +300,6 @@ namespace Eutherion.Win.AppTemplate
                 foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
                 {
                     mainMenuItem.ForeColor = ObservableStyle.ForeColor;
-                }
-
-                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
-                {
-                    ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                    ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
                 }
             }
 
