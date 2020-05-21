@@ -507,15 +507,21 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             var g = e.Graphics;
 
-            // Block out the entire caption area.
+            // Block out the entire client area, then draw a 1-pizel border around it.
             using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
             {
                 g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                    currentMetrics.HorizontalResizeBorderThickness,
-                    currentMetrics.VerticalResizeBorderThickness,
-                    currentMetrics.ClientAreaWidth,
-                    currentMetrics.CaptionHeight));
+                    0,
+                    0,
+                    currentMetrics.TotalWidth,
+                    currentMetrics.TotalHeight));
             }
+
+            g.DrawRectangle(Pens.DimGray,
+                0,
+                0,
+                currentMetrics.TotalWidth - 1,
+                currentMetrics.TotalHeight - 1);
 
             string text = Text;
 
