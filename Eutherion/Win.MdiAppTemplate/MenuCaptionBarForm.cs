@@ -53,6 +53,7 @@ namespace Eutherion.Win.MdiAppTemplate
             public int TotalWidth;
             public int TotalHeight;
 
+            public bool IsMaximized;
             public int HorizontalResizeBorderThickness;
             public int VerticalResizeBorderThickness;
 
@@ -425,8 +426,22 @@ namespace Eutherion.Win.MdiAppTemplate
 
             currentMetrics.TotalWidth = clientSize.Width;
             currentMetrics.TotalHeight = clientSize.Height;
-            currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness;
-            currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness;
+
+            // If maximized, Windows will make a Form bigger than the screen to hide the drop shadow used for resizing.
+            // If a Form such as this one is drawn without that drop shadow, we need to compensate for that.
+            if (WindowState == FormWindowState.Maximized)
+            {
+                currentMetrics.IsMaximized = true;
+                currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness * 2;
+                currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness * 2;
+            }
+            else
+            {
+                currentMetrics.IsMaximized = false;
+                currentMetrics.HorizontalResizeBorderThickness = SystemInformation.HorizontalResizeBorderThickness;
+                currentMetrics.VerticalResizeBorderThickness = SystemInformation.VerticalResizeBorderThickness;
+            }
+
             currentMetrics.CaptionHeight = CaptionHeight;
 
             if (MainMenuStrip != null && MainMenuStrip.Visible)
@@ -507,21 +522,39 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             var g = e.Graphics;
 
-            // Block out the entire client area, then draw a 1-pizel border around it.
-            using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+            if (currentMetrics.IsMaximized)
             {
-                g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                    0,
-                    0,
-                    currentMetrics.TotalWidth,
-                    currentMetrics.TotalHeight));
-            }
+                // Draw only the visible area of the window.
+                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                {
+                    int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
+                    int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
 
-            g.DrawRectangle(Pens.DimGray,
-                0,
-                0,
-                currentMetrics.TotalWidth - 1,
-                currentMetrics.TotalHeight - 1);
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        horizontalInvisibleBorderWidth,
+                        verticalInvisibleBorderWidth,
+                        currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
+                        currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
+                }
+            }
+            else
+            {
+                // Block out the entire client area, then draw a 1-pizel border around it.
+                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                {
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
+                }
+
+                g.DrawRectangle(Pens.DimGray,
+                    0,
+                    0,
+                    currentMetrics.TotalWidth - 1,
+                    currentMetrics.TotalHeight - 1);
+            }
 
             string text = Text;
 
