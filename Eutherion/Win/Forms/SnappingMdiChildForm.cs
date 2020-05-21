@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

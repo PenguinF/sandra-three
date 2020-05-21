@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using Eutherion.Win.Native;
 using System;
 using System.Windows.Forms;
 
@@ -37,7 +38,7 @@ namespace Eutherion.Win
         /// </returns>
         public static Control GetFocusedControl()
         {
-            IntPtr focusedHandle = WinAPI.GetFocus();
+            IntPtr focusedHandle = NativeMethods.GetFocus();
             if (focusedHandle != IntPtr.Zero)
             {
                 // If the focused control is not a .NET control, then this will return null.

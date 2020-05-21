@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;

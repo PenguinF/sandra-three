@@ -25,6 +25,7 @@ using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
+using Eutherion.Win.Native;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;

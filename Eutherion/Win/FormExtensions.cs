@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -40,7 +41,7 @@ namespace Eutherion.Win
                 && !form.IsDisposed
                 && form.WindowState == FormWindowState.Minimized)
             {
-                WinAPI.ShowWindow(new HandleRef(form, form.Handle), SW_RESTORE);
+                NativeMethods.ShowWindow(new HandleRef(form, form.Handle), SW_RESTORE);
             }
         }
 

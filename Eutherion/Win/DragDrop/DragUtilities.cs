@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Native;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -92,19 +93,19 @@ namespace Eutherion.Win.DragDrop
                 try
                 {
                     // Obtain icon-like info using the Windows API, and create a new icon from it to change its hot spot.
-                    WinAPI.GetIconInfo(new HandleRef(copy, iconHandle), ref iconInfo);
+                    NativeMethods.GetIconInfo(new HandleRef(copy, iconHandle), ref iconInfo);
                     iconInfo.fIcon = false;
                     iconInfo.xHotspot = hotSpot.X;
                     iconInfo.yHotspot = hotSpot.Y;
 
-                    IntPtr cursorIconHandle = WinAPI.CreateIconIndirect(ref iconInfo);
+                    IntPtr cursorIconHandle = NativeMethods.CreateIconIndirect(ref iconInfo);
                     return cursorIconHandle != IntPtr.Zero ? new CursorFromHandle(cursorIconHandle) : null;
                 }
                 finally
                 {
-                    if (iconInfo.hbmColor != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmColor));
-                    if (iconInfo.hbmMask != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmMask));
-                    if (iconHandle != IntPtr.Zero) WinAPI.DestroyIcon(new HandleRef(copy, iconHandle));
+                    if (iconInfo.hbmColor != IntPtr.Zero) NativeMethods.DeleteObject(new HandleRef(null, iconInfo.hbmColor));
+                    if (iconInfo.hbmMask != IntPtr.Zero) NativeMethods.DeleteObject(new HandleRef(null, iconInfo.hbmMask));
+                    if (iconHandle != IntPtr.Zero) NativeMethods.DestroyIcon(new HandleRef(copy, iconHandle));
                 }
             }
         }
