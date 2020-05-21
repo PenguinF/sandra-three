@@ -45,7 +45,6 @@ namespace Eutherion.Win.AppTemplate
             UsePopup(false);
 
             BufferedDraw = false;
-            Technology = Technology.DirectWrite;
 
             //https://notepad-plus-plus.org/community/topic/12576/list-of-all-assigned-keyboard-shortcuts/8
             //https://scintilla.org/CommandValues.html
