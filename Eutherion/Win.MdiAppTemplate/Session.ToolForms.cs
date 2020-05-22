@@ -223,9 +223,11 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        private class RichTextBoxExWithMargin : Panel
+        private class RichTextBoxExWithMargin : Panel, IDockableControl
         {
             public RichTextBoxEx TextBox { get; }
+
+            public DockProperties DockProperties { get; } = new DockProperties();
 
             public RichTextBoxExWithMargin(RichTextBoxEx textBox, string fileName)
             {
@@ -233,8 +235,10 @@ namespace Eutherion.Win.MdiAppTemplate
                 TextBox = textBox;
                 Controls.Add(TextBox);
 
-                Text = fileName;
+                DockProperties.CaptionText = fileName;
             }
+
+            event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
         }
 
         private Form CreateReadOnlyTextForm(string fileName, int width, int height)
@@ -279,20 +283,17 @@ namespace Eutherion.Win.MdiAppTemplate
             };
 
             // Use a panel with padding to add some margin around the textBox.
-            var fillPanel = new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
-            {
-                BackColor = Color.LightGray,
-                Dock = DockStyle.Fill,
-            };
-
-            var readOnlyTextForm = new MenuCaptionBarForm
+            var readOnlyTextForm = new MenuCaptionBarForm<RichTextBoxExWithMargin>(
+                new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
+                {
+                    BackColor = Color.LightGray,
+                    Dock = DockStyle.Fill,
+                })
             {
                 CaptionHeight = 26,
                 ClientSize = new Size(width, height),
                 ShowIcon = false,
             };
-
-            readOnlyTextForm.Controls.Add(fillPanel);
 
             // This adds a Close menu item to the context menu of the textBox.
             textBox.BindActions(readOnlyTextForm.StandardUIActionBindings);
