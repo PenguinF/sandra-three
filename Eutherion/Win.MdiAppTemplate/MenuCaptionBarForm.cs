@@ -706,6 +706,8 @@ namespace Eutherion.Win.MdiAppTemplate
             Controls.Add(MainMenuStrip);
 
             mainMenuActionHandler = new UIActionHandler();
+
+            BindStandardUIActions();
         }
 
         private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)

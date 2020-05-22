@@ -267,8 +267,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             Controls.Add(SyntaxEditor);
 
-            BindStandardUIActions();
-
             // Initialize menu strip.
             var fileMenu = new List<DefaultUIActionBinding>();
 
