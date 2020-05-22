@@ -25,6 +25,7 @@ using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
@@ -32,16 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    /// <summary>
-    /// <see cref="UIActionForm"/> which displays a main menu inside a custom caption bar.
-    /// It is advisable to give the main menu strip a back color so it does not display
-    /// a gradient which clashes with the custom drawn caption bar area.
-    /// </summary>
-    /// <remarks>
-    /// Some non-client area handling code is adapted from:
-    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
-    /// </remarks>
-    public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
+    public class OldMenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
         {
@@ -120,7 +112,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private Metrics currentMetrics;
 
-        public MenuCaptionBarForm()
+        public OldMenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
                 | ControlStyles.UserPaint
@@ -700,6 +692,154 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (disposing) ObservableStyle.Dispose();
             base.Dispose(disposing);
+        }
+    }
+
+    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
+    public abstract class MenuCaptionBarForm : OldMenuCaptionBarForm
+    {
+        internal MenuCaptionBarForm() { }
+    }
+
+    /// <summary>
+    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
+    /// </summary>
+    /// <typeparam name="TDockableControl">
+    /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
+    /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
+    /// </typeparam>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
+    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
+        where TDockableControl : Control, IDockableControl
+    {
+        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
+        public TDockableControl DockedControl { get; }
+
+        private readonly UIActionHandler mainMenuActionHandler;
+
+        public MenuCaptionBarForm(TDockableControl dockableControl)
+        {
+            DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
+            Controls.Add(DockedControl);
+
+            MainMenuStrip = new MenuStrip();
+            Controls.Add(MainMenuStrip);
+
+            mainMenuActionHandler = new UIActionHandler();
+
+            BindStandardUIActions();
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+
+            UpdateFromDockProperties();
+            dockableControl.DockPropertiesChanged += UpdateFromDockProperties;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            UIMenu.UpdateMenu(MainMenuStrip.Items);
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)
+        {
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var binding in bindings)
+            {
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                {
+                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    {
+                        try
+                        {
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                        ? UIActionVisibility.Disabled
+                                        : currentActionState;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
+            }
+
+            return menuNodes;
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            var mainMenuItem = (ToolStripMenuItem)sender;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
+        }
+
+        private void UpdateFromDockProperties()
+        {
+            Text = DockedControl.DockProperties.CaptionText;
+
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
+
+            // If something can be saved, closing is dangerous, therefore use a reddish hover color.
+            if (DockedControl.DockProperties.IsModified)
+            {
+                SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
+            }
+            else
+            {
+                ResetCloseButtonHoverColor();
+            }
+
+            // Only fill MainMenuStrip once, it's not really supposed to change.
+            if (DockedControl.DockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
+            {
+                var topLevelContainers = new List<UIMenuNode.Container>();
+
+                foreach (var mainMenuItem in DockedControl.DockProperties.MainMenuItems)
+                {
+                    if (mainMenuItem.Container != null && mainMenuItem.DropDownItems != null && mainMenuItem.DropDownItems.Any())
+                    {
+                        topLevelContainers.Add(mainMenuItem.Container);
+                        mainMenuItem.Container.Nodes.AddRange(BindMainMenuItemActions(mainMenuItem.DropDownItems));
+                    }
+                }
+
+                UIMenuBuilder.BuildMenu(mainMenuActionHandler, topLevelContainers, MainMenuStrip.Items);
+
+                foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+                {
+                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                }
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            bool cancel = e.Cancel;
+            DockedControl.OnFormClosing(e.CloseReason, ref cancel);
+            e.Cancel = cancel;
+            base.OnFormClosing(e);
         }
     }
 }

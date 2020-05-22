@@ -42,13 +42,13 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         public const string SessionUIActionPrefix = nameof(Session) + ".";
 
-        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> aboutFormBox = new Box<Form>();
-        private readonly Box<Form> creditsFormBox = new Box<Form>();
-        private readonly Box<Form> languageFormBox = new Box<Form>();
+        private readonly Box<MenuCaptionBarForm> localSettingsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> defaultSettingsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> languageFormBox = new Box<MenuCaptionBarForm>();
 
-        internal void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        internal void OpenOrActivateToolForm(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {
@@ -94,11 +94,11 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        private Form CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
-                                        SettingsFile settingsFile,
-                                        Func<string> initialTextGenerator,
-                                        SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        private MenuCaptionBarForm CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
+                                                      SettingsFile settingsFile,
+                                                      Func<string> initialTextGenerator,
+                                                      SettingProperty<PersistableFormState> formStateSetting,
+                                                      SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
 
@@ -131,17 +131,23 @@ namespace Eutherion.Win.MdiAppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
-                codeAccessOption,
-                syntaxDescriptor,
-                codeFile,
-                formStateSetting,
-                SharedSettings.JsonZoom)
+            var settingsForm = new MenuCaptionBarForm<SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>>(
+                new SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
+                    codeAccessOption,
+                    syntaxDescriptor,
+                    codeFile,
+                    SharedSettings.JsonZoom))
             {
+                CaptionHeight = 30,
                 ClientSize = new Size(600, 600),
             };
 
-            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.SyntaxEditor);
+            settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
+
+            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
+            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
+
+            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.DockedControl);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
@@ -218,7 +224,26 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        private Form CreateReadOnlyTextForm(string fileName, int width, int height)
+        private class RichTextBoxExWithMargin : Panel, IDockableControl
+        {
+            public RichTextBoxEx TextBox { get; }
+
+            public DockProperties DockProperties { get; } = new DockProperties();
+
+            public RichTextBoxExWithMargin(RichTextBoxEx textBox, string fileName)
+            {
+                Padding = new Padding(6);
+                TextBox = textBox;
+                Controls.Add(TextBox);
+
+                DockProperties.CaptionText = fileName;
+            }
+
+            event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
+            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+        }
+
+        private MenuCaptionBarForm CreateReadOnlyTextForm(string fileName, int width, int height)
         {
             string text;
             try
@@ -260,24 +285,17 @@ namespace Eutherion.Win.MdiAppTemplate
             };
 
             // Use a panel with padding to add some margin around the textBox.
-            var fillPanel = new Panel
-            {
-                BackColor = Color.LightGray,
-                Dock = DockStyle.Fill,
-                Padding = new Padding(6),
-            };
-
-            fillPanel.Controls.Add(textBox);
-
-            var readOnlyTextForm = new MenuCaptionBarForm
+            var readOnlyTextForm = new MenuCaptionBarForm<RichTextBoxExWithMargin>(
+                new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
+                {
+                    BackColor = Color.LightGray,
+                    Dock = DockStyle.Fill,
+                })
             {
                 CaptionHeight = 26,
                 ClientSize = new Size(width, height),
-                Text = Path.GetFileName(fileName),
                 ShowIcon = false,
             };
-
-            readOnlyTextForm.Controls.Add(fillPanel);
 
             // This adds a Close menu item to the context menu of the textBox.
             textBox.BindActions(readOnlyTextForm.StandardUIActionBindings);

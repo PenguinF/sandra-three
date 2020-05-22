@@ -51,6 +51,7 @@
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FileLocalizer.cs" />
     <Compile Include="FormStateAutoSaver.cs" />
+    <Compile Include="IDockableControl.cs" />
     <Compile Include="JsonErrorInfoExtensions.cs" />
     <Compile Include="JsonStyleSelector.cs" />
     <Compile Include="JsonSyntaxDescriptor.cs" />
@@ -88,9 +89,6 @@
     </Compile>
     <Compile Include="SyntaxEditor.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxEditorForm.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIActionForm.cs">
       <SubType>Form</SubType>

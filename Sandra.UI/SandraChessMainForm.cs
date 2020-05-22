@@ -33,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = SyntaxEditorForm<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+    using PgnForm = MenuCaptionBarForm<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
@@ -165,12 +165,13 @@ namespace Sandra.UI
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
             var pgnForm = new PgnForm(
-                isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                PgnSyntaxDescriptor.Instance,
-                pgnFile,
-                SettingKeys.PgnWindow,
-                SettingKeys.PgnZoom)
+                new SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>(
+                    isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                    PgnSyntaxDescriptor.Instance,
+                    pgnFile,
+                    SettingKeys.PgnZoom))
             {
+                CaptionHeight = 30,
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                 ClientSize = new Size(600, 600),
                 ShowInTaskbar = true,
@@ -179,7 +180,12 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
-            PgnStyleSelector.InitializeStyles(pgnForm.SyntaxEditor);
+            pgnForm.Load += (_, __) => Session.Current.AttachFormStateAutoSaver(pgnForm, SettingKeys.PgnWindow, null);
+
+            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
+            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);
+
+            PgnStyleSelector.InitializeStyles(pgnForm.DockedControl);
 
             // Don't index read-only PgnForms.
             if (!isReadOnly)
