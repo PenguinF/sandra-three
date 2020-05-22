@@ -769,7 +769,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         int estimatedHeight = CurrentErrors.Count * 15;
 
                         // Add padding * 2.
-                        estimatedHeight += 16;
+                        estimatedHeight += 12;
 
                         int maxHeight = ClientSize.Height;
                         if (maxHeight < estimatedHeight) estimatedHeight = maxHeight;
