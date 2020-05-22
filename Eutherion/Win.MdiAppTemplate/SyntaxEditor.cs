@@ -719,7 +719,14 @@ namespace Eutherion.Win.MdiAppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                            UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+
+                            if (actionState.UIActionVisibility == UIActionVisibility.Disabled)
+                            {
+                                // Save as dialog got canceled.
+                                // If UIActionVisibility.Hidden was returned, the action isn't available at all, which shouldn't block a form close.
+                                cancel = true;
+                            }
                         }
                         catch (Exception exception)
                         {
@@ -904,6 +911,11 @@ namespace Eutherion.Win.MdiAppTemplate
                     CodeFile.Replace(saveFileDialog.FileName);
                     containsChangesAtSavePoint = CodeFile.ContainsChanges;
                     SetSavePoint();
+                }
+                else
+                {
+                    // Use this value to indicate a camcel action.
+                    return UIActionVisibility.Disabled;
                 }
             }
 
