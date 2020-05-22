@@ -403,8 +403,14 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            bool cancel = e.Cancel;
+            OnFormClosing(e.CloseReason, ref cancel);
+            e.Cancel = cancel;
             base.OnFormClosing(e);
+        }
 
+        void OnFormClosing(CloseReason closeReason, ref bool cancel)
+        {
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (SyntaxEditor.ContainsChanges && SyntaxEditor.CodeFile.AutoSaveFile == null)
             {
@@ -424,14 +430,14 @@ namespace Eutherion.Win.MdiAppTemplate
                         }
                         catch (Exception exception)
                         {
-                            e.Cancel = true;
+                            cancel = true;
                             MessageBox.Show(exception.Message);
                         }
                         break;
                     case DialogResult.No:
                         break;
                     default:
-                        e.Cancel = true;
+                        cancel = true;
                         break;
                 }
             }
