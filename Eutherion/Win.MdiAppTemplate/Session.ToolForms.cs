@@ -218,6 +218,20 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
+        private class RichTextBoxExWithMargin : Panel
+        {
+            public RichTextBoxEx TextBox { get; }
+
+            public RichTextBoxExWithMargin(RichTextBoxEx textBox, string fileName)
+            {
+                Padding = new Padding(6);
+                TextBox = textBox;
+                Controls.Add(TextBox);
+
+                Text = fileName;
+            }
+        }
+
         private Form CreateReadOnlyTextForm(string fileName, int width, int height)
         {
             string text;
@@ -260,20 +274,16 @@ namespace Eutherion.Win.MdiAppTemplate
             };
 
             // Use a panel with padding to add some margin around the textBox.
-            var fillPanel = new Panel
+            var fillPanel = new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
             {
                 BackColor = Color.LightGray,
                 Dock = DockStyle.Fill,
-                Padding = new Padding(6),
             };
-
-            fillPanel.Controls.Add(textBox);
 
             var readOnlyTextForm = new MenuCaptionBarForm
             {
                 CaptionHeight = 26,
                 ClientSize = new Size(width, height),
-                Text = Path.GetFileName(fileName),
                 ShowIcon = false,
             };
 
