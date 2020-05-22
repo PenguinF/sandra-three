@@ -719,6 +719,14 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
             Controls.Add(DockedControl);
+
+            UpdateFromDockProperties();
+            dockableControl.DockPropertiesChanged += UpdateFromDockProperties;
+        }
+
+        private void UpdateFromDockProperties()
+        {
+            Text = DockedControl.DockProperties.CaptionText;
         }
     }
 }

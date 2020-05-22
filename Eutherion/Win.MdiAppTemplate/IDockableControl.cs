@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -29,5 +30,26 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </summary>
     public interface IDockableControl
     {
+        /// <summary>
+        /// Gets a set of properties which are relevant when docked.
+        /// These are owned by the client control, and are read-only for the host control.
+        /// </summary>
+        DockProperties DockProperties { get; }
+
+        /// <summary>
+        /// Occurs when the dock properties have been updated by the client control.
+        /// </summary>
+        event Action DockPropertiesChanged;
+    }
+
+    /// <summary>
+    /// Exposes a set of properties which are relevant when docked.
+    /// </summary>
+    public class DockProperties
+    {
+        /// <summary>
+        /// Gets or sets the text to display in a caption bar.
+        /// </summary>
+        public string CaptionText { get; set; }
     }
 }

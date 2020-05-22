@@ -34,7 +34,7 @@ namespace Eutherion.Win.MdiAppTemplate
 {
     public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
-        private class ErrorListForm : MenuCaptionBarForm
+        private class ErrorListPanel : Panel, IDockableControl
         {
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);
@@ -47,7 +47,11 @@ namespace Eutherion.Win.MdiAppTemplate
             private readonly LocalizedString errorLocationString;
             private readonly LocalizedString titleString;
 
-            public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm)
+            public DockProperties DockProperties { get; } = new DockProperties();
+
+            public event Action DockPropertiesChanged;
+
+            public ErrorListPanel(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm)
             {
                 OwnerEditorForm = ownerEditorForm;
 
@@ -82,26 +86,20 @@ namespace Eutherion.Win.MdiAppTemplate
                 errorsListBox.DoubleClick += (_, __) => OwnerEditorForm.ActivateSelectedError(errorsListBox.SelectedIndex);
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
 
-                // Use two panel to add some margin around the errors list box and to blend it in
-                // so at least it appears to have a constant height.
-                var blendPanel = new Panel
-                {
-                    Dock = DockStyle.Fill,
-                    Padding = new Padding(6),
-                };
+                Controls.Add(errorsListBox);
+            }
 
+            protected override void OnBackColorChanged(EventArgs e)
+            {
                 // Blend background colors.
-                errorsListBox.BackColor = DefaultSyntaxEditorStyle.BackColor;
-                blendPanel.BackColor = DefaultSyntaxEditorStyle.BackColor;
-                BackColor = Color.White;
-
-                blendPanel.Controls.Add(errorsListBox);
-                Controls.Add(blendPanel);
+                errorsListBox.BackColor = BackColor;
+                base.OnBackColorChanged(e);
             }
 
             public void UpdateText()
             {
-                Text = StringUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditorForm.CodeFilePathDisplayString });
+                DockProperties.CaptionText = StringUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditorForm.CodeFilePathDisplayString });
+                DockPropertiesChanged?.Invoke();
             }
 
             public int SelectedErrorIndex
@@ -255,9 +253,9 @@ namespace Eutherion.Win.MdiAppTemplate
             untitledString.DisplayText.ValueChanged += _ =>
             {
                 UpdateChangedMarker();
-                if (errorListFormBox.Value is ErrorListForm errorListForm)
+                if (errorListFormBox.Value is MenuCaptionBarForm<ErrorListPanel> errorListForm)
                 {
-                    errorListForm.UpdateText();
+                    errorListForm.DockedControl.UpdateText();
                 }
             };
 
@@ -326,9 +324,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateErrorListForm()
         {
-            if (errorListFormBox.Value is ErrorListForm errorListForm)
+            if (errorListFormBox.Value is MenuCaptionBarForm<ErrorListPanel> errorListForm)
             {
-                errorListForm.DisplayErrors(SyntaxEditor);
+                errorListForm.DockedControl.DisplayErrors(SyntaxEditor);
             }
         }
 
@@ -519,7 +517,14 @@ namespace Eutherion.Win.MdiAppTemplate
                         if (maxHeight < estimatedHeight) estimatedHeight = maxHeight;
                         if (estimatedHeight < minHeight) estimatedHeight = minHeight;
 
-                        return new ErrorListForm(this)
+                        // Use a panel to blend the errors list box with the background and at least appear as if its height is constant.
+                        return new MenuCaptionBarForm<ErrorListPanel>(
+                            new ErrorListPanel(this)
+                            {
+                                Dock = DockStyle.Fill,
+                                BackColor = DefaultSyntaxEditorStyle.BackColor,
+                                Padding = new Padding(6),
+                            })
                         {
                             CaptionHeight = 26,
                             ShowIcon = false,
@@ -544,15 +549,15 @@ namespace Eutherion.Win.MdiAppTemplate
             if (perform)
             {
                 // Go to previous or last position.
-                ErrorListForm errorListForm = errorListFormBox.Value as ErrorListForm;
-                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.SelectedErrorIndex;
+                MenuCaptionBarForm<ErrorListPanel> errorListForm = errorListFormBox.Value as MenuCaptionBarForm<ErrorListPanel>;
+                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.DockedControl.SelectedErrorIndex;
 
                 // Decrease and range check, since the error count may have changed in the meantime.
                 targetIndex--;
                 if (targetIndex < 0) targetIndex = errorCount - 1;
 
                 // Update error list form and activate error in the editor.
-                if (errorListForm != null) errorListForm.SelectedErrorIndex = targetIndex;
+                if (errorListForm != null) errorListForm.DockedControl.SelectedErrorIndex = targetIndex;
                 ActivateSelectedError(targetIndex);
             }
 
@@ -572,15 +577,15 @@ namespace Eutherion.Win.MdiAppTemplate
             if (perform)
             {
                 // Go to next or first position.
-                ErrorListForm errorListForm = errorListFormBox.Value as ErrorListForm;
-                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.SelectedErrorIndex;
+                MenuCaptionBarForm<ErrorListPanel> errorListForm = errorListFormBox.Value as MenuCaptionBarForm<ErrorListPanel>;
+                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.DockedControl.SelectedErrorIndex;
 
                 // Increase and range check, since the error count may have changed in the meantime.
                 targetIndex++;
                 if (targetIndex >= errorCount) targetIndex = 0;
 
                 // Update error list form and activate error in the editor.
-                if (errorListForm != null) errorListForm.SelectedErrorIndex = targetIndex;
+                if (errorListForm != null) errorListForm.DockedControl.SelectedErrorIndex = targetIndex;
                 ActivateSelectedError(targetIndex);
             }
 
