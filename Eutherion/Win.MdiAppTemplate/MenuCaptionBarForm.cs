@@ -835,6 +835,21 @@ namespace Eutherion.Win.MdiAppTemplate
         private void UpdateFromDockProperties()
         {
             Text = DockedControl.DockProperties.CaptionText;
+            UpdateSaveButton(DockedControl.DockProperties.IsModified);
+
+            // Only fill MainMenuStrip once, it's not really supposed to change.
+            if (DockedControl.DockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
+            {
+                UpdateMenu(DockedControl.DockProperties.MainMenuItems);
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            bool cancel = e.Cancel;
+            DockedControl.OnFormClosing(e.CloseReason, ref cancel);
+            e.Cancel = cancel;
+            base.OnFormClosing(e);
         }
     }
 }

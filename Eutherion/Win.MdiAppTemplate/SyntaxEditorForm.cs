@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : Panel, IDockableControl, IWeakEventTarget
     {
         private class ErrorListPanel : Panel, IDockableControl
         {
@@ -191,6 +191,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 base.Dispose(disposing);
             }
+
+            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private const string ChangedMarker = "• ";
@@ -198,6 +200,10 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
         private readonly LocalizedString untitledString;
+
+        public DockProperties DockProperties { get; } = new DockProperties();
+
+        public event Action DockPropertiesChanged;
 
         public SyntaxEditor<TSyntaxTree, TTerminal, TError> SyntaxEditor { get; }
 
@@ -302,7 +308,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut });
 
-            var mainMenuItems = new List<MainMenuDropDownItem>
+            DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
                 new MainMenuDropDownItem
                 {
@@ -320,8 +326,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     DropDownItems = viewMenu
                 },
             };
-
-            UpdateMenu(mainMenuItems);
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
@@ -361,11 +365,11 @@ namespace Eutherion.Win.MdiAppTemplate
         private void UpdateChangedMarker()
         {
             string fileName = CodeFilePathDisplayString;
-            Text = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
+            DockProperties.CaptionText = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
-            bool isModified = !IsDisposed && !Disposing && !SyntaxEditor.ReadOnly && SyntaxEditor.ContainsChanges;
-            UpdateSaveButton(isModified);
+            DockProperties.IsModified = !IsDisposed && !Disposing && !SyntaxEditor.ReadOnly && SyntaxEditor.ContainsChanges;
+            DockPropertiesChanged?.Invoke();
         }
 
         private int currentActivatedErrorIndex;
@@ -379,15 +383,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            bool cancel = e.Cancel;
-            OnFormClosing(e.CloseReason, ref cancel);
-            e.Cancel = cancel;
-            base.OnFormClosing(e);
-        }
-
-        void OnFormClosing(CloseReason closeReason, ref bool cancel)
+        void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel)
         {
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (SyntaxEditor.ContainsChanges && SyntaxEditor.CodeFile.AutoSaveFile == null)

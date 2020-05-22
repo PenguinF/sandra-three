@@ -43,6 +43,17 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Occurs when the dock properties have been updated by the client control.
         /// </summary>
         event Action DockPropertiesChanged;
+
+        /// <summary>
+        /// Called when the control is about to be closed.
+        /// </summary>
+        /// <param name="closeReason">
+        /// The reason why the control is being closed.
+        /// </param>
+        /// <param name="cancel">
+        /// Whether or not to cancel the closing event.
+        /// </param>
+        void OnFormClosing(CloseReason closeReason, ref bool cancel);
     }
 
     /// <summary>
@@ -54,6 +65,16 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets the text to display in a caption bar.
         /// </summary>
         public string CaptionText { get; set; }
+
+        /// <summary>
+        /// Gets or sets if the control contains any unsaved modifications.
+        /// </summary>
+        public bool IsModified { get; set; }
+
+        /// <summary>
+        /// Gets or sets an enumeration of main menu items to build.
+        /// </summary>
+        public IEnumerable<MainMenuDropDownItem> MainMenuItems { get; set; }
     }
 
     /// <summary>

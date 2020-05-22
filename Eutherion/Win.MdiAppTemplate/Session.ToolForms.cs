@@ -131,11 +131,12 @@ namespace Eutherion.Win.MdiAppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
-                codeAccessOption,
-                syntaxDescriptor,
-                codeFile,
-                SharedSettings.JsonZoom)
+            var settingsForm = new MenuCaptionBarForm<SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>>(
+                new SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
+                    codeAccessOption,
+                    syntaxDescriptor,
+                    codeFile,
+                    SharedSettings.JsonZoom))
             {
                 CaptionHeight = 32,
                 ClientSize = new Size(600, 600),
@@ -144,9 +145,9 @@ namespace Eutherion.Win.MdiAppTemplate
             settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.SyntaxEditor.TrySaveToFile);
+            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.SyntaxEditor.TrySaveToFile);
 
-            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.SyntaxEditor);
+            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.DockedControl.SyntaxEditor);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
@@ -239,6 +240,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
+            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private Form CreateReadOnlyTextForm(string fileName, int width, int height)
