@@ -195,8 +195,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private const string ChangedMarker = "• ";
 
-        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
-
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
         private readonly LocalizedString untitledString;
@@ -365,22 +363,9 @@ namespace Eutherion.Win.MdiAppTemplate
             string fileName = CodeFilePathDisplayString;
             Text = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
 
-            // Invalidate to update the save button.
-            ActionHandler.Invalidate();
-
             // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
-            if (!IsDisposed && !Disposing && !SyntaxEditor.ReadOnly)
-            {
-                // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-                if (SyntaxEditor.ContainsChanges)
-                {
-                    SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
-                }
-                else
-                {
-                    ResetCloseButtonHoverColor();
-                }
-            }
+            bool isModified = !IsDisposed && !Disposing && !SyntaxEditor.ReadOnly && SyntaxEditor.ContainsChanges;
+            UpdateSaveButton(isModified);
         }
 
         private int currentActivatedErrorIndex;

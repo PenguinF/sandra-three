@@ -698,6 +698,8 @@ namespace Eutherion.Win.MdiAppTemplate
     // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
     public class MenuCaptionBarForm : OldMenuCaptionBarForm
     {
+        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
         private readonly UIActionHandler mainMenuActionHandler;
 
         public MenuCaptionBarForm()
@@ -785,6 +787,22 @@ namespace Eutherion.Win.MdiAppTemplate
             foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
             {
                 menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
+        }
+
+        internal void UpdateSaveButton(bool isModified)
+        {
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
+
+            // If something can be saved, closing is dangerous, therefore use a reddish hover color.
+            if (isModified)
+            {
+                SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
+            }
+            else
+            {
+                ResetCloseButtonHoverColor();
             }
         }
     }
