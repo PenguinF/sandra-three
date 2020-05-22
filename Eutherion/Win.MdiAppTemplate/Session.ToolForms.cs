@@ -138,7 +138,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     codeFile,
                     SharedSettings.JsonZoom))
             {
-                CaptionHeight = 32,
+                CaptionHeight = 30,
                 ClientSize = new Size(600, 600),
             };
 
