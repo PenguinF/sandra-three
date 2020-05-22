@@ -41,7 +41,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// Some non-client area handling code is adapted from:
     /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
     /// </remarks>
-    public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
+    public class OldMenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
         {
@@ -120,7 +120,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private Metrics currentMetrics;
 
-        public MenuCaptionBarForm()
+        public OldMenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
                 | ControlStyles.UserPaint
@@ -701,5 +701,10 @@ namespace Eutherion.Win.MdiAppTemplate
             if (disposing) ObservableStyle.Dispose();
             base.Dispose(disposing);
         }
+    }
+
+    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
+    public class MenuCaptionBarForm : OldMenuCaptionBarForm
+    {
     }
 }

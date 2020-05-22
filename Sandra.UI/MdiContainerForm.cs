@@ -36,7 +36,7 @@ namespace Sandra.UI
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
+    public partial class MdiContainerForm : OldMenuCaptionBarForm, IWeakEventTarget
     {
         // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
