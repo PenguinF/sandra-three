@@ -32,15 +32,6 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    /// <summary>
-    /// <see cref="UIActionForm"/> which displays a main menu inside a custom caption bar.
-    /// It is advisable to give the main menu strip a back color so it does not display
-    /// a gradient which clashes with the custom drawn caption bar area.
-    /// </summary>
-    /// <remarks>
-    /// Some non-client area handling code is adapted from:
-    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
-    /// </remarks>
     public class OldMenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
@@ -706,5 +697,28 @@ namespace Eutherion.Win.MdiAppTemplate
     // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
     public class MenuCaptionBarForm : OldMenuCaptionBarForm
     {
+    }
+
+    /// <summary>
+    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
+    /// </summary>
+    /// <typeparam name="TDockableControl">
+    /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
+    /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
+    /// </typeparam>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
+    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
+        where TDockableControl : Control, IDockableControl
+    {
+        public TDockableControl DockedControl { get; }
+
+        public MenuCaptionBarForm(TDockableControl dockableControl)
+        {
+            DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
+            Controls.Add(DockedControl);
+        }
     }
 }
