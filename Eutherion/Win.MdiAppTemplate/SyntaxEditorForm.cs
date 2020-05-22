@@ -426,7 +426,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                            SyntaxEditor.ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
                         }
                         catch (Exception exception)
                         {
