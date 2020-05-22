@@ -90,9 +90,6 @@
     <Compile Include="SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="SyntaxEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>

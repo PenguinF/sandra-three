@@ -33,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = MenuCaptionBarForm<SyntaxEditorForm<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>>;
+    using PgnForm = MenuCaptionBarForm<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
@@ -165,7 +165,7 @@ namespace Sandra.UI
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
             var pgnForm = new PgnForm(
-                new SyntaxEditorForm<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>(
+                new SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>(
                     isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                     PgnSyntaxDescriptor.Instance,
                     pgnFile,
@@ -183,9 +183,9 @@ namespace Sandra.UI
             pgnForm.Load += (_, __) => Session.Current.AttachFormStateAutoSaver(pgnForm, SettingKeys.PgnWindow, null);
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.SyntaxEditor.TrySaveToFile);
+            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);
 
-            PgnStyleSelector.InitializeStyles(pgnForm.DockedControl.SyntaxEditor);
+            PgnStyleSelector.InitializeStyles(pgnForm.DockedControl);
 
             // Don't index read-only PgnForms.
             if (!isReadOnly)

@@ -131,8 +131,8 @@ namespace Eutherion.Win.MdiAppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new MenuCaptionBarForm<SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>>(
-                new SyntaxEditorForm<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
+            var settingsForm = new MenuCaptionBarForm<SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>>(
+                new SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
                     codeAccessOption,
                     syntaxDescriptor,
                     codeFile,
@@ -145,9 +145,9 @@ namespace Eutherion.Win.MdiAppTemplate
             settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.SyntaxEditor.TrySaveToFile);
+            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
 
-            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.DockedControl.SyntaxEditor);
+            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.DockedControl);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 

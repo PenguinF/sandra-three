@@ -21,6 +21,9 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
+using Eutherion.Utils;
+using Eutherion.Win.Storage;
+using Eutherion.Win.UIActions;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
@@ -43,11 +46,182 @@ namespace Eutherion.Win.MdiAppTemplate
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx
+    public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx, IDockableControl, IWeakEventTarget
     {
+        private class ErrorListPanel : Panel, IDockableControl
+        {
+            private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
+            private static readonly Font normalFont = new Font("Calibri", 10);
+
+            private readonly SyntaxEditor<TSyntaxTree, TTerminal, TError> OwnerEditor;
+
+            private readonly ListBoxEx errorsListBox;
+
+            private readonly LocalizedString noErrorsString;
+            private readonly LocalizedString errorLocationString;
+            private readonly LocalizedString titleString;
+
+            public DockProperties DockProperties { get; } = new DockProperties();
+
+            public event Action DockPropertiesChanged;
+
+            public ErrorListPanel(SyntaxEditor<TSyntaxTree, TTerminal, TError> ownerEditor)
+            {
+                OwnerEditor = ownerEditor;
+
+                errorsListBox = new ListBoxEx
+                {
+                    Dock = DockStyle.Fill,
+                    BorderStyle = BorderStyle.None,
+                    HorizontalScrollbar = false,
+                    ItemHeight = 14,
+                    SelectionMode = SelectionMode.MultiExtended,
+                };
+
+                errorsListBox.BindStandardCopySelectUIActions();
+
+                errorsListBox.BindActions(new UIActionBindings
+                {
+                    { SharedUIAction.GoToPreviousError, OwnerEditor.TryGoToPreviousError },
+                    { SharedUIAction.GoToNextError, OwnerEditor.TryGoToNextError },
+                });
+
+                UIMenu.AddTo(errorsListBox);
+
+                // Assume that if this display text changes, that of errorLocationString changes too.
+                noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
+                errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
+                titleString = new LocalizedString(SharedLocalizedStringKeys.ErrorPaneTitle);
+
+                noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
+                errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
+                titleString.DisplayText.ValueChanged += _ => UpdateText();
+
+                errorsListBox.DoubleClick += (_, __) => OwnerEditor.ActivateSelectedError(errorsListBox.SelectedIndex);
+                errorsListBox.KeyDown += ErrorsListBox_KeyDown;
+
+                Controls.Add(errorsListBox);
+            }
+
+            protected override void OnBackColorChanged(EventArgs e)
+            {
+                // Blend background colors.
+                errorsListBox.BackColor = BackColor;
+                base.OnBackColorChanged(e);
+            }
+
+            public void UpdateText()
+            {
+                DockProperties.CaptionText = StringUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
+                DockPropertiesChanged?.Invoke();
+            }
+
+            public int SelectedErrorIndex
+            {
+                get => errorsListBox.SelectedIndex;
+                set
+                {
+                    errorsListBox.ClearSelected();
+                    errorsListBox.SelectedIndex = value;
+                }
+            }
+
+            public void DisplayErrors(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor)
+            {
+                errorsListBox.BeginUpdate();
+
+                try
+                {
+                    if (syntaxEditor.CurrentErrors.Count == 0)
+                    {
+                        errorsListBox.Items.Clear();
+                        errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
+                        errorsListBox.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
+                        errorsListBox.Font = noErrorsFont;
+                    }
+                    else
+                    {
+                        var errorMessages = (from error in syntaxEditor.CurrentErrors
+                                             let errorStart = syntaxEditor.SyntaxDescriptor.GetErrorRange(error).Item1
+                                             let errorMessage = syntaxEditor.SyntaxDescriptor.GetErrorMessage(error)
+                                             let lineIndex = (syntaxEditor.LineFromPosition(errorStart) + 1).ToStringInvariant()
+                                             let position = (syntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
+                                             // Instead of using errorLocationString.DisplayText.Value,
+                                             // use the current localizer to format the localized string.
+                                             let fullErrorMessage = Session.Current.CurrentLocalizer.Localize(
+                                                 errorLocationString.Key,
+                                                 new[] { errorMessage, lineIndex, position })
+                                             select Session.Current.CurrentLocalizer.ToSentenceCase(fullErrorMessage)).ToArray();
+
+                        int oldItemCount = errorsListBox.Items.Count;
+                        var newErrorCount = errorMessages.Length;
+                        int index = 0;
+
+                        while (index < errorsListBox.Items.Count && index < newErrorCount)
+                        {
+                            // Copy to existing index so scroll position is maintained.
+                            errorsListBox.Items[index] = errorMessages[index];
+                            index++;
+                        }
+
+                        // Remove excess old items.
+                        for (int k = oldItemCount - 1; index <= k; k--)
+                        {
+                            errorsListBox.Items.RemoveAt(k);
+                        }
+
+                        while (index < newErrorCount)
+                        {
+                            errorsListBox.Items.Add(errorMessages[index]);
+                            index++;
+                        }
+
+                        errorsListBox.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
+                        errorsListBox.Font = normalFont;
+                    }
+                }
+                finally
+                {
+                    errorsListBox.EndUpdate();
+                }
+            }
+
+            private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
+            {
+                if (e.KeyData == Keys.Enter)
+                {
+                    OwnerEditor.ActivateSelectedError(errorsListBox.SelectedIndex);
+                }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    noErrorsString.Dispose();
+                    errorLocationString.Dispose();
+                    titleString.Dispose();
+                }
+
+                base.Dispose(disposing);
+            }
+
+            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+        }
+
         private const int ErrorIndicatorIndex = 8;
         private const int WarningIndicatorIndex = 9;
         private const int MessageIndicatorIndex = 10;
+
+        private const string ChangedMarker = "• ";
+
+        private readonly Box<Form> errorListFormBox = new Box<Form>();
+
+        private readonly LocalizedString untitledString;
+
+        public DockProperties DockProperties { get; } = new DockProperties();
+
+        public event Action DockPropertiesChanged;
 
         /// <summary>
         /// Gets the syntax descriptor.
@@ -90,8 +264,10 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <exception cref="ArgumentNullException">
         /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
-        public SyntaxEditor(SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
-                            WorkingCopyTextFile codeFile)
+        public SyntaxEditor(SyntaxEditorCodeAccessOption codeAccessOption,
+                            SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
+                            WorkingCopyTextFile codeFile,
+                            SettingProperty<int> zoomSetting)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
@@ -145,6 +321,114 @@ namespace Eutherion.Win.MdiAppTemplate
             containsChangesAtSavePoint = CodeFile.ContainsChanges;
             CopyTextFromTextFile();
             EmptyUndoBuffer();
+
+            ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly;
+
+            // Initialize zoom factor and listen to changes.
+            if (Session.Current.TryGetAutoSaveValue(zoomSetting, out int zoomFactor))
+            {
+                Zoom = zoomFactor;
+            }
+
+            ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(zoomSetting, e.ZoomFactor);
+
+            this.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.SaveToFile, TrySaveToFile },
+            });
+
+            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
+            {
+                this.BindActions(new UIActionBindings
+                {
+                    { SharedUIAction.SaveAs, TrySaveAs },
+                });
+            }
+
+            BindStandardEditUIActions();
+
+            this.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ShowErrorPane, TryShowErrorPane },
+                { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
+                { SharedUIAction.GoToNextError, TryGoToNextError },
+            });
+
+            UIMenu.AddTo(this);
+
+            // Changed marker.
+            untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
+            untitledString.DisplayText.ValueChanged += _ =>
+            {
+                UpdateChangedMarker();
+                if (errorListFormBox.Value is MenuCaptionBarForm<ErrorListPanel> errorListForm)
+                {
+                    errorListForm.DockedControl.UpdateText();
+                }
+            };
+
+            // Save points.
+            SavePointLeft += (_, __) => UpdateChangedMarker();
+            SavePointReached += (_, __) => UpdateChangedMarker();
+            CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
+
+            // Initialize menu strip.
+            var fileMenu = new List<DefaultUIActionBinding>();
+
+            switch (codeAccessOption)
+            {
+                default:
+                case SyntaxEditorCodeAccessOption.Default:
+                    fileMenu.AddRange(new[] {
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.SaveAs,
+                        SharedUIAction.Close });
+                    break;
+                case SyntaxEditorCodeAccessOption.FixedFile:
+                    fileMenu.AddRange(new[] {
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.Close });
+                    break;
+                case SyntaxEditorCodeAccessOption.ReadOnly:
+                    fileMenu.AddRange(new[] {
+                        SharedUIAction.Close });
+                    break;
+            }
+
+            var editMenu = new List<DefaultUIActionBinding>();
+            editMenu.AddRange(new[] {
+                SharedUIAction.Undo,
+                SharedUIAction.Redo,
+                SharedUIAction.CutSelectionToClipBoard,
+                SharedUIAction.CopySelectionToClipBoard,
+                SharedUIAction.PasteSelectionFromClipBoard,
+                SharedUIAction.SelectAllText });
+
+            var viewMenu = new List<DefaultUIActionBinding>();
+            viewMenu.AddRange(new[] {
+                SharedUIAction.ZoomIn,
+                SharedUIAction.ZoomOut });
+
+            DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
+            {
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()),
+                    DropDownItems = fileMenu
+                },
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
+                    DropDownItems = editMenu
+                },
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
+                    DropDownItems = viewMenu
+                },
+            };
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
@@ -167,6 +451,8 @@ namespace Eutherion.Win.MdiAppTemplate
                     CopyTextFromTextFile();
                 }
             }
+
+            UpdateChangedMarker();
         }
 
         private bool copyingTextFromTextFile;
@@ -255,7 +541,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 textDirty = false;
 
-                CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
+                UpdateErrorListForm();
             }
 
             if (syntaxTree == null) return;
@@ -292,8 +578,6 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
-
-        public event EventHandler CurrentErrorsChanged;
 
         public void ActivateError(int errorIndex)
         {
@@ -370,14 +654,200 @@ namespace Eutherion.Win.MdiAppTemplate
             base.OnDwellEnd(e);
         }
 
+        private void UpdateErrorListForm()
+        {
+            if (errorListFormBox.Value is MenuCaptionBarForm<ErrorListPanel> errorListForm)
+            {
+                errorListForm.DockedControl.DisplayErrors(this);
+            }
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            // Individual error translations may have changed.
+            UpdateErrorListForm();
+        }
+
+        private string CodeFilePathDisplayString
+        {
+            get
+            {
+                string openTextFilePath = CodeFile.OpenTextFilePath;
+
+                // Use untitledString for new files that are not yet saved.
+                return openTextFilePath == null
+                    ? untitledString.DisplayText.Value
+                    : Path.GetFileName(openTextFilePath);
+            }
+        }
+
+        private void UpdateChangedMarker()
+        {
+            string fileName = CodeFilePathDisplayString;
+            DockProperties.CaptionText = ContainsChanges ? ChangedMarker + fileName : fileName;
+
+            // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
+            DockProperties.IsModified = !IsDisposed && !Disposing && !ReadOnly && ContainsChanges;
+            DockPropertiesChanged?.Invoke();
+        }
+
+        private int currentActivatedErrorIndex;
+
+        private void ActivateSelectedError(int index)
+        {
+            if (0 <= index && index < CurrentErrors.Count)
+            {
+                currentActivatedErrorIndex = index;
+                ActivateError(index);
+            }
+        }
+
+        void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel)
+        {
+            // Only show message box if there's no auto save file from which local changes can be recovered.
+            if (ContainsChanges && CodeFile.AutoSaveFile == null)
+            {
+                DialogResult result = MessageBox.Show(
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { CodeFilePathDisplayString }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button3);
+
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        try
+                        {
+                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                        }
+                        catch (Exception exception)
+                        {
+                            cancel = true;
+                            MessageBox.Show(exception.Message);
+                        }
+                        break;
+                    case DialogResult.No:
+                        break;
+                    default:
+                        cancel = true;
+                        break;
+                }
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 CodeFile.Dispose();
+                untitledString?.Dispose();
             }
 
             base.Dispose(disposing);
+        }
+
+        public UIActionState TryShowErrorPane(bool perform)
+        {
+            // No errors while read-only: no need to show this action.
+            if (ReadOnly && CurrentErrors.Count == 0)
+            {
+                return UIActionVisibility.Hidden;
+            }
+
+            if (perform)
+            {
+                // Session.Current discouraged, but contains the application icon.
+                Session.Current.OpenOrActivateToolForm(
+                    this,
+                    errorListFormBox,
+                    () =>
+                    {
+                        // Estimate how high the error list form needs to be to show all the errors.
+                        // Stay within a certain range.
+                        const int minHeight = 100;
+                        int estimatedHeight = CurrentErrors.Count * 15;
+
+                        // Add padding * 2.
+                        estimatedHeight += 16;
+
+                        int maxHeight = ClientSize.Height;
+                        if (maxHeight < estimatedHeight) estimatedHeight = maxHeight;
+                        if (estimatedHeight < minHeight) estimatedHeight = minHeight;
+
+                        // Use a panel to blend the errors list box with the background and at least appear as if its height is constant.
+                        return new MenuCaptionBarForm<ErrorListPanel>(
+                            new ErrorListPanel(this)
+                            {
+                                Dock = DockStyle.Fill,
+                                BackColor = DefaultSyntaxEditorStyle.BackColor,
+                                Padding = new Padding(6),
+                            })
+                        {
+                            CaptionHeight = 26,
+                            ShowIcon = false,
+                            ClientSize = new Size(Width, estimatedHeight),
+                        };
+                    });
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryGoToPreviousError(bool perform)
+        {
+            if (ReadOnly && CurrentErrors.Count == 0)
+            {
+                return UIActionVisibility.Hidden;
+            }
+
+            int errorCount = CurrentErrors.Count;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to previous or last position.
+                MenuCaptionBarForm<ErrorListPanel> errorListForm = errorListFormBox.Value as MenuCaptionBarForm<ErrorListPanel>;
+                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.DockedControl.SelectedErrorIndex;
+
+                // Decrease and range check, since the error count may have changed in the meantime.
+                targetIndex--;
+                if (targetIndex < 0) targetIndex = errorCount - 1;
+
+                // Update error list form and activate error in the editor.
+                if (errorListForm != null) errorListForm.DockedControl.SelectedErrorIndex = targetIndex;
+                ActivateSelectedError(targetIndex);
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryGoToNextError(bool perform)
+        {
+            if (ReadOnly && CurrentErrors.Count == 0)
+            {
+                return UIActionVisibility.Hidden;
+            }
+
+            int errorCount = CurrentErrors.Count;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to next or first position.
+                MenuCaptionBarForm<ErrorListPanel> errorListForm = errorListFormBox.Value as MenuCaptionBarForm<ErrorListPanel>;
+                int targetIndex = errorListForm == null ? currentActivatedErrorIndex : errorListForm.DockedControl.SelectedErrorIndex;
+
+                // Increase and range check, since the error count may have changed in the meantime.
+                targetIndex++;
+                if (targetIndex >= errorCount) targetIndex = 0;
+
+                // Update error list form and activate error in the editor.
+                if (errorListForm != null) errorListForm.DockedControl.SelectedErrorIndex = targetIndex;
+                ActivateSelectedError(targetIndex);
+            }
+
+            return UIActionVisibility.Enabled;
         }
 
         public UIActionState TrySaveToFile(bool perform)
@@ -525,5 +995,26 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
         public static readonly Font CallTipFont = new Font("Segoe UI", 10);
+    }
+
+    /// <summary>
+    /// Specifies options for accessing the code file opened by a syntax editor.
+    /// </summary>
+    public enum SyntaxEditorCodeAccessOption
+    {
+        /// <summary>
+        /// The code file is editable and can be saved under a different name.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// The code file is editable but cannot be saved under a different name.
+        /// </summary>
+        FixedFile,
+
+        /// <summary>
+        /// The code file is read-only.
+        /// </summary>
+        ReadOnly,
     }
 }
