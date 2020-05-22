@@ -42,13 +42,13 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         public const string SessionUIActionPrefix = nameof(Session) + ".";
 
-        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> aboutFormBox = new Box<Form>();
-        private readonly Box<Form> creditsFormBox = new Box<Form>();
-        private readonly Box<Form> languageFormBox = new Box<Form>();
+        private readonly Box<MenuCaptionBarForm> localSettingsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> defaultSettingsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> languageFormBox = new Box<MenuCaptionBarForm>();
 
-        internal void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        internal void OpenOrActivateToolForm(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {
@@ -94,11 +94,11 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        private Form CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
-                                        SettingsFile settingsFile,
-                                        Func<string> initialTextGenerator,
-                                        SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        private MenuCaptionBarForm CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
+                                                      SettingsFile settingsFile,
+                                                      Func<string> initialTextGenerator,
+                                                      SettingProperty<PersistableFormState> formStateSetting,
+                                                      SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
 
@@ -243,7 +243,7 @@ namespace Eutherion.Win.MdiAppTemplate
             void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
-        private Form CreateReadOnlyTextForm(string fileName, int width, int height)
+        private MenuCaptionBarForm CreateReadOnlyTextForm(string fileName, int width, int height)
         {
             string text;
             try

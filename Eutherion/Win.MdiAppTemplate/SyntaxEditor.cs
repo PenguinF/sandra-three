@@ -215,7 +215,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private const string ChangedMarker = "• ";
 
-        private readonly Box<Form> errorListFormBox = new Box<Form>();
+        private readonly Box<MenuCaptionBarForm> errorListFormBox = new Box<MenuCaptionBarForm>();
 
         private readonly LocalizedString untitledString;
 
