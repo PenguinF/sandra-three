@@ -25,6 +25,7 @@ using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
@@ -697,6 +698,86 @@ namespace Eutherion.Win.MdiAppTemplate
     // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
     public class MenuCaptionBarForm : OldMenuCaptionBarForm
     {
+        private readonly UIActionHandler mainMenuActionHandler;
+
+        public MenuCaptionBarForm()
+        {
+            MainMenuStrip = new MenuStrip();
+            Controls.Add(MainMenuStrip);
+
+            mainMenuActionHandler = new UIActionHandler();
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)
+        {
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var binding in bindings)
+            {
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                {
+                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    {
+                        try
+                        {
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                        ? UIActionVisibility.Disabled
+                                        : currentActionState;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
+            }
+
+            return menuNodes;
+        }
+
+        internal void UpdateMenu(IEnumerable<MainMenuDropDownItem> mainMenuItems)
+        {
+            var topLevelContainers = new List<UIMenuNode.Container>();
+
+            foreach (var mainMenuItem in mainMenuItems)
+            {
+                if (mainMenuItem.Container != null && mainMenuItem.DropDownItems != null && mainMenuItem.DropDownItems.Any())
+                {
+                    topLevelContainers.Add(mainMenuItem.Container);
+                    mainMenuItem.Container.Nodes.AddRange(BindMainMenuItemActions(mainMenuItem.DropDownItems));
+                }
+            }
+
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, topLevelContainers, MainMenuStrip.Items);
+
+            foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+            {
+                mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+            }
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            var mainMenuItem = (ToolStripMenuItem)sender;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
+        }
     }
 
     /// <summary>

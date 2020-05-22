@@ -19,7 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
+using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -51,5 +54,21 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets the text to display in a caption bar.
         /// </summary>
         public string CaptionText { get; set; }
+    }
+
+    /// <summary>
+    /// Contains a high level definition of a main menu item.
+    /// </summary>
+    public struct MainMenuDropDownItem
+    {
+        /// <summary>
+        /// Represents the main menu container item.
+        /// </summary>
+        public UIMenuNode.Container Container;
+
+        /// <summary>
+        /// Enumerates the bindings to add to the container.
+        /// </summary>
+        public IEnumerable<DefaultUIActionBinding> DropDownItems;
     }
 }

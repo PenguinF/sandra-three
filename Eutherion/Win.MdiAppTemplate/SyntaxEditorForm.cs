@@ -199,8 +199,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
-        private readonly UIActionHandler mainMenuActionHandler;
-
         private readonly LocalizedString untitledString;
 
         public SyntaxEditor<TSyntaxTree, TTerminal, TError> SyntaxEditor { get; }
@@ -272,52 +270,62 @@ namespace Eutherion.Win.MdiAppTemplate
             BindStandardUIActions();
 
             // Initialize menu strip.
-            mainMenuActionHandler = new UIActionHandler();
-
-            var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
+            var fileMenu = new List<DefaultUIActionBinding>();
 
             switch (codeAccessOption)
             {
                 default:
                 case SyntaxEditorCodeAccessOption.Default:
-                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                    fileMenu.AddRange(new[] {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.SaveAs,
-                        SharedUIAction.Close));
+                        SharedUIAction.Close });
                     break;
                 case SyntaxEditorCodeAccessOption.FixedFile:
-                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                    fileMenu.AddRange(new[] {
                         SharedUIAction.SaveToFile,
-                        SharedUIAction.Close));
+                        SharedUIAction.Close });
                     break;
                 case SyntaxEditorCodeAccessOption.ReadOnly:
-                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
-                        SharedUIAction.Close));
+                    fileMenu.AddRange(new[] {
+                        SharedUIAction.Close });
                     break;
             }
 
-            var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
-            editMenu.Nodes.AddRange(BindMainMenuItemActions(
+            var editMenu = new List<DefaultUIActionBinding>();
+            editMenu.AddRange(new[] {
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
                 SharedUIAction.CutSelectionToClipBoard,
                 SharedUIAction.CopySelectionToClipBoard,
                 SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText));
+                SharedUIAction.SelectAllText });
 
-            var viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
-            viewMenu.Nodes.AddRange(BindMainMenuItemActions(
+            var viewMenu = new List<DefaultUIActionBinding>();
+            viewMenu.AddRange(new[] {
                 SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut));
+                SharedUIAction.ZoomOut });
 
-            MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
-            Controls.Add(MainMenuStrip);
-
-            foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+            var mainMenuItems = new List<MainMenuDropDownItem>
             {
-                mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
-            }
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()),
+                    DropDownItems = fileMenu
+                },
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
+                    DropDownItems = editMenu
+                },
+                new MainMenuDropDownItem
+                {
+                    Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
+                    DropDownItems = viewMenu
+                },
+            };
+
+            UpdateMenu(mainMenuItems);
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
@@ -339,56 +347,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             // Individual error translations may have changed.
             UpdateErrorListForm();
-        }
-
-        private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
-        {
-            var menuNodes = new List<UIMenuNode>();
-
-            foreach (var binding in bindings)
-            {
-                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
-                {
-                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
-
-                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
-                    {
-                        try
-                        {
-                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
-                            {
-                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
-                                {
-                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
-                                        ? UIActionVisibility.Disabled
-                                        : currentActionState;
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(e.Message);
-                        }
-
-                        // No handler in the chain that processes the UIAction actively, so set to disabled.
-                        return UIActionVisibility.Disabled;
-                    }));
-                }
-            }
-
-            return menuNodes;
-        }
-
-        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            var mainMenuItem = (ToolStripMenuItem)sender;
-
-            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
-            {
-                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
-            }
         }
 
         private string CodeFilePathDisplayString
