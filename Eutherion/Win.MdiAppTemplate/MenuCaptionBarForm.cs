@@ -708,6 +708,13 @@ namespace Eutherion.Win.MdiAppTemplate
             mainMenuActionHandler = new UIActionHandler();
 
             BindStandardUIActions();
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            UIMenu.UpdateMenu(MainMenuStrip.Items);
         }
 
         private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)

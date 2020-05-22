@@ -338,11 +338,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)
         {
-            if (MainMenuStrip != null)
-            {
-                UIMenu.UpdateMenu(MainMenuStrip.Items);
-            }
-
             // Individual error translations may have changed.
             UpdateErrorListForm();
         }
