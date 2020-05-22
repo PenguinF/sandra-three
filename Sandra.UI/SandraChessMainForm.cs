@@ -168,9 +168,9 @@ namespace Sandra.UI
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                 PgnSyntaxDescriptor.Instance,
                 pgnFile,
-                SettingKeys.PgnWindow,
                 SettingKeys.PgnZoom)
             {
+                CaptionHeight = 32,
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                 ClientSize = new Size(600, 600),
                 ShowInTaskbar = true,
@@ -178,6 +178,11 @@ namespace Sandra.UI
                 ShowIcon = true,
                 StartPosition = FormStartPosition.CenterScreen,
             };
+
+            pgnForm.Load += (_, __) => Session.Current.AttachFormStateAutoSaver(pgnForm, SettingKeys.PgnWindow, null);
+
+            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
+            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.SyntaxEditor.TrySaveToFile);
 
             PgnStyleSelector.InitializeStyles(pgnForm.SyntaxEditor);
 

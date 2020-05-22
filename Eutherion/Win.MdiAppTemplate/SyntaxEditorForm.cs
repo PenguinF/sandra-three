@@ -47,11 +47,9 @@ namespace Eutherion.Win.MdiAppTemplate
             private readonly LocalizedString errorLocationString;
             private readonly LocalizedString titleString;
 
-            public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm, int errorCount, int width, int maxHeight)
+            public ErrorListForm(SyntaxEditorForm<TSyntaxTree, TTerminal, TError> ownerEditorForm)
             {
                 OwnerEditorForm = ownerEditorForm;
-
-                CaptionHeight = 26;
 
                 errorsListBox = new ListBoxEx
                 {
@@ -99,20 +97,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 blendPanel.Controls.Add(errorsListBox);
                 Controls.Add(blendPanel);
-
-                // Estimate how high the error list form needs to be to show all the errors.
-                // Stay within a certain range.
-                const int minHeight = 100;
-                int estimatedHeight = errorCount * 15;
-
-                // Add blendPanel/fillPanel paddings * 2.
-                estimatedHeight += 16;
-
-                if (maxHeight < estimatedHeight) estimatedHeight = maxHeight;
-                if (estimatedHeight < minHeight) estimatedHeight = minHeight;
-
-                ClientSize = new Size(width, estimatedHeight);
-                ShowIcon = false;
             }
 
             public void UpdateText()
@@ -217,8 +201,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
-        private readonly SettingProperty<PersistableFormState> formStateSetting;
-
         private readonly UIActionHandler mainMenuActionHandler;
 
         private readonly LocalizedString untitledString;
@@ -228,13 +210,8 @@ namespace Eutherion.Win.MdiAppTemplate
         public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                 SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
-                                SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> zoomSetting)
         {
-            this.formStateSetting = formStateSetting;
-
-            CaptionHeight = 32;
-
             SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {
                 Dock = DockStyle.Fill,
@@ -253,9 +230,6 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 { SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile },
             });
-
-            // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
-            this.BindAction(SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile);
 
             if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
             {
@@ -471,12 +445,6 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            Session.Current.AttachFormStateAutoSaver(this, formStateSetting, null);
-            base.OnLoad(e);
-        }
-
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
@@ -537,7 +505,27 @@ namespace Eutherion.Win.MdiAppTemplate
                 Session.Current.OpenOrActivateToolForm(
                     this,
                     errorListFormBox,
-                    () => new ErrorListForm(this, SyntaxEditor.CurrentErrors.Count, Width, ClientSize.Height));
+                    () =>
+                    {
+                        // Estimate how high the error list form needs to be to show all the errors.
+                        // Stay within a certain range.
+                        const int minHeight = 100;
+                        int estimatedHeight = SyntaxEditor.CurrentErrors.Count * 15;
+
+                        // Add padding * 2.
+                        estimatedHeight += 16;
+
+                        int maxHeight = ClientSize.Height;
+                        if (maxHeight < estimatedHeight) estimatedHeight = maxHeight;
+                        if (estimatedHeight < minHeight) estimatedHeight = minHeight;
+
+                        return new ErrorListForm(this)
+                        {
+                            CaptionHeight = 26,
+                            ShowIcon = false,
+                            ClientSize = new Size(Width, estimatedHeight),
+                        };
+                    });
             }
 
             return UIActionVisibility.Enabled;

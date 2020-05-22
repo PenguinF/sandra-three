@@ -135,11 +135,16 @@ namespace Eutherion.Win.MdiAppTemplate
                 codeAccessOption,
                 syntaxDescriptor,
                 codeFile,
-                formStateSetting,
                 SharedSettings.JsonZoom)
             {
+                CaptionHeight = 32,
                 ClientSize = new Size(600, 600),
             };
+
+            settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
+
+            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
+            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.SyntaxEditor.TrySaveToFile);
 
             JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.SyntaxEditor);
 
