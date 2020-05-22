@@ -92,22 +92,13 @@ namespace Eutherion.Win.MdiAppTemplate
                     Padding = new Padding(6),
                 };
 
-                var fillPanel = new Panel
-                {
-                    Dock = DockStyle.Fill,
-                    Padding = new Padding(2),
-                };
-
                 // Blend background colors.
                 errorsListBox.BackColor = DefaultSyntaxEditorStyle.BackColor;
                 blendPanel.BackColor = DefaultSyntaxEditorStyle.BackColor;
-                fillPanel.BackColor = Color.White;
                 BackColor = Color.White;
 
                 blendPanel.Controls.Add(errorsListBox);
-                fillPanel.Controls.Add(blendPanel);
-
-                Controls.Add(fillPanel);
+                Controls.Add(blendPanel);
 
                 // Estimate how high the error list form needs to be to show all the errors.
                 // Stay within a certain range.
@@ -230,8 +221,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private readonly UIActionHandler mainMenuActionHandler;
 
-        private readonly Panel fillPanel;
-
         private readonly LocalizedString untitledString;
 
         public SyntaxEditor<TSyntaxTree, TTerminal, TError> SyntaxEditor { get; }
@@ -306,15 +295,7 @@ namespace Eutherion.Win.MdiAppTemplate
             // Interaction between settingsTextBox and errorsTextBox.
             SyntaxEditor.CurrentErrorsChanged += (_, __) => UpdateErrorListForm();
 
-            fillPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(2),
-                BackColor = ObservableStyle.BackColor,
-            };
-
-            fillPanel.Controls.Add(SyntaxEditor);
-            Controls.Add(fillPanel);
+            Controls.Add(SyntaxEditor);
 
             BindStandardUIActions();
 
@@ -367,13 +348,6 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
-
-            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
-        }
-
-        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
-        {
-            fillPanel.BackColor = ObservableStyle.BackColor;
         }
 
         private void UpdateErrorListForm()
