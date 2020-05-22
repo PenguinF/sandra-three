@@ -786,7 +786,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         {
                             CaptionHeight = 26,
                             ShowIcon = false,
-                            ClientSize = new Size(Width, estimatedHeight),
+                            ClientSize = new Size(Math.Min(Width, 600), estimatedHeight),
                         };
                     });
             }
