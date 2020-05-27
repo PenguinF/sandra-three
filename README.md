@@ -1,25 +1,35 @@
 # sandra-three
 Third incarnation of a chess UI for Windows 7 and higher.
 
-![Screenshot Sandra 0.5](https://github.com/PenguinF/sandra-three/tree/master/Doc/screenshot_Sandra_0.5.png)
+![Preview Sandra](https://github.com/PenguinF/sandra-three/tree/master/Doc/preview_sandra_0.9.png)
 
-Main design principle is to have a fluid interface, in which everything should 'just work'. This has led to various complex features which should be hardly noticable, but without which the application feels clumsy:
+Version 1.0 is a raw PGN editor, with following features:
 
-* Windows click or snap together when moved around.
-* There are hardly any modal dialogs. For example, choosing a promotion piece is done by hovering over one of the four quadrants of the promotion square.
+* View and edit PGN files.
+* Single instance.
+* Dragging a PGN file onto the window opens it, or activates it if already open.
+* Smart PGN checker with warnings and error messages.
+* Auto-saves edits and window state. Reopening the application after closing it restores its exact state.
+* Works with large PGN files without problems.
+* Automatically reloads files if updated on disk.
+* Chessboard windows click or snap together when moved around.
 * Appropriate effects for special types of moves.
-* All text is localized. There's a list of available languages under the globe icon. Move notation is localized too. There's also the option to switch to PGN.
-* The session is auto-saved. When restarting the application, it continues exactly where it left off. Even after a system crash or power failure. *[Work in progress.]*
-* User preferences are live: modified preferences are applied immediately, without requiring an application restart.
-* JSON editor for user preferences with syntax highlighting and error reporting.
 * Different modes of making moves.
-* Everything is accessible by keyboard. *[Work in progress.]*
-* Pieces can be picked up, and are drawn correctly no matter where the mouse is on the screen.
-* Clicking on a move in the moves list navigates to the corresponding position in the game.
+* Pieces can be picked up and moved across the entire screen, not just within their window boundaries.
+* Synchronized navigation between PGN editors and chessboards.
 * A screenshot of a diagram can be copied to the clipboard with Ctrl+C or by using the corresponding menu item.
-* Turning the mouse wheel, or pressing the Ctrl++ and Ctrl+- keyboard shortcuts will zoom in and out.
+* Tab pages can be undocked to become separate windows and vice versa.
+* All text is localized. There's a list of available languages under the globe icon.
+* Json editor for user preferences with syntax highlighting and error reporting.
+* User preferences are live: modified preferences are applied immediately, without requiring an application restart.
+* Everything is accessible by keyboard. *[Work in progress.]*
+* Turning the mouse wheel, or pressing the Ctrl++ and Ctrl+- keyboard shortcuts will zoom in and out. This applies to chessboards as well as PGN editors.
+* Saved screen space by displaying the main menu inside the caption area of the window.
+* Responds to Windows display settings such as accent colors, or dark mode.
+* Modal dialogs are avoided unless absolutely necessary.
+* Developer mode to assist with SandraChess development. It reveals a menu item to edit the localized strings of the current language for example.
 
-Version 1.0 will be released when all abovementioned works-in-progress have been completed.
+Some of these features are still under construction.
 
 ***
 
