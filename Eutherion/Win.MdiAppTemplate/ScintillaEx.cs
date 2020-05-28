@@ -44,7 +44,7 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             UsePopup(false);
 
-            BufferedDraw = false;
+            BufferedDraw = true;
 
             //https://notepad-plus-plus.org/community/topic/12576/list-of-all-assigned-keyboard-shortcuts/8
             //https://scintilla.org/CommandValues.html
