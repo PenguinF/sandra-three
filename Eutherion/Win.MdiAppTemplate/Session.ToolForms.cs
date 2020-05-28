@@ -44,9 +44,12 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private readonly Box<MenuCaptionBarForm> localSettingsFormBox = new Box<MenuCaptionBarForm>();
         private readonly Box<MenuCaptionBarForm> defaultSettingsFormBox = new Box<MenuCaptionBarForm>();
+
+        // Indexed by language file.
+        private readonly Dictionary<string, Box<MenuCaptionBarForm>> languageFormBoxes = new Dictionary<string, Box<MenuCaptionBarForm>>(StringComparer.OrdinalIgnoreCase);
+
         private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
         private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
-        private readonly Box<MenuCaptionBarForm> languageFormBox = new Box<MenuCaptionBarForm>();
 
         internal void OpenOrActivateToolForm(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
         {
@@ -377,7 +380,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 OpenOrActivateToolForm(
                     null,
-                    languageFormBox,
+                    languageFormBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<MenuCaptionBarForm>()),
                     () =>
                     {
                         // Generate translations into language file if empty.
