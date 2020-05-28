@@ -261,20 +261,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
                     mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
                 }
-
-                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
-                {
-                    ObservableStyle.Update(() =>
-                    {
-                        ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                        ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
-                        ObservableStyle.Font = MainMenuStrip.Font;
-                    });
-                }
-                else
-                {
-                    ObservableStyle.Font = MainMenuStrip.Font;
-                }
             }
         }
 
