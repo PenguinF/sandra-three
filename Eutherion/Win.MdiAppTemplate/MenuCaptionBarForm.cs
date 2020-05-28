@@ -70,6 +70,10 @@ namespace Eutherion.Win.MdiAppTemplate
             public int SaveButtonLeft;
             public int CloseButtonLeft;
 
+            // Need to display the entire menu, the system buttons, and the border thickness.
+            public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
+            public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
+
             public void UpdateSystemButtonMetrics(bool saveButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
@@ -78,7 +82,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (SystemButtonTop < 0)
                 {
                     SystemButtonTop = 0;
-                    SystemButtonHeight = CaptionHeight;
+                    SystemButtonHeight = CaptionHeight - VerticalResizeBorderThickness;
                 }
                 else
                 {
@@ -520,6 +524,8 @@ namespace Eutherion.Win.MdiAppTemplate
                         currentMetrics.ClientAreaHeight);
                 }
             }
+
+            MinimumSize = new Size(currentMetrics.MinimumWidth, currentMetrics.MinimumHeight);
 
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
