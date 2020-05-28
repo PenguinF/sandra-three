@@ -70,6 +70,10 @@ namespace Eutherion.Win.MdiAppTemplate
             public int SaveButtonLeft;
             public int CloseButtonLeft;
 
+            // Need to display the entire menu, the system buttons, and the border thickness.
+            public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
+            public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
+
             public void UpdateSystemButtonMetrics(bool saveButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
@@ -78,7 +82,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (SystemButtonTop < 0)
                 {
                     SystemButtonTop = 0;
-                    SystemButtonHeight = CaptionHeight;
+                    SystemButtonHeight = CaptionHeight - VerticalResizeBorderThickness;
                 }
                 else
                 {
@@ -129,7 +133,15 @@ namespace Eutherion.Win.MdiAppTemplate
             maximizeButton = CreateCaptionButton();
             maximizeButton.Click += (_, __) =>
             {
-                WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                inRestoreCommand = WindowState == FormWindowState.Maximized;
+                try
+                {
+                    WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                }
+                finally
+                {
+                    inRestoreCommand = false;
+                }
                 UpdateMaximizeButtonIcon();
             };
 
@@ -248,20 +260,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
                     mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
-                }
-
-                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
-                {
-                    ObservableStyle.Update(() =>
-                    {
-                        ObservableStyle.HoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
-                        ObservableStyle.HoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
-                        ObservableStyle.Font = MainMenuStrip.Font;
-                    });
-                }
-                else
-                {
-                    ObservableStyle.Font = MainMenuStrip.Font;
                 }
             }
         }
@@ -513,6 +511,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 }
             }
 
+            MinimumSize = new Size(currentMetrics.MinimumWidth, currentMetrics.MinimumHeight);
+
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
             UpdateMaximizeButtonIcon();
@@ -607,6 +607,9 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private bool inRestoreCommand;
+        private Rectangle lastKnownNormalWindowRectangle;
+
         protected override void WndProc(ref Message m)
         {
             if (m.Msg >= WM.NCCALCSIZE && m.Msg <= WM.NCHITTEST)
@@ -668,23 +671,56 @@ namespace Eutherion.Win.MdiAppTemplate
                     this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                 }
             }
+            else if (m.Msg == WM.WINDOWPOSCHANGED)
+            {
+                base.WndProc(ref m);
+
+                if (WindowState == FormWindowState.Normal)
+                {
+                    if (inRestoreCommand)
+                    {
+                        // Undo effects of RestoreWindowBoundsIfNecessary(), without a non-client area the restore bounds are exactly right.
+                        SetBounds(lastKnownNormalWindowRectangle.X,
+                                  lastKnownNormalWindowRectangle.Y,
+                                  lastKnownNormalWindowRectangle.Width,
+                                  lastKnownNormalWindowRectangle.Height,
+                                  BoundsSpecified.All);
+                    }
+                    else
+                    {
+                        lastKnownNormalWindowRectangle = Bounds;
+                    }
+                }
+            }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
             {
                 // Windows 7 and lower only. This message is not used in Windows 8 and higher.
                 // Make sure to update the accent colors as well.
                 UpdateCaptionAreaButtonsBackColor();
             }
-
-            base.WndProc(ref m);
-
-            // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
-            if (m.Msg == WM.SYSCOMMAND)
+            else if (m.Msg == WM.SYSCOMMAND)
             {
                 int wParam = SC.MASK & m.WParam.ToInt32();
-                if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
+                inRestoreCommand = wParam == SC.RESTORE;
+
+                try
                 {
-                    UpdateMaximizeButtonIcon();
+                    base.WndProc(ref m);
+
+                    // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
+                    if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
+                    {
+                        UpdateMaximizeButtonIcon();
+                    }
                 }
+                finally
+                {
+                    inRestoreCommand = false;
+                }
+            }
+            else
+            {
+                base.WndProc(ref m);
             }
         }
 

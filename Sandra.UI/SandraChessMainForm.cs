@@ -172,7 +172,6 @@ namespace Sandra.UI
                     SettingKeys.PgnZoom))
             {
                 CaptionHeight = 30,
-                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                 ClientSize = new Size(600, 600),
                 ShowInTaskbar = true,
                 Icon = Session.Current.ApplicationIcon,

@@ -75,7 +75,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     }
 
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
-                    toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
                     toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
                 }
             }

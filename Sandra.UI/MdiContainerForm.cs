@@ -430,9 +430,6 @@ namespace Sandra.UI
         {
             base.OnLoad(e);
 
-            // Determine minimum size before restoring from settings: always show title bar and menu.
-            MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
-
             // Initialize from settings if available.
             Session.Current.AttachFormStateAutoSaver(
                 this,
