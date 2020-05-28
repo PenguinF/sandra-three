@@ -129,7 +129,15 @@ namespace Eutherion.Win.MdiAppTemplate
             maximizeButton = CreateCaptionButton();
             maximizeButton.Click += (_, __) =>
             {
-                WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                inRestoreCommand = WindowState == FormWindowState.Maximized;
+                try
+                {
+                    WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                }
+                finally
+                {
+                    inRestoreCommand = false;
+                }
                 UpdateMaximizeButtonIcon();
             };
 
@@ -607,6 +615,9 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private bool inRestoreCommand;
+        private Rectangle lastKnownNormalWindowRectangle;
+
         protected override void WndProc(ref Message m)
         {
             if (m.Msg >= WM.NCCALCSIZE && m.Msg <= WM.NCHITTEST)
@@ -668,23 +679,56 @@ namespace Eutherion.Win.MdiAppTemplate
                     this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                 }
             }
+            else if (m.Msg == WM.WINDOWPOSCHANGED)
+            {
+                base.WndProc(ref m);
+
+                if (WindowState == FormWindowState.Normal)
+                {
+                    if (inRestoreCommand)
+                    {
+                        // Undo effects of RestoreWindowBoundsIfNecessary(), without a non-client area the restore bounds are exactly right.
+                        SetBounds(lastKnownNormalWindowRectangle.X,
+                                  lastKnownNormalWindowRectangle.Y,
+                                  lastKnownNormalWindowRectangle.Width,
+                                  lastKnownNormalWindowRectangle.Height,
+                                  BoundsSpecified.All);
+                    }
+                    else
+                    {
+                        lastKnownNormalWindowRectangle = Bounds;
+                    }
+                }
+            }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
             {
                 // Windows 7 and lower only. This message is not used in Windows 8 and higher.
                 // Make sure to update the accent colors as well.
                 UpdateCaptionAreaButtonsBackColor();
             }
-
-            base.WndProc(ref m);
-
-            // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
-            if (m.Msg == WM.SYSCOMMAND)
+            else if (m.Msg == WM.SYSCOMMAND)
             {
                 int wParam = SC.MASK & m.WParam.ToInt32();
-                if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
+                inRestoreCommand = wParam == SC.RESTORE;
+
+                try
                 {
-                    UpdateMaximizeButtonIcon();
+                    base.WndProc(ref m);
+
+                    // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
+                    if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
+                    {
+                        UpdateMaximizeButtonIcon();
+                    }
                 }
+                finally
+                {
+                    inRestoreCommand = false;
+                }
+            }
+            else
+            {
+                base.WndProc(ref m);
             }
         }
 
