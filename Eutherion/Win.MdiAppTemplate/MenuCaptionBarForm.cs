@@ -888,5 +888,11 @@ namespace Eutherion.Win.MdiAppTemplate
             e.Cancel = cancel;
             base.OnFormClosing(e);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) DockedControl.DockPropertiesChanged -= DockedControl_DockPropertiesChanged;
+            base.Dispose(disposing);
+        }
     }
 }
