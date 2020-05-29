@@ -44,7 +44,6 @@ namespace Sandra.UI
 
         public MdiContainerForm()
         {
-            IsMdiContainer = true;
             Icon = Session.Current.ApplicationIcon;
             Text = Session.ExecutableFileNameWithoutExtension;
 

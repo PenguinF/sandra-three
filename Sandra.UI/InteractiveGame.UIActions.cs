@@ -57,7 +57,7 @@ namespace Sandra.UI
                 {
                     StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm
                     {
-                        MdiParent = OwnerForm,
+                        Owner = OwnerForm,
                         Game = this,
                         PieceImages = PieceImages.ImageArray
                     };
@@ -151,7 +151,7 @@ namespace Sandra.UI
                 {
                     ConstrainedMoveResizeForm newMovesForm = new ConstrainedMoveResizeForm()
                     {
-                        MdiParent = OwnerForm,
+                        Owner = OwnerForm,
                         ShowIcon = false,
                         MaximizeBox = false,
                         FormBorderStyle = FormBorderStyle.SizableToolWindow,
