@@ -74,7 +74,7 @@ namespace Eutherion.Win.MdiAppTemplate
             public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
             public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
 
-            public void UpdateSystemButtonMetrics(bool saveButtonVisible)
+            public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
                 SystemButtonTop = CaptionHeight - captionButtonHeight - 2;
@@ -96,7 +96,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 CloseButtonLeft = TotalWidth - HorizontalResizeBorderThickness - captionButtonWidth - buttonOuterRightMargin;
                 SaveButtonLeft = CloseButtonLeft;
                 if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
-                MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
+                MaximizeButtonLeft = SaveButtonLeft;
+                if (maximizeButtonVisible) MaximizeButtonLeft -= captionButtonWidth + closeButtonMargin;
                 MinimizeButtonLeft = MaximizeButtonLeft - captionButtonWidth;
             }
         }
@@ -460,7 +461,8 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.MainMenuHeight);
             }
 
-            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
+            maximizeButton.Visible = MaximizeBox;
+            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible, maximizeButton.Visible);
 
             closeButton.SetBounds(
                 currentMetrics.CloseButtonLeft,
@@ -477,11 +479,14 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.SystemButtonHeight);
             }
 
-            maximizeButton.SetBounds(
-                currentMetrics.MaximizeButtonLeft,
-                currentMetrics.SystemButtonTop,
-                currentMetrics.SystemButtonWidth,
-                currentMetrics.SystemButtonHeight);
+            if (maximizeButton.Visible)
+            {
+                maximizeButton.SetBounds(
+                    currentMetrics.MaximizeButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
 
             minimizeButton.SetBounds(
                 currentMetrics.MinimizeButtonLeft,
