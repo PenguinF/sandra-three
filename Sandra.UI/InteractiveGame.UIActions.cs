@@ -23,8 +23,8 @@ using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
-using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Forms;
+using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
@@ -111,6 +111,10 @@ namespace Sandra.UI
 
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
 
+                    // Only snap while moving.
+                    MdiChildSnapHelper snapHelper = MdiChildSnapHelper.AttachTo(newChessBoardForm);
+                    snapHelper.SnapWhileResizing = false;
+
                     chessBoardForm = newChessBoardForm;
                     chessBoardForm.Disposed += (_, __) =>
                     {
@@ -145,7 +149,7 @@ namespace Sandra.UI
             {
                 if (movesForm == null)
                 {
-                    SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+                    ConstrainedMoveResizeForm newMovesForm = new ConstrainedMoveResizeForm()
                     {
                         MdiParent = OwnerForm,
                         ShowIcon = false,
@@ -204,6 +208,9 @@ namespace Sandra.UI
                     UIMenu.AddTo(movesTextBox);
 
                     newMovesForm.Controls.Add(movesTextBox);
+
+                    // Snap while moving and resizing.
+                    MdiChildSnapHelper.AttachTo(newMovesForm);
 
                     movesForm = newMovesForm;
                     movesForm.Disposed += (_, __) =>

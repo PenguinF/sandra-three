@@ -58,11 +58,11 @@
     <Compile Include="Forms\ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\MdiChildSnapHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Forms\MoveResizeEventArgs.cs" />
     <Compile Include="Forms\SnapGrid.cs" />
-    <Compile Include="Forms\SnappingMdiChildForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="IImageProvider.cs" />
     <Compile Include="ITextProvider.cs" />
     <Compile Include="LineSegment.cs" />

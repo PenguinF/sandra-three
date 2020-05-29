@@ -21,9 +21,9 @@
 
 using Eutherion;
 using Eutherion.Utils;
-using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
+using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Native;
 using System;
 using System.Drawing;
@@ -37,7 +37,7 @@ namespace Sandra.UI
     /// Form which contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : SnappingMdiChildForm, IWeakEventTarget
+    public partial class StandardChessBoardForm : ConstrainedMoveResizeForm, IWeakEventTarget
     {
         /// <summary>
         /// Gets a reference to the playing board control on this form.

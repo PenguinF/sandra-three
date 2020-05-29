@@ -64,7 +64,7 @@ namespace Sandra.UI
 
         // Keep track of which types of forms are opened.
         StandardChessBoardForm chessBoardForm;
-        SnappingMdiChildForm movesForm;
+        ConstrainedMoveResizeForm movesForm;
 
         MovesTextBox GetMovesTextBox()
         {

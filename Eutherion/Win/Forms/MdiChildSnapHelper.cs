@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SnappingMdiChildForm.cs
+ * MdiChildSnapHelper.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -28,10 +28,25 @@ using System.Windows.Forms;
 namespace Eutherion.Win.Forms
 {
     /// <summary>
-    /// Windows <see cref="Form"/> which, if it's an MDI child, snaps to other MDI children and the edges of its parent MDI client area.
+    /// Modifies a MDI child Form's behavior, such that it snaps to other MDI children and the edges of its parent MDI client area.
     /// </summary>
-    public class SnappingMdiChildForm : ConstrainedMoveResizeForm
+    public class MdiChildSnapHelper
     {
+        /// <summary>
+        /// Initializes a new <see cref="MdiChildSnapHelper"/> for the MDI child and attaches snap behavior to it.
+        /// </summary>
+        /// <param name="mdiChild">
+        /// The <see cref="ConstrainedMoveResizeForm"/> MDI child to modify.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="mdiChild"/> is null.
+        /// </exception>
+        public static MdiChildSnapHelper AttachTo(ConstrainedMoveResizeForm mdiChild)
+        {
+            if (mdiChild == null) throw new ArgumentNullException(nameof(mdiChild));
+            return new MdiChildSnapHelper(mdiChild);
+        }
+
         /// <summary>
         /// Gets the default value for the <see cref="MaxSnapDistance"/> property.
         /// </summary>
@@ -49,20 +64,42 @@ namespace Eutherion.Win.Forms
         public const int DefaultInsensitiveBorderEndLength = 16;
 
         /// <summary>
-        /// Gets or sets the length of the ends of the borders of this form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
+        /// Gets or sets the length of the ends of the borders of the form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
         /// </summary>
         [DefaultValue(DefaultInsensitiveBorderEndLength)]
         public int InsensitiveBorderEndLength { get; set; } = DefaultInsensitiveBorderEndLength;
 
-        // Size/move precalculated information.
-        Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
-        Rectangle m_rectangleBeforeSizeMove;           // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
-        SnapGrid m_snapGrid;
+        /// <summary>
+        /// Gets or sets if the form will snap to other forms while it's being moved. The default value is true.
+        /// </summary>
+        public bool SnapWhileMoving { get; set; } = true;
 
         /// <summary>
-        /// Precalculates and caches line segments that this form can snap onto.
+        /// Gets or sets if the form will snap to other forms while it's being resized. The default value is true.
         /// </summary>
-        SnapGrid PrepareSizeMove(Control.ControlCollection mdiChildren)
+        public bool SnapWhileResizing { get; set; } = true;
+
+        /// <summary>
+        /// Gets the <see cref="ConstrainedMoveResizeForm"/> with the snapping behavior.
+        /// </summary>
+        public ConstrainedMoveResizeForm Form { get; }
+
+        // Size/move precalculated information.
+        private Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
+        private Rectangle m_rectangleBeforeSizeMove;           // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
+        private SnapGrid m_snapGrid;
+
+        private MdiChildSnapHelper(ConstrainedMoveResizeForm mdiChild)
+        {
+            Form = mdiChild;
+            Form.ResizeBegin += MdiChild_ResizeBegin;
+            Form.ResizeEnd += MdiChild_ResizeEnd;
+        }
+
+        /// <summary>
+        /// Precalculates and caches line segments that the form can snap onto.
+        /// </summary>
+        private SnapGrid PrepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
             // Create a list of MDI child rectangles sorted by their z-order. (MDI child on top has index 0.)
@@ -76,9 +113,9 @@ namespace Eutherion.Win.Forms
                     Rectangle mdiChildRectangle = mdiChildForm.Bounds;
                     mdiChildRectangle.Offset(m_currentMdiClientScreenRectangle.Left, m_currentMdiClientScreenRectangle.Top);
 
-                    if (this != mdiChildForm)
+                    if (Form != mdiChildForm)
                     {
-                        // Intersect the MDI child rectangle with the MDI client rectangle, so this form does not snap to edges outside of the visible MDI client rectangle.
+                        // Intersect the MDI child rectangle with the MDI client rectangle, so the form does not snap to edges outside of the visible MDI client rectangle.
                         mdiChildRectangle = Rectangle.Intersect(mdiChildRectangle, m_currentMdiClientScreenRectangle);
 
                         // Only add non-empty rectangles.
@@ -100,11 +137,11 @@ namespace Eutherion.Win.Forms
         }
 
         /// <summary>
-        /// Checks if line segments that this form can snap onto should be precalculated (again).
+        /// Checks if line segments that the form can snap onto should be precalculated (again).
         /// </summary>
-        void CheckUpdateSizeMove()
+        private void CheckUpdateSizeMove()
         {
-            Form parentForm = MdiParent;
+            Form parentForm = Form.MdiParent;
             if (parentForm != null)
             {
                 foreach (Control c in parentForm.Controls)
@@ -118,6 +155,7 @@ namespace Eutherion.Win.Forms
                             m_currentMdiClientScreenRectangle = currentMdiClientScreenRectangle;
                             m_snapGrid = PrepareSizeMove(c.Controls);
                         }
+
                         // No need to check 'other' MdiClients, so stop looping.
                         return;
                     }
@@ -125,36 +163,41 @@ namespace Eutherion.Win.Forms
             }
         }
 
-        protected override void OnResizeBegin(EventArgs e)
+        private void MdiChild_ResizeBegin(object sender, EventArgs e)
         {
-            base.OnResizeBegin(e);
-
             // Precalculate size/move line segments.
             CheckUpdateSizeMove();
+
+            if (m_snapGrid != null)
+            {
+                if (SnapWhileMoving) Form.Moving += MdiChild_Moving;
+                if (SnapWhileResizing) Form.Resizing += MdiChild_Resizing;
+            }
         }
 
-        protected override void OnResizeEnd(EventArgs e)
+        private void MdiChild_ResizeEnd(object sender, EventArgs e)
         {
+            Form.Moving -= MdiChild_Moving;
+            Form.Resizing -= MdiChild_Resizing;
             m_snapGrid = null;
-            base.OnResizeEnd(e);
         }
 
-        protected override void OnMoving(MoveResizeEventArgs e)
+        private void MdiChild_Moving(object sender, MoveResizeEventArgs e)
         {
             if (m_snapGrid != null)
             {
-                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
+                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of the window.
                 CheckUpdateSizeMove();
 
                 m_snapGrid.SnapWhileMoving(e, ref m_rectangleBeforeSizeMove, MaxSnapDistance, InsensitiveBorderEndLength);
             }
         }
 
-        protected override void OnResizing(ResizeEventArgs e)
+        private void MdiChild_Resizing(object sender, ResizeEventArgs e)
         {
             if (m_snapGrid != null)
             {
-                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
+                // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of the window.
                 CheckUpdateSizeMove();
 
                 m_snapGrid.SnapWhileResizing(e, ref m_rectangleBeforeSizeMove, MaxSnapDistance, InsensitiveBorderEndLength);
