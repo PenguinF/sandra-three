@@ -180,7 +180,6 @@ namespace Sandra.UI
 
             Controls.Add(PlayingBoard);
 
-            ShowIcon = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 

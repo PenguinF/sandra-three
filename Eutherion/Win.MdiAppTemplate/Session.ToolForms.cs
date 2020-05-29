@@ -70,8 +70,6 @@ namespace Eutherion.Win.MdiAppTemplate
                         // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
                         // Icon must be set and ShowIcon must be true to override that default icon.
                         toolForm.Value.ShowInTaskbar = true;
-                        toolForm.Value.Icon = ApplicationIcon;
-                        toolForm.Value.ShowIcon = true;
                     }
 
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
@@ -295,7 +293,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 })
             {
                 ClientSize = new Size(width, height),
-                ShowIcon = false,
             };
 
             // This adds a Close menu item to the context menu of the textBox.

@@ -42,12 +42,11 @@ namespace Sandra.UI
 
         public MdiContainerForm()
         {
-            Icon = Session.Current.ApplicationIcon;
-
             DockProperties dockProperties = new DockProperties
             {
                 CaptionHeight = 30,
                 CaptionText = Session.ExecutableFileNameWithoutExtension,
+                Icon = Session.Current.ApplicationIcon,
                 MainMenuItems = InitializeUIActions(),
             };
 

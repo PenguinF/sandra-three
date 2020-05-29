@@ -805,6 +805,9 @@ namespace Eutherion.Win.MdiAppTemplate
             CaptionHeight = dockProperties.CaptionHeight;
             Text = dockProperties.CaptionText;
 
+            Icon = dockProperties.Icon;
+            ShowIcon = dockProperties.Icon != null;
+
             // Invalidate to update the save button.
             ActionHandler.Invalidate();
 

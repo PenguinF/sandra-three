@@ -109,6 +109,12 @@ namespace Sandra.UI
 
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
 
+                    newChessBoardForm.UpdateFromDockProperties(new DockProperties
+                    {
+                        CaptionHeight = 24,
+                        Icon = Session.Current.ApplicationIcon,
+                    });
+
                     // Only snap while moving.
                     OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(newChessBoardForm);
                     snapHelper.SnapWhileResizing = false;
@@ -152,7 +158,6 @@ namespace Sandra.UI
                     OldMenuCaptionBarForm newMovesForm = new OldMenuCaptionBarForm()
                     {
                         Owner = OwnerForm,
-                        ShowIcon = false,
                         MaximizeBox = false,
                         FormBorderStyle = FormBorderStyle.SizableToolWindow,
                     };
@@ -208,6 +213,12 @@ namespace Sandra.UI
                     UIMenu.AddTo(movesTextBox);
 
                     newMovesForm.Controls.Add(movesTextBox);
+
+                    newMovesForm.UpdateFromDockProperties(new DockProperties
+                    {
+                        CaptionHeight = 24,
+                        Icon = Session.Current.ApplicationIcon,
+                    });
 
                     // Snap while moving and resizing.
                     OwnedFormSnapHelper.AttachTo(newMovesForm);

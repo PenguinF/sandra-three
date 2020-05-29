@@ -173,8 +173,6 @@ namespace Sandra.UI
             {
                 ClientSize = new Size(600, 600),
                 ShowInTaskbar = true,
-                Icon = Session.Current.ApplicationIcon,
-                ShowIcon = true,
                 StartPosition = FormStartPosition.CenterScreen,
             };
 

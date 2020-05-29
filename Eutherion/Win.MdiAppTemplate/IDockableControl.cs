@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -70,6 +71,11 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets the text to display in a caption bar.
         /// </summary>
         public string CaptionText { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon to display in a caption bar.
+        /// </summary>
+        public Icon Icon { get; set; }
 
         /// <summary>
         /// Gets or sets if the control contains any unsaved modifications.

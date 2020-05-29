@@ -404,6 +404,8 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             DockProperties.CaptionHeight = 30;
+            DockProperties.Icon = Session.Current.ApplicationIcon;
+
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
                 new MainMenuDropDownItem
@@ -798,7 +800,6 @@ namespace Eutherion.Win.MdiAppTemplate
                                 Padding = new Padding(6),
                             })
                         {
-                            ShowIcon = false,
                             ClientSize = new Size(Math.Min(Width, 600), estimatedHeight),
                         };
                     });
