@@ -62,6 +62,11 @@ namespace Eutherion.Win.MdiAppTemplate
     public class DockProperties
     {
         /// <summary>
+        /// Gets or sets the height of the caption area.
+        /// </summary>
+        public int CaptionHeight { get; set; }
+
+        /// <summary>
         /// Gets or sets the text to display in a caption bar.
         /// </summary>
         public string CaptionText { get; set; }

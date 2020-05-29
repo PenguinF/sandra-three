@@ -46,6 +46,7 @@ namespace Sandra.UI
 
             DockProperties dockProperties = new DockProperties
             {
+                CaptionHeight = 30,
                 CaptionText = Session.ExecutableFileNameWithoutExtension,
                 MainMenuItems = InitializeUIActions(),
             };

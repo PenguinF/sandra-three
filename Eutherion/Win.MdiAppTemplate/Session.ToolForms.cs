@@ -140,7 +140,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     codeFile,
                     SharedSettings.JsonZoom))
             {
-                CaptionHeight = 30,
                 ClientSize = new Size(600, 600),
             };
 
@@ -238,6 +237,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 TextBox = textBox;
                 Controls.Add(TextBox);
 
+                DockProperties.CaptionHeight = 26;
                 DockProperties.CaptionText = fileName;
             }
 
@@ -294,7 +294,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     Dock = DockStyle.Fill,
                 })
             {
-                CaptionHeight = 26,
                 ClientSize = new Size(width, height),
                 ShowIcon = false,
             };

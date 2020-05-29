@@ -802,6 +802,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public void UpdateFromDockProperties(DockProperties dockProperties)
         {
+            CaptionHeight = dockProperties.CaptionHeight;
             Text = dockProperties.CaptionText;
 
             // Invalidate to update the save button.
@@ -838,6 +839,9 @@ namespace Eutherion.Win.MdiAppTemplate
                     mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
                 }
             }
+
+            // CaptionHeight and/or MainMenuStrip can affect the layout.
+            PerformLayout();
         }
 
         protected override void Dispose(bool disposing)

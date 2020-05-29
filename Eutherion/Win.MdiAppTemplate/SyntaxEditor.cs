@@ -101,6 +101,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
 
                 Controls.Add(errorsListBox);
+
+                DockProperties.CaptionHeight = 26;
             }
 
             protected override void OnBackColorChanged(EventArgs e)
@@ -401,6 +403,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     break;
             }
 
+            DockProperties.CaptionHeight = 30;
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
                 new MainMenuDropDownItem
@@ -795,7 +798,6 @@ namespace Eutherion.Win.MdiAppTemplate
                                 Padding = new Padding(6),
                             })
                         {
-                            CaptionHeight = 26,
                             ShowIcon = false,
                             ClientSize = new Size(Math.Min(Width, 600), estimatedHeight),
                         };
