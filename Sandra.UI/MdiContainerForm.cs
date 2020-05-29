@@ -166,6 +166,13 @@ namespace Sandra.UI
                     MovesTextBox.UseLongAlgebraicNotation,
                     StandardChessBoardForm.FlipBoard,
                     StandardChessBoardForm.TakeScreenshot,
+
+                    SharedUIAction.Undo,
+                    SharedUIAction.Redo,
+                    SharedUIAction.CutSelectionToClipBoard,
+                    SharedUIAction.CopySelectionToClipBoard,
+                    SharedUIAction.PasteSelectionFromClipBoard,
+                    SharedUIAction.SelectAllText,
                 }
             });
 
@@ -203,6 +210,9 @@ namespace Sandra.UI
                     modifiedGotoMovesForm,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
+                    SharedUIAction.ShowErrorPane,
+                    SharedUIAction.GoToPreviousError,
+                    SharedUIAction.GoToNextError,
                 }
             });
 

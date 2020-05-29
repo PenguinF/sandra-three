@@ -435,6 +435,9 @@ namespace Eutherion.Win.MdiAppTemplate
                     {
                         SharedUIAction.ZoomIn,
                         SharedUIAction.ZoomOut,
+                        SharedUIAction.ShowErrorPane,
+                        SharedUIAction.GoToPreviousError,
+                        SharedUIAction.GoToNextError,
                     }
                 },
             };
