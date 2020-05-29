@@ -373,41 +373,33 @@ namespace Eutherion.Win.MdiAppTemplate
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Initialize menu strip.
-            var fileMenu = new List<DefaultUIActionBinding>();
+            List<Union<DefaultUIActionBinding, MainMenuDropDownItem>> fileMenu;
 
             switch (codeAccessOption)
             {
                 default:
                 case SyntaxEditorCodeAccessOption.Default:
-                    fileMenu.AddRange(new[] {
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.SaveAs,
-                        SharedUIAction.Close });
+                        SharedUIAction.Close
+                    };
                     break;
                 case SyntaxEditorCodeAccessOption.FixedFile:
-                    fileMenu.AddRange(new[] {
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
                         SharedUIAction.SaveToFile,
-                        SharedUIAction.Close });
+                        SharedUIAction.Close
+                    };
                     break;
                 case SyntaxEditorCodeAccessOption.ReadOnly:
-                    fileMenu.AddRange(new[] {
-                        SharedUIAction.Close });
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.Close
+                    };
                     break;
             }
-
-            var editMenu = new List<DefaultUIActionBinding>();
-            editMenu.AddRange(new[] {
-                SharedUIAction.Undo,
-                SharedUIAction.Redo,
-                SharedUIAction.CutSelectionToClipBoard,
-                SharedUIAction.CopySelectionToClipBoard,
-                SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText });
-
-            var viewMenu = new List<DefaultUIActionBinding>();
-            viewMenu.AddRange(new[] {
-                SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut });
 
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
@@ -419,12 +411,24 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
-                    DropDownItems = editMenu
+                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.Undo,
+                        SharedUIAction.Redo,
+                        SharedUIAction.CutSelectionToClipBoard,
+                        SharedUIAction.CopySelectionToClipBoard,
+                        SharedUIAction.PasteSelectionFromClipBoard,
+                        SharedUIAction.SelectAllText,
+                    }
                 },
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
-                    DropDownItems = viewMenu
+                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.ZoomIn,
+                        SharedUIAction.ZoomOut,
+                    }
                 },
             };
 

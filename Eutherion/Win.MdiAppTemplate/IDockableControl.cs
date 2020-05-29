@@ -88,8 +88,8 @@ namespace Eutherion.Win.MdiAppTemplate
         public UIMenuNode.Container Container;
 
         /// <summary>
-        /// Enumerates the bindings to add to the container.
+        /// Enumerates the collection of drop down item definitions and action bindings to add to the container.
         /// </summary>
-        public IEnumerable<DefaultUIActionBinding> DropDownItems;
+        public IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> DropDownItems;
     }
 }

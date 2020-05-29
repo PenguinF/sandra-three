@@ -780,40 +780,49 @@ namespace Eutherion.Win.MdiAppTemplate
             UIMenu.UpdateMenu(MainMenuStrip.Items);
         }
 
-        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)
+        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> dropDownItems)
         {
             var menuNodes = new List<UIMenuNode>();
 
-            foreach (var binding in bindings)
+            foreach (var dropDownItem in dropDownItems)
             {
-                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                if (dropDownItem.IsOption1(out DefaultUIActionBinding binding))
                 {
-                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
-
-                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                     {
-                        try
+                        menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                        mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
                         {
-                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            try
                             {
-                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                                foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                                 {
-                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
-                                        ? UIActionVisibility.Disabled
-                                        : currentActionState;
+                                    UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                    if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                    {
+                                        return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                            ? UIActionVisibility.Disabled
+                                            : currentActionState;
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(e.Message);
-                        }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.Message);
+                            }
 
-                        // No handler in the chain that processes the UIAction actively, so set to disabled.
-                        return UIActionVisibility.Disabled;
-                    }));
+                            // No handler in the chain that processes the UIAction actively, so set to disabled.
+                            return UIActionVisibility.Disabled;
+                        }));
+                    }
+                }
+                else
+                {
+                    var menuDropDownItem = dropDownItem.ToOption2();
+                    menuNodes.Add(menuDropDownItem.Container);
+                    menuDropDownItem.Container.Nodes.AddRange(BindMainMenuItemActions(menuDropDownItem.DropDownItems));
                 }
             }
 
