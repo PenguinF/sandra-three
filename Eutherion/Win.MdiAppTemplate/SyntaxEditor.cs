@@ -48,7 +48,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </typeparam>
     public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx, IDockableControl, IWeakEventTarget
     {
-        private class ErrorListPanel : Panel, IDockableControl
+        private class ErrorListPanel : ContainerControl, IDockableControl
         {
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);
@@ -103,6 +103,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 Controls.Add(errorsListBox);
 
                 DockProperties.CaptionHeight = 26;
+
+                ActiveControl = errorsListBox;
             }
 
             protected override void OnBackColorChanged(EventArgs e)

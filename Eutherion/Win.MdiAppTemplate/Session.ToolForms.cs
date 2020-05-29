@@ -223,7 +223,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        private class RichTextBoxExWithMargin : Panel, IDockableControl
+        private class RichTextBoxExWithMargin : ContainerControl, IDockableControl
         {
             public RichTextBoxEx TextBox { get; }
 
@@ -237,6 +237,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 DockProperties.CaptionHeight = 26;
                 DockProperties.CaptionText = fileName;
+
+                ActiveControl = textBox;
             }
 
             event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
