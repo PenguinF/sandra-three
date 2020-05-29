@@ -20,7 +20,9 @@
 #endregion
 
 using Eutherion.Win.Native;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Eutherion.Win.Forms
 {
@@ -34,6 +36,24 @@ namespace Eutherion.Win.Forms
         {
             if (min < max) return new LineSegment(position, min, max);
             return null;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LineSegment"/> representing the left edge of a rectangle, or null if it's empty.
+        /// </summary>
+        /// <param name="rectangle">
+        /// The rectangle for which to derive the left edge <see cref="LineSegment"/>.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of the line segment.
+        /// </param>
+        /// <returns>
+        /// A <see cref="LineSegment"/> representing the left edge of the rectangle, or null if it's empty.
+        /// </returns>
+        public static LineSegment LeftEdge(ref Rectangle rectangle, int cutoff)
+        {
+            // Cut off the given length and only yield the left border if it's non-empty.
+            return CreateIfNonEmpty(rectangle.Left, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
         }
 
         /// <summary>
@@ -66,6 +86,24 @@ namespace Eutherion.Win.Forms
         /// <returns>
         /// A <see cref="LineSegment"/> representing the right edge of the rectangle, or null if it's empty.
         /// </returns>
+        public static LineSegment RightEdge(ref Rectangle rectangle, int cutoff)
+        {
+            // Cut off the given length and only yield the right border if it's non-empty.
+            return CreateIfNonEmpty(rectangle.Right, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LineSegment"/> representing the right edge of a rectangle, or null if it's empty.
+        /// </summary>
+        /// <param name="rectangle">
+        /// The rectangle for which to derive the right edge <see cref="LineSegment"/>.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of the line segment.
+        /// </param>
+        /// <returns>
+        /// A <see cref="LineSegment"/> representing the right edge of the rectangle, or null if it's empty.
+        /// </returns>
         public static LineSegment RightEdge(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the right border if it's non-empty.
@@ -84,10 +122,46 @@ namespace Eutherion.Win.Forms
         /// <returns>
         /// A <see cref="LineSegment"/> representing the top edge of the rectangle, or null if it's empty.
         /// </returns>
+        public static LineSegment TopEdge(ref Rectangle rectangle, int cutoff)
+        {
+            // Cut off the given length and only yield the top border if it's non-empty.
+            return CreateIfNonEmpty(rectangle.Top, rectangle.Left + cutoff, rectangle.Right - cutoff);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LineSegment"/> representing the top edge of a rectangle, or null if it's empty.
+        /// </summary>
+        /// <param name="rectangle">
+        /// The rectangle for which to derive the top edge <see cref="LineSegment"/>.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of the line segment.
+        /// </param>
+        /// <returns>
+        /// A <see cref="LineSegment"/> representing the top edge of the rectangle, or null if it's empty.
+        /// </returns>
         public static LineSegment TopEdge(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the top border if it's non-empty.
             return CreateIfNonEmpty(rectangle.Top, rectangle.Left + cutoff, rectangle.Right - cutoff);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LineSegment"/> representing the bottom edge of a rectangle, or null if it's empty.
+        /// </summary>
+        /// <param name="rectangle">
+        /// The rectangle for which to derive the bottom edge <see cref="LineSegment"/>.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of the line segment.
+        /// </param>
+        /// <returns>
+        /// A <see cref="LineSegment"/> representing the bottom edge of the rectangle, or null if it's empty.
+        /// </returns>
+        public static LineSegment BottomEdge(ref Rectangle rectangle, int cutoff)
+        {
+            // Cut off the given length and only yield the bpttom border if it's non-empty.
+            return CreateIfNonEmpty(rectangle.Bottom, rectangle.Left + cutoff, rectangle.Right - cutoff);
         }
 
         /// <summary>
@@ -125,7 +199,7 @@ namespace Eutherion.Win.Forms
         /// <returns>
         /// A list of non-empty line segments representing the left and right edges of the rectangle.
         /// </returns>
-        public static List<LineSegment> GetVerticalEdges(ref RECT rectangle, int cutoff)
+        public static List<LineSegment> GetVerticalEdges(ref Rectangle rectangle, int cutoff)
         {
             // Cut off the given length and only add left and right borders if they are non-empty.
             List<LineSegment> verticalBorders = new List<LineSegment>(16);
@@ -146,7 +220,7 @@ namespace Eutherion.Win.Forms
         /// <returns>
         /// A list of non-empty line segments representing the top and bottom edges of the rectangle.
         /// </returns>
-        public static List<LineSegment> GetHorizontalEdges(ref RECT rectangle, int cutoff)
+        public static List<LineSegment> GetHorizontalEdges(ref Rectangle rectangle, int cutoff)
         {
             // Cut off the given length and only add top and bottom borders if they are non-empty.
             List<LineSegment> horizontalBorders = new List<LineSegment>(16);
@@ -155,27 +229,12 @@ namespace Eutherion.Win.Forms
             return horizontalBorders;
         }
 
-        /// <summary>
-        /// Derives visible line segments from a list of overlapping rectangles in z-order, and adds them to a list.
-        /// </summary>
-        /// <param name="segments">
-        /// The list of segments to add to.
-        /// </param>
-        /// <param name="overlappingRectangles">
-        /// The list of overlapping rectangles in z-order. Rectangles with a lower index overlap rectangles with a higher index.
-        /// </param>
-        /// <param name="isVertical">
-        /// True to consider vertical edges, false to consider horizontal edges.
-        /// </param>
-        /// <param name="cutoff">
-        /// The length to cut off both ends of all line segments.
-        /// </param>
-        public static void AddVisibleSegments(List<LineSegment> segments, List<RECT> overlappingRectangles, bool isVertical, int cutoff)
+        private static void AddVisibleSegments(List<LineSegment> segments, List<Rectangle> overlappingRectangles, bool isVertical, int cutoff)
         {
             // Loop over rectangles, to cut away hidden sections of segments.
             for (int rectangleIndex = overlappingRectangles.Count - 1; rectangleIndex >= 0; --rectangleIndex)
             {
-                RECT rectangle = overlappingRectangles[rectangleIndex];
+                Rectangle rectangle = overlappingRectangles[rectangleIndex];
 
                 // Calculate segments for this rectangle, and start with initial full segments.
                 List<LineSegment> rectangleSegments = isVertical
@@ -186,7 +245,7 @@ namespace Eutherion.Win.Forms
                 for (int overlappingRectangleIndex = rectangleIndex - 1; overlappingRectangleIndex >= 0; --overlappingRectangleIndex)
                 {
                     // Cut away whatever is hidden by the rectangle higher in the z-order.
-                    RECT overlappingRectangle = overlappingRectangles[overlappingRectangleIndex];
+                    Rectangle overlappingRectangle = overlappingRectangles[overlappingRectangleIndex];
 
                     // Calculate inflated rectangle coordinates.
                     int overlappingRectanglePositionMin, overlappingRectanglePositionMax, minInflated, maxInflated;
@@ -255,16 +314,33 @@ namespace Eutherion.Win.Forms
         /// Initializes a new instance of <see cref="SnapGrid"/>.
         /// </summary>
         /// <param name="verticalSegments">
-        /// The enumeration of vertical line segments the resizing/moving window can snap onto.
+        /// A list of vertical line segments the resizing/moving window can snap onto.
         /// </param>
         /// <param name="horizontalSegments">
-        /// The enumeration of horizontal line segments the resizing/moving window can snap onto.
+        /// A list of horizontal line segments the resizing/moving window can snap onto.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="verticalSegments"/> and/or <paramref name="horizontalSegments"/> is null.
+        /// <param name="overlappingRectangles">
+        /// A list of overlapping rectangles in z-order. Rectangles with a lower index overlap rectangles with a higher index.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of all line segments.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="verticalSegments"/> and/or <paramref name="horizontalSegments"/> and/or <paramref name="overlappingRectangles"/> is null.
         /// </exception>
-        public SnapGrid(IEnumerable<LineSegment> verticalSegments, IEnumerable<LineSegment> horizontalSegments)
+        public SnapGrid(
+            List<LineSegment> verticalSegments,
+            List<LineSegment> horizontalSegments,
+            List<Rectangle> overlappingRectangles,
+            int cutoff)
         {
+            if (verticalSegments == null) throw new ArgumentNullException(nameof(verticalSegments));
+            if (horizontalSegments == null) throw new ArgumentNullException(nameof(horizontalSegments));
+            if (overlappingRectangles == null) throw new ArgumentNullException(nameof(overlappingRectangles));
+
+            AddVisibleSegments(verticalSegments, overlappingRectangles, true, cutoff);
+            AddVisibleSegments(horizontalSegments, overlappingRectangles, false, cutoff);
+
             VerticalSegments = ReadOnlyList<LineSegment>.Create(verticalSegments);
             HorizontalSegments = ReadOnlyList<LineSegment>.Create(horizontalSegments);
         }
@@ -285,7 +361,7 @@ namespace Eutherion.Win.Forms
         /// <param name="cutoff">
         /// The length to cut off both ends of line segments representing the edges of the window being moved.
         /// </param>
-        public void SnapWhileMoving(MoveResizeEventArgs e, ref RECT rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
+        public void SnapWhileMoving(MoveResizeEventArgs e, ref Rectangle rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
         {
             // Evaluate left/right borders, then top/bottom borders.
 
@@ -299,7 +375,7 @@ namespace Eutherion.Win.Forms
                 int snapThresholdX = maxSnapDistance + 1;
 
                 // Preserve original width of the rectangle.
-                int originalWidth = rectangleBeforeSizeMove.Right - rectangleBeforeSizeMove.Left;
+                int originalWidth = rectangleBeforeSizeMove.Width;
 
                 // Check vertical segments to snap against.
                 foreach (LineSegment verticalSegment in VerticalSegments)
@@ -329,7 +405,7 @@ namespace Eutherion.Win.Forms
                 int snapThresholdY = maxSnapDistance + 1;
 
                 // Preserve original height of the rectangle.
-                int originalHeight = rectangleBeforeSizeMove.Bottom - rectangleBeforeSizeMove.Top;
+                int originalHeight = rectangleBeforeSizeMove.Height;
 
                 // Check horizontal segments to snap against.
                 foreach (LineSegment horizontalSegment in HorizontalSegments)
@@ -366,7 +442,7 @@ namespace Eutherion.Win.Forms
         /// <param name="cutoff">
         /// The length to cut off both ends of line segments representing the edges of the window being resized.
         /// </param>
-        public void SnapWhileResizing(ResizeEventArgs e, ref RECT rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
+        public void SnapWhileResizing(ResizeEventArgs e, ref Rectangle rectangleBeforeSizeMove, int maxSnapDistance, int cutoff)
         {
             // Evaluate left/right borders, then top/bottom borders.
 
