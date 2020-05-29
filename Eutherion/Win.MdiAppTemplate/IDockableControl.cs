@@ -83,7 +83,7 @@ namespace Eutherion.Win.MdiAppTemplate
     public struct MainMenuDropDownItem
     {
         /// <summary>
-        /// Represents the main menu container item.
+        /// Represents the main menu container item. It is assumed to be empty.
         /// </summary>
         public UIMenuNode.Container Container;
 
