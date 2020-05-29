@@ -208,6 +208,11 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         /// <summary>
+        /// Gets the size of the client area of the form.
+        /// </summary>
+        public Size ClientAreaSize => new Size(currentMetrics.ClientAreaWidth, currentMetrics.ClientAreaHeight);
+
+        /// <summary>
         /// Sets the currently used hover color of the close button.
         /// </summary>
         public void SetCloseButtonHoverColor(Color value)

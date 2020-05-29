@@ -69,7 +69,7 @@ namespace Sandra.UI
                         // Place directly to the right.
                         var mdiChildBounds = movesForm.Bounds;
                         newChessBoardForm.StartPosition = FormStartPosition.Manual;
-                        newChessBoardForm.ClientSize = new Size(movesForm.ClientSize.Height, movesForm.ClientSize.Height);
+                        newChessBoardForm.ClientSize = new Size(movesForm.ClientAreaSize.Height, movesForm.ClientAreaSize.Height);
                         newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
                     }
                     else
@@ -77,8 +77,6 @@ namespace Sandra.UI
                         // Only specify its default size.
                         newChessBoardForm.ClientSize = new Size(400, 400);
                     }
-
-                    newChessBoardForm.PerformAutoFit(null);
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
@@ -114,6 +112,8 @@ namespace Sandra.UI
                     // Only snap while moving.
                     OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(newChessBoardForm);
                     snapHelper.SnapWhileResizing = false;
+
+                    newChessBoardForm.Load += (_, __) => newChessBoardForm.PerformAutoFit(null);
 
                     chessBoardForm = newChessBoardForm;
                     chessBoardForm.Disposed += (_, __) =>
@@ -163,7 +163,7 @@ namespace Sandra.UI
                         var mdiChildBounds = chessBoardForm.Bounds;
                         newMovesForm.StartPosition = FormStartPosition.Manual;
                         newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
-                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientSize.Height);
+                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientAreaSize.Height);
                     }
                     else
                     {

@@ -1027,8 +1027,8 @@ namespace Sandra.UI
         private void StartResize()
         {
             // Cache difference in size between the window and the client rectangle.
-            widthDifference = Bounds.Width - ClientRectangle.Width;
-            heightDifference = Bounds.Height - ClientRectangle.Height;
+            widthDifference = Bounds.Width - ClientAreaSize.Width;
+            heightDifference = Bounds.Height - ClientAreaSize.Height;
         }
 
         private void PerformAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
