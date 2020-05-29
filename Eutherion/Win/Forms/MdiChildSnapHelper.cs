@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,7 +29,7 @@ namespace Eutherion.Win.Forms
     /// <summary>
     /// Modifies a MDI child Form's behavior, such that it snaps to other MDI children and the edges of its parent MDI client area.
     /// </summary>
-    public class MdiChildSnapHelper
+    public class MdiChildSnapHelper : SnapHelper
     {
         /// <summary>
         /// Initializes a new <see cref="MdiChildSnapHelper"/> for the MDI child and attaches snap behavior to it.
@@ -47,51 +46,14 @@ namespace Eutherion.Win.Forms
             return new MdiChildSnapHelper(mdiChild);
         }
 
-        /// <summary>
-        /// Gets the default value for the <see cref="MaxSnapDistance"/> property.
-        /// </summary>
-        public const int DefaultMaxSnapDistance = 4;
-
-        /// <summary>
-        /// Gets or sets the maximum distance between form edges within which they will be sensitive to snapping together. The default value is <see cref="DefaultMaxSnapDistance"/> (4).
-        /// </summary>
-        [DefaultValue(DefaultMaxSnapDistance)]
-        public int MaxSnapDistance { get; set; } = DefaultMaxSnapDistance;
-
-        /// <summary>
-        /// Gets the default value for the <see cref="InsensitiveBorderEndLength"/> property.
-        /// </summary>
-        public const int DefaultInsensitiveBorderEndLength = 16;
-
-        /// <summary>
-        /// Gets or sets the length of the ends of the borders of the form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
-        /// </summary>
-        [DefaultValue(DefaultInsensitiveBorderEndLength)]
-        public int InsensitiveBorderEndLength { get; set; } = DefaultInsensitiveBorderEndLength;
-
-        /// <summary>
-        /// Gets or sets if the form will snap to other forms while it's being moved. The default value is true.
-        /// </summary>
-        public bool SnapWhileMoving { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets if the form will snap to other forms while it's being resized. The default value is true.
-        /// </summary>
-        public bool SnapWhileResizing { get; set; } = true;
-
-        /// <summary>
-        /// Gets the <see cref="ConstrainedMoveResizeForm"/> with the snapping behavior.
-        /// </summary>
-        public ConstrainedMoveResizeForm Form { get; }
-
         // Size/move precalculated information.
         private Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
         private Rectangle m_rectangleBeforeSizeMove;           // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
         private SnapGrid m_snapGrid;
 
         private MdiChildSnapHelper(ConstrainedMoveResizeForm mdiChild)
+            : base(mdiChild)
         {
-            Form = mdiChild;
             Form.ResizeBegin += MdiChild_ResizeBegin;
             Form.ResizeEnd += MdiChild_ResizeEnd;
         }
