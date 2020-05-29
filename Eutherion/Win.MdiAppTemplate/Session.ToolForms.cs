@@ -70,8 +70,6 @@ namespace Eutherion.Win.MdiAppTemplate
                         // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
                         // Icon must be set and ShowIcon must be true to override that default icon.
                         toolForm.Value.ShowInTaskbar = true;
-                        toolForm.Value.Icon = ApplicationIcon;
-                        toolForm.Value.ShowIcon = true;
                     }
 
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
@@ -140,7 +138,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     codeFile,
                     SharedSettings.JsonZoom))
             {
-                CaptionHeight = 30,
                 ClientSize = new Size(600, 600),
             };
 
@@ -226,7 +223,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        private class RichTextBoxExWithMargin : Panel, IDockableControl
+        private class RichTextBoxExWithMargin : ContainerControl, IDockableControl
         {
             public RichTextBoxEx TextBox { get; }
 
@@ -238,11 +235,14 @@ namespace Eutherion.Win.MdiAppTemplate
                 TextBox = textBox;
                 Controls.Add(TextBox);
 
+                DockProperties.CaptionHeight = 26;
                 DockProperties.CaptionText = fileName;
+
+                ActiveControl = textBox;
             }
 
             event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
-            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private MenuCaptionBarForm CreateReadOnlyTextForm(string fileName, int width, int height)
@@ -291,12 +291,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
                 {
                     BackColor = Color.LightGray,
-                    Dock = DockStyle.Fill,
                 })
             {
-                CaptionHeight = 26,
                 ClientSize = new Size(width, height),
-                ShowIcon = false,
             };
 
             // This adds a Close menu item to the context menu of the textBox.
@@ -450,5 +447,15 @@ namespace Eutherion.Win.MdiAppTemplate
 
             return UIActionVisibility.Enabled;
         };
+
+        /// <summary>
+        /// Gets if an action is considered a developer tool and is therefore allowed to be hidden in a main menu.
+        /// </summary>
+        internal static bool IsDeveloperTool(UIAction action)
+        {
+            return action == EditCurrentLanguage.Action
+                || action == OpenLocalAppDataFolder.Action
+                || action == OpenExecutableFolder.Action;
+        }
     }
 }

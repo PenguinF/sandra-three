@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -53,7 +54,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <param name="cancel">
         /// Whether or not to cancel the closing event.
         /// </param>
-        void OnFormClosing(CloseReason closeReason, ref bool cancel);
+        void OnClosing(CloseReason closeReason, ref bool cancel);
     }
 
     /// <summary>
@@ -62,9 +63,19 @@ namespace Eutherion.Win.MdiAppTemplate
     public class DockProperties
     {
         /// <summary>
+        /// Gets or sets the height of the caption area.
+        /// </summary>
+        public int CaptionHeight { get; set; }
+
+        /// <summary>
         /// Gets or sets the text to display in a caption bar.
         /// </summary>
         public string CaptionText { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon to display in a caption bar.
+        /// </summary>
+        public Icon Icon { get; set; }
 
         /// <summary>
         /// Gets or sets if the control contains any unsaved modifications.
@@ -83,13 +94,13 @@ namespace Eutherion.Win.MdiAppTemplate
     public struct MainMenuDropDownItem
     {
         /// <summary>
-        /// Represents the main menu container item.
+        /// Represents the main menu container item. It is assumed to be empty.
         /// </summary>
         public UIMenuNode.Container Container;
 
         /// <summary>
-        /// Enumerates the bindings to add to the container.
+        /// Enumerates the collection of drop down item definitions and action bindings to add to the container.
         /// </summary>
-        public IEnumerable<DefaultUIActionBinding> DropDownItems;
+        public IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> DropDownItems;
     }
 }

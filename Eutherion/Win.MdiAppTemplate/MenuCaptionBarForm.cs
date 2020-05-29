@@ -74,7 +74,7 @@ namespace Eutherion.Win.MdiAppTemplate
             public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
             public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
 
-            public void UpdateSystemButtonMetrics(bool saveButtonVisible)
+            public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible, bool mininizeButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
                 SystemButtonTop = CaptionHeight - captionButtonHeight - 2;
@@ -96,10 +96,14 @@ namespace Eutherion.Win.MdiAppTemplate
                 CloseButtonLeft = TotalWidth - HorizontalResizeBorderThickness - captionButtonWidth - buttonOuterRightMargin;
                 SaveButtonLeft = CloseButtonLeft;
                 if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
-                MaximizeButtonLeft = SaveButtonLeft - captionButtonWidth - closeButtonMargin;
-                MinimizeButtonLeft = MaximizeButtonLeft - captionButtonWidth;
+                MaximizeButtonLeft = SaveButtonLeft;
+                if (maximizeButtonVisible) MaximizeButtonLeft -= captionButtonWidth + closeButtonMargin;
+                MinimizeButtonLeft = MaximizeButtonLeft;
+                if (mininizeButtonVisible) MinimizeButtonLeft -= captionButtonWidth;
             }
         }
+
+        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
         private const int MainMenuHorizontalMargin = 8;
 
@@ -110,6 +114,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly NonSelectableButton maximizeButton;
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
+
+        private readonly UIActionHandler mainMenuActionHandler;
 
         private Button currentHoverButton;
         private Color? closeButtonHoverColorOverride;
@@ -173,12 +179,15 @@ namespace Eutherion.Win.MdiAppTemplate
             closeButton = CreateCaptionButton();
             closeButton.Click += (_, __) => Close();
 
+            MainMenuStrip = new MenuStrip();
+
             SuspendLayout();
 
             Controls.Add(minimizeButton);
             Controls.Add(maximizeButton);
             Controls.Add(saveButton);
             Controls.Add(closeButton);
+            Controls.Add(MainMenuStrip);
 
             ResumeLayout();
 
@@ -186,6 +195,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             AllowTransparency = true;
             TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+
+            mainMenuActionHandler = new UIActionHandler();
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
         private NonSelectableButton CreateCaptionButton()
@@ -206,6 +219,16 @@ namespace Eutherion.Win.MdiAppTemplate
 
             return button;
         }
+
+        /// <summary>
+        /// Gets the size of the client area of the form.
+        /// </summary>
+        public Size ClientAreaSize => new Size(currentMetrics.ClientAreaWidth, currentMetrics.ClientAreaHeight);
+
+        /// <summary>
+        /// Returns the style of the title bar which can be observed for changes.
+        /// </summary>
+        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
         /// <summary>
         /// Sets the currently used hover color of the close button.
@@ -250,45 +273,12 @@ namespace Eutherion.Win.MdiAppTemplate
             Invalidate();
         }
 
-        protected override void OnControlAdded(ControlEventArgs e)
-        {
-            base.OnControlAdded(e);
-
-            if (e.Control == MainMenuStrip)
-            {
-                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
-                {
-                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
-                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
-                }
-            }
-        }
-
-        protected override void OnControlRemoved(ControlEventArgs e)
-        {
-            if (e.Control == MainMenuStrip)
-            {
-                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
-                {
-                    mainMenuItem.DropDownOpening -= MainMenuItem_DropDownOpening;
-                    mainMenuItem.DropDownClosed -= MainMenuItem_DropDownClosed;
-                }
-            }
-
-            base.OnControlRemoved(e);
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             // For when another window is active when this form is first shown.
             UpdateCaptionAreaButtonsBackColor();
             base.OnLoad(e);
         }
-
-        /// <summary>
-        /// Returns the style of the title bar which can be observed for changes.
-        /// </summary>
-        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
@@ -389,8 +379,32 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
         {
+            var mainMenuItem = (ToolStripDropDownItem)sender;
+
             // Use DefaultForeColor rather than titleBarForeColor when dropped down.
-            ((ToolStripDropDownItem)sender).ForeColor = DefaultForeColor;
+            mainMenuItem.ForeColor = DefaultForeColor;
+
+            // Remember last toolstrip separator before a developer tool item with FirstInGroup set.
+            ToolStripSeparator lastSeparator = null;
+
+            foreach (ToolStripItem toolStripItem in mainMenuItem.DropDownItems)
+            {
+                if (toolStripItem is UIActionToolStripMenuItem menuItem)
+                {
+                    UIActionState actionState = mainMenuActionHandler.TryPerformAction(menuItem.Action, false);
+                    menuItem.Update(actionState);
+
+                    if (Session.IsDeveloperTool(menuItem.Action))
+                    {
+                        // Hide instead of disable developer tool items.
+                        bool visible = actionState.UIActionVisibility == UIActionVisibility.Enabled;
+                        menuItem.Visible = visible;
+                        if (lastSeparator != null) lastSeparator.Visible = visible;
+                    }
+                }
+
+                lastSeparator = toolStripItem as ToolStripSeparator;
+            }
         }
 
         private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
@@ -465,7 +479,9 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.MainMenuHeight);
             }
 
-            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible);
+            maximizeButton.Visible = MaximizeBox;
+            minimizeButton.Visible = MinimizeBox;
+            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible, MaximizeBox, MinimizeBox);
 
             closeButton.SetBounds(
                 currentMetrics.CloseButtonLeft,
@@ -482,17 +498,23 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.SystemButtonHeight);
             }
 
-            maximizeButton.SetBounds(
-                currentMetrics.MaximizeButtonLeft,
-                currentMetrics.SystemButtonTop,
-                currentMetrics.SystemButtonWidth,
-                currentMetrics.SystemButtonHeight);
+            if (maximizeButton.Visible)
+            {
+                maximizeButton.SetBounds(
+                    currentMetrics.MaximizeButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
 
-            minimizeButton.SetBounds(
-                currentMetrics.MinimizeButtonLeft,
-                currentMetrics.SystemButtonTop,
-                currentMetrics.SystemButtonWidth,
-                currentMetrics.SystemButtonHeight);
+            if (minimizeButton.Visible)
+            {
+                minimizeButton.SetBounds(
+                    currentMetrics.MinimizeButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
 
             foreach (Control control in Controls)
             {
@@ -724,6 +746,107 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            UIMenu.UpdateMenu(MainMenuStrip.Items);
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> dropDownItems)
+        {
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var dropDownItem in dropDownItems)
+            {
+                if (dropDownItem.IsOption1(out DefaultUIActionBinding binding))
+                {
+                    if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                    {
+                        menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                        mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                        {
+                            try
+                            {
+                                // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                                foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                                {
+                                    UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                    if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                    {
+                                        return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                            ? UIActionVisibility.Disabled
+                                            : currentActionState;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.Message);
+                            }
+
+                            // No handler in the chain that processes the UIAction actively, so set to disabled.
+                            return UIActionVisibility.Disabled;
+                        }));
+                    }
+                }
+                else
+                {
+                    var menuDropDownItem = dropDownItem.ToOption2();
+                    menuNodes.Add(menuDropDownItem.Container);
+                    menuDropDownItem.Container.Nodes.AddRange(BindMainMenuItemActions(menuDropDownItem.DropDownItems));
+                }
+            }
+
+            return menuNodes;
+        }
+
+        public void UpdateFromDockProperties(DockProperties dockProperties)
+        {
+            CaptionHeight = dockProperties.CaptionHeight;
+            Text = dockProperties.CaptionText;
+
+            Icon = dockProperties.Icon;
+            ShowIcon = dockProperties.Icon != null;
+
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
+
+            // If something can be saved, closing is dangerous, therefore use a reddish hover color.
+            if (dockProperties.IsModified)
+            {
+                SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
+            }
+            else
+            {
+                ResetCloseButtonHoverColor();
+            }
+
+            // Only fill MainMenuStrip once, it's not really supposed to change.
+            if (dockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
+            {
+                var topLevelContainers = new List<UIMenuNode.Container>();
+
+                foreach (var mainMenuItem in dockProperties.MainMenuItems)
+                {
+                    if (mainMenuItem.Container != null && mainMenuItem.DropDownItems != null && mainMenuItem.DropDownItems.Any())
+                    {
+                        topLevelContainers.Add(mainMenuItem.Container);
+                        mainMenuItem.Container.Nodes.AddRange(BindMainMenuItemActions(mainMenuItem.DropDownItems));
+                    }
+                }
+
+                UIMenuBuilder.BuildMenu(mainMenuActionHandler, topLevelContainers, MainMenuStrip.Items);
+
+                foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+                {
+                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                }
+            }
+
+            // CaptionHeight and/or MainMenuStrip can affect the layout.
+            PerformLayout();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) ObservableStyle.Dispose();
@@ -751,131 +874,33 @@ namespace Eutherion.Win.MdiAppTemplate
     public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
         where TDockableControl : Control, IDockableControl
     {
-        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
-
         public TDockableControl DockedControl { get; }
-
-        private readonly UIActionHandler mainMenuActionHandler;
 
         public MenuCaptionBarForm(TDockableControl dockableControl)
         {
             DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
             Controls.Add(DockedControl);
 
-            MainMenuStrip = new MenuStrip();
-            Controls.Add(MainMenuStrip);
-
-            mainMenuActionHandler = new UIActionHandler();
-
             BindStandardUIActions();
 
-            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
-
-            UpdateFromDockProperties();
-            dockableControl.DockPropertiesChanged += UpdateFromDockProperties;
+            UpdateFromDockProperties(dockableControl.DockProperties);
+            dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
         }
 
-        private void CurrentLocalizerChanged(object sender, EventArgs e)
-        {
-            UIMenu.UpdateMenu(MainMenuStrip.Items);
-        }
-
-        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<DefaultUIActionBinding> bindings)
-        {
-            var menuNodes = new List<UIMenuNode>();
-
-            foreach (var binding in bindings)
-            {
-                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
-                {
-                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
-
-                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
-                    {
-                        try
-                        {
-                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
-                            {
-                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
-                                {
-                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
-                                        ? UIActionVisibility.Disabled
-                                        : currentActionState;
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(e.Message);
-                        }
-
-                        // No handler in the chain that processes the UIAction actively, so set to disabled.
-                        return UIActionVisibility.Disabled;
-                    }));
-                }
-            }
-
-            return menuNodes;
-        }
-
-        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            var mainMenuItem = (ToolStripMenuItem)sender;
-
-            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
-            {
-                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
-            }
-        }
-
-        private void UpdateFromDockProperties()
-        {
-            Text = DockedControl.DockProperties.CaptionText;
-
-            // Invalidate to update the save button.
-            ActionHandler.Invalidate();
-
-            // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-            if (DockedControl.DockProperties.IsModified)
-            {
-                SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
-            }
-            else
-            {
-                ResetCloseButtonHoverColor();
-            }
-
-            // Only fill MainMenuStrip once, it's not really supposed to change.
-            if (DockedControl.DockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
-            {
-                var topLevelContainers = new List<UIMenuNode.Container>();
-
-                foreach (var mainMenuItem in DockedControl.DockProperties.MainMenuItems)
-                {
-                    if (mainMenuItem.Container != null && mainMenuItem.DropDownItems != null && mainMenuItem.DropDownItems.Any())
-                    {
-                        topLevelContainers.Add(mainMenuItem.Container);
-                        mainMenuItem.Container.Nodes.AddRange(BindMainMenuItemActions(mainMenuItem.DropDownItems));
-                    }
-                }
-
-                UIMenuBuilder.BuildMenu(mainMenuActionHandler, topLevelContainers, MainMenuStrip.Items);
-
-                foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
-                {
-                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
-                }
-            }
-        }
+        private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             bool cancel = e.Cancel;
-            DockedControl.OnFormClosing(e.CloseReason, ref cancel);
+            DockedControl.OnClosing(e.CloseReason, ref cancel);
             e.Cancel = cancel;
             base.OnFormClosing(e);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) DockedControl.DockPropertiesChanged -= DockedControl_DockPropertiesChanged;
+            base.Dispose(disposing);
         }
     }
 }

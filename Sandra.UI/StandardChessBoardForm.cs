@@ -37,7 +37,7 @@ namespace Sandra.UI
     /// Form which contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : ConstrainedMoveResizeForm, IWeakEventTarget
+    public partial class StandardChessBoardForm : OldMenuCaptionBarForm, IWeakEventTarget
     {
         /// <summary>
         /// Gets a reference to the playing board control on this form.
@@ -180,7 +180,6 @@ namespace Sandra.UI
 
             Controls.Add(PlayingBoard);
 
-            ShowIcon = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
@@ -1027,8 +1026,8 @@ namespace Sandra.UI
         private void StartResize()
         {
             // Cache difference in size between the window and the client rectangle.
-            widthDifference = Bounds.Width - ClientRectangle.Width;
-            heightDifference = Bounds.Height - ClientRectangle.Height;
+            widthDifference = Bounds.Width - ClientAreaSize.Width;
+            heightDifference = Bounds.Height - ClientAreaSize.Height;
         }
 
         private void PerformAutoFit(ref RECT resizeRect, ResizeMode resizeMode)

@@ -49,6 +49,9 @@ namespace Eutherion.Win.Native
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         public static extern bool DestroyIcon(HandleRef hIcon);
 
+        [DllImport(User32, CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool EnumWindows(EnumThreadWindowsCallback callback, IntPtr extraData);
+
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern IntPtr GetFocus();
 
@@ -77,4 +80,6 @@ namespace Eutherion.Win.Native
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern uint TrackPopupMenuEx(HandleRef hmenu, uint fuFlags, int x, int y, HandleRef hwnd, IntPtr lptpm);
     }
+
+    public delegate bool EnumThreadWindowsCallback(IntPtr hWnd, IntPtr lParam);
 }

@@ -48,7 +48,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </typeparam>
     public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx, IDockableControl, IWeakEventTarget
     {
-        private class ErrorListPanel : Panel, IDockableControl
+        private class ErrorListPanel : ContainerControl, IDockableControl
         {
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);
@@ -101,6 +101,10 @@ namespace Eutherion.Win.MdiAppTemplate
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
 
                 Controls.Add(errorsListBox);
+
+                DockProperties.CaptionHeight = 26;
+
+                ActiveControl = errorsListBox;
             }
 
             protected override void OnBackColorChanged(EventArgs e)
@@ -206,7 +210,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 base.Dispose(disposing);
             }
 
-            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private const int ErrorIndicatorIndex = 8;
@@ -373,41 +377,36 @@ namespace Eutherion.Win.MdiAppTemplate
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Initialize menu strip.
-            var fileMenu = new List<DefaultUIActionBinding>();
+            List<Union<DefaultUIActionBinding, MainMenuDropDownItem>> fileMenu;
 
             switch (codeAccessOption)
             {
                 default:
                 case SyntaxEditorCodeAccessOption.Default:
-                    fileMenu.AddRange(new[] {
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.SaveAs,
-                        SharedUIAction.Close });
+                        SharedUIAction.Close
+                    };
                     break;
                 case SyntaxEditorCodeAccessOption.FixedFile:
-                    fileMenu.AddRange(new[] {
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
                         SharedUIAction.SaveToFile,
-                        SharedUIAction.Close });
+                        SharedUIAction.Close
+                    };
                     break;
                 case SyntaxEditorCodeAccessOption.ReadOnly:
-                    fileMenu.AddRange(new[] {
-                        SharedUIAction.Close });
+                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.Close
+                    };
                     break;
             }
 
-            var editMenu = new List<DefaultUIActionBinding>();
-            editMenu.AddRange(new[] {
-                SharedUIAction.Undo,
-                SharedUIAction.Redo,
-                SharedUIAction.CutSelectionToClipBoard,
-                SharedUIAction.CopySelectionToClipBoard,
-                SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText });
-
-            var viewMenu = new List<DefaultUIActionBinding>();
-            viewMenu.AddRange(new[] {
-                SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut });
+            DockProperties.CaptionHeight = 30;
+            DockProperties.Icon = Session.Current.ApplicationIcon;
 
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
@@ -419,12 +418,27 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
-                    DropDownItems = editMenu
+                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.Undo,
+                        SharedUIAction.Redo,
+                        SharedUIAction.CutSelectionToClipBoard,
+                        SharedUIAction.CopySelectionToClipBoard,
+                        SharedUIAction.PasteSelectionFromClipBoard,
+                        SharedUIAction.SelectAllText,
+                    }
                 },
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
-                    DropDownItems = viewMenu
+                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    {
+                        SharedUIAction.ZoomIn,
+                        SharedUIAction.ZoomOut,
+                        SharedUIAction.ShowErrorPane,
+                        SharedUIAction.GoToPreviousError,
+                        SharedUIAction.GoToNextError,
+                    }
                 },
             };
 
@@ -702,7 +716,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel)
+        void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel)
         {
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (ContainsChanges && CodeFile.AutoSaveFile == null)
@@ -786,13 +800,10 @@ namespace Eutherion.Win.MdiAppTemplate
                         return new MenuCaptionBarForm<ErrorListPanel>(
                             new ErrorListPanel(this)
                             {
-                                Dock = DockStyle.Fill,
                                 BackColor = DefaultSyntaxEditorStyle.BackColor,
                                 Padding = new Padding(6),
                             })
                         {
-                            CaptionHeight = 26,
-                            ShowIcon = false,
                             ClientSize = new Size(Math.Min(Width, 600), estimatedHeight),
                         };
                     });

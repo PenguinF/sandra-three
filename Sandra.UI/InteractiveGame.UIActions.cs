@@ -57,7 +57,7 @@ namespace Sandra.UI
                 {
                     StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm
                     {
-                        MdiParent = OwnerForm,
+                        Owner = OwnerForm,
                         Game = this,
                         PieceImages = PieceImages.ImageArray
                     };
@@ -69,7 +69,7 @@ namespace Sandra.UI
                         // Place directly to the right.
                         var mdiChildBounds = movesForm.Bounds;
                         newChessBoardForm.StartPosition = FormStartPosition.Manual;
-                        newChessBoardForm.ClientSize = new Size(movesForm.ClientSize.Height, movesForm.ClientSize.Height);
+                        newChessBoardForm.ClientSize = new Size(movesForm.ClientAreaSize.Height, movesForm.ClientAreaSize.Height);
                         newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
                     }
                     else
@@ -77,8 +77,6 @@ namespace Sandra.UI
                         // Only specify its default size.
                         newChessBoardForm.ClientSize = new Size(400, 400);
                     }
-
-                    newChessBoardForm.PerformAutoFit(null);
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
@@ -111,9 +109,17 @@ namespace Sandra.UI
 
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
 
+                    newChessBoardForm.UpdateFromDockProperties(new DockProperties
+                    {
+                        CaptionHeight = 24,
+                        Icon = Session.Current.ApplicationIcon,
+                    });
+
                     // Only snap while moving.
-                    MdiChildSnapHelper snapHelper = MdiChildSnapHelper.AttachTo(newChessBoardForm);
+                    OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(newChessBoardForm);
                     snapHelper.SnapWhileResizing = false;
+
+                    newChessBoardForm.Load += (_, __) => newChessBoardForm.PerformAutoFit(null);
 
                     chessBoardForm = newChessBoardForm;
                     chessBoardForm.Disposed += (_, __) =>
@@ -149,10 +155,9 @@ namespace Sandra.UI
             {
                 if (movesForm == null)
                 {
-                    ConstrainedMoveResizeForm newMovesForm = new ConstrainedMoveResizeForm()
+                    OldMenuCaptionBarForm newMovesForm = new OldMenuCaptionBarForm()
                     {
-                        MdiParent = OwnerForm,
-                        ShowIcon = false,
+                        Owner = OwnerForm,
                         MaximizeBox = false,
                         FormBorderStyle = FormBorderStyle.SizableToolWindow,
                     };
@@ -163,7 +168,7 @@ namespace Sandra.UI
                         var mdiChildBounds = chessBoardForm.Bounds;
                         newMovesForm.StartPosition = FormStartPosition.Manual;
                         newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
-                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientSize.Height);
+                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientAreaSize.Height);
                     }
                     else
                     {
@@ -173,7 +178,6 @@ namespace Sandra.UI
 
                     var movesTextBox = new MovesTextBox()
                     {
-                        Dock = DockStyle.Fill,
                         Game = this,
                     };
 
@@ -209,8 +213,14 @@ namespace Sandra.UI
 
                     newMovesForm.Controls.Add(movesTextBox);
 
+                    newMovesForm.UpdateFromDockProperties(new DockProperties
+                    {
+                        CaptionHeight = 24,
+                        Icon = Session.Current.ApplicationIcon,
+                    });
+
                     // Snap while moving and resizing.
-                    MdiChildSnapHelper.AttachTo(newMovesForm);
+                    OwnedFormSnapHelper.AttachTo(newMovesForm);
 
                     movesForm = newMovesForm;
                     movesForm.Disposed += (_, __) =>

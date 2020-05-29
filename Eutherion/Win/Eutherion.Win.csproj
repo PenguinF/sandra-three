@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="Forms\MdiChildSnapHelper.cs" />
     <Compile Include="Forms\MoveResizeEventArgs.cs" />
+    <Compile Include="Forms\OwnedFormSnapHelper.cs" />
     <Compile Include="Forms\SnapGrid.cs" />
     <Compile Include="Forms\SnapHelper.cs" />
     <Compile Include="IImageProvider.cs" />

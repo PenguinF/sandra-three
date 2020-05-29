@@ -42,10 +42,10 @@ namespace Eutherion.Win.Forms
         /// <summary>
         /// Gets the default value for the <see cref="InsensitiveBorderEndLength"/> property.
         /// </summary>
-        public const int DefaultInsensitiveBorderEndLength = 16;
+        public const int DefaultInsensitiveBorderEndLength = 0;
 
         /// <summary>
-        /// Gets or sets the length of the ends of the borders of the form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
+        /// Gets or sets the length of the ends of the borders of the form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (0).
         /// </summary>
         [DefaultValue(DefaultInsensitiveBorderEndLength)]
         public int InsensitiveBorderEndLength { get; set; } = DefaultInsensitiveBorderEndLength;
