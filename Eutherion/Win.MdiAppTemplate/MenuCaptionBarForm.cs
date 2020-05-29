@@ -771,9 +771,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
 
-            UpdateFromDockProperties();
-            dockableControl.DockPropertiesChanged += UpdateFromDockProperties;
+            UpdateFromDockProperties(dockableControl.DockProperties);
+            dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
         }
+
+        private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)
         {
@@ -839,15 +841,15 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        private void UpdateFromDockProperties()
+        private void UpdateFromDockProperties(DockProperties dockProperties)
         {
-            Text = DockedControl.DockProperties.CaptionText;
+            Text = dockProperties.CaptionText;
 
             // Invalidate to update the save button.
             ActionHandler.Invalidate();
 
             // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-            if (DockedControl.DockProperties.IsModified)
+            if (dockProperties.IsModified)
             {
                 SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
             }
@@ -857,11 +859,11 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             // Only fill MainMenuStrip once, it's not really supposed to change.
-            if (DockedControl.DockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
+            if (dockProperties.MainMenuItems != null && MainMenuStrip.Items.Count == 0)
             {
                 var topLevelContainers = new List<UIMenuNode.Container>();
 
-                foreach (var mainMenuItem in DockedControl.DockProperties.MainMenuItems)
+                foreach (var mainMenuItem in dockProperties.MainMenuItems)
                 {
                     if (mainMenuItem.Container != null && mainMenuItem.DropDownItems != null && mainMenuItem.DropDownItems.Any())
                     {
