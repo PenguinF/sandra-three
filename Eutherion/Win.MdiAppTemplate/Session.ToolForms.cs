@@ -242,7 +242,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
-            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private MenuCaptionBarForm CreateReadOnlyTextForm(string fileName, int width, int height)

@@ -206,7 +206,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 base.Dispose(disposing);
             }
 
-            void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
         }
 
         private const int ErrorIndicatorIndex = 8;
@@ -702,7 +702,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        void IDockableControl.OnFormClosing(CloseReason closeReason, ref bool cancel)
+        void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel)
         {
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (ContainsChanges && CodeFile.AutoSaveFile == null)

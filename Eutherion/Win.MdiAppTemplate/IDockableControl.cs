@@ -53,7 +53,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <param name="cancel">
         /// Whether or not to cancel the closing event.
         /// </param>
-        void OnFormClosing(CloseReason closeReason, ref bool cancel);
+        void OnClosing(CloseReason closeReason, ref bool cancel);
     }
 
     /// <summary>
