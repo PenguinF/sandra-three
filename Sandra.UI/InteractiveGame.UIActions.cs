@@ -112,7 +112,7 @@ namespace Sandra.UI
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
 
                     // Only snap while moving.
-                    MdiChildSnapHelper snapHelper = MdiChildSnapHelper.AttachTo(newChessBoardForm);
+                    OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(newChessBoardForm);
                     snapHelper.SnapWhileResizing = false;
 
                     chessBoardForm = newChessBoardForm;
@@ -210,7 +210,7 @@ namespace Sandra.UI
                     newMovesForm.Controls.Add(movesTextBox);
 
                     // Snap while moving and resizing.
-                    MdiChildSnapHelper.AttachTo(newMovesForm);
+                    OwnedFormSnapHelper.AttachTo(newMovesForm);
 
                     movesForm = newMovesForm;
                     movesForm.Disposed += (_, __) =>
