@@ -384,9 +384,26 @@ namespace Eutherion.Win.MdiAppTemplate
             // Use DefaultForeColor rather than titleBarForeColor when dropped down.
             mainMenuItem.ForeColor = DefaultForeColor;
 
-            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            // Remember last toolstrip separator before a developer tool item with FirstInGroup set.
+            ToolStripSeparator lastSeparator = null;
+
+            foreach (ToolStripItem toolStripItem in mainMenuItem.DropDownItems)
             {
-                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+                if (toolStripItem is UIActionToolStripMenuItem menuItem)
+                {
+                    UIActionState actionState = mainMenuActionHandler.TryPerformAction(menuItem.Action, false);
+                    menuItem.Update(actionState);
+
+                    if (Session.IsDeveloperTool(menuItem.Action))
+                    {
+                        // Hide instead of disable developer tool items.
+                        bool visible = actionState.UIActionVisibility == UIActionVisibility.Enabled;
+                        menuItem.Visible = visible;
+                        if (lastSeparator != null) lastSeparator.Visible = visible;
+                    }
+                }
+
+                lastSeparator = toolStripItem as ToolStripSeparator;
             }
         }
 

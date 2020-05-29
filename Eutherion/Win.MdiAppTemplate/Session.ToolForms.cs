@@ -450,5 +450,15 @@ namespace Eutherion.Win.MdiAppTemplate
 
             return UIActionVisibility.Enabled;
         };
+
+        /// <summary>
+        /// Gets if an action is considered a developer tool and is therefore allowed to be hidden in a main menu.
+        /// </summary>
+        internal static bool IsDeveloperTool(UIAction action)
+        {
+            return action == EditCurrentLanguage.Action
+                || action == OpenLocalAppDataFolder.Action
+                || action == OpenExecutableFolder.Action;
+        }
     }
 }
