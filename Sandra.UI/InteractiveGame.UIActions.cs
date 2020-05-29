@@ -149,7 +149,7 @@ namespace Sandra.UI
             {
                 if (movesForm == null)
                 {
-                    ConstrainedMoveResizeForm newMovesForm = new ConstrainedMoveResizeForm()
+                    OldMenuCaptionBarForm newMovesForm = new OldMenuCaptionBarForm()
                     {
                         Owner = OwnerForm,
                         ShowIcon = false,

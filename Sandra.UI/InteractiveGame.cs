@@ -20,7 +20,8 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Win.Forms;
+using Eutherion.Win.MdiAppTemplate;
+using System.Linq;
 
 namespace Sandra.UI
 {
@@ -64,12 +65,12 @@ namespace Sandra.UI
 
         // Keep track of which types of forms are opened.
         StandardChessBoardForm chessBoardForm;
-        ConstrainedMoveResizeForm movesForm;
+        OldMenuCaptionBarForm movesForm;
 
         MovesTextBox GetMovesTextBox()
         {
             if (movesForm == null) return null;
-            return (MovesTextBox)movesForm.Controls[0];
+            return movesForm.Controls.OfType<MovesTextBox>().First();
         }
 
         private static Chess.Variation GetFirstMove(Chess.Variation variation)

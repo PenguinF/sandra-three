@@ -37,7 +37,7 @@ namespace Sandra.UI
     /// Form which contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : ConstrainedMoveResizeForm, IWeakEventTarget
+    public partial class StandardChessBoardForm : OldMenuCaptionBarForm, IWeakEventTarget
     {
         /// <summary>
         /// Gets a reference to the playing board control on this form.
