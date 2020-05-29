@@ -289,7 +289,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 new RichTextBoxExWithMargin(textBox, Path.GetFileName(fileName))
                 {
                     BackColor = Color.LightGray,
-                    Dock = DockStyle.Fill,
                 })
             {
                 ClientSize = new Size(width, height),

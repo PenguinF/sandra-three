@@ -795,7 +795,6 @@ namespace Eutherion.Win.MdiAppTemplate
                         return new MenuCaptionBarForm<ErrorListPanel>(
                             new ErrorListPanel(this)
                             {
-                                Dock = DockStyle.Fill,
                                 BackColor = DefaultSyntaxEditorStyle.BackColor,
                                 Padding = new Padding(6),
                             })

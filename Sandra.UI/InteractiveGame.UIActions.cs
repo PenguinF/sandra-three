@@ -178,7 +178,6 @@ namespace Sandra.UI
 
                     var movesTextBox = new MovesTextBox()
                     {
-                        Dock = DockStyle.Fill,
                         Game = this,
                     };
 
