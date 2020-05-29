@@ -101,6 +101,8 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
         private const int MainMenuHorizontalMargin = 8;
 
         public const int DefaultCaptionHeight = 30;
@@ -110,6 +112,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly NonSelectableButton maximizeButton;
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
+
+        private readonly UIActionHandler mainMenuActionHandler;
 
         private Button currentHoverButton;
         private Color? closeButtonHoverColorOverride;
@@ -189,6 +193,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             AllowTransparency = true;
             TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+
+            mainMenuActionHandler = new UIActionHandler();
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
         private NonSelectableButton CreateCaptionButton()
@@ -397,8 +405,15 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
         {
+            var mainMenuItem = (ToolStripDropDownItem)sender;
+
             // Use DefaultForeColor rather than titleBarForeColor when dropped down.
-            ((ToolStripDropDownItem)sender).ForeColor = DefaultForeColor;
+            mainMenuItem.ForeColor = DefaultForeColor;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
         }
 
         private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
@@ -732,56 +747,6 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) ObservableStyle.Dispose();
-            base.Dispose(disposing);
-        }
-    }
-
-    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
-    public abstract class MenuCaptionBarForm : OldMenuCaptionBarForm
-    {
-        internal MenuCaptionBarForm() { }
-    }
-
-    /// <summary>
-    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
-    /// </summary>
-    /// <typeparam name="TDockableControl">
-    /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
-    /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
-    /// </typeparam>
-    /// <remarks>
-    /// Some non-client area handling code is adapted from:
-    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
-    /// </remarks>
-    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
-        where TDockableControl : Control, IDockableControl
-    {
-        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
-
-        public TDockableControl DockedControl { get; }
-
-        private readonly UIActionHandler mainMenuActionHandler;
-
-        public MenuCaptionBarForm(TDockableControl dockableControl)
-        {
-            DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
-            Controls.Add(DockedControl);
-
-            mainMenuActionHandler = new UIActionHandler();
-
-            BindStandardUIActions();
-
-            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
-
-            UpdateFromDockProperties(dockableControl.DockProperties);
-            dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
-        }
-
-        private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
-
         private void CurrentLocalizerChanged(object sender, EventArgs e)
         {
             UIMenu.UpdateMenu(MainMenuStrip.Items);
@@ -836,17 +801,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return menuNodes;
         }
 
-        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            var mainMenuItem = (ToolStripMenuItem)sender;
-
-            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
-            {
-                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
-            }
-        }
-
-        private void UpdateFromDockProperties(DockProperties dockProperties)
+        public void UpdateFromDockProperties(DockProperties dockProperties)
         {
             Text = dockProperties.CaptionText;
 
@@ -885,6 +840,48 @@ namespace Eutherion.Win.MdiAppTemplate
                 }
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) ObservableStyle.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+
+    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
+    public abstract class MenuCaptionBarForm : OldMenuCaptionBarForm
+    {
+        internal MenuCaptionBarForm() { }
+    }
+
+    /// <summary>
+    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
+    /// </summary>
+    /// <typeparam name="TDockableControl">
+    /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
+    /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
+    /// </typeparam>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
+    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
+        where TDockableControl : Control, IDockableControl
+    {
+        public TDockableControl DockedControl { get; }
+
+        public MenuCaptionBarForm(TDockableControl dockableControl)
+        {
+            DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
+            Controls.Add(DockedControl);
+
+            BindStandardUIActions();
+
+            UpdateFromDockProperties(dockableControl.DockProperties);
+            dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
+        }
+
+        private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
