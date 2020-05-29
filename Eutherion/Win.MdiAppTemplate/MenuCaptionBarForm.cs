@@ -271,34 +271,6 @@ namespace Eutherion.Win.MdiAppTemplate
             Invalidate();
         }
 
-        protected override void OnControlAdded(ControlEventArgs e)
-        {
-            base.OnControlAdded(e);
-
-            if (e.Control == MainMenuStrip)
-            {
-                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
-                {
-                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
-                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
-                }
-            }
-        }
-
-        protected override void OnControlRemoved(ControlEventArgs e)
-        {
-            if (e.Control == MainMenuStrip)
-            {
-                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
-                {
-                    mainMenuItem.DropDownOpening -= MainMenuItem_DropDownOpening;
-                    mainMenuItem.DropDownClosed -= MainMenuItem_DropDownClosed;
-                }
-            }
-
-            base.OnControlRemoved(e);
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             // For when another window is active when this form is first shown.
