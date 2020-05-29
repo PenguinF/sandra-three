@@ -50,9 +50,7 @@ namespace Sandra.UI
             // Initialize UIActions before building the MainMenuStrip based on it.
             InitializeUIActions();
 
-            MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, mainMenuRootNodes, MainMenuStrip.Items);
-            Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
             IndexFocusDependentUIActions(MainMenuStrip.Items);

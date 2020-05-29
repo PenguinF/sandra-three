@@ -173,12 +173,15 @@ namespace Eutherion.Win.MdiAppTemplate
             closeButton = CreateCaptionButton();
             closeButton.Click += (_, __) => Close();
 
+            MainMenuStrip = new MenuStrip();
+
             SuspendLayout();
 
             Controls.Add(minimizeButton);
             Controls.Add(maximizeButton);
             Controls.Add(saveButton);
             Controls.Add(closeButton);
+            Controls.Add(MainMenuStrip);
 
             ResumeLayout();
 
@@ -211,6 +214,11 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets the size of the client area of the form.
         /// </summary>
         public Size ClientAreaSize => new Size(currentMetrics.ClientAreaWidth, currentMetrics.ClientAreaHeight);
+
+        /// <summary>
+        /// Returns the style of the title bar which can be observed for changes.
+        /// </summary>
+        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
         /// <summary>
         /// Sets the currently used hover color of the close button.
@@ -289,11 +297,6 @@ namespace Eutherion.Win.MdiAppTemplate
             UpdateCaptionAreaButtonsBackColor();
             base.OnLoad(e);
         }
-
-        /// <summary>
-        /// Returns the style of the title bar which can be observed for changes.
-        /// </summary>
-        public MenuCaptionBarFormStyle ObservableStyle { get; } = new MenuCaptionBarFormStyle();
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
@@ -766,9 +769,6 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
             Controls.Add(DockedControl);
-
-            MainMenuStrip = new MenuStrip();
-            Controls.Add(MainMenuStrip);
 
             mainMenuActionHandler = new UIActionHandler();
 
