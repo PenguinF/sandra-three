@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -57,7 +56,7 @@ namespace Eutherion.Win.Forms
 
         // Size/move precalculated information.
         Rectangle m_currentMdiClientScreenRectangle;   // Current bounds of the MDI client rectangle. Changes during sizing/moving when scrollbars are shown or hidden.
-        RECT m_rectangleBeforeSizeMove;                // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
+        Rectangle m_rectangleBeforeSizeMove;           // Initial bounds of this window before sizing/moving was started. Used to preserve sizes or positions.
         SnapGrid m_snapGrid;
 
         /// <summary>
@@ -66,39 +65,21 @@ namespace Eutherion.Win.Forms
         SnapGrid PrepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
-            RECT mdiClientRectangle = new RECT
-            {
-                Left = m_currentMdiClientScreenRectangle.Left,
-                Right = m_currentMdiClientScreenRectangle.Right,
-                Top = m_currentMdiClientScreenRectangle.Top,
-                Bottom = m_currentMdiClientScreenRectangle.Bottom,
-            };
-
             // Create a list of MDI child rectangles sorted by their z-order. (MDI child on top has index 0.)
-            List<RECT> mdiChildRectangles = new List<RECT>();
+            List<Rectangle> mdiChildRectangles = new List<Rectangle>();
             int mdiChildCount = mdiChildren.Count;
             for (int mdiChildIndex = 0; mdiChildIndex < mdiChildCount; ++mdiChildIndex)
             {
                 if (mdiChildren[mdiChildIndex] is Form mdiChildForm && mdiChildForm.Visible && mdiChildForm.WindowState == FormWindowState.Normal)
                 {
                     // Convert the bounds of this MDI child to screen coordinates.
-                    Rectangle mdiChildBounds = mdiChildForm.Bounds;
-                    mdiChildBounds.Offset(mdiClientRectangle.Left, mdiClientRectangle.Top);
-                    RECT mdiChildRectangle = new RECT
-                    {
-                        Left = mdiChildBounds.Left,
-                        Right = mdiChildBounds.Right,
-                        Top = mdiChildBounds.Top,
-                        Bottom = mdiChildBounds.Bottom,
-                    };
+                    Rectangle mdiChildRectangle = mdiChildForm.Bounds;
+                    mdiChildRectangle.Offset(m_currentMdiClientScreenRectangle.Left, m_currentMdiClientScreenRectangle.Top);
 
                     if (this != mdiChildForm)
                     {
                         // Intersect the MDI child rectangle with the MDI client rectangle, so this form does not snap to edges outside of the visible MDI client rectangle.
-                        if (mdiChildRectangle.Left < mdiClientRectangle.Left) mdiChildRectangle.Left = mdiClientRectangle.Left;
-                        if (mdiChildRectangle.Right > mdiClientRectangle.Right) mdiChildRectangle.Right = mdiClientRectangle.Right;
-                        if (mdiChildRectangle.Top < mdiClientRectangle.Top) mdiChildRectangle.Top = mdiClientRectangle.Top;
-                        if (mdiChildRectangle.Bottom > mdiClientRectangle.Bottom) mdiChildRectangle.Bottom = mdiClientRectangle.Bottom;
+                        mdiChildRectangle = Rectangle.Intersect(mdiChildRectangle, m_currentMdiClientScreenRectangle);
 
                         // Only add non-empty rectangles.
                         if (mdiChildRectangle.Left < mdiChildRectangle.Right && mdiChildRectangle.Top < mdiChildRectangle.Bottom) mdiChildRectangles.Add(mdiChildRectangle);
@@ -112,8 +93,8 @@ namespace Eutherion.Win.Forms
             }
 
             // Calculate snappable segments and save them to arrays which can be used efficiently from within the event handlers.
-            List<LineSegment> verticalSegments = SnapGrid.GetVerticalEdges(ref mdiClientRectangle, 0);
-            List<LineSegment> horizontalSegments = SnapGrid.GetHorizontalEdges(ref mdiClientRectangle, 0);
+            List<LineSegment> verticalSegments = SnapGrid.GetVerticalEdges(ref m_currentMdiClientScreenRectangle, 0);
+            List<LineSegment> horizontalSegments = SnapGrid.GetHorizontalEdges(ref m_currentMdiClientScreenRectangle, 0);
 
             return new SnapGrid(verticalSegments, horizontalSegments, mdiChildRectangles, InsensitiveBorderEndLength);
         }
