@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Win.Native;
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Forms
@@ -155,22 +156,7 @@ namespace Eutherion.Win.Forms
             return horizontalBorders;
         }
 
-        /// <summary>
-        /// Derives visible line segments from a list of overlapping rectangles in z-order, and adds them to a list.
-        /// </summary>
-        /// <param name="segments">
-        /// The list of segments to add to.
-        /// </param>
-        /// <param name="overlappingRectangles">
-        /// The list of overlapping rectangles in z-order. Rectangles with a lower index overlap rectangles with a higher index.
-        /// </param>
-        /// <param name="isVertical">
-        /// True to consider vertical edges, false to consider horizontal edges.
-        /// </param>
-        /// <param name="cutoff">
-        /// The length to cut off both ends of all line segments.
-        /// </param>
-        public static void AddVisibleSegments(List<LineSegment> segments, List<RECT> overlappingRectangles, bool isVertical, int cutoff)
+        private static void AddVisibleSegments(List<LineSegment> segments, List<RECT> overlappingRectangles, bool isVertical, int cutoff)
         {
             // Loop over rectangles, to cut away hidden sections of segments.
             for (int rectangleIndex = overlappingRectangles.Count - 1; rectangleIndex >= 0; --rectangleIndex)
@@ -255,16 +241,33 @@ namespace Eutherion.Win.Forms
         /// Initializes a new instance of <see cref="SnapGrid"/>.
         /// </summary>
         /// <param name="verticalSegments">
-        /// The enumeration of vertical line segments the resizing/moving window can snap onto.
+        /// A list of vertical line segments the resizing/moving window can snap onto.
         /// </param>
         /// <param name="horizontalSegments">
-        /// The enumeration of horizontal line segments the resizing/moving window can snap onto.
+        /// A list of horizontal line segments the resizing/moving window can snap onto.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="verticalSegments"/> and/or <paramref name="horizontalSegments"/> is null.
+        /// <param name="overlappingRectangles">
+        /// A list of overlapping rectangles in z-order. Rectangles with a lower index overlap rectangles with a higher index.
+        /// </param>
+        /// <param name="cutoff">
+        /// The length to cut off both ends of all line segments.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="verticalSegments"/> and/or <paramref name="horizontalSegments"/> and/or <paramref name="overlappingRectangles"/> is null.
         /// </exception>
-        public SnapGrid(IEnumerable<LineSegment> verticalSegments, IEnumerable<LineSegment> horizontalSegments)
+        public SnapGrid(
+            List<LineSegment> verticalSegments,
+            List<LineSegment> horizontalSegments,
+            List<RECT> overlappingRectangles,
+            int cutoff)
         {
+            if (verticalSegments == null) throw new ArgumentNullException(nameof(verticalSegments));
+            if (horizontalSegments == null) throw new ArgumentNullException(nameof(horizontalSegments));
+            if (overlappingRectangles == null) throw new ArgumentNullException(nameof(overlappingRectangles));
+
+            AddVisibleSegments(verticalSegments, overlappingRectangles, true, cutoff);
+            AddVisibleSegments(horizontalSegments, overlappingRectangles, false, cutoff);
+
             VerticalSegments = ReadOnlyList<LineSegment>.Create(verticalSegments);
             HorizontalSegments = ReadOnlyList<LineSegment>.Create(horizontalSegments);
         }

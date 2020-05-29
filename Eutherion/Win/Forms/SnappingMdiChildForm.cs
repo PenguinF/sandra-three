@@ -79,8 +79,7 @@ namespace Eutherion.Win.Forms
             int mdiChildCount = mdiChildren.Count;
             for (int mdiChildIndex = 0; mdiChildIndex < mdiChildCount; ++mdiChildIndex)
             {
-                Control child = mdiChildren[mdiChildIndex];
-                if (child is Form mdiChildForm && mdiChildForm.Visible && mdiChildForm.WindowState == FormWindowState.Normal)
+                if (mdiChildren[mdiChildIndex] is Form mdiChildForm && mdiChildForm.Visible && mdiChildForm.WindowState == FormWindowState.Normal)
                 {
                     // Convert the bounds of this MDI child to screen coordinates.
                     Rectangle mdiChildBounds = mdiChildForm.Bounds;
@@ -112,15 +111,11 @@ namespace Eutherion.Win.Forms
                 }
             }
 
-            // Calculate snappable segments and save them to arrays which can be used efficiently from within the WndProc() override.
+            // Calculate snappable segments and save them to arrays which can be used efficiently from within the event handlers.
             List<LineSegment> verticalSegments = SnapGrid.GetVerticalEdges(ref mdiClientRectangle, 0);
             List<LineSegment> horizontalSegments = SnapGrid.GetHorizontalEdges(ref mdiClientRectangle, 0);
 
-            // Add snap line segments for each MDI child.
-            SnapGrid.AddVisibleSegments(verticalSegments, mdiChildRectangles, true, InsensitiveBorderEndLength);
-            SnapGrid.AddVisibleSegments(horizontalSegments, mdiChildRectangles, false, InsensitiveBorderEndLength);
-
-            return new SnapGrid(verticalSegments, horizontalSegments);
+            return new SnapGrid(verticalSegments, horizontalSegments, mdiChildRectangles, InsensitiveBorderEndLength);
         }
 
         /// <summary>
