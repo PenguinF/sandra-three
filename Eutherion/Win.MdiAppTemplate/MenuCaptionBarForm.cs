@@ -74,7 +74,7 @@ namespace Eutherion.Win.MdiAppTemplate
             public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
             public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
 
-            public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible)
+            public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible, bool mininizeButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
                 SystemButtonTop = CaptionHeight - captionButtonHeight - 2;
@@ -98,7 +98,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (saveButtonVisible) SaveButtonLeft -= captionButtonWidth;
                 MaximizeButtonLeft = SaveButtonLeft;
                 if (maximizeButtonVisible) MaximizeButtonLeft -= captionButtonWidth + closeButtonMargin;
-                MinimizeButtonLeft = MaximizeButtonLeft - captionButtonWidth;
+                MinimizeButtonLeft = MaximizeButtonLeft;
+                if (mininizeButtonVisible) MinimizeButtonLeft -= captionButtonWidth;
             }
         }
 
@@ -462,7 +463,8 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             maximizeButton.Visible = MaximizeBox;
-            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible, maximizeButton.Visible);
+            minimizeButton.Visible = MinimizeBox;
+            currentMetrics.UpdateSystemButtonMetrics(saveButton.Visible, MaximizeBox, MinimizeBox);
 
             closeButton.SetBounds(
                 currentMetrics.CloseButtonLeft,
@@ -488,11 +490,14 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.SystemButtonHeight);
             }
 
-            minimizeButton.SetBounds(
-                currentMetrics.MinimizeButtonLeft,
-                currentMetrics.SystemButtonTop,
-                currentMetrics.SystemButtonWidth,
-                currentMetrics.SystemButtonHeight);
+            if (minimizeButton.Visible)
+            {
+                minimizeButton.SetBounds(
+                    currentMetrics.MinimizeButtonLeft,
+                    currentMetrics.SystemButtonTop,
+                    currentMetrics.SystemButtonWidth,
+                    currentMetrics.SystemButtonHeight);
+            }
 
             foreach (Control control in Controls)
             {
