@@ -27,6 +27,12 @@ namespace Eutherion.Win.Controls
     {
         private class TabHeaderPanel : Control
         {
+            private readonly GlyphTabControl OwnerTabControl;
+
+            public TabHeaderPanel(GlyphTabControl ownerTabControl)
+            {
+                OwnerTabControl = ownerTabControl;
+            }
         }
     }
 }

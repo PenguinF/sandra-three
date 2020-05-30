@@ -21,6 +21,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Controls
@@ -57,5 +58,44 @@ namespace Eutherion.Win.Controls
         /// The default value for the <see cref="TabHeaderHeight"/> property.
         /// </summary>
         public const int DefaultTabHeaderHeight = 26;
+
+        private readonly TabHeaderPanel HeaderPanel;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GlyphTabControl"/>.
+        /// </summary>
+        public GlyphTabControl()
+        {
+            HeaderPanel = new TabHeaderPanel(this);
+            Controls.Add(HeaderPanel);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="Control.Layout"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// A <see cref="LayoutEventArgs"/> that contains the event data.
+        /// </param>
+        protected override void OnLayout(LayoutEventArgs e)
+        {
+            var clientSize = ClientSize;
+            HeaderPanel.SetBounds(0, 0, clientSize.Width, TabHeaderHeight);
+            base.OnLayout(e);
+        }
+
+        /// <summary>
+        /// Paints the background of the control.
+        /// </summary>
+        /// <param name="e">
+        /// A <see cref="PaintEventArgs"/> that contains the event data.
+        /// </param>
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            // Default behavior if there is no control to display in the tab client area.
+            var clientSize = ClientSize;
+
+            e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
+                0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
+        }
     }
 }
