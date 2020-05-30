@@ -47,7 +47,7 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>> OpenPgnEditors
             = new Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>>(StringComparer.OrdinalIgnoreCase);
 
-        private MdiContainerForm mdiContainerForm;
+        private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -86,10 +86,15 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (mdiContainerForm != null && mdiContainerForm.IsHandleCreated && !mdiContainerForm.IsDisposed)
+            // First mdiContainerForm in the list gets the honor of opening the new PGN files.
+            foreach (var candidate in mdiContainerForms)
             {
-                // Activate mdiContainerForm before opening pgn files.
-                mdiContainerForm.EnsureActivated();
+                if (candidate.IsHandleCreated && !candidate.IsDisposed)
+                {
+                    // Activate mdiContainerForm before opening pgn files.
+                    candidate.EnsureActivated();
+                    break;
+                }
             }
 
             OpenCommandLineArgs(receivedCommandLineArgs);
@@ -119,12 +124,13 @@ namespace Sandra.UI
 
         private void OpenNewMdiContainerForm()
         {
-            mdiContainerForm = new MdiContainerForm();
+            var mdiContainerForm = new MdiContainerForm();
 
             mdiContainerForm.Load += MdiContainerForm_Load;
             mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
             mdiContainerForm.FormClosed += (_, __) => Close();
 
+            mdiContainerForms.Add(mdiContainerForm);
             mdiContainerForm.Show();
         }
 
