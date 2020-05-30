@@ -111,7 +111,7 @@ namespace Eutherion.Win.Controls
 
             tabPage.ClientControl.Visible = false;
             Controls.Add(tabPage.ClientControl);
-            HeaderPanel.Invalidate();
+            HeaderPanel.UpdateMetrics();
 
             OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
@@ -124,7 +124,7 @@ namespace Eutherion.Win.Controls
             else if (tabPageIndex < ActiveTabPageIndex) ActiveTabPageIndex--;
 
             Controls.Remove(tabPage.ClientControl);
-            HeaderPanel.Invalidate();
+            HeaderPanel.UpdateMetrics();
 
             OnAfterTabRemoved(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
@@ -153,7 +153,7 @@ namespace Eutherion.Win.Controls
                 newActiveControl.Visible = true;
                 if (oldActiveControl != null) oldActiveControl.Visible = false;
                 ActiveControl = newActiveControl;
-                HeaderPanel.Invalidate();
+                HeaderPanel.UpdateNonMetrics();
             }
         }
 

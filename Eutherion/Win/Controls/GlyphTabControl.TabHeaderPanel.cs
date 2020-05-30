@@ -44,6 +44,22 @@ namespace Eutherion.Win.Controls
                 SetStyle(ControlStyles.Selectable, false);
             }
 
+            /// <summary>
+            /// Called when the positions and sizes of tab headers are expected to change.
+            /// </summary>
+            public void UpdateMetrics()
+            {
+                Invalidate();
+            }
+
+            /// <summary>
+            /// Called when the header must be redrawn, but the positions and sizes of tab headers has not changed.
+            /// </summary>
+            public void UpdateNonMetrics()
+            {
+                Invalidate();
+            }
+
             private Rectangle TabHeaderTextRectangle(int index) => new Rectangle(
                 index * 120,
                 0,
