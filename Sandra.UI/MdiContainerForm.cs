@@ -282,8 +282,8 @@ namespace Sandra.UI
 
             pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
 
-            // Open as new window.
-            new MenuCaptionBarForm<PgnEditor>(pgnEditor);
+            // Open as new tab page.
+            DockedControl.TabPages.Add(new MdiTabPage<PgnEditor>(pgnEditor));
 
             return pgnEditor;
         }
