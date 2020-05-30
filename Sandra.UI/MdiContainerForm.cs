@@ -268,18 +268,17 @@ namespace Sandra.UI
             });
         }
 
-        private MenuCaptionBarForm<PgnEditor> NewPgnEditor(string normalizedPgnFileName, bool isReadOnly)
+        private PgnEditor NewPgnEditor(string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
-            var pgnEditor = new MenuCaptionBarForm<PgnEditor>(
-                new PgnEditor(
-                    isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                    PgnSyntaxDescriptor.Instance,
-                    pgnFile,
-                    SettingKeys.PgnZoom));
+            var pgnEditor = new PgnEditor(
+                isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                PgnSyntaxDescriptor.Instance,
+                pgnFile,
+                SettingKeys.PgnZoom);
 
-            PgnStyleSelector.InitializeStyles(pgnEditor.DockedControl);
+            PgnStyleSelector.InitializeStyles(pgnEditor);
 
             // Don't index read-only pgn editors.
             if (!isReadOnly)
@@ -300,6 +299,9 @@ namespace Sandra.UI
                 };
             }
 
+            // Open as new window.
+            new MenuCaptionBarForm<PgnEditor>(pgnEditor);
+
             return pgnEditor;
         }
 
@@ -309,12 +311,12 @@ namespace Sandra.UI
             NewPgnEditor(null, isReadOnly: false).EnsureActivated();
         }
 
-        private MenuCaptionBarForm<PgnEditor> NewOrExistingPgnEditor(string pgnFileName, bool isReadOnly)
+        private PgnEditor NewOrExistingPgnEditor(string pgnFileName, bool isReadOnly)
         {
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
 
-            if (isReadOnly || !Program.MainForm.TryGetPgnEditors(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnEditors))
+            if (isReadOnly || !Program.MainForm.TryGetPgnEditors(normalizedPgnFileName, out List<PgnEditor> pgnEditors))
             {
                 // File path not open yet, initialize new PGN editor.
                 return NewPgnEditor(normalizedPgnFileName, isReadOnly);

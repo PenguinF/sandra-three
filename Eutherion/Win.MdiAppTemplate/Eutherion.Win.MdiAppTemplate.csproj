@@ -48,6 +48,7 @@
     <Compile Include="AutoSaveFileNamePair.cs" />
     <Compile Include="BuiltInEnglishLocalizer.cs" />
     <Compile Include="CombinedUIActionInterface.cs" />
+    <Compile Include="DockableControlHelpers.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FileLocalizer.cs" />
     <Compile Include="FormStateAutoSaver.cs" />

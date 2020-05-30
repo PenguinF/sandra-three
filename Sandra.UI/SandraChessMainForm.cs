@@ -41,8 +41,8 @@ namespace Sandra.UI
         /// <summary>
         /// List of open PGN editors indexed by their path. New PGN files are indexed under the empty path.
         /// </summary>
-        private readonly Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>> OpenPgnEditors
-            = new Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
+            = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
         private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
 
@@ -167,10 +167,10 @@ namespace Sandra.UI
             mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
-        internal bool TryGetPgnEditors(string key, out List<MenuCaptionBarForm<PgnEditor>> pgnEditors)
+        internal bool TryGetPgnEditors(string key, out List<PgnEditor> pgnEditors)
             => OpenPgnEditors.TryGetValue(key, out pgnEditors);
 
-        internal void RemovePgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
+        internal void RemovePgnEditor(string key, PgnEditor pgnEditor)
         {
             // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
             var pgnEditors = OpenPgnEditors[key ?? string.Empty];
@@ -178,9 +178,9 @@ namespace Sandra.UI
             if (pgnEditors.Count == 0) OpenPgnEditors.Remove(key ?? string.Empty);
         }
 
-        internal void AddPgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
+        internal void AddPgnEditor(string key, PgnEditor pgnEditor)
         {
-            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnEditor);
+            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<PgnEditor>()).Add(pgnEditor);
         }
     }
 }
