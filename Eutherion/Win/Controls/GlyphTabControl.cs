@@ -64,6 +64,11 @@ namespace Eutherion.Win.Controls
         /// </summary>
         public TabPageCollection TabPages { get; }
 
+        /// <summary>
+        /// Gets the index of the active tab page, or -1 if none is active.
+        /// </summary>
+        public int ActiveTabPageIndex { get; private set; } = -1;
+
         #region Ignored properties
 
         /// <summary>
@@ -123,8 +128,11 @@ namespace Eutherion.Win.Controls
             // Default behavior if there is no control to display in the tab client area.
             var clientSize = ClientSize;
 
-            e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
-                0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
+            if (ActiveTabPageIndex < 0)
+            {
+                e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
+                    0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
+            }
         }
     }
 }
