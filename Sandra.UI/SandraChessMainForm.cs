@@ -111,15 +111,19 @@ namespace Sandra.UI
                 // Load chess piece images.
                 PieceImages.LoadChessPieceImages();
 
-                mdiContainerForm = new MdiContainerForm();
-
-                mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
-                mdiContainerForm.FormClosed += (_, __) => Close();
-
                 Visible = false;
-
-                mdiContainerForm.Show();
+                OpenNewMdiContainerForm();
             }
+        }
+
+        private void OpenNewMdiContainerForm()
+        {
+            mdiContainerForm = new MdiContainerForm();
+
+            mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
+            mdiContainerForm.FormClosed += (_, __) => Close();
+
+            mdiContainerForm.Show();
         }
 
         internal void OpenCommandLineArgs(string[] commandLineArgs)
