@@ -59,6 +59,28 @@ namespace Eutherion.Win.Controls
         /// </summary>
         public const int DefaultTabHeaderHeight = 26;
 
+        #region Ignored properties
+
+        /// <summary>
+        /// This property is ignored.
+        /// </summary>
+        [Browsable(false)]
+        public override Image BackgroundImage { get => base.BackgroundImage; set => base.BackgroundImage = value; }
+
+        /// <summary>
+        /// This property is ignored.
+        /// </summary>
+        [Browsable(false)]
+        public override ImageLayout BackgroundImageLayout { get => base.BackgroundImageLayout; set => base.BackgroundImageLayout = value; }
+
+        /// <summary>
+        /// This property is ignored.
+        /// </summary>
+        [Browsable(false)]
+        public override string Text { get => base.Text; set => base.Text = value; }
+
+        #endregion Ignored properties
+
         private readonly TabHeaderPanel HeaderPanel;
 
         /// <summary>
