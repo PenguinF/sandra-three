@@ -127,7 +127,6 @@ namespace Sandra.UI
             var mdiContainerForm = new MdiContainerForm();
 
             mdiContainerForm.Load += MdiContainerForm_Load;
-            mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
 
             mdiContainerForm.FormClosed += (_, __) =>
             {
@@ -161,6 +160,8 @@ namespace Sandra.UI
                     // Update the bounds of the form.
                     mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
+
+            OpenCommandLineArgs(commandLineArgs);
         }
 
         internal void OpenCommandLineArgs(string[] commandLineArgs)
