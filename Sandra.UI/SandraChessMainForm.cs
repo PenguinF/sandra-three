@@ -178,7 +178,7 @@ namespace Sandra.UI
                 // Catch exception for each open action individually.
                 try
                 {
-                    OpenOrActivatePgnFile(mdiContainerForm, pgnFileName, isReadOnly: false);
+                    NewOrExistingPgnEditor(mdiContainerForm, pgnFileName, isReadOnly: false).EnsureActivated();
                 }
                 catch (Exception exception)
                 {
@@ -207,7 +207,7 @@ namespace Sandra.UI
             OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnEditor);
         }
 
-        private void OpenPgnForm(MdiContainerForm mdiContainerForm, string normalizedPgnFileName, bool isReadOnly)
+        private MenuCaptionBarForm<PgnEditor> NewPgnEditor(MdiContainerForm mdiContainerForm, string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
@@ -242,29 +242,29 @@ namespace Sandra.UI
                 };
             }
 
-            pgnForm.EnsureActivated();
+            return pgnForm;
         }
 
-        internal void OpenNewPgnFile(MdiContainerForm mdiContainerForm)
+        internal void OpenNewPgnEditor(MdiContainerForm mdiContainerForm)
         {
             // Never create as read-only.
-            OpenPgnForm(mdiContainerForm, null, isReadOnly: false);
+            NewPgnEditor(mdiContainerForm, null, isReadOnly: false).EnsureActivated();
         }
 
-        internal void OpenOrActivatePgnFile(MdiContainerForm mdiContainerForm, string pgnFileName, bool isReadOnly)
+        internal MenuCaptionBarForm<PgnEditor> NewOrExistingPgnEditor(MdiContainerForm mdiContainerForm, string pgnFileName, bool isReadOnly)
         {
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
 
             if (isReadOnly || !OpenPgnEditors.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
             {
-                // File path not open yet, initialize new PGN Form.
-                OpenPgnForm(mdiContainerForm, normalizedPgnFileName, isReadOnly);
+                // File path not open yet, initialize new PGN editor.
+                return NewPgnEditor(mdiContainerForm, normalizedPgnFileName, isReadOnly);
             }
             else
             {
-                // Just activate the first Form in the list.
-                pgnForms[0].EnsureActivated();
+                // Just return the first editor in the list.
+                return pgnForms[0];
             }
         }
     }

@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using System;
 using System.Windows.Forms;
@@ -81,7 +82,7 @@ namespace Sandra.UI
 
         public UIActionState TryNewPgnFile(bool perform)
         {
-            if (perform) Program.MainForm.OpenNewPgnFile(this);
+            if (perform) Program.MainForm.OpenNewPgnEditor(this);
             return UIActionVisibility.Enabled;
         }
 
@@ -121,7 +122,7 @@ namespace Sandra.UI
                 var dialogResult = openFileDialog.ShowDialog(this);
                 if (dialogResult == DialogResult.OK)
                 {
-                    Program.MainForm.OpenOrActivatePgnFile(this, openFileDialog.FileName, openFileDialog.ReadOnlyChecked);
+                    Program.MainForm.NewOrExistingPgnEditor(this, openFileDialog.FileName, openFileDialog.ReadOnlyChecked).EnsureActivated();
                 }
             }
 
