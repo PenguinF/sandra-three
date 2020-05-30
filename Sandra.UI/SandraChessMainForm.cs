@@ -41,9 +41,9 @@ namespace Sandra.UI
         private readonly string[] commandLineArgs;
 
         /// <summary>
-        /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
+        /// List of open PGN editors indexed by their path. New PGN files are indexed under the empty path.
         /// </summary>
-        private readonly Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>> OpenPgnForms
+        private readonly Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>> OpenPgnEditors
             = new Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>>(StringComparer.OrdinalIgnoreCase);
 
         private MdiContainerForm mdiContainerForm;
@@ -149,14 +149,14 @@ namespace Sandra.UI
         private void RemovePgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
         {
             // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
-            var pgnForms = OpenPgnForms[key ?? string.Empty];
+            var pgnForms = OpenPgnEditors[key ?? string.Empty];
             pgnForms.Remove(pgnForm);
-            if (pgnForms.Count == 0) OpenPgnForms.Remove(key ?? string.Empty);
+            if (pgnForms.Count == 0) OpenPgnEditors.Remove(key ?? string.Empty);
         }
 
         private void AddPgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
         {
-            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnForm);
+            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnForm);
         }
 
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
@@ -208,7 +208,7 @@ namespace Sandra.UI
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
 
-            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
+            if (isReadOnly || !OpenPgnEditors.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
             {
                 // File path not open yet, initialize new PGN Form.
                 OpenPgnForm(normalizedPgnFileName, isReadOnly);
