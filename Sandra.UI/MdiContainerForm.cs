@@ -25,9 +25,7 @@ using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -251,28 +249,6 @@ namespace Sandra.UI
 
             // Focus back on the chessboard form.
             game.TryGotoChessBoardForm(true);
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-
-            // Initialize from settings if available.
-            Session.Current.AttachFormStateAutoSaver(
-                this,
-                SettingKeys.Window,
-                () =>
-                {
-                    // Show in the center of the monitor where the mouse currently is.
-                    var activeScreen = Screen.FromPoint(MousePosition);
-                    Rectangle workingArea = activeScreen.WorkingArea;
-
-                    // Two thirds the size of the active monitor's working area.
-                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
-
-                    // Update the bounds of the form.
-                    SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                });
         }
     }
 }

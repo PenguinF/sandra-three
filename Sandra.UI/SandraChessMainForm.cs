@@ -27,6 +27,7 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -120,10 +121,33 @@ namespace Sandra.UI
         {
             mdiContainerForm = new MdiContainerForm();
 
+            mdiContainerForm.Load += MdiContainerForm_Load;
             mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
             mdiContainerForm.FormClosed += (_, __) => Close();
 
             mdiContainerForm.Show();
+        }
+
+        private void MdiContainerForm_Load(object sender, EventArgs e)
+        {
+            MdiContainerForm mdiContainerForm = (MdiContainerForm)sender;
+
+            // Initialize from settings if available.
+            Session.Current.AttachFormStateAutoSaver(
+                mdiContainerForm,
+                SettingKeys.Window,
+                () =>
+                {
+                    // Show in the center of the monitor where the mouse currently is.
+                    var activeScreen = Screen.FromPoint(MousePosition);
+                    Rectangle workingArea = activeScreen.WorkingArea;
+
+                    // Two thirds the size of the active monitor's working area.
+                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+                    // Update the bounds of the form.
+                    mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+                });
         }
 
         internal void OpenCommandLineArgs(string[] commandLineArgs)
