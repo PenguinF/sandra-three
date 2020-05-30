@@ -273,8 +273,6 @@ namespace Sandra.UI
                     // Update the bounds of the form.
                     SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
-
-            NewPlayingBoard();
         }
     }
 }
