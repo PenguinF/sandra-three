@@ -24,7 +24,6 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
-using Sandra.Chess;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -238,17 +237,6 @@ namespace Sandra.UI
             });
 
             return mainMenuRootNodes;
-        }
-
-        public void NewPlayingBoard()
-        {
-            InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
-
-            game.TryGotoChessBoardForm(true);
-            game.TryGotoMovesForm(true);
-
-            // Focus back on the chessboard form.
-            game.TryGotoChessBoardForm(true);
         }
     }
 }

@@ -53,7 +53,17 @@ namespace Sandra.UI
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)
         {
-            if (perform) NewPlayingBoard();
+            if (perform)
+            {
+                InteractiveGame game = new InteractiveGame(this, Chess.Position.GetInitialPosition());
+
+                game.TryGotoChessBoardForm(true);
+                game.TryGotoMovesForm(true);
+
+                // Focus back on the chessboard form.
+                game.TryGotoChessBoardForm(true);
+            }
+
             return UIActionVisibility.Enabled;
         }
 
