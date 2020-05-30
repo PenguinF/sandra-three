@@ -114,6 +114,12 @@ namespace Eutherion.Win.Controls
         {
             var clientSize = ClientSize;
             HeaderPanel.SetBounds(0, 0, clientSize.Width, TabHeaderHeight);
+
+            foreach (var tabPage in TabPages)
+            {
+                tabPage.ClientControl.SetBounds(0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight);
+            }
+
             base.OnLayout(e);
         }
 
