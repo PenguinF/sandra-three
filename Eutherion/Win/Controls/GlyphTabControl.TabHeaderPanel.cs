@@ -37,6 +37,10 @@ namespace Eutherion.Win.Controls
             private float CurrentTabWidth;
             private float CurrentHorizontalTabTextMargin;
 
+            private Point LastKnownMouseMovePoint = new Point(-1, -1);
+
+            private int HoverTabIndex = -1;
+
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
                 OwnerTabControl = ownerTabControl;
@@ -63,6 +67,9 @@ namespace Eutherion.Win.Controls
                 CurrentHorizontalTabTextMargin = OwnerTabControl.HorizontalTabTextMargin;
                 if (CurrentHorizontalTabTextMargin * 2 > CurrentTabWidth) CurrentHorizontalTabTextMargin = CurrentTabWidth / 2;
 
+                // Must hit test again after updating the metrics.
+                HitTest(MousePosition);
+
                 Invalidate();
             }
 
@@ -72,6 +79,71 @@ namespace Eutherion.Win.Controls
             public void UpdateNonMetrics()
             {
                 Invalidate();
+            }
+
+            private void HitTest(Point clientLocation)
+            {
+                int tabIndex = -1;
+
+                if (clientLocation.Y >= 0 && clientLocation.Y < ClientSize.Height && CurrentTabWidth > 0)
+                {
+                    tabIndex = (int)Math.Floor(clientLocation.X / CurrentTabWidth);
+                    if (tabIndex >= OwnerTabControl.TabPages.Count) tabIndex = -1;
+                }
+
+                if (HoverTabIndex != tabIndex)
+                {
+                    HoverTabIndex = tabIndex;
+                    Invalidate();
+                }
+            }
+
+            protected override void OnMouseEnter(EventArgs e)
+            {
+                if (LastKnownMouseMovePoint.X >= 0 && LastKnownMouseMovePoint.Y >= 0)
+                {
+                    HitTest(LastKnownMouseMovePoint);
+                }
+
+                base.OnMouseEnter(e);
+            }
+
+            protected override void OnMouseDown(MouseEventArgs e)
+            {
+                HitTest(e.Location);
+
+                if (HoverTabIndex >= 0 && e.Button == MouseButtons.Left)
+                {
+                    OwnerTabControl.TabHeaderClicked(HoverTabIndex);
+                }
+
+                base.OnMouseDown(e);
+            }
+
+            protected override void OnMouseMove(MouseEventArgs e)
+            {
+                // Do a hit test, which updates hover information.
+                HitTest(e.Location);
+
+                // Remember position for mouse-enters without mouse-leaves.
+                LastKnownMouseMovePoint = e.Location;
+
+                base.OnMouseMove(e);
+            }
+
+            protected override void OnMouseUp(MouseEventArgs e)
+            {
+                HitTest(e.Location);
+                base.OnMouseUp(e);
+            }
+
+            protected override void OnMouseLeave(EventArgs e)
+            {
+                // Hit test a position outside of the control to reset the hover tab index and raise proper events.
+                LastKnownMouseMovePoint = new Point(-1, -1);
+                HitTest(LastKnownMouseMovePoint);
+
+                base.OnMouseLeave(e);
             }
 
             protected override void OnLayout(LayoutEventArgs e) => UpdateMetrics();

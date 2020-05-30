@@ -138,7 +138,7 @@ namespace Eutherion.Win.Controls
             Controls.Add(HeaderPanel);
         }
 
-        internal void TabInserted(TabPage tabPage, int tabPageIndex)
+        private void TabInserted(TabPage tabPage, int tabPageIndex)
         {
             // Make sure the same page remains activated.
             if (ActiveTabPageIndex >= tabPageIndex) ActiveTabPageIndex++;
@@ -151,7 +151,7 @@ namespace Eutherion.Win.Controls
             OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
 
-        internal void TabRemoved(TabPage tabPage, int tabPageIndex)
+        private void TabRemoved(TabPage tabPage, int tabPageIndex)
         {
             // Make sure the same page remains activated.
             // If the active tab page is closed, just deselect.
@@ -172,6 +172,11 @@ namespace Eutherion.Win.Controls
             {
                 HeaderPanel.UpdateNonMetrics();
             }
+        }
+
+        private void TabHeaderClicked(int tabPageIndex)
+        {
+            ActivateTab(tabPageIndex);
         }
 
         /// <summary>
