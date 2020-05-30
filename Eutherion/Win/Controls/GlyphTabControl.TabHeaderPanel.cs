@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -30,6 +31,10 @@ namespace Eutherion.Win.Controls
         private class TabHeaderPanel : Control
         {
             private readonly GlyphTabControl OwnerTabControl;
+
+            private int CurrentWidth;
+            private int CurrentHeight;
+            private float CurrentTabWidth;
 
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
@@ -49,6 +54,12 @@ namespace Eutherion.Win.Controls
             /// </summary>
             public void UpdateMetrics()
             {
+                CurrentWidth = ClientSize.Width;
+                CurrentHeight = ClientSize.Height;
+                int tabCount = OwnerTabControl.TabPages.Count;
+                CurrentTabWidth = tabCount > 0 ? (float)CurrentWidth / tabCount : 0;
+                if (OwnerTabControl.TabWidth < CurrentTabWidth) CurrentTabWidth = OwnerTabControl.TabWidth;
+
                 Invalidate();
             }
 
@@ -60,11 +71,13 @@ namespace Eutherion.Win.Controls
                 Invalidate();
             }
 
+            protected override void OnLayout(LayoutEventArgs e) => UpdateMetrics();
+
             private Rectangle TabHeaderTextRectangle(int index) => new Rectangle(
-                index * 120,
+                (int)Math.Round(index * CurrentTabWidth),
                 0,
-                120,
-                ClientSize.Height);
+                (int)Math.Round(CurrentTabWidth),
+                CurrentHeight);
 
             protected override void OnPaint(PaintEventArgs e)
             {

@@ -60,6 +60,23 @@ namespace Eutherion.Win.Controls
         public const int DefaultTabHeaderHeight = 26;
 
         /// <summary>
+        /// Gets or sets the width a tab header will occupy if not constrained. The minimum value is 1. The default value is <see cref="DefaultTabWidth"/> (120).
+        /// </summary>
+        [DefaultValue(DefaultTabWidth)]
+        public int TabWidth
+        {
+            get => tabWidth;
+            set { if (tabWidth != value) { tabWidth = Checked(value, 1, nameof(TabWidth)); HeaderPanel.UpdateMetrics(); } }
+        }
+
+        private int tabWidth = DefaultTabWidth;
+
+        /// <summary>
+        /// The default value for the <see cref="TabWidth"/> property.
+        /// </summary>
+        public const int DefaultTabWidth = 120;
+
+        /// <summary>
         /// Gets the collection of tab pages in this control.
         /// </summary>
         public TabPageCollection TabPages { get; }
