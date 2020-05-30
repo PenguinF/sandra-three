@@ -57,6 +57,18 @@ namespace Eutherion.Win.MdiAppTemplate
                 }
             }
         }
+
+        protected override void OnAfterTabInserted(GlyphTabControlEventArgs e)
+        {
+            if (e.TabPage is MdiTabPage mdiTabPage) mdiTabPage.RegisterDockPropertiesChangedEvent();
+            base.OnAfterTabInserted(e);
+        }
+
+        protected override void OnAfterTabRemoved(GlyphTabControlEventArgs e)
+        {
+            if (e.TabPage is MdiTabPage mdiTabPage) mdiTabPage.DeregisterDockPropertiesChangedEvent();
+            base.OnAfterTabRemoved(e);
+        }
     }
 
     public abstract class MdiTabPage : GlyphTabControl.TabPage
@@ -68,6 +80,23 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             DockedControl = dockedControl;
         }
+
+        internal void RegisterDockPropertiesChangedEvent()
+        {
+            UpdateFromDockProperties();
+            DockedControl.DockPropertiesChanged += UpdateFromDockProperties;
+        }
+
+        internal void DeregisterDockPropertiesChangedEvent()
+        {
+            DockedControl.DockPropertiesChanged -= UpdateFromDockProperties;
+        }
+
+        private void UpdateFromDockProperties()
+        {
+            DockProperties dockProperties = DockedControl.DockProperties;
+            Text = dockProperties.CaptionText;
+        }
     }
 
     public class MdiTabPage<TDockableControl> : MdiTabPage
@@ -76,13 +105,6 @@ namespace Eutherion.Win.MdiAppTemplate
         public MdiTabPage(TDockableControl clientControl)
             : base(clientControl, clientControl)
         {
-            UpdateFromDockProperties(DockedControl.DockProperties);
-            DockedControl.DockPropertiesChanged += () => UpdateFromDockProperties(DockedControl.DockProperties);
-        }
-
-        private void UpdateFromDockProperties(DockProperties dockProperties)
-        {
-            Text = dockProperties.CaptionText;
         }
     }
 }
