@@ -33,7 +33,14 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    public class OldMenuCaptionBarForm : UIActionForm, IWeakEventTarget
+    /// <summary>
+    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
+    /// </summary>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
+    public abstract class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
         {
@@ -122,7 +129,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private Metrics currentMetrics;
 
-        public OldMenuCaptionBarForm()
+        private protected MenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
                 | ControlStyles.UserPaint
@@ -854,12 +861,6 @@ namespace Eutherion.Win.MdiAppTemplate
         }
     }
 
-    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
-    public abstract class MenuCaptionBarForm : OldMenuCaptionBarForm
-    {
-        internal MenuCaptionBarForm() { }
-    }
-
     /// <summary>
     /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
     /// </summary>
@@ -867,13 +868,12 @@ namespace Eutherion.Win.MdiAppTemplate
     /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
     /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
     /// </typeparam>
-    /// <remarks>
-    /// Some non-client area handling code is adapted from:
-    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
-    /// </remarks>
     public class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
         where TDockableControl : Control, IDockableControl
     {
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
         public TDockableControl DockedControl { get; }
 
         public MenuCaptionBarForm(TDockableControl dockableControl)
