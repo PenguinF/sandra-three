@@ -43,7 +43,7 @@ namespace Sandra.UI
 
         public void ActiveMoveTreeUpdated()
         {
-            if (chessBoardForm != null) chessBoardForm.GameUpdated();
+            if (chessBoard != null) chessBoard.GameUpdated();
         }
 
         public void HandleMouseWheelEvent(int delta)
@@ -60,7 +60,7 @@ namespace Sandra.UI
             }
         }
 
-        StandardChessBoard chessBoardForm;
+        private StandardChessBoard chessBoard;
 
         private static Chess.Variation GetFirstMove(Chess.Variation variation)
         {

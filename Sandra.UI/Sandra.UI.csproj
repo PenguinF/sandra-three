@@ -86,11 +86,11 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="StandardChessBoard.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="StandardChessBoard.UIActions.cs">
       <DependentUpon>StandardChessBoard.cs</DependentUpon>
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

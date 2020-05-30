@@ -800,7 +800,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return menuNodes;
         }
 
-        public void UpdateFromDockProperties(DockProperties dockProperties)
+        private protected void UpdateFromDockProperties(DockProperties dockProperties)
         {
             CaptionHeight = dockProperties.CaptionHeight;
             Text = dockProperties.CaptionText;

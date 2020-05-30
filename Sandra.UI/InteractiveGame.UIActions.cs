@@ -23,13 +23,13 @@ using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
-using Eutherion.Win.Forms;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -52,19 +52,17 @@ namespace Sandra.UI
         {
             if (perform)
             {
-                if (chessBoardForm == null)
+                if (chessBoard == null)
                 {
-                    StandardChessBoard newChessBoardForm = new StandardChessBoard
+                    var newChessBoard = new StandardChessBoard
                     {
-                        Owner = OwnerPgnEditor.FindForm(),
                         Game = this,
                         PieceImages = PieceImages.ImageArray
                     };
 
-                    newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-                    newChessBoardForm.ClientSize = new Size(400, 400);
+                    newChessBoard.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
 
-                    newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
+                    newChessBoard.PlayingBoard.BindActions(new UIActionBindings
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
 
@@ -85,32 +83,33 @@ namespace Sandra.UI
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
-                        { StandardChessBoard.FlipBoard, newChessBoardForm.TryFlipBoard },
-                        { StandardChessBoard.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+                        { StandardChessBoard.FlipBoard, newChessBoard.TryFlipBoard },
+                        { StandardChessBoard.TakeScreenshot, newChessBoard.TryTakeScreenshot },
 
-                        { SharedUIAction.ZoomIn, newChessBoardForm.TryZoomIn },
-                        { SharedUIAction.ZoomOut, newChessBoardForm.TryZoomOut },
+                        { SharedUIAction.ZoomIn, newChessBoard.TryZoomIn },
+                        { SharedUIAction.ZoomOut, newChessBoard.TryZoomOut },
                     });
 
-                    UIMenu.AddTo(newChessBoardForm.PlayingBoard);
+                    UIMenu.AddTo(newChessBoard.PlayingBoard);
 
-                    newChessBoardForm.UpdateFromDockProperties(new DockProperties
+                    newChessBoard.DockProperties.CaptionHeight = 24;
+                    newChessBoard.DockProperties.Icon = Session.Current.ApplicationIcon;
+
+                    var newChessBoardForm = new MenuCaptionBarForm<StandardChessBoard>(newChessBoard)
                     {
-                        CaptionHeight = 24,
-                        Icon = Session.Current.ApplicationIcon,
-                    });
+                        Owner = OwnerPgnEditor.FindForm(),
+                        MaximizeBox = false,
+                        FormBorderStyle = FormBorderStyle.SizableToolWindow,
+                        ClientSize = new Size(400, 400),
+                    };
 
-                    // Only snap while moving.
-                    OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(newChessBoardForm);
-                    snapHelper.SnapWhileResizing = false;
+                    StandardChessBoard.ConstrainClientSize(newChessBoardForm);
 
-                    newChessBoardForm.Load += (_, __) => newChessBoardForm.PerformAutoFit(null);
-
-                    chessBoardForm = newChessBoardForm;
-                    chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
+                    chessBoard = newChessBoard;
+                    chessBoard.Disposed += (_, __) => chessBoard = null;
                 }
 
-                chessBoardForm.EnsureActivated();
+                chessBoard.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;
