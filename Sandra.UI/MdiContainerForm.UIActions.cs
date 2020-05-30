@@ -61,11 +61,6 @@ namespace Sandra.UI
             if (perform)
             {
                 InteractiveGame game = new InteractiveGame(pgnEditor, Chess.Position.GetInitialPosition());
-
-                game.TryGotoChessBoardForm(true);
-                game.TryGotoMovesForm(true);
-
-                // Focus back on the chessboard form.
                 game.TryGotoChessBoardForm(true);
             }
 

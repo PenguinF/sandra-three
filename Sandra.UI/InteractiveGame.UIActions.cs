@@ -81,7 +81,6 @@ namespace Sandra.UI
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
-                        { GotoMovesForm, TryGotoMovesForm },
 
                         { GotoStart, TryGotoStart },
                         { GotoFirstMove, TryGotoFirstMove },

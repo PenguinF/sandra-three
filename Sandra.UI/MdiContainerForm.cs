@@ -104,8 +104,6 @@ namespace Sandra.UI
                     InteractiveGame.DemoteActiveVariation,
                     InteractiveGame.BreakActiveVariation,
                     InteractiveGame.DeleteActiveVariation,
-                    MovesTextBox.UsePgnPieceSymbols,
-                    MovesTextBox.UseLongAlgebraicNotation,
                     StandardChessBoardForm.FlipBoard,
                     StandardChessBoardForm.TakeScreenshot,
 
@@ -132,24 +130,12 @@ namespace Sandra.UI
                     },
                 });
 
-            var modifiedGotoMovesForm = new DefaultUIActionBinding(
-                InteractiveGame.GotoMovesForm.Action,
-                new ImplementationSet<IUIActionInterface>
-                {
-                    new CombinedUIActionInterface
-                    {
-                        Shortcuts = InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
-                        MenuTextProvider = LocalizedStringKeys.Moves.ToTextProvider(),
-                    },
-                });
-
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
                     modifiedGotoChessBoardForm,
-                    modifiedGotoMovesForm,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
                     SharedUIAction.ShowErrorPane,
