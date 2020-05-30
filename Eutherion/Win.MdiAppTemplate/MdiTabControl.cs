@@ -40,4 +40,31 @@ namespace Eutherion.Win.MdiAppTemplate
         {
         }
     }
+
+    public abstract class MdiTabPage : GlyphTabControl.TabPage
+    {
+        public IDockableControl DockedControl { get; }
+
+        private protected MdiTabPage(IDockableControl dockedControl, Control clientControl)
+            : base(clientControl)
+        {
+            DockedControl = dockedControl;
+        }
+    }
+
+    public class MdiTabPage<TDockableControl> : MdiTabPage
+        where TDockableControl : Control, IDockableControl
+    {
+        public MdiTabPage(TDockableControl clientControl)
+            : base(clientControl, clientControl)
+        {
+            UpdateFromDockProperties(DockedControl.DockProperties);
+            DockedControl.DockPropertiesChanged += () => UpdateFromDockProperties(DockedControl.DockProperties);
+        }
+
+        private void UpdateFromDockProperties(DockProperties dockProperties)
+        {
+            Text = dockProperties.CaptionText;
+        }
+    }
 }
