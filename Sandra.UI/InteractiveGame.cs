@@ -60,7 +60,7 @@ namespace Sandra.UI
             }
         }
 
-        StandardChessBoardForm chessBoardForm;
+        StandardChessBoard chessBoardForm;
 
         private static Chess.Variation GetFirstMove(Chess.Variation variation)
         {

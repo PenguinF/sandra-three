@@ -104,8 +104,8 @@ namespace Sandra.UI
                     InteractiveGame.DemoteActiveVariation,
                     InteractiveGame.BreakActiveVariation,
                     InteractiveGame.DeleteActiveVariation,
-                    StandardChessBoardForm.FlipBoard,
-                    StandardChessBoardForm.TakeScreenshot,
+                    StandardChessBoard.FlipBoard,
+                    StandardChessBoard.TakeScreenshot,
 
                     SharedUIAction.Undo,
                     SharedUIAction.Redo,

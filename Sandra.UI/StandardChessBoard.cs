@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * StandardChessBoardForm.cs
+ * StandardChessBoard.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -37,7 +37,7 @@ namespace Sandra.UI
     /// Form which contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : OldMenuCaptionBarForm, IWeakEventTarget
+    public partial class StandardChessBoard : OldMenuCaptionBarForm, IWeakEventTarget
     {
         /// <summary>
         /// Gets a reference to the playing board control on this form.
@@ -150,7 +150,7 @@ namespace Sandra.UI
             }
         }
 
-        public StandardChessBoardForm()
+        public StandardChessBoard()
         {
             PlayingBoard = new PlayingBoard
             {

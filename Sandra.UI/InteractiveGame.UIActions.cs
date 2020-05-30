@@ -54,7 +54,7 @@ namespace Sandra.UI
             {
                 if (chessBoardForm == null)
                 {
-                    StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm
+                    StandardChessBoard newChessBoardForm = new StandardChessBoard
                     {
                         Owner = OwnerPgnEditor.FindForm(),
                         Game = this,
@@ -85,8 +85,8 @@ namespace Sandra.UI
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
-                        { StandardChessBoardForm.FlipBoard, newChessBoardForm.TryFlipBoard },
-                        { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+                        { StandardChessBoard.FlipBoard, newChessBoardForm.TryFlipBoard },
+                        { StandardChessBoard.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
 
                         { SharedUIAction.ZoomIn, newChessBoardForm.TryZoomIn },
                         { SharedUIAction.ZoomOut, newChessBoardForm.TryZoomOut },

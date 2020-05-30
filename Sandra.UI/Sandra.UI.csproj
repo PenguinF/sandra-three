@@ -85,11 +85,11 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="StandardChessBoardForm.cs">
+    <Compile Include="StandardChessBoard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="StandardChessBoardForm.UIActions.cs">
-      <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
+    <Compile Include="StandardChessBoard.UIActions.cs">
+      <DependentUpon>StandardChessBoard.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
