@@ -178,7 +178,7 @@ namespace Sandra.UI
                 // Catch exception for each open action individually.
                 try
                 {
-                    OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
+                    OpenOrActivatePgnFile(mdiContainerForm, pgnFileName, isReadOnly: false);
                 }
                 catch (Exception exception)
                 {
@@ -207,7 +207,7 @@ namespace Sandra.UI
             OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnEditor);
         }
 
-        private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
+        private void OpenPgnForm(MdiContainerForm mdiContainerForm, string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
@@ -245,13 +245,13 @@ namespace Sandra.UI
             pgnForm.EnsureActivated();
         }
 
-        private void OpenNewPgnFile()
+        internal void OpenNewPgnFile(MdiContainerForm mdiContainerForm)
         {
             // Never create as read-only.
-            OpenPgnForm(null, isReadOnly: false);
+            OpenPgnForm(mdiContainerForm, null, isReadOnly: false);
         }
 
-        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        internal void OpenOrActivatePgnFile(MdiContainerForm mdiContainerForm, string pgnFileName, bool isReadOnly)
         {
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
@@ -259,74 +259,13 @@ namespace Sandra.UI
             if (isReadOnly || !OpenPgnEditors.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
             {
                 // File path not open yet, initialize new PGN Form.
-                OpenPgnForm(normalizedPgnFileName, isReadOnly);
+                OpenPgnForm(mdiContainerForm, normalizedPgnFileName, isReadOnly);
             }
             else
             {
                 // Just activate the first Form in the list.
                 pgnForms[0].EnsureActivated();
             }
-        }
-
-        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
-            new UIAction(SandraChessMainFormUIActionPrefix + nameof(NewPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
-                    IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryNewPgnFile(bool perform)
-        {
-            if (perform) OpenNewPgnFile();
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
-            new UIAction(SandraChessMainFormUIActionPrefix + nameof(OpenPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
-                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
-                    OpensDialog = true,
-                },
-            });
-
-        public UIActionState TryOpenPgnFile(bool perform)
-        {
-            if (perform)
-            {
-                string extension = PgnSyntaxDescriptor.Instance.FileExtension;
-                var extensionLocalizedKey = PgnSyntaxDescriptor.Instance.FileExtensionLocalizedKey;
-
-                var openFileDialog = new OpenFileDialog
-                {
-                    AutoUpgradeEnabled = true,
-                    DereferenceLinks = true,
-                    DefaultExt = extension,
-                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
-                    SupportMultiDottedExtensions = true,
-                    RestoreDirectory = true,
-                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
-                    ValidateNames = true,
-                    CheckFileExists = false,
-                    ShowReadOnly = true,
-                };
-
-                var dialogResult = openFileDialog.ShowDialog(this);
-                if (dialogResult == DialogResult.OK)
-                {
-                    OpenOrActivatePgnFile(openFileDialog.FileName, openFileDialog.ReadOnlyChecked);
-                }
-            }
-
-            return UIActionVisibility.Enabled;
         }
     }
 }

@@ -107,8 +107,8 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(SandraChessMainForm.NewPgnFile, Program.MainForm.TryNewPgnFile);
-            this.BindAction(SandraChessMainForm.OpenPgnFile, Program.MainForm.TryOpenPgnFile);
+            this.BindAction(NewPgnFile, TryNewPgnFile);
+            this.BindAction(OpenPgnFile, TryOpenPgnFile);
             this.BindAction(SharedUIAction.Exit, TryExit);
 
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
@@ -125,8 +125,8 @@ namespace Sandra.UI
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
-                    SandraChessMainForm.NewPgnFile,
-                    SandraChessMainForm.OpenPgnFile,
+                    NewPgnFile,
+                    OpenPgnFile,
                     SharedUIAction.Exit,
                 }
             });
