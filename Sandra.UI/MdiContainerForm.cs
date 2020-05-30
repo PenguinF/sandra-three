@@ -279,9 +279,6 @@ namespace Sandra.UI
                     pgnFile,
                     SettingKeys.PgnZoom));
 
-            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            pgnEditor.BindAction(SharedUIAction.SaveToFile, pgnEditor.DockedControl.TrySaveToFile);
-
             PgnStyleSelector.InitializeStyles(pgnEditor.DockedControl);
 
             // Don't index read-only pgn editors.
