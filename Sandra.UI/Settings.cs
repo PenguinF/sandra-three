@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System.Drawing;
@@ -58,14 +57,6 @@ namespace Sandra.UI
 
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PgnZoom))),
-            ScintillaZoomFactor.Instance);
-
-        public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
-            new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
-
-        public static readonly SettingProperty<int> MovesZoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(MovesZoom))),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -149,9 +140,7 @@ namespace Sandra.UI
                 SettingKeys.PgnZoom,
                 SharedSettings.DefaultSettingsAutoSave,
                 SharedSettings.PreferencesAutoSave,
-                SharedSettings.JsonZoom,
-                SettingKeys.Notation,
-                SettingKeys.MovesZoom);
+                SharedSettings.JsonZoom);
         }
 
         public SettingSchema CreateDefaultSettingsSchema(Session session)

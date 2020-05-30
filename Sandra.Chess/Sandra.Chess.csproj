@@ -86,7 +86,6 @@
     <Compile Include="Pgn\PgnSymbolType.cs" />
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
-    <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
     <Compile Include="Pgn\PgnTagElementInMoveTreeSyntax.cs" />
     <Compile Include="Pgn\PgnTagElementSyntax.cs" />
     <Compile Include="Pgn\PgnTagElementSyntaxVisitor.cs" />

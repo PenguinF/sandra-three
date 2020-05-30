@@ -30,7 +30,6 @@ using Sandra.Chess;
 using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -63,20 +62,7 @@ namespace Sandra.UI
                     };
 
                     newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-
-                    if (movesForm != null && movesForm.WindowState == FormWindowState.Normal)
-                    {
-                        // Place directly to the right.
-                        var mdiChildBounds = movesForm.Bounds;
-                        newChessBoardForm.StartPosition = FormStartPosition.Manual;
-                        newChessBoardForm.ClientSize = new Size(movesForm.ClientAreaSize.Height, movesForm.ClientAreaSize.Height);
-                        newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
-                    }
-                    else
-                    {
-                        // Only specify its default size.
-                        newChessBoardForm.ClientSize = new Size(400, 400);
-                    }
+                    newChessBoardForm.ClientSize = new Size(400, 400);
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
@@ -121,117 +107,10 @@ namespace Sandra.UI
                     newChessBoardForm.Load += (_, __) => newChessBoardForm.PerformAutoFit(null);
 
                     chessBoardForm = newChessBoardForm;
-                    chessBoardForm.Disposed += (_, __) =>
-                    {
-                        chessBoardForm = null;
-
-                        // To refresh the state of the GotoChessBoardForm action elsewhere.
-                        var movesTextBox = GetMovesTextBox();
-                        if (movesTextBox != null) movesTextBox.ActionHandler.Invalidate();
-                    };
+                    chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
                 }
 
                 chessBoardForm.EnsureActivated();
-            }
-
-            return UIActionVisibility.Enabled;
-        }
-
-
-        public static readonly DefaultUIActionBinding GotoMovesForm = new DefaultUIActionBinding(
-            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
-                },
-            });
-
-        public UIActionState TryGotoMovesForm(bool perform)
-        {
-            if (perform)
-            {
-                if (movesForm == null)
-                {
-                    OldMenuCaptionBarForm newMovesForm = new OldMenuCaptionBarForm()
-                    {
-                        Owner = OwnerPgnEditor.FindForm(),
-                        MaximizeBox = false,
-                        FormBorderStyle = FormBorderStyle.SizableToolWindow,
-                    };
-
-                    if (chessBoardForm != null && chessBoardForm.WindowState == FormWindowState.Normal)
-                    {
-                        // Place directly to the right.
-                        var mdiChildBounds = chessBoardForm.Bounds;
-                        newMovesForm.StartPosition = FormStartPosition.Manual;
-                        newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
-                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientAreaSize.Height);
-                    }
-                    else
-                    {
-                        // Only specify its default size.
-                        newMovesForm.ClientSize = new Size(200, 400);
-                    }
-
-                    var movesTextBox = new MovesTextBox()
-                    {
-                        Game = this,
-                    };
-
-                    movesTextBox.BindActions(new UIActionBindings
-                    {
-                        { GotoChessBoardForm, TryGotoChessBoardForm },
-                        { GotoMovesForm, TryGotoMovesForm },
-
-                        { GotoStart, TryGotoStart },
-                        { GotoFirstMove, TryGotoFirstMove },
-                        { FastNavigateBackward, TryFastNavigateBackward },
-                        { GotoPreviousMove, TryGotoPreviousMove },
-                        { GotoNextMove, TryGotoNextMove },
-                        { FastNavigateForward, TryFastNavigateForward },
-                        { GotoLastMove, TryGotoLastMove },
-                        { GotoEnd, TryGotoEnd },
-
-                        { GotoPreviousVariation, TryGotoPreviousVariation },
-                        { GotoNextVariation, TryGotoNextVariation },
-
-                        { PromoteActiveVariation, TryPromoteActiveVariation },
-                        { DemoteActiveVariation, TryDemoteActiveVariation },
-                        { BreakActiveVariation, TryBreakActiveVariation },
-                        { DeleteActiveVariation, TryDeleteActiveVariation },
-
-                        { MovesTextBox.UsePgnPieceSymbols, movesTextBox.TryUsePgnPieceSymbols },
-                        { MovesTextBox.UseLongAlgebraicNotation, movesTextBox.TryUseLongAlgebraicNotation },
-                    });
-
-                    movesTextBox.BindStandardEditUIActions();
-
-                    UIMenu.AddTo(movesTextBox);
-
-                    newMovesForm.Controls.Add(movesTextBox);
-
-                    newMovesForm.UpdateFromDockProperties(new DockProperties
-                    {
-                        CaptionHeight = 24,
-                        Icon = Session.Current.ApplicationIcon,
-                    });
-
-                    // Snap while moving and resizing.
-                    OwnedFormSnapHelper.AttachTo(newMovesForm);
-
-                    movesForm = newMovesForm;
-                    movesForm.Disposed += (_, __) =>
-                    {
-                        movesForm = null;
-
-                        // To refresh the state of the GotoMovesForm action elsewhere.
-                        if (chessBoardForm != null) chessBoardForm.PlayingBoard.ActionHandler.Invalidate();
-                    };
-                }
-
-                movesForm.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;

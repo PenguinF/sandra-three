@@ -65,13 +65,6 @@
       <DependentUpon>MdiContainerForm.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MovesTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MovesTextBox.UIActions.cs">
-      <DependentUpon>MovesTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PgnErrorInfoExtensions.cs" />
     <Compile Include="PgnStyleSelector.cs" />
     <Compile Include="PgnSyntaxDescriptor.cs" />
