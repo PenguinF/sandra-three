@@ -39,6 +39,24 @@ namespace Eutherion.Win.MdiAppTemplate
         public void OnClosing(CloseReason closeReason, ref bool cancel)
         {
         }
+
+        /// <summary>
+        /// Acivates a control docked in one of the tab pages, then activates the control itself.
+        /// </summary>
+        public void Activate<TDockableControl>(TDockableControl dockedControl)
+            where TDockableControl : Control, IDockableControl
+        {
+            for (int i = 0; i < TabPages.Count; i++)
+            {
+                TabPage tabPage = TabPages[i];
+                if (tabPage.ClientControl == dockedControl)
+                {
+                    // Select tab page, move focus.
+                    ActivateTab(i);
+                    ActiveControl = tabPage.ClientControl;
+                }
+            }
+        }
     }
 
     public abstract class MdiTabPage : GlyphTabControl.TabPage

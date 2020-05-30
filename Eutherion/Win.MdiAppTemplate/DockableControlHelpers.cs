@@ -56,12 +56,18 @@ namespace Eutherion.Win.MdiAppTemplate
         public static void EnsureActivated<TDockableControl>(this TDockableControl dockedControl)
             where TDockableControl : Control, IDockableControl
         {
-            if (dockedControl.GetDockHost().IsOption1(out MenuCaptionBarForm<TDockableControl> menuCaptionBarForm))
-            {
-                // Activate the Form, then also the control.
-                menuCaptionBarForm.EnsureActivated();
-                menuCaptionBarForm.ActiveControl = dockedControl;
-            }
+            dockedControl.GetDockHost().Match(
+                whenOption1: menuCaptionBarForm =>
+                {
+                    // Activate the Form, then also the control.
+                    menuCaptionBarForm.EnsureActivated();
+                    menuCaptionBarForm.ActiveControl = dockedControl;
+                },
+                whenOption2: mdiTabControl =>
+                {
+                    mdiTabControl.EnsureActivated();
+                    mdiTabControl.Activate(dockedControl);
+                });
         }
     }
 }

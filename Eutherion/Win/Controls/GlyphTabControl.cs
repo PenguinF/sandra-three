@@ -126,6 +126,34 @@ namespace Eutherion.Win.Controls
         }
 
         /// <summary>
+        /// Activates the <see cref="TabPage"/> with the given index.
+        /// </summary>
+        /// <param name="tabPageIndex">
+        /// The index of the tab page to activate.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="tabPageIndex"/> is less than 0, or greater than or equal to the number of tab pages in <see cref="TabPages"/>.
+        /// </exception>
+        public void ActivateTab(int tabPageIndex)
+        {
+            if (tabPageIndex < 0 || tabPageIndex >= TabPages.Count) throw new ArgumentOutOfRangeException(nameof(tabPageIndex));
+
+            if (ActiveTabPageIndex != tabPageIndex)
+            {
+                TabPage newActiveTabPage = TabPages[tabPageIndex];
+
+                Control oldActiveControl = ActiveTabPageIndex >= 0 ? TabPages[ActiveTabPageIndex].ClientControl : null;
+                Control newActiveControl = newActiveTabPage.ClientControl;
+
+                ActiveTabPageIndex = tabPageIndex;
+                newActiveControl.Visible = true;
+                if (oldActiveControl != null) oldActiveControl.Visible = false;
+                ActiveControl = newActiveControl;
+                HeaderPanel.Invalidate();
+            }
+        }
+
+        /// <summary>
         /// Raises the <see cref="Control.Layout"/> event.
         /// </summary>
         /// <param name="e">
