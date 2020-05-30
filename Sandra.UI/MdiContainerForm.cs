@@ -236,13 +236,15 @@ namespace Sandra.UI
 
         internal void OpenCommandLineArgs(string[] commandLineArgs)
         {
+            PgnEditor lastOpenedPgnEditor = null;
+
             // Interpret each command line argument as a file to open.
             commandLineArgs.ForEach(pgnFileName =>
             {
                 // Catch exception for each open action individually.
                 try
                 {
-                    NewOrExistingPgnEditor(pgnFileName, isReadOnly: false).EnsureActivated();
+                    lastOpenedPgnEditor = NewOrExistingPgnEditor(pgnFileName, isReadOnly: false);
                 }
                 catch (Exception exception)
                 {
@@ -256,6 +258,22 @@ namespace Sandra.UI
                         MessageBoxIcon.Information);
                 }
             });
+
+            if (lastOpenedPgnEditor != null)
+            {
+                // Only activate the last opened PGN editor.
+                lastOpenedPgnEditor.EnsureActivated();
+            }
+            else if (DockedControl.TabPages.Count == 0)
+            {
+                // Open default new untitled file.
+                OpenNewPgnEditor();
+            }
+            else
+            {
+                // If no arguments were given, just activate the form.
+                DockedControl.EnsureActivated();
+            }
         }
 
         private PgnEditor NewPgnEditor(string normalizedPgnFileName, bool isReadOnly)
