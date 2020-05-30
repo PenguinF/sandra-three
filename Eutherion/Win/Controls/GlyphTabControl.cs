@@ -28,5 +28,9 @@ namespace Eutherion.Win.Controls
     /// </summary>
     public partial class GlyphTabControl : ContainerControl
     {
+        /// <summary>
+        /// Gets the character which represents a modified state.
+        /// </summary>
+        public static string ModifiedMarkerCharacter { get; } = "•";
     }
 }

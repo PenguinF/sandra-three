@@ -22,6 +22,7 @@
 using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.Controls;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using ScintillaNET;
@@ -216,8 +217,6 @@ namespace Eutherion.Win.MdiAppTemplate
         private const int ErrorIndicatorIndex = 8;
         private const int WarningIndicatorIndex = 9;
         private const int MessageIndicatorIndex = 10;
-
-        private const string ChangedMarker = "• ";
 
         private readonly Box<MenuCaptionBarForm> errorListFormBox = new Box<MenuCaptionBarForm>();
 
@@ -698,7 +697,7 @@ namespace Eutherion.Win.MdiAppTemplate
         private void UpdateChangedMarker()
         {
             string fileName = CodeFilePathDisplayString;
-            DockProperties.CaptionText = ContainsChanges ? ChangedMarker + fileName : fileName;
+            DockProperties.CaptionText = ContainsChanges ? $"{GlyphTabControl.ModifiedMarkerCharacter} {fileName}" : fileName;
 
             // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
             DockProperties.IsModified = !IsDisposed && !Disposing && !ReadOnly && ContainsChanges;
