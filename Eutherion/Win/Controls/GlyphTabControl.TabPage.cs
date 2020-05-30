@@ -32,6 +32,11 @@ namespace Eutherion.Win.Controls
         public class TabPage
         {
             /// <summary>
+            /// Gets or sets the text to display in the tab header.
+            /// </summary>
+            public string Text { get; set; }
+
+            /// <summary>
             /// Gets the client control for this tab page.
             /// </summary>
             public Control ClientControl { get; }
