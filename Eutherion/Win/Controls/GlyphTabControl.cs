@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Controls
@@ -32,5 +34,28 @@ namespace Eutherion.Win.Controls
         /// Gets the character which represents a modified state.
         /// </summary>
         public static string ModifiedMarkerCharacter { get; } = "•";
+
+        private static int Checked(int value, int minimumValue, string propertyName)
+        {
+            if (value < minimumValue) throw new ArgumentOutOfRangeException(propertyName, value, $"{propertyName} must be {minimumValue} or higher.");
+            return value;
+        }
+
+        /// <summary>
+        /// Gets or sets the tab header height. The minimum value is 1. The default value is <see cref="DefaultTabHeaderHeight"/> (26).
+        /// </summary>
+        [DefaultValue(DefaultTabHeaderHeight)]
+        public int TabHeaderHeight
+        {
+            get => tabHeaderHeight;
+            set { if (tabHeaderHeight != value) { tabHeaderHeight = Checked(value, 1, nameof(TabHeaderHeight)); PerformLayout(); } }
+        }
+
+        private int tabHeaderHeight = DefaultTabHeaderHeight;
+
+        /// <summary>
+        /// The default value for the <see cref="TabHeaderHeight"/> property.
+        /// </summary>
+        public const int DefaultTabHeaderHeight = 26;
     }
 }
