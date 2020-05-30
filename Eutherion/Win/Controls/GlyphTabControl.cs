@@ -59,6 +59,11 @@ namespace Eutherion.Win.Controls
         /// </summary>
         public const int DefaultTabHeaderHeight = 26;
 
+        /// <summary>
+        /// Gets the collection of tab pages in this control.
+        /// </summary>
+        public TabPageCollection TabPages { get; }
+
         #region Ignored properties
 
         /// <summary>
@@ -89,6 +94,8 @@ namespace Eutherion.Win.Controls
         public GlyphTabControl()
         {
             HeaderPanel = new TabHeaderPanel(this);
+            TabPages = new TabPageCollection(this);
+
             Controls.Add(HeaderPanel);
         }
 
