@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Drawing;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Controls
@@ -32,6 +34,48 @@ namespace Eutherion.Win.Controls
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
                 OwnerTabControl = ownerTabControl;
+
+                SetStyle(ControlStyles.AllPaintingInWmPaint
+                    | ControlStyles.UserPaint
+                    | ControlStyles.UserMouse
+                    | ControlStyles.OptimizedDoubleBuffer
+                    | ControlStyles.Opaque, true);
+
+                SetStyle(ControlStyles.Selectable, false);
+            }
+
+            private Rectangle TabHeaderTextRectangle(int index) => new Rectangle(
+                index * 120,
+                0,
+                120,
+                ClientSize.Height);
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                var g = e.Graphics;
+                Rectangle clientRectangle = ClientRectangle;
+
+                // Block out the entire client area.
+                using (var inactiveAreaBrush = new SolidBrush(OwnerTabControl.BackColor))
+                {
+                    g.FillRectangle(inactiveAreaBrush, clientRectangle);
+                }
+
+                // Then draw each tab page.
+                for (int tabIndex = 0; tabIndex < OwnerTabControl.TabPages.Count; tabIndex++)
+                {
+                    TabPage tabPage = OwnerTabControl.TabPages[tabIndex];
+
+                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    TextRenderer.DrawText(
+                        g,
+                        tabPage.Text,
+                        OwnerTabControl.Font,
+                        TabHeaderTextRectangle(tabIndex),
+                        Color.Black,
+                        OwnerTabControl.BackColor,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                }
             }
         }
     }
