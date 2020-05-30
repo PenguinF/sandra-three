@@ -112,6 +112,8 @@ namespace Eutherion.Win.Controls
             tabPage.ClientControl.Visible = false;
             Controls.Add(tabPage.ClientControl);
             HeaderPanel.Invalidate();
+
+            OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
 
         internal void TabRemoved(TabPage tabPage, int tabPageIndex)
@@ -123,6 +125,8 @@ namespace Eutherion.Win.Controls
 
             Controls.Remove(tabPage.ClientControl);
             HeaderPanel.Invalidate();
+
+            OnAfterTabRemoved(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
 
         /// <summary>
@@ -152,6 +156,32 @@ namespace Eutherion.Win.Controls
                 HeaderPanel.Invalidate();
             }
         }
+
+        /// <summary>
+        /// Occurs after a new tab page is inserted.
+        /// </summary>
+        public event EventHandler<GlyphTabControlEventArgs> AfterTabInserted;
+
+        /// <summary>
+        /// Raises the <see cref="AfterTabInserted/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnAfterTabInserted(GlyphTabControlEventArgs e) => AfterTabInserted?.Invoke(this, e);
+
+        /// <summary>
+        /// Occurs after a new tab page is removed.
+        /// </summary>
+        public event EventHandler<GlyphTabControlEventArgs> AfterTabRemoved;
+
+        /// <summary>
+        /// Raises the <see cref="AfterTabRemoved/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnAfterTabRemoved(GlyphTabControlEventArgs e) => AfterTabRemoved?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="Control.Layout"/> event.
@@ -188,6 +218,37 @@ namespace Eutherion.Win.Controls
                 e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
                     0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
             }
+        }
+    }
+
+    /// <summary>
+    /// Provides data for <see cref="GlyphTabControl"/> events.
+    /// </summary>
+    public class GlyphTabControlEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the <see cref="GlyphTabControl.TabPage"/> the event is occurring for.
+        /// </summary>
+        public GlyphTabControl.TabPage TabPage { get; }
+
+        /// <summary>
+        /// Gets the zero-based index of the <see cref="GlyphTabControl.TabPage"/> the event is occurring for.
+        /// </summary>
+        public int TabPageIndex { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GlyphTabControlEventArgs"/>.
+        /// </summary>
+        /// <param name="tabPage">
+        /// The <see cref="GlyphTabControl.TabPage"/> the event is occurring for.
+        /// </param>
+        /// <param name="tabPageIndex">
+        /// The zero-based index of the <see cref="GlyphTabControl.TabPage"/> the event is occurring for.
+        /// </param>
+        public GlyphTabControlEventArgs(GlyphTabControl.TabPage tabPage, int tabPageIndex)
+        {
+            TabPage = tabPage;
+            TabPageIndex = tabPageIndex;
         }
     }
 }
