@@ -128,7 +128,14 @@ namespace Sandra.UI
 
             mdiContainerForm.Load += MdiContainerForm_Load;
             mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
-            mdiContainerForm.FormClosed += (_, __) => Close();
+
+            mdiContainerForm.FormClosed += (_, __) =>
+            {
+                mdiContainerForms.Remove(mdiContainerForm);
+
+                // Close the entire process after the last form is closed.
+                if (mdiContainerForms.Count == 0) Close();
+            };
 
             mdiContainerForms.Add(mdiContainerForm);
             mdiContainerForm.Show();
