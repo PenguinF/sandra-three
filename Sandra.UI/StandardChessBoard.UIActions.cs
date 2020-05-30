@@ -30,10 +30,10 @@ namespace Sandra.UI
 {
     public partial class StandardChessBoard
     {
-        public const string StandardChessBoardFormUIActionPrefix = nameof(StandardChessBoard) + ".";
+        public const string StandardChessBoardUIActionPrefix = nameof(StandardChessBoard) + ".";
 
         public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
+            new UIAction(StandardChessBoardUIActionPrefix + nameof(FlipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -52,7 +52,7 @@ namespace Sandra.UI
         }
 
         public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
+            new UIAction(StandardChessBoardUIActionPrefix + nameof(TakeScreenshot)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
