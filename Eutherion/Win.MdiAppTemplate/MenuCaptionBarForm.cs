@@ -205,6 +205,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
             mainMenuActionHandler = new UIActionHandler();
 
+            this.BindActions(StandardUIActionBindings);
+
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
@@ -226,6 +228,16 @@ namespace Eutherion.Win.MdiAppTemplate
 
             return button;
         }
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public abstract IDockableControl DockedAsDockable { get; }
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public abstract Control DockedAsControl { get; }
 
         /// <summary>
         /// Gets the size of the client area of the form.
@@ -253,25 +265,6 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             closeButtonHoverColorOverride = null;
             closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
-        }
-
-        /// <summary>
-        /// Gets the regular UIActions for this Form.
-        /// </summary>
-        public UIActionBindings StandardUIActionBindings => new UIActionBindings
-        {
-            { SharedUIAction.Close, TryClose },
-        };
-
-        /// <summary>
-        /// Binds the regular UIActions to this Form.
-        /// </summary>
-        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
-
-        public UIActionState TryClose(bool perform)
-        {
-            if (perform) Close();
-            return UIActionVisibility.Enabled;
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -847,6 +840,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
                 {
                     mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
                 }
             }
 
@@ -854,10 +848,32 @@ namespace Eutherion.Win.MdiAppTemplate
             PerformLayout();
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            bool cancel = e.Cancel;
+            DockedAsDockable.OnClosing(e.CloseReason, ref cancel);
+            e.Cancel = cancel;
+            base.OnFormClosing(e);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) ObservableStyle.Dispose();
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
         }
     }
 
@@ -876,26 +892,26 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public TDockableControl DockedControl { get; }
 
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public override IDockableControl DockedAsDockable => DockedControl;
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public override Control DockedAsControl => DockedControl;
+
         public MenuCaptionBarForm(TDockableControl dockableControl)
         {
             DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
             Controls.Add(DockedControl);
-
-            BindStandardUIActions();
 
             UpdateFromDockProperties(dockableControl.DockProperties);
             dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
         }
 
         private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            bool cancel = e.Cancel;
-            DockedControl.OnClosing(e.CloseReason, ref cancel);
-            e.Cancel = cancel;
-            base.OnFormClosing(e);
-        }
 
         protected override void Dispose(bool disposing)
         {
