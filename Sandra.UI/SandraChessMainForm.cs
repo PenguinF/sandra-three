@@ -188,17 +188,17 @@ namespace Sandra.UI
             });
         }
 
-        private void RemovePgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
+        internal void RemovePgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
         {
             // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
-            var pgnForms = OpenPgnEditors[key ?? string.Empty];
-            pgnForms.Remove(pgnForm);
-            if (pgnForms.Count == 0) OpenPgnEditors.Remove(key ?? string.Empty);
+            var pgnEditors = OpenPgnEditors[key ?? string.Empty];
+            pgnEditors.Remove(pgnEditor);
+            if (pgnEditors.Count == 0) OpenPgnEditors.Remove(key ?? string.Empty);
         }
 
-        private void AddPgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
+        internal void AddPgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
         {
-            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnForm);
+            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnEditor);
         }
 
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
@@ -220,19 +220,19 @@ namespace Sandra.UI
             // Don't index read-only PgnForms.
             if (!isReadOnly)
             {
-                AddPgnForm(normalizedPgnFileName, pgnForm);
+                AddPgnEditor(normalizedPgnFileName, pgnForm);
 
                 // Re-index when pgnFile.OpenTextFilePath changes.
                 pgnFile.OpenTextFilePathChanged += (_, e) =>
                 {
-                    RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
-                    AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                    RemovePgnEditor(e.PreviousOpenTextFilePath, pgnForm);
+                    AddPgnEditor(pgnFile.OpenTextFilePath, pgnForm);
                 };
 
                 // Remove from index when pgnForm is closed.
                 pgnForm.Disposed += (_, __) =>
                 {
-                    RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                    RemovePgnEditor(pgnFile.OpenTextFilePath, pgnForm);
                 };
             }
 
