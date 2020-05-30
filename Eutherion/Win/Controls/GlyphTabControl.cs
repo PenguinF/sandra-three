@@ -112,6 +112,7 @@ namespace Eutherion.Win.Controls
             tabPage.ClientControl.Visible = false;
             Controls.Add(tabPage.ClientControl);
             HeaderPanel.UpdateMetrics();
+            tabPage.NotifyChange += Tab_NotifyChange;
 
             OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
@@ -123,10 +124,20 @@ namespace Eutherion.Win.Controls
             if (tabPageIndex == ActiveTabPageIndex) ActiveTabPageIndex = -1;
             else if (tabPageIndex < ActiveTabPageIndex) ActiveTabPageIndex--;
 
+            tabPage.NotifyChange -= Tab_NotifyChange;
             Controls.Remove(tabPage.ClientControl);
             HeaderPanel.UpdateMetrics();
 
             OnAfterTabRemoved(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
+        }
+
+        private void Tab_NotifyChange(TabPage tabPage)
+        {
+            int tabPageIndex = TabPages.IndexOf(tabPage);
+            if (tabPageIndex >= 0)
+            {
+                HeaderPanel.UpdateNonMetrics();
+            }
         }
 
         /// <summary>

@@ -34,7 +34,19 @@ namespace Eutherion.Win.Controls
             /// <summary>
             /// Gets or sets the text to display in the tab header.
             /// </summary>
-            public string Text { get; set; }
+            public string Text { get => text; set { if (text != value) { text = value; OnNotifyChange(); } } }
+
+            private string text;
+
+            /// <summary>
+            /// Occurs when the style or text of the tab page was updated.
+            /// </summary>
+            public event Action<TabPage> NotifyChange;
+
+            /// <summary>
+            /// Raises the <see cref="NotifyChange"/> event.
+            /// </summary>
+            protected virtual void OnNotifyChange() => NotifyChange?.Invoke(this);
 
             /// <summary>
             /// Gets the client control for this tab page.
