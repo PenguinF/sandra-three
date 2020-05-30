@@ -278,6 +278,9 @@ namespace Eutherion.Win.MdiAppTemplate
             // For when another window is active when this form is first shown.
             UpdateCaptionAreaButtonsBackColor();
             base.OnLoad(e);
+
+            // If the docked control is a ContainerControl, it will move the focus to its own ActiveControl.
+            ActiveControl = DockedAsControl;
         }
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
