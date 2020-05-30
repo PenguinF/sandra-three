@@ -56,10 +56,6 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
-        public static readonly SettingProperty<PersistableFormState> PgnWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PgnWindow))),
-            PersistableFormState.Type);
-
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PgnZoom))),
             ScintillaZoomFactor.Instance);
@@ -150,13 +146,9 @@ namespace Sandra.UI
                 session.LangSetting,
                 SettingKeys.Window,
                 SharedSettings.AutoSaveCounter,
-                SettingKeys.PgnWindow,
                 SettingKeys.PgnZoom,
-                SharedSettings.DefaultSettingsWindow,
                 SharedSettings.DefaultSettingsAutoSave,
-                SharedSettings.PreferencesWindow,
                 SharedSettings.PreferencesAutoSave,
-                SharedSettings.LanguageWindow,
                 SharedSettings.JsonZoom,
                 SettingKeys.Notation,
                 SettingKeys.MovesZoom);

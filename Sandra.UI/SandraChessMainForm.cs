@@ -176,8 +176,6 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
-            pgnForm.Load += (_, __) => Session.Current.AttachFormStateAutoSaver(pgnForm, SettingKeys.PgnWindow, null);
-
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
             pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);
 

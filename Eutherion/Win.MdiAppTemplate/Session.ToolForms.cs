@@ -97,7 +97,6 @@ namespace Eutherion.Win.MdiAppTemplate
         private MenuCaptionBarForm CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                                       SettingsFile settingsFile,
                                                       Func<string> initialTextGenerator,
-                                                      SettingProperty<PersistableFormState> formStateSetting,
                                                       SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
@@ -140,8 +139,6 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 ClientSize = new Size(600, 600),
             };
-
-            settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
             settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
@@ -187,7 +184,6 @@ namespace Eutherion.Win.MdiAppTemplate
                             SyntaxEditorCodeAccessOption.FixedFile,
                             LocalSettings,
                             initialTextGenerator,
-                            SharedSettings.PreferencesWindow,
                             SharedSettings.PreferencesAutoSave);
                     });
             }
@@ -216,7 +212,6 @@ namespace Eutherion.Win.MdiAppTemplate
                         GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
-                        SharedSettings.DefaultSettingsWindow,
                         SharedSettings.DefaultSettingsAutoSave));
             }
 
@@ -400,7 +395,6 @@ namespace Eutherion.Win.MdiAppTemplate
                             SyntaxEditorCodeAccessOption.FixedFile,
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
-                            SharedSettings.LanguageWindow,
                             null);
                     });
             }
