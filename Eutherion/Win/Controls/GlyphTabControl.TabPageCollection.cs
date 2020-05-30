@@ -38,9 +38,18 @@ namespace Eutherion.Win.Controls
 
             internal TabPageCollection(GlyphTabControl ownerTabControl) => OwnerTabControl = ownerTabControl;
 
-            private void InsertTab(int index, TabPage tab) => tabs.Insert(index, tab);
+            private void InsertTab(int index, TabPage tab)
+            {
+                tabs.Insert(index, tab);
+                OwnerTabControl.TabInserted(tab, index);
+            }
 
-            private void RemoveTab(int index) => tabs.RemoveAt(index);
+            private void RemoveTab(int index)
+            {
+                TabPage tab = tabs[index];
+                tabs.RemoveAt(index);
+                OwnerTabControl.TabRemoved(tab, index);
+            }
 
             /// <summary>
             /// Gets or sets the tab page at the specified index.

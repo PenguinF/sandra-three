@@ -104,6 +104,27 @@ namespace Eutherion.Win.Controls
             Controls.Add(HeaderPanel);
         }
 
+        internal void TabInserted(TabPage tabPage, int tabPageIndex)
+        {
+            // Make sure the same page remains activated.
+            if (ActiveTabPageIndex >= tabPageIndex) ActiveTabPageIndex++;
+
+            tabPage.ClientControl.Visible = false;
+            Controls.Add(tabPage.ClientControl);
+            HeaderPanel.Invalidate();
+        }
+
+        internal void TabRemoved(TabPage tabPage, int tabPageIndex)
+        {
+            // Make sure the same page remains activated.
+            // If the active tab page is closed, just deselect.
+            if (tabPageIndex == ActiveTabPageIndex) ActiveTabPageIndex = -1;
+            else if (tabPageIndex < ActiveTabPageIndex) ActiveTabPageIndex--;
+
+            Controls.Remove(tabPage.ClientControl);
+            HeaderPanel.Invalidate();
+        }
+
         /// <summary>
         /// Raises the <see cref="Control.Layout"/> event.
         /// </summary>
