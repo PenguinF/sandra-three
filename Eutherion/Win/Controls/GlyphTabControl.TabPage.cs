@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Windows.Forms;
+
 namespace Eutherion.Win.Controls
 {
     public partial class GlyphTabControl
@@ -28,6 +31,22 @@ namespace Eutherion.Win.Controls
         /// </summary>
         public class TabPage
         {
+            /// <summary>
+            /// Gets the client control for this tab page.
+            /// </summary>
+            public Control ClientControl { get; }
+
+            /// <summary>
+            /// Initializes a new instance of <see cref="TabPage"/>.
+            /// </summary>
+            /// <param name="clientControl">
+            /// The client control for this tab page.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// <paramref name="clientControl"/> is null.
+            /// </exception>
+            public TabPage(Control clientControl)
+                => ClientControl = clientControl ?? throw new ArgumentNullException(nameof(clientControl));
         }
     }
 }
