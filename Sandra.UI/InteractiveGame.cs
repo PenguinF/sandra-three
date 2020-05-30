@@ -21,22 +21,25 @@
 
 using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
+using Sandra.Chess.Pgn;
 using System.Linq;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Encapsulates a chess game which publishes a set of shared <see cref="UIAction"/>s.
     /// </summary>
     public partial class InteractiveGame
     {
         // For accessing global settings and displaying windows.
-        public readonly MdiContainerForm OwnerForm;
+        public readonly PgnEditor OwnerPgnEditor;
         public readonly Chess.Game Game;
 
-        public InteractiveGame(MdiContainerForm ownerForm, Chess.Position initialPosition)
+        public InteractiveGame(PgnEditor ownerPgnEditor, Chess.Position initialPosition)
         {
-            OwnerForm = ownerForm;
+            OwnerPgnEditor = ownerPgnEditor;
             Game = new Chess.Game(initialPosition);
         }
 

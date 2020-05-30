@@ -117,7 +117,6 @@ namespace Sandra.UI
 
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
             this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
-            this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
             this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
@@ -298,6 +297,8 @@ namespace Sandra.UI
                     Program.MainForm.RemovePgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
                 };
             }
+
+            pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
 
             // Open as new window.
             new MenuCaptionBarForm<PgnEditor>(pgnEditor);

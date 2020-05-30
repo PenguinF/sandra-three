@@ -57,7 +57,7 @@ namespace Sandra.UI
                 {
                     StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm
                     {
-                        Owner = OwnerForm,
+                        Owner = OwnerPgnEditor.FindForm(),
                         Game = this,
                         PieceImages = PieceImages.ImageArray
                     };
@@ -157,7 +157,7 @@ namespace Sandra.UI
                 {
                     OldMenuCaptionBarForm newMovesForm = new OldMenuCaptionBarForm()
                     {
-                        Owner = OwnerForm,
+                        Owner = OwnerPgnEditor.FindForm(),
                         MaximizeBox = false,
                         FormBorderStyle = FormBorderStyle.SizableToolWindow,
                     };

@@ -23,11 +23,14 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
+using Sandra.Chess.Pgn;
 using System;
 using System.Windows.Forms;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
@@ -47,16 +50,17 @@ namespace Sandra.UI
             {
                 new CombinedUIActionInterface
                 {
+                    IsFirstInGroup = true,
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
                     MenuTextProvider = LocalizedStringKeys.NewGame.ToTextProvider(),
                 },
             });
 
-        public UIActionState TryOpenNewPlayingBoard(bool perform)
+        public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
             if (perform)
             {
-                InteractiveGame game = new InteractiveGame(this, Chess.Position.GetInitialPosition());
+                InteractiveGame game = new InteractiveGame(pgnEditor, Chess.Position.GetInitialPosition());
 
                 game.TryGotoChessBoardForm(true);
                 game.TryGotoMovesForm(true);
