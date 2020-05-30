@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
@@ -83,21 +82,20 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            // First mdiContainerForm in the list gets the honor of opening the new PGN files.
-            foreach (var candidate in mdiContainerForms)
+            if (receivedCommandLineArgs.Length > 0)
             {
-                if (candidate.IsHandleCreated && !candidate.IsDisposed)
+                // First mdiContainerForm in the list gets the honor of opening the new PGN files.
+                foreach (var candidate in mdiContainerForms)
                 {
-                    // Activate mdiContainerForm before opening pgn files.
-                    candidate.EnsureActivated();
-                    candidate.OpenCommandLineArgs(receivedCommandLineArgs);
-                    return;
+                    if (candidate.IsHandleCreated && !candidate.IsDisposed)
+                    {
+                        candidate.OpenCommandLineArgs(receivedCommandLineArgs);
+                        return;
+                    }
                 }
-            }
 
-            var mdiContainerForm = OpenNewMdiContainerForm();
-            mdiContainerForm.OpenCommandLineArgs(receivedCommandLineArgs);
-            mdiContainerForm.Show();
+                OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
+            }
         }
 
         protected override void OnLoad(EventArgs e)
