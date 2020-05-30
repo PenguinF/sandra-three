@@ -871,7 +871,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// Some non-client area handling code is adapted from:
     /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
     /// </remarks>
-    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
+    public class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
         where TDockableControl : Control, IDockableControl
     {
         public TDockableControl DockedControl { get; }

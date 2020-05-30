@@ -38,68 +38,22 @@ namespace Sandra.UI
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : OldMenuCaptionBarForm, IWeakEventTarget
+    public partial class MdiContainerForm : MenuCaptionBarForm<MdiTabControl>, IWeakEventTarget
     {
-        private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
-
-        public MdiContainerForm()
+        private static MdiTabControl CreateMdiTabControl()
         {
-            DockProperties dockProperties = new DockProperties
-            {
-                CaptionHeight = 30,
-                CaptionText = Session.ExecutableFileNameWithoutExtension,
-                Icon = Session.Current.ApplicationIcon,
-                MainMenuItems = InitializeUIActions(),
-            };
+            var mdiTabControl = new MdiTabControl();
 
-            UpdateFromDockProperties(dockProperties);
+            mdiTabControl.DockProperties.CaptionHeight = 30;
+            mdiTabControl.DockProperties.CaptionText = Session.ExecutableFileNameWithoutExtension;
+            mdiTabControl.DockProperties.Icon = Session.Current.ApplicationIcon;
 
-            AllowDrop = true;
-        }
-
-        protected override void OnDragEnter(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-
-            base.OnDragEnter(e);
-        }
-
-        protected override void OnDragOver(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-
-            base.OnDragOver(e);
-        }
-
-        protected override void OnDragDrop(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
-            }
-
-            base.OnDragDrop(e);
-        }
-
-        private List<MainMenuDropDownItem> InitializeUIActions()
-        {
             // Define the main menu.
             var mainMenuRootNodes = new List<MainMenuDropDownItem>();
 
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                foreach (var localizer in Session.Current.RegisteredLocalizers)
-                {
-                    this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
-                }
-
                 var langMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
                 langMenu.AddRange(Session.Current.RegisteredLocalizers.Select(x => (Union<DefaultUIActionBinding, MainMenuDropDownItem>)x.SwitchToLangUIActionBinding));
 
@@ -109,19 +63,6 @@ namespace Sandra.UI
                     DropDownItems = langMenu
                 });
             }
-
-            // Actions which have their handler in this instance.
-            this.BindAction(NewPgnFile, TryNewPgnFile);
-            this.BindAction(OpenPgnFile, TryOpenPgnFile);
-            this.BindAction(SharedUIAction.Exit, TryExit);
-
-            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
-            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
-            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
-            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
-            this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
-            this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
 
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
@@ -240,7 +181,62 @@ namespace Sandra.UI
                 }
             });
 
-            return mainMenuRootNodes;
+            mdiTabControl.DockProperties.MainMenuItems = mainMenuRootNodes;
+
+            return mdiTabControl;
+        }
+
+        public MdiContainerForm() : base(CreateMdiTabControl())
+        {
+            // Actions which have their handler in this instance.
+            foreach (var localizer in Session.Current.RegisteredLocalizers)
+            {
+                this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
+            }
+
+            this.BindAction(NewPgnFile, TryNewPgnFile);
+            this.BindAction(OpenPgnFile, TryOpenPgnFile);
+            this.BindAction(SharedUIAction.Exit, TryExit);
+
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
+            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
+            this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
+            this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
+
+            AllowDrop = true;
+        }
+
+        protected override void OnDragEnter(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragEnter(e);
+        }
+
+        protected override void OnDragOver(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragOver(e);
+        }
+
+        protected override void OnDragDrop(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
+            }
+
+            base.OnDragDrop(e);
         }
 
         internal void OpenCommandLineArgs(string[] commandLineArgs)
