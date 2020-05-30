@@ -516,22 +516,12 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.SystemButtonHeight);
             }
 
-            foreach (Control control in Controls)
-            {
-                if (control != MainMenuStrip
-                    && control != closeButton
-                    && control != saveButton
-                    && control != maximizeButton
-                    && control != minimizeButton
-                    && control.Visible)
-                {
-                    control.SetBounds(
-                        currentMetrics.ClientAreaLeft,
-                        currentMetrics.ClientAreaTop,
-                        currentMetrics.ClientAreaWidth,
-                        currentMetrics.ClientAreaHeight);
-                }
-            }
+            // Do a null-check in case this is called from our constructor, it may not yet been set.
+            DockedAsControl?.SetBounds(
+                currentMetrics.ClientAreaLeft,
+                currentMetrics.ClientAreaTop,
+                currentMetrics.ClientAreaWidth,
+                currentMetrics.ClientAreaHeight);
 
             MinimumSize = new Size(currentMetrics.MinimumWidth, currentMetrics.MinimumHeight);
 
