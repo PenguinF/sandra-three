@@ -94,6 +94,17 @@ namespace Eutherion.Win.Controls
         public const int DefaultHorizontalTabTextMargin = 6;
 
         /// <summary>
+        /// Gets or sets the background color to display when the mouse is hovering over an inactive tab header.
+        /// </summary>
+        public Color InactiveTabHeaderHoverColor
+        {
+            get => inactiveTabHeaderHoverColor;
+            set { if (inactiveTabHeaderHoverColor != value) { inactiveTabHeaderHoverColor = value; HeaderPanel.UpdateNonMetrics(); } }
+        }
+
+        private Color inactiveTabHeaderHoverColor;
+
+        /// <summary>
         /// Gets the collection of tab pages in this control.
         /// </summary>
         public TabPageCollection TabPages { get; }

@@ -170,14 +170,31 @@ namespace Eutherion.Win.Controls
                 {
                     TabPage tabPage = OwnerTabControl.TabPages[tabIndex];
 
+                    // Remember some things for drawing text later.
+                    Color tabBackColor;
+
+                    if (tabIndex == HoverTabIndex)
+                    {
+                        using (var hoverBrush = new SolidBrush(OwnerTabControl.InactiveTabHeaderHoverColor))
+                        {
+                            g.FillRectangle(hoverBrush, new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight));
+                        }
+
+                        tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
+                    }
+                    else
+                    {
+                        tabBackColor = OwnerTabControl.BackColor;
+                    }
+
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
                         g,
                         tabPage.Text,
                         OwnerTabControl.Font,
                         TabHeaderTextRectangle(tabIndex),
-                        Color.Black,
-                        OwnerTabControl.BackColor,
+                        OwnerTabControl.ForeColor,
+                        tabBackColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
                 }
             }
