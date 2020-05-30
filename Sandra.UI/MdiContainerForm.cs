@@ -193,6 +193,15 @@ namespace Sandra.UI
             this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
 
             AllowDrop = true;
+
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
+        }
+
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
+        {
+            DockedControl.BackColor = ObservableStyle.BackColor;
+            DockedControl.ForeColor = ObservableStyle.ForeColor;
+            DockedControl.Font = ObservableStyle.Font;
         }
 
         protected override void OnDragEnter(DragEventArgs e)
