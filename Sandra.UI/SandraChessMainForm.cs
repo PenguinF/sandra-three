@@ -27,7 +27,6 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -169,12 +168,7 @@ namespace Sandra.UI
                     isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                     PgnSyntaxDescriptor.Instance,
                     pgnFile,
-                    SettingKeys.PgnZoom))
-            {
-                ClientSize = new Size(600, 600),
-                ShowInTaskbar = true,
-                StartPosition = FormStartPosition.CenterScreen,
-            };
+                    SettingKeys.PgnZoom));
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
             pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);

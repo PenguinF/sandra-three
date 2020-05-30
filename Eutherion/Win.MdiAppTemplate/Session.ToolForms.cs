@@ -135,10 +135,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     codeAccessOption,
                     syntaxDescriptor,
                     codeFile,
-                    SharedSettings.JsonZoom))
-            {
-                ClientSize = new Size(600, 600),
-            };
+                    SharedSettings.JsonZoom));
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
             settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
