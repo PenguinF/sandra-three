@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = MenuCaptionBarForm<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>>;
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
@@ -43,8 +43,8 @@ namespace Sandra.UI
         /// <summary>
         /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
         /// </summary>
-        private readonly Dictionary<string, List<PgnForm>> OpenPgnForms
-            = new Dictionary<string, List<PgnForm>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>> OpenPgnForms
+            = new Dictionary<string, List<MenuCaptionBarForm<PgnEditor>>>(StringComparer.OrdinalIgnoreCase);
 
         private MdiContainerForm mdiContainerForm;
 
@@ -146,7 +146,7 @@ namespace Sandra.UI
             });
         }
 
-        private void RemovePgnForm(string key, PgnForm pgnForm)
+        private void RemovePgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
         {
             // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
             var pgnForms = OpenPgnForms[key ?? string.Empty];
@@ -154,17 +154,17 @@ namespace Sandra.UI
             if (pgnForms.Count == 0) OpenPgnForms.Remove(key ?? string.Empty);
         }
 
-        private void AddPgnForm(string key, PgnForm pgnForm)
+        private void AddPgnForm(string key, MenuCaptionBarForm<PgnEditor> pgnForm)
         {
-            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<PgnForm>()).Add(pgnForm);
+            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnForm);
         }
 
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
-            var pgnForm = new PgnForm(
-                new SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>(
+            var pgnForm = new MenuCaptionBarForm<PgnEditor>(
+                new PgnEditor(
                     isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                     PgnSyntaxDescriptor.Instance,
                     pgnFile,
@@ -208,7 +208,7 @@ namespace Sandra.UI
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
 
-            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<PgnForm> pgnForms))
+            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
             {
                 // File path not open yet, initialize new PGN Form.
                 OpenPgnForm(normalizedPgnFileName, isReadOnly);
