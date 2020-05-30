@@ -82,7 +82,7 @@ namespace Sandra.UI
 
         public UIActionState TryNewPgnFile(bool perform)
         {
-            if (perform) Program.MainForm.OpenNewPgnEditor(this);
+            if (perform) OpenNewPgnEditor();
             return UIActionVisibility.Enabled;
         }
 
@@ -122,7 +122,7 @@ namespace Sandra.UI
                 var dialogResult = openFileDialog.ShowDialog(this);
                 if (dialogResult == DialogResult.OK)
                 {
-                    Program.MainForm.NewOrExistingPgnEditor(this, openFileDialog.FileName, openFileDialog.ReadOnlyChecked).EnsureActivated();
+                    NewOrExistingPgnEditor(openFileDialog.FileName, openFileDialog.ReadOnlyChecked).EnsureActivated();
                 }
             }
 

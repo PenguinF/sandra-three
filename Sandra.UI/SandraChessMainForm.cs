@@ -20,15 +20,12 @@
 #endregion
 
 using Eutherion;
-using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -93,13 +90,13 @@ namespace Sandra.UI
                 {
                     // Activate mdiContainerForm before opening pgn files.
                     candidate.EnsureActivated();
-                    OpenCommandLineArgs(candidate, receivedCommandLineArgs);
+                    candidate.OpenCommandLineArgs(receivedCommandLineArgs);
                     return;
                 }
             }
 
             var mdiContainerForm = OpenNewMdiContainerForm();
-            OpenCommandLineArgs(mdiContainerForm, receivedCommandLineArgs);
+            mdiContainerForm.OpenCommandLineArgs(receivedCommandLineArgs);
             mdiContainerForm.Show();
         }
 
@@ -167,32 +164,11 @@ namespace Sandra.UI
                     mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
 
-            OpenCommandLineArgs(mdiContainerForm, commandLineArgs);
+            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
-        internal void OpenCommandLineArgs(MdiContainerForm mdiContainerForm, string[] commandLineArgs)
-        {
-            // Interpret each command line argument as a file to open.
-            commandLineArgs.ForEach(pgnFileName =>
-            {
-                // Catch exception for each open action individually.
-                try
-                {
-                    NewOrExistingPgnEditor(mdiContainerForm, pgnFileName, isReadOnly: false).EnsureActivated();
-                }
-                catch (Exception exception)
-                {
-                    // For now, show the exception to the user.
-                    // Maybe user has no access to the path, or the given file name is not a valid.
-                    // TODO: analyze what error conditions can occur and handle them appropriately.
-                    MessageBox.Show(
-                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                        pgnFileName,
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
-            });
-        }
+        internal bool TryGetPgnEditors(string key, out List<MenuCaptionBarForm<PgnEditor>> pgnEditors)
+            => OpenPgnEditors.TryGetValue(key, out pgnEditors);
 
         internal void RemovePgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
         {
@@ -205,67 +181,6 @@ namespace Sandra.UI
         internal void AddPgnEditor(string key, MenuCaptionBarForm<PgnEditor> pgnEditor)
         {
             OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<MenuCaptionBarForm<PgnEditor>>()).Add(pgnEditor);
-        }
-
-        private MenuCaptionBarForm<PgnEditor> NewPgnEditor(MdiContainerForm mdiContainerForm, string normalizedPgnFileName, bool isReadOnly)
-        {
-            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
-
-            var pgnForm = new MenuCaptionBarForm<PgnEditor>(
-                new PgnEditor(
-                    isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                    PgnSyntaxDescriptor.Instance,
-                    pgnFile,
-                    SettingKeys.PgnZoom));
-
-            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);
-
-            PgnStyleSelector.InitializeStyles(pgnForm.DockedControl);
-
-            // Don't index read-only PgnForms.
-            if (!isReadOnly)
-            {
-                AddPgnEditor(normalizedPgnFileName, pgnForm);
-
-                // Re-index when pgnFile.OpenTextFilePath changes.
-                pgnFile.OpenTextFilePathChanged += (_, e) =>
-                {
-                    RemovePgnEditor(e.PreviousOpenTextFilePath, pgnForm);
-                    AddPgnEditor(pgnFile.OpenTextFilePath, pgnForm);
-                };
-
-                // Remove from index when pgnForm is closed.
-                pgnForm.Disposed += (_, __) =>
-                {
-                    RemovePgnEditor(pgnFile.OpenTextFilePath, pgnForm);
-                };
-            }
-
-            return pgnForm;
-        }
-
-        internal void OpenNewPgnEditor(MdiContainerForm mdiContainerForm)
-        {
-            // Never create as read-only.
-            NewPgnEditor(mdiContainerForm, null, isReadOnly: false).EnsureActivated();
-        }
-
-        internal MenuCaptionBarForm<PgnEditor> NewOrExistingPgnEditor(MdiContainerForm mdiContainerForm, string pgnFileName, bool isReadOnly)
-        {
-            // Normalize the file name so it gets indexed correctly.
-            string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
-
-            if (isReadOnly || !OpenPgnEditors.TryGetValue(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnForms))
-            {
-                // File path not open yet, initialize new PGN editor.
-                return NewPgnEditor(mdiContainerForm, normalizedPgnFileName, isReadOnly);
-            }
-            else
-            {
-                // Just return the first editor in the list.
-                return pgnForms[0];
-            }
         }
     }
 }

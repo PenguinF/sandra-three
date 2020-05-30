@@ -22,14 +22,19 @@
 using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
+using Sandra.Chess.Pgn;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
@@ -76,7 +81,7 @@ namespace Sandra.UI
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                Program.MainForm.OpenCommandLineArgs(this, (string[])e.Data.GetData(DataFormats.FileDrop));
+                OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
             }
 
             base.OnDragDrop(e);
@@ -237,6 +242,91 @@ namespace Sandra.UI
             });
 
             return mainMenuRootNodes;
+        }
+
+        internal void OpenCommandLineArgs(string[] commandLineArgs)
+        {
+            // Interpret each command line argument as a file to open.
+            commandLineArgs.ForEach(pgnFileName =>
+            {
+                // Catch exception for each open action individually.
+                try
+                {
+                    NewOrExistingPgnEditor(pgnFileName, isReadOnly: false).EnsureActivated();
+                }
+                catch (Exception exception)
+                {
+                    // For now, show the exception to the user.
+                    // Maybe user has no access to the path, or the given file name is not a valid.
+                    // TODO: analyze what error conditions can occur and handle them appropriately.
+                    MessageBox.Show(
+                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                        pgnFileName,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            });
+        }
+
+        private MenuCaptionBarForm<PgnEditor> NewPgnEditor(string normalizedPgnFileName, bool isReadOnly)
+        {
+            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
+
+            var pgnEditor = new MenuCaptionBarForm<PgnEditor>(
+                new PgnEditor(
+                    isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                    PgnSyntaxDescriptor.Instance,
+                    pgnFile,
+                    SettingKeys.PgnZoom));
+
+            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
+            pgnEditor.BindAction(SharedUIAction.SaveToFile, pgnEditor.DockedControl.TrySaveToFile);
+
+            PgnStyleSelector.InitializeStyles(pgnEditor.DockedControl);
+
+            // Don't index read-only pgn editors.
+            if (!isReadOnly)
+            {
+                Program.MainForm.AddPgnEditor(normalizedPgnFileName, pgnEditor);
+
+                // Re-index when pgnFile.OpenTextFilePath changes.
+                pgnFile.OpenTextFilePathChanged += (_, e) =>
+                {
+                    Program.MainForm.RemovePgnEditor(e.PreviousOpenTextFilePath, pgnEditor);
+                    Program.MainForm.AddPgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
+                };
+
+                // Remove from index when pgnEditor is closed.
+                pgnEditor.Disposed += (_, __) =>
+                {
+                    Program.MainForm.RemovePgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
+                };
+            }
+
+            return pgnEditor;
+        }
+
+        private void OpenNewPgnEditor()
+        {
+            // Never create as read-only.
+            NewPgnEditor(null, isReadOnly: false).EnsureActivated();
+        }
+
+        private MenuCaptionBarForm<PgnEditor> NewOrExistingPgnEditor(string pgnFileName, bool isReadOnly)
+        {
+            // Normalize the file name so it gets indexed correctly.
+            string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
+
+            if (isReadOnly || !Program.MainForm.TryGetPgnEditors(normalizedPgnFileName, out List<MenuCaptionBarForm<PgnEditor>> pgnEditors))
+            {
+                // File path not open yet, initialize new PGN editor.
+                return NewPgnEditor(normalizedPgnFileName, isReadOnly);
+            }
+            else
+            {
+                // Just return the first editor in the list. It may be docked somewhere else.
+                return pgnEditors[0];
+            }
         }
     }
 }
