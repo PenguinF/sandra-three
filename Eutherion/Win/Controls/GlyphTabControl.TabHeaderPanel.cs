@@ -35,6 +35,7 @@ namespace Eutherion.Win.Controls
             private int CurrentWidth;
             private int CurrentHeight;
             private float CurrentTabWidth;
+            private float CurrentHorizontalTabTextMargin;
 
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
@@ -59,6 +60,8 @@ namespace Eutherion.Win.Controls
                 int tabCount = OwnerTabControl.TabPages.Count;
                 CurrentTabWidth = tabCount > 0 ? (float)CurrentWidth / tabCount : 0;
                 if (OwnerTabControl.TabWidth < CurrentTabWidth) CurrentTabWidth = OwnerTabControl.TabWidth;
+                CurrentHorizontalTabTextMargin = OwnerTabControl.HorizontalTabTextMargin;
+                if (CurrentHorizontalTabTextMargin * 2 > CurrentTabWidth) CurrentHorizontalTabTextMargin = CurrentTabWidth / 2;
 
                 Invalidate();
             }
@@ -74,9 +77,9 @@ namespace Eutherion.Win.Controls
             protected override void OnLayout(LayoutEventArgs e) => UpdateMetrics();
 
             private Rectangle TabHeaderTextRectangle(int index) => new Rectangle(
-                (int)Math.Round(index * CurrentTabWidth),
+                (int)Math.Round(index * CurrentTabWidth + CurrentHorizontalTabTextMargin),
                 0,
-                (int)Math.Round(CurrentTabWidth),
+                (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2),
                 CurrentHeight);
 
             protected override void OnPaint(PaintEventArgs e)

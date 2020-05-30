@@ -77,6 +77,23 @@ namespace Eutherion.Win.Controls
         public const int DefaultTabWidth = 120;
 
         /// <summary>
+        /// Gets or sets the horizontal margin for text in a tab header. The minimum value is 0. The default value is <see cref="DefaultHorizontalTabTextMargin"/> (6).
+        /// </summary>
+        [DefaultValue(DefaultHorizontalTabTextMargin)]
+        public int HorizontalTabTextMargin
+        {
+            get => horizontalTabTextMargin;
+            set { if (horizontalTabTextMargin != value) { horizontalTabTextMargin = Checked(value, 0, nameof(HorizontalTabTextMargin)); HeaderPanel.UpdateMetrics(); } }
+        }
+
+        private int horizontalTabTextMargin = DefaultHorizontalTabTextMargin;
+
+        /// <summary>
+        /// The default value for the <see cref="HorizontalTabTextMargin"/> property.
+        /// </summary>
+        public const int DefaultHorizontalTabTextMargin = 6;
+
+        /// <summary>
         /// Gets the collection of tab pages in this control.
         /// </summary>
         public TabPageCollection TabPages { get; }
