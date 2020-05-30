@@ -77,7 +77,7 @@ namespace Sandra.UI
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                Program.MainForm.OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
+                Program.MainForm.OpenCommandLineArgs(this, (string[])e.Data.GetData(DataFormats.FileDrop));
             }
 
             base.OnDragDrop(e);

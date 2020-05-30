@@ -93,11 +93,14 @@ namespace Sandra.UI
                 {
                     // Activate mdiContainerForm before opening pgn files.
                     candidate.EnsureActivated();
-                    break;
+                    OpenCommandLineArgs(candidate, receivedCommandLineArgs);
+                    return;
                 }
             }
 
-            OpenCommandLineArgs(receivedCommandLineArgs);
+            var mdiContainerForm = OpenNewMdiContainerForm();
+            OpenCommandLineArgs(mdiContainerForm, receivedCommandLineArgs);
+            mdiContainerForm.Show();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -118,15 +121,17 @@ namespace Sandra.UI
                 PieceImages.LoadChessPieceImages();
 
                 Visible = false;
-                OpenNewMdiContainerForm();
+                var mdiContainerForm = OpenNewMdiContainerForm();
+
+                // Only the first one should auto-save and open the stored command line arguments.
+                mdiContainerForm.Load += MdiContainerForm_Load;
+                mdiContainerForm.Show();
             }
         }
 
-        private void OpenNewMdiContainerForm()
+        private MdiContainerForm OpenNewMdiContainerForm()
         {
             var mdiContainerForm = new MdiContainerForm();
-
-            mdiContainerForm.Load += MdiContainerForm_Load;
 
             mdiContainerForm.FormClosed += (_, __) =>
             {
@@ -137,7 +142,8 @@ namespace Sandra.UI
             };
 
             mdiContainerForms.Add(mdiContainerForm);
-            mdiContainerForm.Show();
+
+            return mdiContainerForm;
         }
 
         private void MdiContainerForm_Load(object sender, EventArgs e)
@@ -161,10 +167,10 @@ namespace Sandra.UI
                     mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
 
-            OpenCommandLineArgs(commandLineArgs);
+            OpenCommandLineArgs(mdiContainerForm, commandLineArgs);
         }
 
-        internal void OpenCommandLineArgs(string[] commandLineArgs)
+        internal void OpenCommandLineArgs(MdiContainerForm mdiContainerForm, string[] commandLineArgs)
         {
             // Interpret each command line argument as a file to open.
             commandLineArgs.ForEach(pgnFileName =>
