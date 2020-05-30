@@ -21,7 +21,6 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
@@ -116,12 +115,13 @@ namespace Sandra.UI
                     ValidateNames = true,
                     CheckFileExists = false,
                     ShowReadOnly = true,
+                    Multiselect = true,
                 };
 
                 var dialogResult = openFileDialog.ShowDialog(this);
                 if (dialogResult == DialogResult.OK)
                 {
-                    NewOrExistingPgnEditor(openFileDialog.FileName, openFileDialog.ReadOnlyChecked).EnsureActivated();
+                    OpenCommandLineArgs(openFileDialog.FileNames, isReadOnly: openFileDialog.ReadOnlyChecked);
                 }
             }
 

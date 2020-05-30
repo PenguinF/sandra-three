@@ -234,7 +234,7 @@ namespace Sandra.UI
             base.OnDragDrop(e);
         }
 
-        internal void OpenCommandLineArgs(string[] commandLineArgs)
+        internal void OpenCommandLineArgs(string[] commandLineArgs, bool isReadOnly = false)
         {
             PgnEditor lastOpenedPgnEditor = null;
 
@@ -244,7 +244,7 @@ namespace Sandra.UI
                 // Catch exception for each open action individually.
                 try
                 {
-                    lastOpenedPgnEditor = NewOrExistingPgnEditor(pgnFileName, isReadOnly: false);
+                    lastOpenedPgnEditor = NewOrExistingPgnEditor(pgnFileName, isReadOnly);
                 }
                 catch (Exception exception)
                 {
