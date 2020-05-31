@@ -69,7 +69,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        public void OnClosing(CloseReason closeReason, ref bool cancel)
+        public void CanClose(CloseReason closeReason, ref bool cancel)
         {
         }
 
@@ -120,6 +120,18 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             UpdateCaptionText(e.TabPageIndex);
             base.OnAfterTabActivated(e);
+        }
+
+        protected override void OnTabHeaderGlyphClick(GlyphTabControlCancelEventArgs e)
+        {
+            if (TabPages[e.TabPageIndex] is MdiTabPage mdiTabPage)
+            {
+                bool cancel = e.Cancel;
+                mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
+                e.Cancel = cancel;
+            }
+
+            base.OnTabHeaderGlyphClick(e);
         }
     }
 

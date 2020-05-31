@@ -831,7 +831,7 @@ namespace Eutherion.Win.MdiAppTemplate
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             bool cancel = e.Cancel;
-            DockedAsDockable.OnClosing(e.CloseReason, ref cancel);
+            DockedAsDockable.CanClose(e.CloseReason, ref cancel);
             e.Cancel = cancel;
             base.OnFormClosing(e);
         }

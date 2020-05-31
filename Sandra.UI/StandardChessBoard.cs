@@ -1106,6 +1106,6 @@ namespace Sandra.UI
         }
 
         event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
-        void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
+        void IDockableControl.CanClose(CloseReason closeReason, ref bool cancel) { }
     }
 }
