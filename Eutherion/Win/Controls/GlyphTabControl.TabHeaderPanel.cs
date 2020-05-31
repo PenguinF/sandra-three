@@ -149,12 +149,6 @@ namespace Eutherion.Win.Controls
 
             protected override void OnLayout(LayoutEventArgs e) => UpdateMetrics();
 
-            private Rectangle TabHeaderTextRectangle(int index) => new Rectangle(
-                (int)Math.Round(index * CurrentTabWidth + CurrentHorizontalTabTextMargin),
-                0,
-                (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2),
-                CurrentHeight);
-
             protected override void OnPaint(PaintEventArgs e)
             {
                 var g = e.Graphics;
@@ -165,6 +159,9 @@ namespace Eutherion.Win.Controls
                 {
                     g.FillRectangle(inactiveAreaBrush, clientRectangle);
                 }
+
+                // Calculate text area width for each tab page.
+                int textAreaWidth = (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2);
 
                 // Then draw each tab page.
                 for (int tabIndex = 0; tabIndex < OwnerTabControl.TabPages.Count; tabIndex++)
@@ -213,7 +210,11 @@ namespace Eutherion.Win.Controls
                         g,
                         tabPage.Text,
                         OwnerTabControl.Font,
-                        TabHeaderTextRectangle(tabIndex),
+                        new Rectangle(
+                            (int)Math.Round(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin),
+                            0,
+                            textAreaWidth,
+                            CurrentHeight),
                         tabForeColor,
                         tabBackColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
