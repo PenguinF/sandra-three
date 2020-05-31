@@ -130,7 +130,7 @@ namespace Eutherion.Win.MdiAppTemplate
         private void UpdateFromDockProperties()
         {
             DockProperties dockProperties = DockedControl.DockProperties;
-            Text = dockProperties.CaptionText;
+            Text = dockProperties.TabPageText;
             ActiveBackColor = dockProperties.TabBackColor;
             ActiveForeColor = dockProperties.TabForeColor;
         }

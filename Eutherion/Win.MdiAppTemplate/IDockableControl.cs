@@ -88,6 +88,17 @@ namespace Eutherion.Win.MdiAppTemplate
         public IEnumerable<MainMenuDropDownItem> MainMenuItems { get; set; }
 
         /// <summary>
+        /// Gets or sets the text to display in a tab page header.
+        /// If this property is not set, tab page headers will display <see cref="CaptionText"/> instead.
+        /// </summary>
+        public string TabPageTextOverride { get; set; }
+
+        /// <summary>
+        /// Gets the text to display in a tab page header.
+        /// </summary>
+        public string TabPageText => string.IsNullOrWhiteSpace(TabPageTextOverride) ? CaptionText : TabPageTextOverride;
+
+        /// <summary>
         /// Gets or sets the background color to display in a tab header if the control is docked on an active tab page.
         /// </summary>
         public Color TabBackColor { get; set; }

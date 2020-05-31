@@ -700,6 +700,7 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             string fileName = CodeFilePathDisplayString;
             DockProperties.CaptionText = ContainsChanges ? $"{GlyphTabControl.ModifiedMarkerCharacter} {fileName}" : fileName;
+            DockProperties.TabPageTextOverride = fileName;
 
             // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
             DockProperties.IsModified = !IsDisposed && !Disposing && !ReadOnly && ContainsChanges;
