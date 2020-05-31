@@ -71,6 +71,18 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public void CanClose(CloseReason closeReason, ref bool cancel)
         {
+            // Use correct CloseReason value.
+            if (closeReason == CloseReason.UserClosing) closeReason = CloseReason.MdiFormClosing;
+
+            // Go through each tab page to see if they can close.
+            for (int i = 0; i < TabPages.Count; i++)
+            {
+                if (TabPages[i] is MdiTabPage mdiTabPage)
+                {
+                    mdiTabPage.DockedControl.CanClose(closeReason, ref cancel);
+                    if (cancel) break;
+                }
+            }
         }
 
         /// <summary>
