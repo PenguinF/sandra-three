@@ -247,16 +247,32 @@ namespace Eutherion.Win.Controls
             }
             else
             {
-                // Close the tab page rather than activate it.
-                TabPage tabPage = TabPages[tabPageIndex];
-                var cancelEventArgs = new GlyphTabControlCancelEventArgs(tabPage, tabPageIndex);
-                OnTabHeaderGlyphClick(cancelEventArgs);
+                // Close the tab page rather than activating it.
+                CloseTab(tabPageIndex);
+            }
+        }
 
-                if (!cancelEventArgs.Cancel)
-                {
-                    // Need to dispose the client control, this is an actual close action.
-                    TabPages.RemoveTab(tabPageIndex, disposeClientControl: true);
-                }
+        /// <summary>
+        /// Closes the <see cref="TabPage"/> with the given index and disposes its client control.
+        /// </summary>
+        /// <param name="tabPageIndex">
+        /// The index of the tab page to close.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="tabPageIndex"/> is less than 0, or greater than or equal to the number of tab pages in <see cref="TabPages"/>.
+        /// </exception>
+        public void CloseTab(int tabPageIndex)
+        {
+            if (tabPageIndex < 0 || tabPageIndex >= TabPages.Count) throw new ArgumentOutOfRangeException(nameof(tabPageIndex));
+
+            TabPage tabPage = TabPages[tabPageIndex];
+            var cancelEventArgs = new GlyphTabControlCancelEventArgs(tabPage, tabPageIndex);
+            OnTabHeaderGlyphClick(cancelEventArgs);
+
+            if (!cancelEventArgs.Cancel)
+            {
+                // Need to dispose the client control, this is an actual close action.
+                TabPages.RemoveTab(tabPageIndex, disposeClientControl: true);
             }
         }
 
