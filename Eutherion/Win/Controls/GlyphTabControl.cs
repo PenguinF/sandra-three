@@ -226,6 +226,8 @@ namespace Eutherion.Win.Controls
                 if (oldActiveControl != null) oldActiveControl.Visible = false;
                 ActiveControl = newActiveControl;
                 HeaderPanel.UpdateNonMetrics();
+
+                OnAfterTabActivated(new GlyphTabControlEventArgs(newActiveTabPage, tabPageIndex));
             }
         }
 
@@ -235,7 +237,7 @@ namespace Eutherion.Win.Controls
         public event EventHandler<GlyphTabControlEventArgs> AfterTabInserted;
 
         /// <summary>
-        /// Raises the <see cref="AfterTabInserted/> event.
+        /// Raises the <see cref="AfterTabInserted"/> event.
         /// </summary>
         /// <param name="e">
         /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
@@ -248,12 +250,25 @@ namespace Eutherion.Win.Controls
         public event EventHandler<GlyphTabControlEventArgs> AfterTabRemoved;
 
         /// <summary>
-        /// Raises the <see cref="AfterTabRemoved/> event.
+        /// Raises the <see cref="AfterTabRemoved"/> event.
         /// </summary>
         /// <param name="e">
         /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
         /// </param>
         protected virtual void OnAfterTabRemoved(GlyphTabControlEventArgs e) => AfterTabRemoved?.Invoke(this, e);
+
+        /// <summary>
+        /// Occurs after a tab page is activated.
+        /// </summary>
+        public event EventHandler<GlyphTabControlEventArgs> AfterTabActivated;
+
+        /// <summary>
+        /// Raises the <see cref="AfterTabActivated"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnAfterTabActivated(GlyphTabControlEventArgs e) => AfterTabActivated?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="Control.Layout"/> event.
