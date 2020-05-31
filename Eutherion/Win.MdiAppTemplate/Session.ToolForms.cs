@@ -51,6 +51,38 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
         private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
 
+        internal void OpenOrActivateSettingsEditor(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
+        {
+            if (toolForm.Value == null)
+            {
+                // Rely on exception handler in call stack, so no try-catch here.
+                toolForm.Value = toolFormConstructor();
+
+                if (toolForm.Value != null)
+                {
+                    if (ownerControl?.TopLevelControl is Form ownerForm)
+                    {
+                        toolForm.Value.Owner = ownerForm;
+                        toolForm.Value.ShowInTaskbar = false;
+                    }
+                    else
+                    {
+                        // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
+                        // Icon must be set and ShowIcon must be true to override that default icon.
+                        toolForm.Value.ShowInTaskbar = true;
+                    }
+
+                    toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
+                    toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
+                }
+            }
+
+            if (toolForm.Value != null)
+            {
+                toolForm.Value.EnsureActivated();
+            }
+        }
+
         internal void OpenOrActivateToolForm(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
         {
             if (toolForm.Value == null)
@@ -151,7 +183,7 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (perform)
             {
-                OpenOrActivateToolForm(
+                OpenOrActivateSettingsEditor(
                     null,
                     localSettingsFormBox,
                     () =>
@@ -202,7 +234,7 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (perform)
             {
-                OpenOrActivateToolForm(
+                OpenOrActivateSettingsEditor(
                     null,
                     defaultSettingsFormBox,
                     () => CreateSettingsForm(
@@ -366,7 +398,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (perform)
             {
-                OpenOrActivateToolForm(
+                OpenOrActivateSettingsEditor(
                     null,
                     languageFormBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<MenuCaptionBarForm>()),
                     () =>
