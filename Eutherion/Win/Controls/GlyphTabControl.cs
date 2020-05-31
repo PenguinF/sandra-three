@@ -105,6 +105,17 @@ namespace Eutherion.Win.Controls
         private Color inactiveTabHeaderHoverColor;
 
         /// <summary>
+        /// Gets or sets the border color to display when the mouse is hovering over an inactive tab header.
+        /// </summary>
+        public Color InactiveTabHeaderHoverBorderColor
+        {
+            get => inactiveTabHeaderHoverBorderColor;
+            set { if (inactiveTabHeaderHoverBorderColor != value) { inactiveTabHeaderHoverBorderColor = value; HeaderPanel.UpdateNonMetrics(); } }
+        }
+
+        private Color inactiveTabHeaderHoverBorderColor;
+
+        /// <summary>
         /// Gets the collection of tab pages in this control.
         /// </summary>
         public TabPageCollection TabPages { get; }

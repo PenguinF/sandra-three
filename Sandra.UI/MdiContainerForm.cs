@@ -203,6 +203,7 @@ namespace Sandra.UI
             DockedControl.ForeColor = ObservableStyle.ForeColor;
             DockedControl.Font = ObservableStyle.Font;
             DockedControl.InactiveTabHeaderHoverColor = ObservableStyle.HoverColor;
+            DockedControl.InactiveTabHeaderHoverBorderColor = ObservableStyle.HoverBorderColor;
         }
 
         protected override void OnDragEnter(DragEventArgs e)

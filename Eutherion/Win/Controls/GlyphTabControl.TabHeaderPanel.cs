@@ -189,7 +189,13 @@ namespace Eutherion.Win.Controls
                     {
                         using (var hoverBrush = new SolidBrush(OwnerTabControl.InactiveTabHeaderHoverColor))
                         {
-                            g.FillRectangle(hoverBrush, new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight));
+                            g.FillRectangle(hoverBrush, tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight);
+                        }
+
+                        // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
+                        using (var hoverBorderPen = new Pen(OwnerTabControl.InactiveTabHeaderHoverBorderColor, 1))
+                        {
+                            g.DrawRectangle(hoverBorderPen, tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, CurrentHeight);
                         }
 
                         tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
