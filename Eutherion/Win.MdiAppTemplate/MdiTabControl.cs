@@ -98,7 +98,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     // Select tab page, move focus.
                     ActivateTab(i);
-                    ActiveControl = tabPage.ClientControl;
+                    if (i == ActiveTabPageIndex) ActiveControl = dockedControl;
                 }
             }
         }

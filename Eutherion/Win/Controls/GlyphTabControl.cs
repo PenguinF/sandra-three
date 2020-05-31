@@ -292,6 +292,9 @@ namespace Eutherion.Win.Controls
             if (ActiveTabPageIndex != tabPageIndex)
             {
                 TabPage newActiveTabPage = TabPages[tabPageIndex];
+                var cancelEventArgs = new GlyphTabControlCancelEventArgs(newActiveTabPage, tabPageIndex);
+                OnBeforeTabActivated(cancelEventArgs);
+                if (cancelEventArgs.Cancel) return;
 
                 Control oldActiveControl = ActiveTabPageIndex >= 0 ? TabPages[ActiveTabPageIndex].ClientControl : null;
                 Control newActiveControl = newActiveTabPage.ClientControl;
@@ -361,6 +364,19 @@ namespace Eutherion.Win.Controls
         /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
         /// </param>
         protected virtual void OnAfterTabClosed(GlyphTabControlEventArgs e) => AfterTabClosed?.Invoke(this, e);
+
+        /// <summary>
+        /// Occurs before a tab page is activated.
+        /// </summary>
+        public event EventHandler<GlyphTabControlCancelEventArgs> BeforeTabActivated;
+
+        /// <summary>
+        /// Raises the <see cref="BeforeTabActivated"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlCancelEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnBeforeTabActivated(GlyphTabControlCancelEventArgs e) => BeforeTabActivated?.Invoke(this, e);
 
         /// <summary>
         /// Occurs after a tab page is activated.
