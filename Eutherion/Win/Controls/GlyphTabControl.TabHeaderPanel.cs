@@ -49,6 +49,7 @@ namespace Eutherion.Win.Controls
             private Point LastKnownMouseMovePoint = new Point(-1, -1);
 
             private int HoverTabIndex = -1;
+            private bool HoverOverGlyph;
 
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
@@ -120,17 +121,34 @@ namespace Eutherion.Win.Controls
             private void HitTest(Point clientLocation)
             {
                 int tabIndex = -1;
+                bool overGlyph = false;
 
                 if (clientLocation.Y >= 0 && clientLocation.Y < ClientSize.Height && CurrentTabWidth > 0)
                 {
                     tabIndex = (int)Math.Floor(clientLocation.X / CurrentTabWidth);
-                    if (tabIndex >= OwnerTabControl.TabPages.Count) tabIndex = -1;
+
+                    if (tabIndex < OwnerTabControl.TabPages.Count)
+                    {
+                        float relativeX = clientLocation.X - tabIndex * CurrentTabWidth;
+
+                        // Between the right edge of the text and the edge of where the margin starts.
+                        overGlyph
+                            = CurrentTabWidth - CurrentHorizontalTabTextMargin - MeasuredGlyphSize.Width < relativeX
+                            && relativeX < CurrentTabWidth - CurrentHorizontalTabTextMargin;
+                    }
+                    else
+                    {
+                        tabIndex = -1;
+                    }
                 }
 
-                if (HoverTabIndex != tabIndex)
+                if (HoverTabIndex != tabIndex || HoverOverGlyph != overGlyph)
                 {
+                    if (HoverTabIndex != tabIndex) ToolTip.SetToolTip(this, tabIndex >= 0 ? OwnerTabControl.TabPages[tabIndex].Text : null);
+
                     HoverTabIndex = tabIndex;
-                    UpdateNonMetrics();
+                    HoverOverGlyph = overGlyph;
+                    Invalidate();
                 }
             }
 
@@ -214,6 +232,7 @@ namespace Eutherion.Win.Controls
                     // Remember some things for drawing text later.
                     Color tabBackColor;
                     Color tabForeColor;
+                    Color glyphForeColor;
                     bool drawCloseButtonGlyph;
 
                     if (tabIndex == OwnerTabControl.ActiveTabPageIndex)
@@ -228,6 +247,13 @@ namespace Eutherion.Win.Controls
 
                         // Only show glyph for active and hover tabs.
                         drawCloseButtonGlyph = true;
+                        glyphForeColor = tabForeColor;
+
+                        // Highlight when hovering.
+                        if (tabIndex == HoverTabIndex && HoverOverGlyph)
+                        {
+                            glyphForeColor = ControlPaint.Light(glyphForeColor);
+                        }
                     }
                     else if (tabIndex == HoverTabIndex)
                     {
@@ -247,12 +273,20 @@ namespace Eutherion.Win.Controls
 
                         // Only show glyph for active and hover tabs.
                         drawCloseButtonGlyph = true;
+                        glyphForeColor = tabForeColor;
+
+                        // Highlight when hovering.
+                        if (HoverOverGlyph)
+                        {
+                            glyphForeColor = ControlPaint.Light(glyphForeColor);
+                        }
                     }
                     else
                     {
                         tabBackColor = OwnerTabControl.BackColor;
                         tabForeColor = OwnerTabControl.ForeColor;
                         drawCloseButtonGlyph = false;
+                        glyphForeColor = tabForeColor;
                     }
 
                     int textAreaLeftOffset = (int)Math.Floor(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin);
@@ -282,7 +316,7 @@ namespace Eutherion.Win.Controls
                                 (CurrentHeight - MeasuredGlyphSize.Height) / 2 - 1,
                                 MeasuredGlyphSize.Width,
                                 MeasuredGlyphSize.Height),
-                            tabForeColor,
+                            glyphForeColor,
                             tabBackColor,
                             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
                     }
