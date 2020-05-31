@@ -116,6 +116,30 @@ namespace Eutherion.Win.Controls
         private Color inactiveTabHeaderHoverBorderColor;
 
         /// <summary>
+        /// Gets or sets the foreground color to display for a glyph when the mouse is hovering over an inactive tab header but not over the glyph itself.
+        /// If this color is empty, <see cref="Control.ForeColor"/> is used.
+        /// </summary>
+        public Color InactiveTabHeaderGlyphForeColor
+        {
+            get => inactiveTabHeaderGlyphForeColor;
+            set { if (inactiveTabHeaderGlyphForeColor != value) { inactiveTabHeaderGlyphForeColor = value; HeaderPanel.UpdateNonMetrics(); } }
+        }
+
+        private Color inactiveTabHeaderGlyphForeColor;
+
+        /// <summary>
+        /// Gets or sets the foreground color to display for a glyph when the mouse is hovering over it on an inactive tab header.
+        /// If this color is empty, a lighter version of <see cref="InactiveTabHeaderGlyphForeColor"/> is used.
+        /// </summary>
+        public Color InactiveTabHeaderGlyphHoverColor
+        {
+            get => inactiveTabHeaderGlyphHoverColor;
+            set { if (inactiveTabHeaderGlyphHoverColor != value) { inactiveTabHeaderGlyphHoverColor = value; HeaderPanel.UpdateNonMetrics(); } }
+        }
+
+        private Color inactiveTabHeaderGlyphHoverColor;
+
+        /// <summary>
         /// Gets the collection of tab pages in this control.
         /// </summary>
         public TabPageCollection TabPages { get; }

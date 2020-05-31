@@ -107,6 +107,18 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets the foreground color to display in a tab header if the control is docked on an active tab page.
         /// </summary>
         public Color TabForeColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display for the glyph on the active tab page.
+        /// If this color is empty, <see cref="TabForeColor"/> is used.
+        /// </summary>
+        public Color GlyphForeColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display for the glyph on the active tab page if the mouse is positioned over it.
+        /// If this color is empty, a lighter version of <see cref="GlyphForeColor"/> is used.
+        /// </summary>
+        public Color GlyphHoverColor { get; set; }
     }
 
     /// <summary>

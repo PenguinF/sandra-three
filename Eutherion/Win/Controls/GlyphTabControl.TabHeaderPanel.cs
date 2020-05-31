@@ -247,12 +247,17 @@ namespace Eutherion.Win.Controls
 
                         // Only show glyph for active and hover tabs.
                         drawCloseButtonGlyph = true;
-                        glyphForeColor = tabForeColor;
+                        glyphForeColor = tabPage.GlyphForeColor.A == 0
+                            ? tabForeColor
+                            : tabPage.GlyphForeColor;
 
                         // Highlight when hovering.
                         if (tabIndex == HoverTabIndex && HoverOverGlyph)
                         {
-                            glyphForeColor = ControlPaint.Light(glyphForeColor);
+                            // Default to a lighter version if no color given.
+                            glyphForeColor = tabPage.GlyphHoverColor.A == 0
+                                ? ControlPaint.Light(glyphForeColor)
+                                : tabPage.GlyphHoverColor;
                         }
                     }
                     else if (tabIndex == HoverTabIndex)
@@ -273,12 +278,17 @@ namespace Eutherion.Win.Controls
 
                         // Only show glyph for active and hover tabs.
                         drawCloseButtonGlyph = true;
-                        glyphForeColor = tabForeColor;
+                        glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphForeColor.A == 0
+                            ? tabForeColor
+                            : OwnerTabControl.InactiveTabHeaderGlyphForeColor;
 
                         // Highlight when hovering.
                         if (HoverOverGlyph)
                         {
-                            glyphForeColor = ControlPaint.Light(glyphForeColor);
+                            // Default to a lighter version if no color given.
+                            glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphHoverColor.A == 0
+                                ? ControlPaint.Light(glyphForeColor)
+                                : OwnerTabControl.InactiveTabHeaderGlyphHoverColor;
                         }
                     }
                     else
@@ -286,7 +296,7 @@ namespace Eutherion.Win.Controls
                         tabBackColor = OwnerTabControl.BackColor;
                         tabForeColor = OwnerTabControl.ForeColor;
                         drawCloseButtonGlyph = false;
-                        glyphForeColor = tabForeColor;
+                        glyphForeColor = tabForeColor;  // Not used.
                     }
 
                     int textAreaLeftOffset = (int)Math.Floor(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin);

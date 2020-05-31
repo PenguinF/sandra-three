@@ -33,6 +33,20 @@ namespace Eutherion.Win.Controls
         public class TabPage
         {
             /// <summary>
+            /// Gets or sets the text to display in the tab header.
+            /// </summary>
+            public string Text { get => text; set { if (text != value) { text = value; OnNotifyChange(); } } }
+
+            private string text;
+
+            /// <summary>
+            /// Gets or sets if the client control contains any unsaved modifications.
+            /// </summary>
+            public bool IsModified { get => isModified; set { if (isModified != value) { isModified = value; OnNotifyChange(); } } }
+
+            private bool isModified;
+
+            /// <summary>
             /// Gets or sets the background color to display if the tab page is active.
             /// </summary>
             public Color ActiveBackColor { get => activeBackColor; set { if (activeBackColor != value) { activeBackColor = value; OnNotifyChange(); } } }
@@ -47,18 +61,20 @@ namespace Eutherion.Win.Controls
             private Color activeForeColor;
 
             /// <summary>
-            /// Gets or sets the text to display in the tab header.
+            /// Gets or sets the foreground color to display for the glyph if the tab page is active.
+            /// If this color is empty, <see cref="ActiveForeColor"/> is used.
             /// </summary>
-            public string Text { get => text; set { if (text != value) { text = value; OnNotifyChange(); } } }
+            public Color GlyphForeColor { get => glyphForeColor; set { if (glyphForeColor != value) { glyphForeColor = value; OnNotifyChange(); } } }
 
-            private string text;
+            private Color glyphForeColor;
 
             /// <summary>
-            /// Gets or sets if the client control contains any unsaved modifications.
+            /// Gets or sets the foreground color to display for the glyph when the mouse is hovering over it and the tab page is active.
+            /// If this color is empty, a lighter version of <see cref="GlyphForeColor"/> is used.
             /// </summary>
-            public bool IsModified { get => isModified; set { if (isModified != value) { isModified = value; OnNotifyChange(); } } }
+            public Color GlyphHoverColor { get => glyphHoverColor; set { if (glyphHoverColor != value) { glyphHoverColor = value; OnNotifyChange(); } } }
 
-            private bool isModified;
+            private Color glyphHoverColor;
 
             /// <summary>
             /// Occurs when the style or text of the tab page was updated.

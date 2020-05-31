@@ -145,6 +145,8 @@ namespace Eutherion.Win.MdiAppTemplate
             IsModified = dockProperties.IsModified;
             ActiveBackColor = dockProperties.TabBackColor;
             ActiveForeColor = dockProperties.TabForeColor;
+            GlyphForeColor = dockProperties.GlyphForeColor;
+            GlyphHoverColor = dockProperties.GlyphHoverColor;
         }
     }
 

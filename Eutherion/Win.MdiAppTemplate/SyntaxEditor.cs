@@ -408,6 +408,8 @@ namespace Eutherion.Win.MdiAppTemplate
             DockProperties.Icon = Session.Current.ApplicationIcon;
             DockProperties.TabBackColor = DefaultSyntaxEditorStyle.BackColor; // Keep synchronized with DefaultStyle.BackColor.
             DockProperties.TabForeColor = DefaultSyntaxEditorStyle.ForeColor; // Keep synchronized with DefaultStyle.ForeColor.
+            DockProperties.GlyphForeColor = Color.LightGray;
+            DockProperties.GlyphHoverColor = Color.White;
 
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
