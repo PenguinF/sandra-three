@@ -94,6 +94,21 @@ namespace Eutherion.Win.Controls
         public const int DefaultHorizontalTabTextMargin = 6;
 
         /// <summary>
+        /// Gets or sets the background color for the inactive header area of the control.
+        /// </summary>
+        public override Color BackColor { get => base.BackColor; set { if (base.BackColor != value) { base.BackColor = value; HeaderPanel.UpdateNonMetrics(); } } }
+
+        /// <summary>
+        /// Gets or sets the foreground color for the inactive header area of the control.
+        /// </summary>
+        public override Color ForeColor { get => base.ForeColor; set { if (base.ForeColor != value) { base.ForeColor = value; HeaderPanel.UpdateNonMetrics(); } } }
+
+        /// <summary>
+        /// Gets or sets the font of the text displayed in all header areas of the control.
+        /// </summary>
+        public override Font Font { get => base.Font; set { if (base.Font != value) { base.Font = value; HeaderPanel.UpdateNonMetrics(); } } }
+
+        /// <summary>
         /// Gets or sets the background color to display when the mouse is hovering over an inactive tab header.
         /// </summary>
         public Color InactiveTabHeaderHoverColor
@@ -117,7 +132,7 @@ namespace Eutherion.Win.Controls
 
         /// <summary>
         /// Gets or sets the foreground color to display for a glyph when the mouse is hovering over an inactive tab header but not over the glyph itself.
-        /// If this color is empty, <see cref="Control.ForeColor"/> is used.
+        /// If this color is empty, <see cref="ForeColor"/> is used.
         /// </summary>
         public Color InactiveTabHeaderGlyphForeColor
         {
