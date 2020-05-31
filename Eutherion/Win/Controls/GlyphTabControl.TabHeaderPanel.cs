@@ -168,7 +168,7 @@ namespace Eutherion.Win.Controls
 
                 if (HoverTabIndex >= 0 && e.Button == MouseButtons.Left)
                 {
-                    OwnerTabControl.TabHeaderClicked(HoverTabIndex);
+                    OwnerTabControl.TabHeaderClicked(HoverTabIndex, HoverOverGlyph);
                 }
 
                 base.OnMouseDown(e);

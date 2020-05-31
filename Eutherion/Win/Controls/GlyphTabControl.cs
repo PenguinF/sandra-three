@@ -221,9 +221,13 @@ namespace Eutherion.Win.Controls
             }
         }
 
-        private void TabHeaderClicked(int tabPageIndex)
+        private void TabHeaderClicked(int tabPageIndex, bool mouseOverGlyph)
         {
-            ActivateTab(tabPageIndex);
+            if (!mouseOverGlyph)
+            {
+                // Default is to activate the tab.
+                ActivateTab(tabPageIndex);
+            }
         }
 
         /// <summary>
