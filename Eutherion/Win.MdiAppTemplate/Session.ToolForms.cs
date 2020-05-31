@@ -34,6 +34,8 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
+    using SettingsEditor = SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>;
+
     /// <summary>
     /// Contains all ambient state which is global to a single user session.
     /// This includes e.g. an auto-save file, settings and preferences.
@@ -42,14 +44,34 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         public const string SessionUIActionPrefix = nameof(Session) + ".";
 
-        private readonly Box<MenuCaptionBarForm> localSettingsFormBox = new Box<MenuCaptionBarForm>();
-        private readonly Box<MenuCaptionBarForm> defaultSettingsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<SettingsEditor> localSettingsEditorBox = new Box<SettingsEditor>();
+        private readonly Box<SettingsEditor> defaultSettingsEditorBox = new Box<SettingsEditor>();
 
         // Indexed by language file.
-        private readonly Dictionary<string, Box<MenuCaptionBarForm>> languageFormBoxes = new Dictionary<string, Box<MenuCaptionBarForm>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Box<SettingsEditor>> languageEditorBoxes = new Dictionary<string, Box<SettingsEditor>>(StringComparer.OrdinalIgnoreCase);
 
         private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
         private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
+
+        internal void OpenOrActivateSettingsEditor(MdiTabControl dockHostControl, Box<SettingsEditor> settingsEditor, Func<SettingsEditor> settingsEditorConstructor)
+        {
+            if (settingsEditor.Value == null)
+            {
+                // Rely on exception handler in call stack, so no try-catch here.
+                settingsEditor.Value = settingsEditorConstructor();
+
+                if (settingsEditor.Value != null)
+                {
+                    dockHostControl.TabPages.Add(new MdiTabPage<SettingsEditor>(settingsEditor.Value));
+                    settingsEditor.Value.Disposed += (_, __) => settingsEditor.Value = null;
+                }
+            }
+
+            if (settingsEditor.Value != null)
+            {
+                settingsEditor.Value.EnsureActivated();
+            }
+        }
 
         internal void OpenOrActivateToolForm(Control ownerControl, Box<MenuCaptionBarForm> toolForm, Func<MenuCaptionBarForm> toolFormConstructor)
         {
@@ -60,18 +82,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 if (toolForm.Value != null)
                 {
-                    if (ownerControl?.TopLevelControl is Form ownerForm)
-                    {
-                        toolForm.Value.Owner = ownerForm;
-                        toolForm.Value.ShowInTaskbar = false;
-                    }
-                    else
-                    {
-                        // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
-                        // Icon must be set and ShowIcon must be true to override that default icon.
-                        toolForm.Value.ShowInTaskbar = true;
-                    }
-
+                    toolForm.Value.Owner = ownerControl.FindForm();
+                    toolForm.Value.ShowInTaskbar = false;
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
                     toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
                 }
@@ -94,10 +106,10 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        private MenuCaptionBarForm CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
-                                                      SettingsFile settingsFile,
-                                                      Func<string> initialTextGenerator,
-                                                      SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        private SettingsEditor CreateSettingsEditor(SyntaxEditorCodeAccessOption codeAccessOption,
+                                                    SettingsFile settingsFile,
+                                                    Func<string> initialTextGenerator,
+                                                    SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
 
@@ -130,30 +142,26 @@ namespace Eutherion.Win.MdiAppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new MenuCaptionBarForm<SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>>(
-                new SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>(
-                    codeAccessOption,
-                    syntaxDescriptor,
-                    codeFile,
-                    SharedSettings.JsonZoom));
+            var settingsEditor = new SettingsEditor(
+                codeAccessOption,
+                syntaxDescriptor,
+                codeFile,
+                SharedSettings.JsonZoom);
 
-            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
+            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsEditor);
 
-            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.DockedControl);
+            if (autoSaver != null) settingsEditor.Disposed += (_, __) => autoSaver.Dispose();
 
-            if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
-
-            return settingsForm;
+            return settingsEditor;
         }
 
-        public UIActionHandlerFunc TryEditPreferencesFile() => perform =>
+        public UIActionHandlerFunc TryEditPreferencesFile(MdiTabControl dockHostControl) => perform =>
         {
             if (perform)
             {
-                OpenOrActivateToolForm(
-                    null,
-                    localSettingsFormBox,
+                OpenOrActivateSettingsEditor(
+                    dockHostControl,
+                    localSettingsEditorBox,
                     () =>
                     {
                         // If the file doesn't exist yet, generate a local settings file with a commented out copy
@@ -177,7 +185,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                 SettingWriterOptions.CommentOutProperties);
                         }
 
-                        return CreateSettingsForm(
+                        return CreateSettingsEditor(
                             SyntaxEditorCodeAccessOption.FixedFile,
                             LocalSettings,
                             initialTextGenerator,
@@ -198,14 +206,14 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryShowDefaultSettingsFile() => perform =>
+        public UIActionHandlerFunc TryShowDefaultSettingsFile(MdiTabControl dockHostControl) => perform =>
         {
             if (perform)
             {
-                OpenOrActivateToolForm(
-                    null,
-                    defaultSettingsFormBox,
-                    () => CreateSettingsForm(
+                OpenOrActivateSettingsEditor(
+                    dockHostControl,
+                    defaultSettingsEditorBox,
+                    () => CreateSettingsEditor(
                         GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
@@ -356,7 +364,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryEditCurrentLanguage() => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage(MdiTabControl dockHostControl) => perform =>
         {
             // Only enable in developer mode.
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
@@ -366,9 +374,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (perform)
             {
-                OpenOrActivateToolForm(
-                    null,
-                    languageFormBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<MenuCaptionBarForm>()),
+                OpenOrActivateSettingsEditor(
+                    dockHostControl,
+                    languageEditorBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<SettingsEditor>()),
                     () =>
                     {
                         // Generate translations into language file if empty.
@@ -388,7 +396,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                 SettingWriterOptions.SuppressSettingComments);
                         }
 
-                        return CreateSettingsForm(
+                        return CreateSettingsEditor(
                             SyntaxEditorCodeAccessOption.FixedFile,
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,

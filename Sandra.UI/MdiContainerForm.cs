@@ -184,11 +184,11 @@ namespace Sandra.UI
             this.BindAction(OpenPgnFile, TryOpenPgnFile);
             this.BindAction(SharedUIAction.Exit, TryExit);
 
-            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
-            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(DockedControl));
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(DockedControl));
             this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(DockedControl));
             this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
             this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
 
