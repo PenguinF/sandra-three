@@ -586,23 +586,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                int textAreaLeftEdge = currentMetrics.MainMenuLeft;
-                int textAreaWidth = currentMetrics.ClientAreaWidth;
-
-                // Measure the text. If its left edge is about to disappear under the main menu,
-                // use a different Rectangle to center the text in.
-                // See also e.g. Visual Studio Code where it works the same way.
-                // Also use an extra MainMenuHorizontalMargin.
-                Size measuredTextSize = TextRenderer.MeasureText(text, ObservableStyle.Font);
-                int probableLeftTextEdge = (textAreaWidth - measuredTextSize.Width) / 2;
-
-                if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
-                {
-                    // Now place it in the middle between the outer menu right edge and the system buttons.
-                    textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
-                    textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
-                }
+                // Place the text in the middle between the outer menu right edge and the system buttons.
+                // Also 1 pixel above center to align with the main menu.
+                int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
+                int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
 
                 Rectangle textAreaRectangle = new Rectangle(
                     textAreaLeftEdge,
