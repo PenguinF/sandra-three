@@ -22,82 +22,38 @@
 using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
+using Eutherion.Win.Controls;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
-using Sandra.Chess;
+using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : OldMenuCaptionBarForm, IWeakEventTarget
+    public partial class MdiContainerForm : MenuCaptionBarForm<MdiTabControl>, IWeakEventTarget
     {
-        private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
-
-        public MdiContainerForm()
+        private static MdiTabControl CreateMdiTabControl()
         {
-            DockProperties dockProperties = new DockProperties
-            {
-                CaptionHeight = 30,
-                CaptionText = Session.ExecutableFileNameWithoutExtension,
-                Icon = Session.Current.ApplicationIcon,
-                MainMenuItems = InitializeUIActions(),
-            };
+            var mdiTabControl = new MdiTabControl(Session.ExecutableFileNameWithoutExtension);
 
-            UpdateFromDockProperties(dockProperties);
+            mdiTabControl.DockProperties.CaptionHeight = 30;
+            mdiTabControl.DockProperties.Icon = Session.Current.ApplicationIcon;
 
-            AllowDrop = true;
-        }
-
-        protected override void OnDragEnter(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-
-            base.OnDragEnter(e);
-        }
-
-        protected override void OnDragOver(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-
-            base.OnDragOver(e);
-        }
-
-        protected override void OnDragDrop(DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                Program.MainForm.OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
-            }
-
-            base.OnDragDrop(e);
-        }
-
-        private List<MainMenuDropDownItem> InitializeUIActions()
-        {
             // Define the main menu.
             var mainMenuRootNodes = new List<MainMenuDropDownItem>();
 
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                foreach (var localizer in Session.Current.RegisteredLocalizers)
-                {
-                    this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
-                }
-
                 var langMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
                 langMenu.AddRange(Session.Current.RegisteredLocalizers.Select(x => (Union<DefaultUIActionBinding, MainMenuDropDownItem>)x.SwitchToLangUIActionBinding));
 
@@ -108,27 +64,13 @@ namespace Sandra.UI
                 });
             }
 
-            // Actions which have their handler in this instance.
-            this.BindAction(SandraChessMainForm.NewPgnFile, Program.MainForm.TryNewPgnFile);
-            this.BindAction(SandraChessMainForm.OpenPgnFile, Program.MainForm.TryOpenPgnFile);
-            this.BindAction(SharedUIAction.Exit, TryExit);
-
-            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
-            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
-            this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
-            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
-            this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
-            this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
-
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
-                    SandraChessMainForm.NewPgnFile,
-                    SandraChessMainForm.OpenPgnFile,
+                    NewPgnFile,
+                    OpenPgnFile,
                     SharedUIAction.Exit,
                 }
             });
@@ -162,10 +104,8 @@ namespace Sandra.UI
                     InteractiveGame.DemoteActiveVariation,
                     InteractiveGame.BreakActiveVariation,
                     InteractiveGame.DeleteActiveVariation,
-                    MovesTextBox.UsePgnPieceSymbols,
-                    MovesTextBox.UseLongAlgebraicNotation,
-                    StandardChessBoardForm.FlipBoard,
-                    StandardChessBoardForm.TakeScreenshot,
+                    StandardChessBoard.FlipBoard,
+                    StandardChessBoard.TakeScreenshot,
 
                     SharedUIAction.Undo,
                     SharedUIAction.Redo,
@@ -190,24 +130,12 @@ namespace Sandra.UI
                     },
                 });
 
-            var modifiedGotoMovesForm = new DefaultUIActionBinding(
-                InteractiveGame.GotoMovesForm.Action,
-                new ImplementationSet<IUIActionInterface>
-                {
-                    new CombinedUIActionInterface
-                    {
-                        Shortcuts = InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
-                        MenuTextProvider = LocalizedStringKeys.Moves.ToTextProvider(),
-                    },
-                });
-
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
                     modifiedGotoChessBoardForm,
-                    modifiedGotoMovesForm,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
                     SharedUIAction.ShowErrorPane,
@@ -239,42 +167,205 @@ namespace Sandra.UI
                 }
             });
 
-            return mainMenuRootNodes;
+            mdiTabControl.DockProperties.MainMenuItems = mainMenuRootNodes;
+
+            return mdiTabControl;
         }
 
-        public void NewPlayingBoard()
+        public MdiContainerForm() : base(CreateMdiTabControl())
         {
-            InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
+            // Actions which have their handler in this instance.
+            foreach (var localizer in Session.Current.RegisteredLocalizers)
+            {
+                this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
+            }
 
-            game.TryGotoChessBoardForm(true);
-            game.TryGotoMovesForm(true);
+            this.BindAction(NewPgnFile, TryNewPgnFile);
+            this.BindAction(OpenPgnFile, TryOpenPgnFile);
+            this.BindAction(SharedUIAction.Exit, TryExit);
 
-            // Focus back on the chessboard form.
-            game.TryGotoChessBoardForm(true);
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
+            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
+            this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
+            this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
+
+            AllowDrop = true;
+
+            ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
+
+            DockedControl.AfterTabRemoved += DockedControl_AfterTabRemoved;
+            DockedControl.AfterTabClosed += DockedControl_AfterTabRemoved;
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void ObservableStyle_NotifyChange(object sender, EventArgs e)
         {
-            base.OnLoad(e);
+            DockedControl.BackColor = ObservableStyle.BackColor;
+            DockedControl.ForeColor = ObservableStyle.ForeColor;
+            DockedControl.Font = ObservableStyle.Font;
+            DockedControl.InactiveTabHeaderHoverColor = ObservableStyle.HoverColor;
+            DockedControl.InactiveTabHeaderHoverBorderColor = ObservableStyle.HoverBorderColor;
+        }
 
-            // Initialize from settings if available.
-            Session.Current.AttachFormStateAutoSaver(
-                this,
-                SettingKeys.Window,
-                () =>
+        private void DockedControl_AfterTabRemoved(object sender, GlyphTabControlEventArgs e)
+        {
+            MdiTabControl mdiTabControl = (MdiTabControl)sender;
+            if (mdiTabControl.TabPages.Count == 0)
+            {
+                // If the last tab page is closed, close the entire form.
+                Close();
+            }
+            else if (mdiTabControl.ActiveTabPageIndex < 0)
+            {
+                // If the active tab page was closed, activate the tab page to the right. If there is none, go to the left.
+                int targetIndex = e.TabPageIndex;
+                if (targetIndex >= mdiTabControl.TabPages.Count) targetIndex = mdiTabControl.TabPages.Count - 1;
+                mdiTabControl.ActivateTab(targetIndex);
+            }
+        }
+
+        protected override void OnDragEnter(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragEnter(e);
+        }
+
+        protected override void OnDragOver(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragOver(e);
+        }
+
+        protected override void OnDragDrop(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
+            }
+
+            base.OnDragDrop(e);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            // Hide before disposing. Lots of initializing Scintilla editors will delay the close action by seconds.
+            if (!e.Cancel) Visible = false;
+        }
+
+        internal void OpenCommandLineArgs(string[] commandLineArgs, bool isReadOnly = false)
+        {
+            PgnEditor lastOpenedPgnEditor = null;
+
+            // Interpret each command line argument as a file to open.
+            commandLineArgs.ForEach(pgnFileName =>
+            {
+                // Catch exception for each open action individually.
+                try
                 {
-                    // Show in the center of the monitor where the mouse currently is.
-                    var activeScreen = Screen.FromPoint(MousePosition);
-                    Rectangle workingArea = activeScreen.WorkingArea;
+                    lastOpenedPgnEditor = NewOrExistingPgnEditor(pgnFileName, isReadOnly);
+                }
+                catch (Exception exception)
+                {
+                    // For now, show the exception to the user.
+                    // Maybe user has no access to the path, or the given file name is not a valid.
+                    // TODO: analyze what error conditions can occur and handle them appropriately.
+                    MessageBox.Show(
+                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                        pgnFileName,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            });
 
-                    // Two thirds the size of the active monitor's working area.
-                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+            if (lastOpenedPgnEditor != null)
+            {
+                // Only activate the last opened PGN editor.
+                lastOpenedPgnEditor.EnsureActivated();
+            }
+            else if (DockedControl.TabPages.Count == 0)
+            {
+                // Open default new untitled file.
+                OpenNewPgnEditor();
+            }
+            else
+            {
+                // If no arguments were given, just activate the form.
+                DockedControl.EnsureActivated();
+            }
+        }
 
-                    // Update the bounds of the form.
-                    SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                });
+        private PgnEditor NewPgnEditor(string normalizedPgnFileName, bool isReadOnly)
+        {
+            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
 
-            NewPlayingBoard();
+            var pgnEditor = new PgnEditor(
+                isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                PgnSyntaxDescriptor.Instance,
+                pgnFile,
+                SettingKeys.PgnZoom);
+
+            PgnStyleSelector.InitializeStyles(pgnEditor);
+
+            // Don't index read-only pgn editors.
+            if (!isReadOnly)
+            {
+                Program.MainForm.AddPgnEditor(normalizedPgnFileName, pgnEditor);
+
+                // Re-index when pgnFile.OpenTextFilePath changes.
+                pgnFile.OpenTextFilePathChanged += (_, e) =>
+                {
+                    Program.MainForm.RemovePgnEditor(e.PreviousOpenTextFilePath, pgnEditor);
+                    Program.MainForm.AddPgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
+                };
+
+                // Remove from index when pgnEditor is closed.
+                pgnEditor.Disposed += (_, __) =>
+                {
+                    Program.MainForm.RemovePgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
+                };
+            }
+
+            pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
+
+            // Open as new tab page.
+            DockedControl.TabPages.Add(new MdiTabPage<PgnEditor>(pgnEditor));
+
+            return pgnEditor;
+        }
+
+        private void OpenNewPgnEditor()
+        {
+            // Never create as read-only.
+            NewPgnEditor(null, isReadOnly: false).EnsureActivated();
+        }
+
+        private PgnEditor NewOrExistingPgnEditor(string pgnFileName, bool isReadOnly)
+        {
+            // Normalize the file name so it gets indexed correctly.
+            string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
+
+            if (isReadOnly || !Program.MainForm.TryGetPgnEditors(normalizedPgnFileName, out List<PgnEditor> pgnEditors))
+            {
+                // File path not open yet, initialize new PGN editor.
+                return NewPgnEditor(normalizedPgnFileName, isReadOnly);
+            }
+            else
+            {
+                // Just return the first editor in the list. It may be docked somewhere else.
+                return pgnEditors[0];
+            }
         }
     }
 }

@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System.Drawing;
@@ -56,20 +55,8 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
-        public static readonly SettingProperty<PersistableFormState> PgnWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PgnWindow))),
-            PersistableFormState.Type);
-
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PgnZoom))),
-            ScintillaZoomFactor.Instance);
-
-        public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
-            new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
-
-        public static readonly SettingProperty<int> MovesZoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(MovesZoom))),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -150,16 +137,10 @@ namespace Sandra.UI
                 session.LangSetting,
                 SettingKeys.Window,
                 SharedSettings.AutoSaveCounter,
-                SettingKeys.PgnWindow,
                 SettingKeys.PgnZoom,
-                SharedSettings.DefaultSettingsWindow,
                 SharedSettings.DefaultSettingsAutoSave,
-                SharedSettings.PreferencesWindow,
                 SharedSettings.PreferencesAutoSave,
-                SharedSettings.LanguageWindow,
-                SharedSettings.JsonZoom,
-                SettingKeys.Notation,
-                SettingKeys.MovesZoom);
+                SharedSettings.JsonZoom);
         }
 
         public SettingSchema CreateDefaultSettingsSchema(Session session)

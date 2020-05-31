@@ -22,10 +22,14 @@
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
+using Sandra.Chess.Pgn;
 using System;
+using System.Windows.Forms;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
@@ -45,14 +49,82 @@ namespace Sandra.UI
             {
                 new CombinedUIActionInterface
                 {
+                    IsFirstInGroup = true,
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
                     MenuTextProvider = LocalizedStringKeys.NewGame.ToTextProvider(),
                 },
             });
 
-        public UIActionState TryOpenNewPlayingBoard(bool perform)
+        public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
-            if (perform) NewPlayingBoard();
+            if (perform)
+            {
+                InteractiveGame game = new InteractiveGame(pgnEditor, Chess.Position.GetInitialPosition());
+                game.TryGotoChessBoardForm(true);
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPgnFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
+                    IsFirstInGroup = true,
+                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
+                },
+            });
+
+        public UIActionState TryNewPgnFile(bool perform)
+        {
+            if (perform) OpenNewPgnEditor();
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPgnFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
+                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
+                    OpensDialog = true,
+                },
+            });
+
+        public UIActionState TryOpenPgnFile(bool perform)
+        {
+            if (perform)
+            {
+                string extension = PgnSyntaxDescriptor.Instance.FileExtension;
+                var extensionLocalizedKey = PgnSyntaxDescriptor.Instance.FileExtensionLocalizedKey;
+
+                var openFileDialog = new OpenFileDialog
+                {
+                    AutoUpgradeEnabled = true,
+                    DereferenceLinks = true,
+                    DefaultExt = extension,
+                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    SupportMultiDottedExtensions = true,
+                    RestoreDirectory = true,
+                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
+                    ValidateNames = true,
+                    CheckFileExists = false,
+                    ShowReadOnly = true,
+                    Multiselect = true,
+                };
+
+                var dialogResult = openFileDialog.ShowDialog(this);
+                if (dialogResult == DialogResult.OK)
+                {
+                    OpenCommandLineArgs(openFileDialog.FileNames, isReadOnly: openFileDialog.ReadOnlyChecked);
+                }
+            }
+
             return UIActionVisibility.Enabled;
         }
     }

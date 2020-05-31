@@ -22,6 +22,7 @@
 using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.Controls;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using ScintillaNET;
@@ -210,14 +211,12 @@ namespace Eutherion.Win.MdiAppTemplate
                 base.Dispose(disposing);
             }
 
-            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.CanClose(CloseReason closeReason, ref bool cancel) { }
         }
 
         private const int ErrorIndicatorIndex = 8;
         private const int WarningIndicatorIndex = 9;
         private const int MessageIndicatorIndex = 10;
-
-        private const string ChangedMarker = "• ";
 
         private readonly Box<MenuCaptionBarForm> errorListFormBox = new Box<MenuCaptionBarForm>();
 
@@ -407,6 +406,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             DockProperties.CaptionHeight = 30;
             DockProperties.Icon = Session.Current.ApplicationIcon;
+            DockProperties.TabBackColor = DefaultSyntaxEditorStyle.BackColor; // Keep synchronized with DefaultStyle.BackColor.
+            DockProperties.TabForeColor = DefaultSyntaxEditorStyle.ForeColor; // Keep synchronized with DefaultStyle.ForeColor.
+            DockProperties.GlyphForeColor = Color.LightGray;
+            DockProperties.GlyphHoverColor = Color.White;
 
             DockProperties.MainMenuItems = new List<MainMenuDropDownItem>
             {
@@ -698,7 +701,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private void UpdateChangedMarker()
         {
             string fileName = CodeFilePathDisplayString;
-            DockProperties.CaptionText = ContainsChanges ? ChangedMarker + fileName : fileName;
+            DockProperties.CaptionText = ContainsChanges ? $"{GlyphTabControl.ModifiedMarkerCharacter} {fileName}" : fileName;
+            DockProperties.TabPageTextOverride = fileName;
 
             // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
             DockProperties.IsModified = !IsDisposed && !Disposing && !ReadOnly && ContainsChanges;
@@ -716,7 +720,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel)
+        void IDockableControl.CanClose(CloseReason closeReason, ref bool cancel)
         {
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (ContainsChanges && CodeFile.AutoSaveFile == null)

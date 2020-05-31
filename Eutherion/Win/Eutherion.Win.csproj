@@ -43,6 +43,18 @@
     <Compile Include="AutoSaveTextFile.cs" />
     <Compile Include="ConstantImageProvider.cs" />
     <Compile Include="ConstantTextProvider.cs" />
+    <Compile Include="Controls\GlyphTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\GlyphTabControl.TabHeaderPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\GlyphTabControl.TabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\GlyphTabControl.TabPageCollection.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\NonSelectableButton.cs">
       <SubType>Component</SubType>
     </Compile>

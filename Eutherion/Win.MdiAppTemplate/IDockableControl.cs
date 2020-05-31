@@ -54,7 +54,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <param name="cancel">
         /// Whether or not to cancel the closing event.
         /// </param>
-        void OnClosing(CloseReason closeReason, ref bool cancel);
+        void CanClose(CloseReason closeReason, ref bool cancel);
     }
 
     /// <summary>
@@ -86,6 +86,39 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets an enumeration of main menu items to build.
         /// </summary>
         public IEnumerable<MainMenuDropDownItem> MainMenuItems { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text to display in a tab page header.
+        /// If this property is not set, tab page headers will display <see cref="CaptionText"/> instead.
+        /// </summary>
+        public string TabPageTextOverride { get; set; }
+
+        /// <summary>
+        /// Gets the text to display in a tab page header.
+        /// </summary>
+        public string TabPageText => string.IsNullOrWhiteSpace(TabPageTextOverride) ? CaptionText : TabPageTextOverride;
+
+        /// <summary>
+        /// Gets or sets the background color to display in a tab header if the control is docked on an active tab page.
+        /// </summary>
+        public Color TabBackColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display in a tab header if the control is docked on an active tab page.
+        /// </summary>
+        public Color TabForeColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display for the glyph on the active tab page.
+        /// If this color is empty, <see cref="TabForeColor"/> is used.
+        /// </summary>
+        public Color GlyphForeColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display for the glyph on the active tab page if the mouse is positioned over it.
+        /// If this color is empty, a lighter version of <see cref="GlyphForeColor"/> is used.
+        /// </summary>
+        public Color GlyphHoverColor { get; set; }
     }
 
     /// <summary>

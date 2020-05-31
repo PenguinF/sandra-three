@@ -97,7 +97,6 @@ namespace Eutherion.Win.MdiAppTemplate
         private MenuCaptionBarForm CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                                       SettingsFile settingsFile,
                                                       Func<string> initialTextGenerator,
-                                                      SettingProperty<PersistableFormState> formStateSetting,
                                                       SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
@@ -136,12 +135,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     codeAccessOption,
                     syntaxDescriptor,
                     codeFile,
-                    SharedSettings.JsonZoom))
-            {
-                ClientSize = new Size(600, 600),
-            };
-
-            settingsForm.Load += (_, __) => AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
+                    SharedSettings.JsonZoom));
 
             // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
             settingsForm.BindAction(SharedUIAction.SaveToFile, settingsForm.DockedControl.TrySaveToFile);
@@ -187,7 +181,6 @@ namespace Eutherion.Win.MdiAppTemplate
                             SyntaxEditorCodeAccessOption.FixedFile,
                             LocalSettings,
                             initialTextGenerator,
-                            SharedSettings.PreferencesWindow,
                             SharedSettings.PreferencesAutoSave);
                     });
             }
@@ -216,7 +209,6 @@ namespace Eutherion.Win.MdiAppTemplate
                         GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
-                        SharedSettings.DefaultSettingsWindow,
                         SharedSettings.DefaultSettingsAutoSave));
             }
 
@@ -242,7 +234,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
-            void IDockableControl.OnClosing(CloseReason closeReason, ref bool cancel) { }
+            void IDockableControl.CanClose(CloseReason closeReason, ref bool cancel) { }
         }
 
         private MenuCaptionBarForm CreateReadOnlyTextForm(string fileName, int width, int height)
@@ -400,7 +392,6 @@ namespace Eutherion.Win.MdiAppTemplate
                             SyntaxEditorCodeAccessOption.FixedFile,
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
-                            SharedSettings.LanguageWindow,
                             null);
                     });
             }

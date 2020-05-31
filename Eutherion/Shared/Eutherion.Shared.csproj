@@ -88,8 +88,6 @@
     <Compile Include="Text\ReadOnlySeparatedSpanList.cs" />
     <Compile Include="Text\ReadOnlySpanList.cs" />
     <Compile Include="Text\StringLiteral.cs" />
-    <Compile Include="Text\TextElement.cs" />
-    <Compile Include="Text\TextIndex.cs" />
     <Compile Include="UIActions\DefaultUIActionBinding.cs" />
     <Compile Include="UIActions\IUIActionHandlerProvider.cs" />
     <Compile Include="UIActions\IUIActionInterface.cs" />

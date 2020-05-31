@@ -96,7 +96,6 @@ namespace Eutherion.Text.Json
 
         /// <summary>
         /// Returns the index of the <see cref="JsonSyntax"/> after the given position.
-        /// <seealso cref="TextIndex{TTerminal}.GetElementAfter(int)"/>.
         /// </summary>
         private int GetChildIndexAfter(int position)
         {

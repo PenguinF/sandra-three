@@ -48,6 +48,7 @@
     <Compile Include="AutoSaveFileNamePair.cs" />
     <Compile Include="BuiltInEnglishLocalizer.cs" />
     <Compile Include="CombinedUIActionInterface.cs" />
+    <Compile Include="DockableControlHelpers.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FileLocalizer.cs" />
     <Compile Include="FormStateAutoSaver.cs" />
@@ -62,6 +63,9 @@
     <Compile Include="LocalizedString.cs" />
     <Compile Include="LocalizedTextProvider.cs" />
     <Compile Include="Localizers.cs" />
+    <Compile Include="MdiTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MenuCaptionBarForm.cs">
       <SubType>Form</SubType>
     </Compile>

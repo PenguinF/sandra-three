@@ -33,7 +33,14 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    public class OldMenuCaptionBarForm : UIActionForm, IWeakEventTarget
+    /// <summary>
+    /// <see cref="UIActionForm"/> which contains a single client control, and displays a main menu in the top left area of a custom caption bar.
+    /// </summary>
+    /// <remarks>
+    /// Some non-client area handling code is adapted from:
+    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
+    /// </remarks>
+    public abstract class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private struct Metrics
         {
@@ -122,7 +129,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private Metrics currentMetrics;
 
-        public OldMenuCaptionBarForm()
+        private protected MenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
                 | ControlStyles.UserPaint
@@ -198,6 +205,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
             mainMenuActionHandler = new UIActionHandler();
 
+            this.BindActions(StandardUIActionBindings);
+
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
@@ -219,6 +228,16 @@ namespace Eutherion.Win.MdiAppTemplate
 
             return button;
         }
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public abstract IDockableControl DockedAsDockable { get; }
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public abstract Control DockedAsControl { get; }
 
         /// <summary>
         /// Gets the size of the client area of the form.
@@ -248,25 +267,6 @@ namespace Eutherion.Win.MdiAppTemplate
             closeButton.FlatAppearance.MouseOverBackColor = ObservableStyle.HoverColor;
         }
 
-        /// <summary>
-        /// Gets the regular UIActions for this Form.
-        /// </summary>
-        public UIActionBindings StandardUIActionBindings => new UIActionBindings
-        {
-            { SharedUIAction.Close, TryClose },
-        };
-
-        /// <summary>
-        /// Binds the regular UIActions to this Form.
-        /// </summary>
-        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
-
-        public UIActionState TryClose(bool perform)
-        {
-            if (perform) Close();
-            return UIActionVisibility.Enabled;
-        }
-
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
@@ -278,6 +278,9 @@ namespace Eutherion.Win.MdiAppTemplate
             // For when another window is active when this form is first shown.
             UpdateCaptionAreaButtonsBackColor();
             base.OnLoad(e);
+
+            // If the docked control is a ContainerControl, it will move the focus to its own ActiveControl.
+            ActiveControl = DockedAsControl;
         }
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
@@ -516,22 +519,12 @@ namespace Eutherion.Win.MdiAppTemplate
                     currentMetrics.SystemButtonHeight);
             }
 
-            foreach (Control control in Controls)
-            {
-                if (control != MainMenuStrip
-                    && control != closeButton
-                    && control != saveButton
-                    && control != maximizeButton
-                    && control != minimizeButton
-                    && control.Visible)
-                {
-                    control.SetBounds(
-                        currentMetrics.ClientAreaLeft,
-                        currentMetrics.ClientAreaTop,
-                        currentMetrics.ClientAreaWidth,
-                        currentMetrics.ClientAreaHeight);
-                }
-            }
+            // Do a null-check in case this is called from our constructor, it may not yet been set.
+            DockedAsControl?.SetBounds(
+                currentMetrics.ClientAreaLeft,
+                currentMetrics.ClientAreaTop,
+                currentMetrics.ClientAreaWidth,
+                currentMetrics.ClientAreaHeight);
 
             MinimumSize = new Size(currentMetrics.MinimumWidth, currentMetrics.MinimumHeight);
 
@@ -593,23 +586,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
-                int textAreaLeftEdge = currentMetrics.MainMenuLeft;
-                int textAreaWidth = currentMetrics.ClientAreaWidth;
-
-                // Measure the text. If its left edge is about to disappear under the main menu,
-                // use a different Rectangle to center the text in.
-                // See also e.g. Visual Studio Code where it works the same way.
-                // Also use an extra MainMenuHorizontalMargin.
-                Size measuredTextSize = TextRenderer.MeasureText(text, ObservableStyle.Font);
-                int probableLeftTextEdge = (textAreaWidth - measuredTextSize.Width) / 2;
-
-                if (probableLeftTextEdge < currentMetrics.MainMenuWidth)
-                {
-                    // Now place it in the middle between the outer menu right edge and the system buttons.
-                    textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
-                    textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
-                }
+                // Place the text in the middle between the outer menu right edge and the system buttons.
+                // Also 1 pixel above center to align with the main menu.
+                int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
+                int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
 
                 Rectangle textAreaRectangle = new Rectangle(
                     textAreaLeftEdge,
@@ -800,7 +780,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return menuNodes;
         }
 
-        public void UpdateFromDockProperties(DockProperties dockProperties)
+        private protected void UpdateFromDockProperties(DockProperties dockProperties)
         {
             CaptionHeight = dockProperties.CaptionHeight;
             Text = dockProperties.CaptionText;
@@ -840,6 +820,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
                 {
                     mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
                 }
             }
 
@@ -847,17 +828,33 @@ namespace Eutherion.Win.MdiAppTemplate
             PerformLayout();
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            bool cancel = e.Cancel;
+            DockedAsDockable.CanClose(e.CloseReason, ref cancel);
+            e.Cancel = cancel;
+            base.OnFormClosing(e);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) ObservableStyle.Dispose();
             base.Dispose(disposing);
         }
-    }
 
-    // OldMenuCaptionBarForm retained while there are still client area controls that do not implement IDockableControl.
-    public abstract class MenuCaptionBarForm : OldMenuCaptionBarForm
-    {
-        internal MenuCaptionBarForm() { }
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
+        }
     }
 
     /// <summary>
@@ -867,35 +864,34 @@ namespace Eutherion.Win.MdiAppTemplate
     /// The type of the client control. It must derive from <see cref="Control"/> and implements the <see cref="IDockableControl"/>
     /// interface, which allows it to be hosted in a <see cref="MdiTabControl"/> as well.
     /// </typeparam>
-    /// <remarks>
-    /// Some non-client area handling code is adapted from:
-    /// https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Shell/WindowChromeWorker.cs,369313199b0de06c
-    /// </remarks>
-    public sealed class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
+    public class MenuCaptionBarForm<TDockableControl> : MenuCaptionBarForm
         where TDockableControl : Control, IDockableControl
     {
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
         public TDockableControl DockedControl { get; }
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public override IDockableControl DockedAsDockable => DockedControl;
+
+        /// <summary>
+        /// Gets the docked <see cref="Control"/> and <see cref="IDockableControl"/>.
+        /// </summary>
+        public override Control DockedAsControl => DockedControl;
 
         public MenuCaptionBarForm(TDockableControl dockableControl)
         {
             DockedControl = dockableControl ?? throw new ArgumentNullException(nameof(dockableControl));
             Controls.Add(DockedControl);
 
-            BindStandardUIActions();
-
             UpdateFromDockProperties(dockableControl.DockProperties);
             dockableControl.DockPropertiesChanged += DockedControl_DockPropertiesChanged;
         }
 
         private void DockedControl_DockPropertiesChanged() => UpdateFromDockProperties(DockedControl.DockProperties);
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            bool cancel = e.Cancel;
-            DockedControl.OnClosing(e.CloseReason, ref cancel);
-            e.Cancel = cancel;
-            base.OnFormClosing(e);
-        }
 
         protected override void Dispose(bool disposing)
         {

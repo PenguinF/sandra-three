@@ -27,6 +27,8 @@ using System.Collections.Generic;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Describes the interaction between PGN syntax and a syntax editor.
     /// </summary>
@@ -67,8 +69,8 @@ namespace Sandra.UI
         public override IEnumerable<PgnErrorInfo> GetErrors(RootPgnSyntax syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor, IPgnSymbol terminalSymbol)
-            => PgnStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(PgnEditor pgnEditor, IPgnSymbol terminalSymbol)
+            => PgnStyleSelector.Instance.Visit(terminalSymbol, pgnEditor);
 
         public override (int, int) GetTokenSpan(IPgnSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);

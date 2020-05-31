@@ -20,20 +20,16 @@
 #endregion
 
 using Eutherion;
-using Eutherion.UIActions;
-using Eutherion.Utils;
-using Eutherion.Win;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = MenuCaptionBarForm<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>>;
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
@@ -42,12 +38,12 @@ namespace Sandra.UI
         private readonly string[] commandLineArgs;
 
         /// <summary>
-        /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
+        /// List of open PGN editors indexed by their path. New PGN files are indexed under the empty path.
         /// </summary>
-        private readonly Dictionary<string, List<PgnForm>> OpenPgnForms
-            = new Dictionary<string, List<PgnForm>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
+            = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        private MdiContainerForm mdiContainerForm;
+        private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -86,13 +82,20 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (mdiContainerForm != null && mdiContainerForm.IsHandleCreated && !mdiContainerForm.IsDisposed)
+            if (receivedCommandLineArgs.Length > 0)
             {
-                // Activate mdiContainerForm before opening pgn files.
-                mdiContainerForm.EnsureActivated();
-            }
+                // First mdiContainerForm in the list gets the honor of opening the new PGN files.
+                foreach (var candidate in mdiContainerForms)
+                {
+                    if (candidate.IsHandleCreated && !candidate.IsDisposed)
+                    {
+                        candidate.OpenCommandLineArgs(receivedCommandLineArgs);
+                        return;
+                    }
+                }
 
-            OpenCommandLineArgs(receivedCommandLineArgs);
+                OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
+            }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -112,181 +115,70 @@ namespace Sandra.UI
                 // Load chess piece images.
                 PieceImages.LoadChessPieceImages();
 
-                mdiContainerForm = new MdiContainerForm();
-
-                mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
-                mdiContainerForm.FormClosed += (_, __) => Close();
-
                 Visible = false;
+                var mdiContainerForm = OpenNewMdiContainerForm();
 
+                // Only the first one should auto-save and open the stored command line arguments.
+                mdiContainerForm.Load += MdiContainerForm_Load;
                 mdiContainerForm.Show();
             }
         }
 
-        internal void OpenCommandLineArgs(string[] commandLineArgs)
+        private MdiContainerForm OpenNewMdiContainerForm()
         {
-            // Interpret each command line argument as a file to open.
-            commandLineArgs.ForEach(pgnFileName =>
+            var mdiContainerForm = new MdiContainerForm();
+
+            mdiContainerForm.FormClosed += (_, __) =>
             {
-                // Catch exception for each open action individually.
-                try
-                {
-                    OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
-                }
-                catch (Exception exception)
-                {
-                    // For now, show the exception to the user.
-                    // Maybe user has no access to the path, or the given file name is not a valid.
-                    // TODO: analyze what error conditions can occur and handle them appropriately.
-                    MessageBox.Show(
-                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                        pgnFileName,
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
-            });
-        }
+                mdiContainerForms.Remove(mdiContainerForm);
 
-        private void RemovePgnForm(string key, PgnForm pgnForm)
-        {
-            // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
-            var pgnForms = OpenPgnForms[key ?? string.Empty];
-            pgnForms.Remove(pgnForm);
-            if (pgnForms.Count == 0) OpenPgnForms.Remove(key ?? string.Empty);
-        }
-
-        private void AddPgnForm(string key, PgnForm pgnForm)
-        {
-            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<PgnForm>()).Add(pgnForm);
-        }
-
-        private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
-        {
-            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
-
-            var pgnForm = new PgnForm(
-                new SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>(
-                    isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                    PgnSyntaxDescriptor.Instance,
-                    pgnFile,
-                    SettingKeys.PgnZoom))
-            {
-                ClientSize = new Size(600, 600),
-                ShowInTaskbar = true,
-                StartPosition = FormStartPosition.CenterScreen,
+                // Close the entire process after the last form is closed.
+                if (mdiContainerForms.Count == 0) Close();
             };
 
-            pgnForm.Load += (_, __) => Session.Current.AttachFormStateAutoSaver(pgnForm, SettingKeys.PgnWindow, null);
+            mdiContainerForms.Add(mdiContainerForm);
 
-            // Bind SaveToFile action to the MenuCaptionBarForm to show the save button in the caption area.
-            pgnForm.BindAction(SharedUIAction.SaveToFile, pgnForm.DockedControl.TrySaveToFile);
-
-            PgnStyleSelector.InitializeStyles(pgnForm.DockedControl);
-
-            // Don't index read-only PgnForms.
-            if (!isReadOnly)
-            {
-                AddPgnForm(normalizedPgnFileName, pgnForm);
-
-                // Re-index when pgnFile.OpenTextFilePath changes.
-                pgnFile.OpenTextFilePathChanged += (_, e) =>
-                {
-                    RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
-                    AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
-                };
-
-                // Remove from index when pgnForm is closed.
-                pgnForm.Disposed += (_, __) =>
-                {
-                    RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
-                };
-            }
-
-            pgnForm.EnsureActivated();
+            return mdiContainerForm;
         }
 
-        private void OpenNewPgnFile()
+        private void MdiContainerForm_Load(object sender, EventArgs e)
         {
-            // Never create as read-only.
-            OpenPgnForm(null, isReadOnly: false);
+            MdiContainerForm mdiContainerForm = (MdiContainerForm)sender;
+
+            // Initialize from settings if available.
+            Session.Current.AttachFormStateAutoSaver(
+                mdiContainerForm,
+                SettingKeys.Window,
+                () =>
+                {
+                    // Show in the center of the monitor where the mouse currently is.
+                    var activeScreen = Screen.FromPoint(MousePosition);
+                    Rectangle workingArea = activeScreen.WorkingArea;
+
+                    // Two thirds the size of the active monitor's working area.
+                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+                    // Update the bounds of the form.
+                    mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+                });
+
+            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
-        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
-        {
-            // Normalize the file name so it gets indexed correctly.
-            string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
+        internal bool TryGetPgnEditors(string key, out List<PgnEditor> pgnEditors)
+            => OpenPgnEditors.TryGetValue(key, out pgnEditors);
 
-            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<PgnForm> pgnForms))
-            {
-                // File path not open yet, initialize new PGN Form.
-                OpenPgnForm(normalizedPgnFileName, isReadOnly);
-            }
-            else
-            {
-                // Just activate the first Form in the list.
-                pgnForms[0].EnsureActivated();
-            }
+        internal void RemovePgnEditor(string key, PgnEditor pgnEditor)
+        {
+            // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
+            var pgnEditors = OpenPgnEditors[key ?? string.Empty];
+            pgnEditors.Remove(pgnEditor);
+            if (pgnEditors.Count == 0) OpenPgnEditors.Remove(key ?? string.Empty);
         }
 
-        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
-            new UIAction(SandraChessMainFormUIActionPrefix + nameof(NewPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
-                    IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryNewPgnFile(bool perform)
+        internal void AddPgnEditor(string key, PgnEditor pgnEditor)
         {
-            if (perform) OpenNewPgnFile();
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
-            new UIAction(SandraChessMainFormUIActionPrefix + nameof(OpenPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
-                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
-                    OpensDialog = true,
-                },
-            });
-
-        public UIActionState TryOpenPgnFile(bool perform)
-        {
-            if (perform)
-            {
-                string extension = PgnSyntaxDescriptor.Instance.FileExtension;
-                var extensionLocalizedKey = PgnSyntaxDescriptor.Instance.FileExtensionLocalizedKey;
-
-                var openFileDialog = new OpenFileDialog
-                {
-                    AutoUpgradeEnabled = true,
-                    DereferenceLinks = true,
-                    DefaultExt = extension,
-                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
-                    SupportMultiDottedExtensions = true,
-                    RestoreDirectory = true,
-                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
-                    ValidateNames = true,
-                    CheckFileExists = false,
-                    ShowReadOnly = true,
-                };
-
-                var dialogResult = openFileDialog.ShowDialog(this);
-                if (dialogResult == DialogResult.OK)
-                {
-                    OpenOrActivatePgnFile(openFileDialog.FileName, openFileDialog.ReadOnlyChecked);
-                }
-            }
-
-            return UIActionVisibility.Enabled;
+            OpenPgnEditors.GetOrAdd(key ?? string.Empty, _ => new List<PgnEditor>()).Add(pgnEditor);
         }
     }
 }

@@ -62,25 +62,13 @@ namespace Eutherion.Win.MdiAppTemplate
             new SettingKey(SettingKey.ToSnakeCase(nameof(AutoSaveCounter))),
             PType.CLR.UInt32);
 
-        public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
-            PersistableFormState.Type);
-
         public static readonly SettingProperty<AutoSaveFileNamePair> DefaultSettingsAutoSave = new SettingProperty<AutoSaveFileNamePair>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsAutoSave))),
             AutoSaveFilePairPType.Instance);
 
-        public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
-            PersistableFormState.Type);
-
         public static readonly SettingProperty<AutoSaveFileNamePair> PreferencesAutoSave = new SettingProperty<AutoSaveFileNamePair>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesAutoSave))),
             AutoSaveFilePairPType.Instance);
-
-        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
-            PersistableFormState.Type);
 
         public static readonly SettingProperty<int> JsonZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(JsonZoom))),

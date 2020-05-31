@@ -65,13 +65,6 @@
       <DependentUpon>MdiContainerForm.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MovesTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MovesTextBox.UIActions.cs">
-      <DependentUpon>MovesTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PgnErrorInfoExtensions.cs" />
     <Compile Include="PgnStyleSelector.cs" />
     <Compile Include="PgnSyntaxDescriptor.cs" />
@@ -92,12 +85,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="StandardChessBoardForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="StandardChessBoard.cs">
+      <SubType>Component</SubType>
     </Compile>
-    <Compile Include="StandardChessBoardForm.UIActions.cs">
-      <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
-      <SubType>Form</SubType>
+    <Compile Include="StandardChessBoard.UIActions.cs">
+      <DependentUpon>StandardChessBoard.cs</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

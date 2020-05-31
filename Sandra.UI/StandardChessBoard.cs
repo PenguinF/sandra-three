@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * StandardChessBoardForm.cs
+ * StandardChessBoard.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -34,11 +34,13 @@ using System.Windows.Forms;
 namespace Sandra.UI
 {
     /// <summary>
-    /// Form which contains a chess board on which a standard game of chess is played.
+    /// Contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : OldMenuCaptionBarForm, IWeakEventTarget
+    public partial class StandardChessBoard : ContainerControl, IDockableControl, IWeakEventTarget
     {
+        public DockProperties DockProperties { get; } = new DockProperties();
+
         /// <summary>
         /// Gets a reference to the playing board control on this form.
         /// </summary>
@@ -150,7 +152,7 @@ namespace Sandra.UI
             }
         }
 
-        public StandardChessBoardForm()
+        public StandardChessBoard()
         {
             PlayingBoard = new PlayingBoard
             {
@@ -179,9 +181,6 @@ namespace Sandra.UI
             PlayingBoard.Paint += PlayingBoard_Paint;
 
             Controls.Add(PlayingBoard);
-
-            MaximizeBox = false;
-            FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
             UpdateLastMoveArrowPen();
         }
@@ -966,16 +965,43 @@ namespace Sandra.UI
             }
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                lastMoveArrowPen.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private void PerformAutoFit(int? targetSquareSize)
+        {
+            // Don't expect a StandardChessBoard to be docked somewhere else, but also don't throw.
+            if (FindForm() is MenuCaptionBarForm<StandardChessBoard> chessBoardForm)
+            {
+                PerformAutoFit(chessBoardForm, targetSquareSize);
+            }
+        }
+
+        public static void ConstrainClientSize(MenuCaptionBarForm<StandardChessBoard> chessBoardForm)
+        {
+            chessBoardForm.Resizing += ChessBoardForm_Resizing;
+            PerformAutoFit(chessBoardForm, null);
+
+            // Only snap while moving.
+            OwnedFormSnapHelper snapHelper = OwnedFormSnapHelper.AttachTo(chessBoardForm);
+            snapHelper.SnapWhileResizing = false;
+        }
+
         /// <summary>
         /// Manually updates the size of the form to a value which it would have snapped to had it been resized by WM_SIZING messages.
         /// </summary>
         /// <param name="targetSquareSize">
         /// IF not-null and greater than 0, will resize the form so the playing board will have the desired square size.
         /// </param>
-        public void PerformAutoFit(int? targetSquareSize)
+        private static void PerformAutoFit(MenuCaptionBarForm<StandardChessBoard> chessBoardForm, int? targetSquareSize)
         {
-            StartResize();
-
             // Simulate OnResizing event.
             // No need to create a RECT with coordinates relative to the screen, since only the size may be affected.
             RECT windowRect;
@@ -983,55 +1009,43 @@ namespace Sandra.UI
             {
                 windowRect = new RECT
                 {
-                    Left = Left,
-                    Right = Right,
-                    Top = Top,
-                    Bottom = Bottom,
+                    Left = chessBoardForm.Left,
+                    Right = chessBoardForm.Right,
+                    Top = chessBoardForm.Top,
+                    Bottom = chessBoardForm.Bottom,
                 };
             }
             else
             {
-                Size targetSize = PlayingBoard.GetExactAutoFitSize(targetSquareSize.Value);
-                targetSize.Width += widthDifference;
-                targetSize.Height += heightDifference;
+                Size targetSize = chessBoardForm.DockedControl.PlayingBoard.GetExactAutoFitSize(targetSquareSize.Value);
+                Size clientAreaSize = chessBoardForm.ClientAreaSize;
+                targetSize.Width += chessBoardForm.ClientSize.Width - clientAreaSize.Width;
+                targetSize.Height += chessBoardForm.ClientSize.Height - clientAreaSize.Height;
 
                 windowRect = new RECT
                 {
-                    Left = Left,
-                    Right = Left + targetSize.Width,
-                    Top = Top,
-                    Bottom = Top + targetSize.Height,
+                    Left = chessBoardForm.Left,
+                    Right = chessBoardForm.Left + targetSize.Width,
+                    Top = chessBoardForm.Top,
+                    Bottom = chessBoardForm.Top + targetSize.Height,
                 };
             }
 
-            PerformAutoFit(ref windowRect, ResizeMode.BottomRight);
+            PerformAutoFit(chessBoardForm, ref windowRect, ResizeMode.BottomRight);
 
-            SetBoundsCore(windowRect.Left, windowRect.Top,
-                          windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
-                          BoundsSpecified.Size);
+            chessBoardForm.SetBounds(windowRect.Left, windowRect.Top,
+                                     windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
+                                     BoundsSpecified.Size);
 
-            PlayingBoard.Size = PlayingBoard.GetClosestAutoFitSize(ClientSize);
+            chessBoardForm.DockedControl.PlayingBoard.Size = chessBoardForm.DockedControl.PlayingBoard.GetClosestAutoFitSize(chessBoardForm.DockedControl.ClientSize);
         }
 
-        int widthDifference;
-        int heightDifference;
-
-        protected override void OnResizeBegin(EventArgs e)
+        private static void PerformAutoFit(MenuCaptionBarForm<StandardChessBoard> chessBoardForm, ref RECT resizeRect, ResizeMode resizeMode)
         {
-            base.OnResizeBegin(e);
+            Size clientAreaSize = chessBoardForm.ClientAreaSize;
+            int widthDifference = chessBoardForm.ClientSize.Width - clientAreaSize.Width;
+            int heightDifference = chessBoardForm.ClientSize.Height - clientAreaSize.Height;
 
-            StartResize();
-        }
-
-        private void StartResize()
-        {
-            // Cache difference in size between the window and the client rectangle.
-            widthDifference = Bounds.Width - ClientAreaSize.Width;
-            heightDifference = Bounds.Height - ClientAreaSize.Height;
-        }
-
-        private void PerformAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
-        {
             Size maxBounds;
             switch (resizeMode)
             {
@@ -1054,7 +1068,7 @@ namespace Sandra.UI
             }
 
             // Calculate closest auto fit size given the client height and width that would result from performing the given resize.
-            Size targetSize = PlayingBoard.GetClosestAutoFitSize(maxBounds);
+            Size targetSize = chessBoardForm.DockedControl.PlayingBoard.GetClosestAutoFitSize(maxBounds);
 
             // Left/right.
             switch (resizeMode)
@@ -1087,20 +1101,13 @@ namespace Sandra.UI
             }
         }
 
-        protected override void OnResizing(ResizeEventArgs e)
+        private static void ChessBoardForm_Resizing(object sender, ResizeEventArgs e)
         {
             // Snap to auto-fit.
-            PerformAutoFit(ref e.MoveResizeRect, e.ResizeMode);
+            PerformAutoFit((MenuCaptionBarForm<StandardChessBoard>)sender, ref e.MoveResizeRect, e.ResizeMode);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                lastMoveArrowPen.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
+        event Action IDockableControl.DockPropertiesChanged { add { } remove { } }
+        void IDockableControl.CanClose(CloseReason closeReason, ref bool cancel) { }
     }
 }

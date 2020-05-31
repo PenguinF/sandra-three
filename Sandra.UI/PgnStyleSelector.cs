@@ -26,10 +26,12 @@ using System.Drawing;
 
 namespace Sandra.UI
 {
+    using PgnEditor = SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// A style selector for PGN syntax highlighting.
     /// </summary>
-    public class PgnStyleSelector : PgnSymbolVisitor<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>, Style>
+    public class PgnStyleSelector : PgnSymbolVisitor<PgnEditor, Style>
     {
         private const int tagNameStyleIndex = 8;
         private const int tagValueStyleIndex = 9;
@@ -53,69 +55,69 @@ namespace Sandra.UI
 
         public static readonly PgnStyleSelector Instance = new PgnStyleSelector();
 
-        public static void InitializeStyles(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+        public static void InitializeStyles(PgnEditor pgnEditor)
         {
-            syntaxEditor.Styles[tagNameStyleIndex].ForeColor = tagNameForeColor;
-            tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
+            pgnEditor.Styles[tagNameStyleIndex].ForeColor = tagNameForeColor;
+            tagNameAndEscapeFont.CopyTo(pgnEditor.Styles[tagNameStyleIndex]);
 
-            syntaxEditor.Styles[tagValueStyleIndex].ForeColor = tagValueForeColor;
-            syntaxEditor.Styles[errorTagValueStyleIndex].ForeColor = errorTagValueForeColor;
-            syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
-            syntaxEditor.Styles[moveNumberStyleIndex].ForeColor = moveNumberForeColor;
-            syntaxEditor.Styles[moveTextStyleIndex].ForeColor = moveTextForeColor;
-            syntaxEditor.Styles[errorSymbolStyleIndex].ForeColor = errorSymbolForeColor;
+            pgnEditor.Styles[tagValueStyleIndex].ForeColor = tagValueForeColor;
+            pgnEditor.Styles[errorTagValueStyleIndex].ForeColor = errorTagValueForeColor;
+            pgnEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
+            pgnEditor.Styles[moveNumberStyleIndex].ForeColor = moveNumberForeColor;
+            pgnEditor.Styles[moveTextStyleIndex].ForeColor = moveTextForeColor;
+            pgnEditor.Styles[errorSymbolStyleIndex].ForeColor = errorSymbolForeColor;
 
-            syntaxEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
-            tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[escapedLineStyleIndex]);
+            pgnEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
+            tagNameAndEscapeFont.CopyTo(pgnEditor.Styles[escapedLineStyleIndex]);
         }
 
         private PgnStyleSelector() { }
 
-        public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.DefaultStyle;
+        public override Style DefaultVisit(IPgnSymbol node, PgnEditor pgnEditor)
+            => pgnEditor.DefaultStyle;
 
-        public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[escapedLineStyleIndex];
+        public override Style VisitEscapeSyntax(PgnEscapeSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[escapedLineStyleIndex];
 
-        public override Style VisitGameResultSyntax(PgnGameResultSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[moveTextStyleIndex];
+        public override Style VisitGameResultSyntax(PgnGameResultSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[moveTextStyleIndex];
 
-        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[illegalCharacterStyleIndex];
+        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[illegalCharacterStyleIndex];
 
-        public override Style VisitMoveNumberSyntax(PgnMoveNumberSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[moveNumberStyleIndex];
+        public override Style VisitMoveNumberSyntax(PgnMoveNumberSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[moveNumberStyleIndex];
 
-        public override Style VisitMoveSyntax(PgnMoveSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[node.IsUnrecognizedMove ? errorSymbolStyleIndex : moveTextStyleIndex];
+        public override Style VisitMoveSyntax(PgnMoveSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[node.IsUnrecognizedMove ? errorSymbolStyleIndex : moveTextStyleIndex];
 
         // Only darken OverflowNag, and display EmptyNag like a regular NAG. Got to go through that state before creating a valid NAG.
-        public override Style VisitNagSyntax(PgnNagSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[node.Green.SymbolType == PgnSymbolType.OverflowNag ? errorSymbolStyleIndex : moveTextStyleIndex];
+        public override Style VisitNagSyntax(PgnNagSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[node.Green.SymbolType == PgnSymbolType.OverflowNag ? errorSymbolStyleIndex : moveTextStyleIndex];
 
-        public override Style VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[illegalCharacterStyleIndex];
+        public override Style VisitOrphanParenthesisCloseSyntax(PgnOrphanParenthesisCloseSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[illegalCharacterStyleIndex];
 
-        public override Style VisitPeriodSyntax(PgnPeriodSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[moveNumberStyleIndex];
+        public override Style VisitPeriodSyntax(PgnPeriodSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[moveNumberStyleIndex];
 
-        public override Style VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
+        public override Style VisitTagElementInMoveTreeSyntax(PgnTagElementInMoveTreeSyntax node, PgnEditor pgnEditor)
         {
             switch (node.Green.TagElement.SymbolType)
             {
                 case PgnSymbolType.TagValue:
                 case PgnSymbolType.ErrorTagValue:
-                    return syntaxEditor.Styles[errorTagValueStyleIndex];
+                    return pgnEditor.Styles[errorTagValueStyleIndex];
             }
 
             // Display [ and ] like illegal characters.
-            return syntaxEditor.Styles[illegalCharacterStyleIndex];
+            return pgnEditor.Styles[illegalCharacterStyleIndex];
         }
 
-        public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[tagNameStyleIndex];
+        public override Style VisitTagNameSyntax(PgnTagNameSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[tagNameStyleIndex];
 
-        public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[node.ContainsErrors ? errorTagValueStyleIndex : tagValueStyleIndex];
+        public override Style VisitTagValueSyntax(PgnTagValueSyntax node, PgnEditor pgnEditor)
+            => pgnEditor.Styles[node.ContainsErrors ? errorTagValueStyleIndex : tagValueStyleIndex];
     }
 }
