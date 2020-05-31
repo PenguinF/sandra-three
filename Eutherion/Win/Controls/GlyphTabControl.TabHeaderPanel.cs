@@ -32,6 +32,7 @@ namespace Eutherion.Win.Controls
         private class TabHeaderPanel : Control
         {
             private static readonly string CloseButtonGlyph = "×";
+            private static readonly float GlyphFontToHeightRatio = 2.2f;  // This more or less puts the '×' in the center, with the used font family.
 
             private readonly GlyphTabControl OwnerTabControl;
             private readonly ToolTip ToolTip;
@@ -86,7 +87,7 @@ namespace Eutherion.Win.Controls
                 if (previousHeight != CurrentHeight || CurrentCloseButtonGlyphFont == null)
                 {
                     CurrentCloseButtonGlyphFont?.Dispose();
-                    CurrentCloseButtonGlyphFont = new Font("Segoe UI", CurrentHeight / 2.2f, FontStyle.Bold, GraphicsUnit.Point);
+                    CurrentCloseButtonGlyphFont = new Font("Segoe UI", CurrentHeight / GlyphFontToHeightRatio, FontStyle.Bold, GraphicsUnit.Point);
 
                     // Without the Graphics device context which is available in the Paint event handler, we cannot measure
                     // the glyph size accurately here. Unfortunately, having an updated glyph size is necessary for
@@ -213,8 +214,8 @@ namespace Eutherion.Win.Controls
                         g,
                         CloseButtonGlyph,
                         CurrentCloseButtonGlyphFont,
-                        new Size((int)Math.Floor(CurrentTabWidth), CurrentHeight),
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                        Size.Empty,
+                        TextFormatFlags.NoPadding);
                     NeedNewGlyphSizeMeasurement = false;
                 }
 
@@ -316,16 +317,18 @@ namespace Eutherion.Win.Controls
 
                     if (drawCloseButtonGlyph)
                     {
-                        // Display '×' slightly above center.
+                        // Make rectangle 2 pixels less high to not interfere with hover border.
+                        Rectangle glyphRectangle = new Rectangle(
+                            textAreaLeftOffset + textAreaWidth,
+                            1,
+                            MeasuredGlyphSize.Width,
+                            MeasuredGlyphSize.Height - 2);
+
                         TextRenderer.DrawText(
                             g,
                             CloseButtonGlyph,
                             CurrentCloseButtonGlyphFont,
-                            new Rectangle(
-                                textAreaLeftOffset + textAreaWidth,
-                                (CurrentHeight - MeasuredGlyphSize.Height) / 2 - 1,
-                                MeasuredGlyphSize.Width,
-                                MeasuredGlyphSize.Height),
+                            glyphRectangle,
                             glyphForeColor,
                             tabBackColor,
                             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
