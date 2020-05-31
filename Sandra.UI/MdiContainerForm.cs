@@ -236,6 +236,14 @@ namespace Sandra.UI
             base.OnDragDrop(e);
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            // Hide before disposing. Lots of initializing Scintilla editors will delay the close action by seconds.
+            if (!e.Cancel) Visible = false;
+        }
+
         internal void OpenCommandLineArgs(string[] commandLineArgs, bool isReadOnly = false)
         {
             PgnEditor lastOpenedPgnEditor = null;
