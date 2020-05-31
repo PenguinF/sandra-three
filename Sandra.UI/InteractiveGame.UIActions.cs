@@ -29,7 +29,6 @@ using Sandra.Chess;
 using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -99,7 +98,6 @@ namespace Sandra.UI
                     {
                         Owner = OwnerPgnEditor.FindForm(),
                         MaximizeBox = false,
-                        FormBorderStyle = FormBorderStyle.SizableToolWindow,
                         ClientSize = new Size(400, 400),
                     };
 
