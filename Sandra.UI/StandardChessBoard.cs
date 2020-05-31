@@ -1018,8 +1018,9 @@ namespace Sandra.UI
             else
             {
                 Size targetSize = chessBoardForm.DockedControl.PlayingBoard.GetExactAutoFitSize(targetSquareSize.Value);
-                targetSize.Width += chessBoardForm.ClientSize.Width - chessBoardForm.ClientAreaSize.Width;
-                targetSize.Height += chessBoardForm.ClientSize.Height - chessBoardForm.ClientAreaSize.Height;
+                Size clientAreaSize = chessBoardForm.ClientAreaSize;
+                targetSize.Width += chessBoardForm.ClientSize.Width - clientAreaSize.Width;
+                targetSize.Height += chessBoardForm.ClientSize.Height - clientAreaSize.Height;
 
                 windowRect = new RECT
                 {
@@ -1041,8 +1042,9 @@ namespace Sandra.UI
 
         private static void PerformAutoFit(MenuCaptionBarForm<StandardChessBoard> chessBoardForm, ref RECT resizeRect, ResizeMode resizeMode)
         {
-            int widthDifference = chessBoardForm.ClientSize.Width - chessBoardForm.ClientAreaSize.Width;
-            int heightDifference = chessBoardForm.ClientSize.Height - chessBoardForm.ClientAreaSize.Height;
+            Size clientAreaSize = chessBoardForm.ClientAreaSize;
+            int widthDifference = chessBoardForm.ClientSize.Width - clientAreaSize.Width;
+            int heightDifference = chessBoardForm.ClientSize.Height - clientAreaSize.Height;
 
             Size maxBounds;
             switch (resizeMode)
