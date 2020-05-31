@@ -32,6 +32,7 @@ namespace Eutherion.Win.Controls
         private class TabHeaderPanel : Control
         {
             private readonly GlyphTabControl OwnerTabControl;
+            private readonly ToolTip ToolTip;
 
             private int CurrentWidth;
             private int CurrentHeight;
@@ -45,6 +46,7 @@ namespace Eutherion.Win.Controls
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
                 OwnerTabControl = ownerTabControl;
+                ToolTip = new ToolTip();
 
                 SetStyle(ControlStyles.AllPaintingInWmPaint
                     | ControlStyles.UserPaint
@@ -79,6 +81,7 @@ namespace Eutherion.Win.Controls
             /// </summary>
             public void UpdateNonMetrics()
             {
+                ToolTip.SetToolTip(this, HoverTabIndex >= 0 ? OwnerTabControl.TabPages[HoverTabIndex].Text : null);
                 Invalidate();
             }
 
@@ -95,7 +98,7 @@ namespace Eutherion.Win.Controls
                 if (HoverTabIndex != tabIndex)
                 {
                     HoverTabIndex = tabIndex;
-                    Invalidate();
+                    UpdateNonMetrics();
                 }
             }
 
@@ -220,6 +223,12 @@ namespace Eutherion.Win.Controls
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
                     g.SmoothingMode = SmoothingMode.None;
                 }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing) ToolTip.Dispose();
+                base.Dispose(disposing);
             }
         }
     }
