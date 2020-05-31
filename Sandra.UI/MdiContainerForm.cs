@@ -23,6 +23,7 @@ using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
+using Eutherion.Win.Controls;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess.Pgn;
@@ -194,6 +195,9 @@ namespace Sandra.UI
             AllowDrop = true;
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
+
+            DockedControl.AfterTabRemoved += DockedControl_AfterTabRemoved;
+            DockedControl.AfterTabClosed += DockedControl_AfterTabRemoved;
         }
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
@@ -203,6 +207,23 @@ namespace Sandra.UI
             DockedControl.Font = ObservableStyle.Font;
             DockedControl.InactiveTabHeaderHoverColor = ObservableStyle.HoverColor;
             DockedControl.InactiveTabHeaderHoverBorderColor = ObservableStyle.HoverBorderColor;
+        }
+
+        private void DockedControl_AfterTabRemoved(object sender, GlyphTabControlEventArgs e)
+        {
+            MdiTabControl mdiTabControl = (MdiTabControl)sender;
+            if (mdiTabControl.TabPages.Count == 0)
+            {
+                // If the last tab page is closed, close the entire form.
+                Close();
+            }
+            else if (mdiTabControl.ActiveTabPageIndex < 0)
+            {
+                // If the active tab page was closed, activate the tab page to the right. If there is none, go to the left.
+                int targetIndex = e.TabPageIndex;
+                if (targetIndex >= mdiTabControl.TabPages.Count) targetIndex = mdiTabControl.TabPages.Count - 1;
+                mdiTabControl.ActivateTab(targetIndex);
+            }
         }
 
         protected override void OnDragEnter(DragEventArgs e)
