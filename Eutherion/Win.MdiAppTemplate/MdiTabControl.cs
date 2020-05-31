@@ -32,9 +32,22 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </summary>
     public class MdiTabControl : GlyphTabControl, IDockableControl
     {
+        public string ApplicationTitle { get; }
+
         public DockProperties DockProperties { get; } = new DockProperties();
 
         public event Action DockPropertiesChanged;
+
+        public MdiTabControl(string applicationTitle)
+        {
+            ApplicationTitle = applicationTitle;
+            UpdateCaptionText();
+        }
+
+        private void UpdateCaptionText()
+        {
+            DockProperties.CaptionText = ApplicationTitle;
+        }
 
         public void OnClosing(CloseReason closeReason, ref bool cancel)
         {

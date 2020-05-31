@@ -42,10 +42,9 @@ namespace Sandra.UI
     {
         private static MdiTabControl CreateMdiTabControl()
         {
-            var mdiTabControl = new MdiTabControl();
+            var mdiTabControl = new MdiTabControl(Session.ExecutableFileNameWithoutExtension);
 
             mdiTabControl.DockProperties.CaptionHeight = 30;
-            mdiTabControl.DockProperties.CaptionText = Session.ExecutableFileNameWithoutExtension;
             mdiTabControl.DockProperties.Icon = Session.Current.ApplicationIcon;
 
             // Define the main menu.
