@@ -193,6 +193,7 @@ namespace Eutherion.Win.Controls
             if (tabPageIndex >= 0)
             {
                 HeaderPanel.UpdateNonMetrics();
+                OnTabNotifyChange(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
             }
         }
 
@@ -230,6 +231,19 @@ namespace Eutherion.Win.Controls
                 OnAfterTabActivated(new GlyphTabControlEventArgs(newActiveTabPage, tabPageIndex));
             }
         }
+
+        /// <summary>
+        /// Occurs after a property of a tab page in the <see cref="TabPages"/> collection is modified.
+        /// </summary>
+        public event EventHandler<GlyphTabControlEventArgs> TabNotifyChange;
+
+        /// <summary>
+        /// Raises the <see cref="TabNotifyChange"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnTabNotifyChange(GlyphTabControlEventArgs e) => TabNotifyChange?.Invoke(this, e);
 
         /// <summary>
         /// Occurs after a new tab page is inserted.

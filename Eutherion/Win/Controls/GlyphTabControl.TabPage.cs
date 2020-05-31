@@ -54,6 +54,13 @@ namespace Eutherion.Win.Controls
             private string text;
 
             /// <summary>
+            /// Gets or sets if the client control contains any unsaved modifications.
+            /// </summary>
+            public bool IsModified { get => isModified; set { if (isModified != value) { isModified = value; OnNotifyChange(); } } }
+
+            private bool isModified;
+
+            /// <summary>
             /// Occurs when the style or text of the tab page was updated.
             /// </summary>
             public event Action<TabPage> NotifyChange;

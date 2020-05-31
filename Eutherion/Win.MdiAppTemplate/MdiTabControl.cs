@@ -53,6 +53,10 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 newCaptionText = ApplicationTitle;
             }
+            else if (mdiTabPage.DockedControl.DockProperties.IsModified)
+            {
+                newCaptionText = $"{ModifiedMarkerCharacter} {mdiTabPage.Text} - {ApplicationTitle}";
+            }
             else
             {
                 newCaptionText = $"{mdiTabPage.Text} - {ApplicationTitle}";
@@ -85,6 +89,13 @@ namespace Eutherion.Win.MdiAppTemplate
                     ActiveControl = tabPage.ClientControl;
                 }
             }
+        }
+
+        protected override void OnTabNotifyChange(GlyphTabControlEventArgs e)
+        {
+            // Text of the active tab page may have been updated.
+            if (e.TabPageIndex == ActiveTabPageIndex) UpdateCaptionText(e.TabPageIndex);
+            base.OnTabNotifyChange(e);
         }
 
         protected override void OnAfterTabInserted(GlyphTabControlEventArgs e)
@@ -131,6 +142,7 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             DockProperties dockProperties = DockedControl.DockProperties;
             Text = dockProperties.TabPageText;
+            IsModified = dockProperties.IsModified;
             ActiveBackColor = dockProperties.TabBackColor;
             ActiveForeColor = dockProperties.TabForeColor;
         }
