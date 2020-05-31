@@ -21,6 +21,7 @@
 
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
@@ -172,8 +173,19 @@ namespace Eutherion.Win.Controls
 
                     // Remember some things for drawing text later.
                     Color tabBackColor;
+                    Color tabForeColor;
 
-                    if (tabIndex == HoverTabIndex)
+                    if (tabIndex == OwnerTabControl.ActiveTabPageIndex)
+                    {
+                        using (var activeTabHeaderBrush = new SolidBrush(tabPage.ActiveBackColor))
+                        {
+                            g.FillRectangle(activeTabHeaderBrush, new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight));
+                        }
+
+                        tabBackColor = tabPage.ActiveBackColor;
+                        tabForeColor = tabPage.ActiveForeColor;
+                    }
+                    else if (tabIndex == HoverTabIndex)
                     {
                         using (var hoverBrush = new SolidBrush(OwnerTabControl.InactiveTabHeaderHoverColor))
                         {
@@ -181,21 +193,25 @@ namespace Eutherion.Win.Controls
                         }
 
                         tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
+                        tabForeColor = OwnerTabControl.ForeColor;
                     }
                     else
                     {
                         tabBackColor = OwnerTabControl.BackColor;
+                        tabForeColor = OwnerTabControl.ForeColor;
                     }
 
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
                         g,
                         tabPage.Text,
                         OwnerTabControl.Font,
                         TabHeaderTextRectangle(tabIndex),
-                        OwnerTabControl.ForeColor,
+                        tabForeColor,
                         tabBackColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                    g.SmoothingMode = SmoothingMode.None;
                 }
             }
         }

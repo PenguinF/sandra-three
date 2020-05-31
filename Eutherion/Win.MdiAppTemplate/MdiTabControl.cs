@@ -96,6 +96,8 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             DockProperties dockProperties = DockedControl.DockProperties;
             Text = dockProperties.CaptionText;
+            ActiveBackColor = dockProperties.TabBackColor;
+            ActiveForeColor = dockProperties.TabForeColor;
         }
     }
 

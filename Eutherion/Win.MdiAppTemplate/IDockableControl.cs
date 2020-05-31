@@ -86,6 +86,16 @@ namespace Eutherion.Win.MdiAppTemplate
         /// Gets or sets an enumeration of main menu items to build.
         /// </summary>
         public IEnumerable<MainMenuDropDownItem> MainMenuItems { get; set; }
+
+        /// <summary>
+        /// Gets or sets the background color to display in a tab header if the control is docked on an active tab page.
+        /// </summary>
+        public Color TabBackColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the foreground color to display in a tab header if the control is docked on an active tab page.
+        /// </summary>
+        public Color TabForeColor { get; set; }
     }
 
     /// <summary>

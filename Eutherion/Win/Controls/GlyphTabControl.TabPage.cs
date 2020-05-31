@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Controls
@@ -31,6 +32,20 @@ namespace Eutherion.Win.Controls
         /// </summary>
         public class TabPage
         {
+            /// <summary>
+            /// Gets or sets the background color to display if the tab page is active.
+            /// </summary>
+            public Color ActiveBackColor { get => activeBackColor; set { if (activeBackColor != value) { activeBackColor = value; OnNotifyChange(); } } }
+
+            private Color activeBackColor;
+
+            /// <summary>
+            /// Gets or sets the foreground color to display if the tab page is active.
+            /// </summary>
+            public Color ActiveForeColor { get => activeForeColor; set { if (activeForeColor != value) { activeForeColor = value; OnNotifyChange(); } } }
+
+            private Color activeForeColor;
+
             /// <summary>
             /// Gets or sets the text to display in the tab header.
             /// </summary>
