@@ -41,12 +41,28 @@ namespace Eutherion.Win.MdiAppTemplate
         public MdiTabControl(string applicationTitle)
         {
             ApplicationTitle = applicationTitle;
-            UpdateCaptionText();
+            UpdateCaptionText(-1);
         }
 
-        private void UpdateCaptionText()
+        private void UpdateCaptionText(int activeTabIndex)
         {
-            DockProperties.CaptionText = ApplicationTitle;
+            string newCaptionText;
+
+            // Don't support non-MdiTabPages here.
+            if (activeTabIndex < 0 || !(TabPages[activeTabIndex] is MdiTabPage mdiTabPage))
+            {
+                newCaptionText = ApplicationTitle;
+            }
+            else
+            {
+                newCaptionText = $"{mdiTabPage.Text} - {ApplicationTitle}";
+            }
+
+            if (DockProperties.CaptionText != newCaptionText)
+            {
+                DockProperties.CaptionText = newCaptionText;
+                DockPropertiesChanged?.Invoke();
+            }
         }
 
         public void OnClosing(CloseReason closeReason, ref bool cancel)
@@ -81,6 +97,12 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (e.TabPage is MdiTabPage mdiTabPage) mdiTabPage.DeregisterDockPropertiesChangedEvent();
             base.OnAfterTabRemoved(e);
+        }
+
+        protected override void OnAfterTabActivated(GlyphTabControlEventArgs e)
+        {
+            UpdateCaptionText(e.TabPageIndex);
+            base.OnAfterTabActivated(e);
         }
     }
 
