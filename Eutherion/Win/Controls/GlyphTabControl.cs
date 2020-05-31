@@ -247,8 +247,16 @@ namespace Eutherion.Win.Controls
             }
             else
             {
-                // Need to dispose the client control, this is an actual close action.
-                TabPages.RemoveTab(tabPageIndex, disposeClientControl: true);
+                // Close the tab page rather than activate it.
+                TabPage tabPage = TabPages[tabPageIndex];
+                var cancelEventArgs = new GlyphTabControlCancelEventArgs(tabPage, tabPageIndex);
+                OnTabHeaderGlyphClick(cancelEventArgs);
+
+                if (!cancelEventArgs.Cancel)
+                {
+                    // Need to dispose the client control, this is an actual close action.
+                    TabPages.RemoveTab(tabPageIndex, disposeClientControl: true);
+                }
             }
         }
 
@@ -352,6 +360,19 @@ namespace Eutherion.Win.Controls
         protected virtual void OnAfterTabActivated(GlyphTabControlEventArgs e) => AfterTabActivated?.Invoke(this, e);
 
         /// <summary>
+        /// Occurs a the tab header glyph is clicked or otherwise invoked.
+        /// </summary>
+        public event EventHandler<GlyphTabControlCancelEventArgs> TabHeaderGlyphClick;
+
+        /// <summary>
+        /// Raises the <see cref="TabHeaderGlyphClick"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlCancelEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnTabHeaderGlyphClick(GlyphTabControlCancelEventArgs e) => TabHeaderGlyphClick?.Invoke(this, e);
+
+        /// <summary>
         /// Raises the <see cref="Control.Layout"/> event.
         /// </summary>
         /// <param name="e">
@@ -378,11 +399,11 @@ namespace Eutherion.Win.Controls
         /// </param>
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            // Default behavior if there is no control to display in the tab client area.
-            var clientSize = ClientSize;
-
             if (ActiveTabPageIndex < 0)
             {
+                // Default behavior if there is no control to display in the tab client area.
+                var clientSize = ClientSize;
+
                 e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
                     0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
             }
@@ -418,5 +439,22 @@ namespace Eutherion.Win.Controls
             TabPage = tabPage;
             TabPageIndex = tabPageIndex;
         }
+    }
+
+    /// <summary>
+    /// Provides data for cancelable <see cref="GlyphTabControl"/> events.
+    /// </summary>
+    public class GlyphTabControlCancelEventArgs : GlyphTabControlEventArgs
+    {
+        /// <summary>
+        /// Initializes a new instance of <see cref="GlyphTabControlCancelEventArgs"/>
+        /// with the <see cref="Cancel"/> property set to false.
+        /// </summary>
+        public GlyphTabControlCancelEventArgs(GlyphTabControl.TabPage tabPage, int tabPageIndex) : base(tabPage, tabPageIndex) { }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the event should be canceled.
+        /// </summary>
+        public bool Cancel { get; set; }
     }
 }
