@@ -31,6 +31,8 @@ namespace Eutherion.Win.Controls
     {
         private class TabHeaderPanel : Control
         {
+            private static readonly string CloseButtonGlyph = "×";
+
             private readonly GlyphTabControl OwnerTabControl;
             private readonly ToolTip ToolTip;
 
@@ -38,6 +40,8 @@ namespace Eutherion.Win.Controls
             private int CurrentHeight;
             private float CurrentTabWidth;
             private float CurrentHorizontalTabTextMargin;
+            private int CurrentTextAreaWidthIncludeGlyph;
+            private Font CurrentCloseButtonGlyphFont;
 
             private Point LastKnownMouseMovePoint = new Point(-1, -1);
 
@@ -62,6 +66,7 @@ namespace Eutherion.Win.Controls
             /// </summary>
             public void UpdateMetrics()
             {
+                int previousHeight = CurrentHeight;
                 CurrentWidth = ClientSize.Width;
                 CurrentHeight = ClientSize.Height;
                 int tabCount = OwnerTabControl.TabPages.Count;
@@ -69,6 +74,16 @@ namespace Eutherion.Win.Controls
                 if (OwnerTabControl.TabWidth < CurrentTabWidth) CurrentTabWidth = OwnerTabControl.TabWidth;
                 CurrentHorizontalTabTextMargin = OwnerTabControl.HorizontalTabTextMargin;
                 if (CurrentHorizontalTabTextMargin * 2 > CurrentTabWidth) CurrentHorizontalTabTextMargin = CurrentTabWidth / 2;
+
+                // Glyph font height little less than half the tab height.
+                if (previousHeight != CurrentHeight || CurrentCloseButtonGlyphFont == null)
+                {
+                    CurrentCloseButtonGlyphFont?.Dispose();
+                    CurrentCloseButtonGlyphFont = new Font("Segoe UI", CurrentHeight / 2.2f, FontStyle.Bold, GraphicsUnit.Point);
+                }
+
+                // Calculate text area width for each tab page.
+                CurrentTextAreaWidthIncludeGlyph = (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2);
 
                 // Must hit test again after updating the metrics.
                 HitTest(MousePosition);
@@ -163,9 +178,6 @@ namespace Eutherion.Win.Controls
                     g.FillRectangle(inactiveAreaBrush, clientRectangle);
                 }
 
-                // Calculate text area width for each tab page.
-                int textAreaWidth = (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2);
-
                 // Then draw each tab page.
                 for (int tabIndex = 0; tabIndex < OwnerTabControl.TabPages.Count; tabIndex++)
                 {
@@ -174,6 +186,7 @@ namespace Eutherion.Win.Controls
                     // Remember some things for drawing text later.
                     Color tabBackColor;
                     Color tabForeColor;
+                    bool drawCloseButtonGlyph;
 
                     if (tabIndex == OwnerTabControl.ActiveTabPageIndex)
                     {
@@ -184,6 +197,9 @@ namespace Eutherion.Win.Controls
 
                         tabBackColor = tabPage.ActiveBackColor;
                         tabForeColor = tabPage.ActiveForeColor;
+
+                        // Only show glyph for active and hover tabs.
+                        drawCloseButtonGlyph = true;
                     }
                     else if (tabIndex == HoverTabIndex)
                     {
@@ -200,12 +216,31 @@ namespace Eutherion.Win.Controls
 
                         tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
                         tabForeColor = OwnerTabControl.ForeColor;
+
+                        // Only show glyph for active and hover tabs.
+                        drawCloseButtonGlyph = true;
                     }
                     else
                     {
                         tabBackColor = OwnerTabControl.BackColor;
                         tabForeColor = OwnerTabControl.ForeColor;
+                        drawCloseButtonGlyph = false;
                     }
+
+                    Size measuredGlyphSize = Size.Empty;
+                    int textAreaWidth = CurrentTextAreaWidthIncludeGlyph;
+                    if (drawCloseButtonGlyph)
+                    {
+                        measuredGlyphSize = TextRenderer.MeasureText(
+                            g,
+                            CloseButtonGlyph,
+                            CurrentCloseButtonGlyphFont,
+                            new Size((int)Math.Floor(CurrentTabWidth), CurrentHeight),
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                        textAreaWidth -= measuredGlyphSize.Width;
+                    }
+
+                    int textAreaLeftOffset = (int)Math.Floor(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin);
 
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
@@ -214,20 +249,43 @@ namespace Eutherion.Win.Controls
                         tabPage.Text,
                         OwnerTabControl.Font,
                         new Rectangle(
-                            (int)Math.Round(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin),
+                            textAreaLeftOffset,
                             0,
                             textAreaWidth,
                             CurrentHeight),
                         tabForeColor,
                         tabBackColor,
-                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+
+                    if (drawCloseButtonGlyph)
+                    {
+                        // Display '×' slightly above center.
+                        TextRenderer.DrawText(
+                            g,
+                            CloseButtonGlyph,
+                            CurrentCloseButtonGlyphFont,
+                            new Rectangle(
+                                textAreaLeftOffset + textAreaWidth,
+                                (CurrentHeight - measuredGlyphSize.Height) / 2 - 1,
+                                measuredGlyphSize.Width,
+                                measuredGlyphSize.Height),
+                            tabForeColor,
+                            tabBackColor,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    }
+
                     g.SmoothingMode = SmoothingMode.None;
                 }
             }
 
             protected override void Dispose(bool disposing)
             {
-                if (disposing) ToolTip.Dispose();
+                if (disposing)
+                {
+                    ToolTip.Dispose();
+                    CurrentCloseButtonGlyphFont?.Dispose();
+                }
+
                 base.Dispose(disposing);
             }
         }
