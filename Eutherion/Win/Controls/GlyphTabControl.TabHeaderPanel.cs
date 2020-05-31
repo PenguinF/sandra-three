@@ -32,7 +32,14 @@ namespace Eutherion.Win.Controls
         private class TabHeaderPanel : Control
         {
             private static readonly string CloseButtonGlyph = "×";
-            private static readonly float GlyphFontToHeightRatio = 2.2f;  // This more or less puts the '×' in the center, with the used font family.
+
+            // This more or less puts the '×' in the center, with the used font family.
+            private static readonly float GlyphFontToHeightRatio = 2.2f;
+
+            // If e.g. the glyph takes up 12 horizontal pixels, about a tenth of it is expected to be a unit of padding,
+            // with one padding unit to the left, and 2 to the right.
+            // This means that the character is estimated to be around 8.4 pixels wide.
+            private static readonly float EstimatedHorizontalGlyphPaddingRatio = 10f;
 
             private readonly GlyphTabControl OwnerTabControl;
             private readonly ToolTip ToolTip;
@@ -317,21 +324,42 @@ namespace Eutherion.Win.Controls
 
                     if (drawCloseButtonGlyph)
                     {
-                        // Make rectangle 2 pixels less high to not interfere with hover border.
-                        Rectangle glyphRectangle = new Rectangle(
-                            textAreaLeftOffset + textAreaWidth,
-                            1,
-                            MeasuredGlyphSize.Width,
-                            MeasuredGlyphSize.Height - 2);
+                        if (!HoverOverGlyph && tabPage.IsModified)
+                        {
+                            // Subtract the padding, one from the left, two from the right side.
+                            float hrzPadding = MeasuredGlyphSize.Width / EstimatedHorizontalGlyphPaddingRatio;
+                            float diameter = MeasuredGlyphSize.Width - 3 * hrzPadding;
 
-                        TextRenderer.DrawText(
-                            g,
-                            CloseButtonGlyph,
-                            CurrentCloseButtonGlyphFont,
-                            glyphRectangle,
-                            glyphForeColor,
-                            tabBackColor,
-                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                            RectangleF glyphRectangle = new RectangleF(
+                                textAreaLeftOffset + textAreaWidth + hrzPadding,
+                                (CurrentHeight - diameter) / 2,
+                                diameter,
+                                diameter);
+
+                            // Draw a circle where otherwise the '×' would be.
+                            using (var ellipseBrush = new SolidBrush(glyphForeColor))
+                            {
+                                g.FillEllipse(ellipseBrush, glyphRectangle);
+                            }
+                        }
+                        else
+                        {
+                            // Make rectangle 2 pixels less high to not interfere with hover border.
+                            Rectangle glyphRectangle = new Rectangle(
+                                textAreaLeftOffset + textAreaWidth,
+                                1,
+                                MeasuredGlyphSize.Width,
+                                MeasuredGlyphSize.Height - 2);
+
+                            TextRenderer.DrawText(
+                                g,
+                                CloseButtonGlyph,
+                                CurrentCloseButtonGlyphFont,
+                                glyphRectangle,
+                                glyphForeColor,
+                                tabBackColor,
+                                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                        }
                     }
 
                     g.SmoothingMode = SmoothingMode.None;
