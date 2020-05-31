@@ -41,7 +41,10 @@ namespace Eutherion.Win.Controls
             private float CurrentTabWidth;
             private float CurrentHorizontalTabTextMargin;
             private int CurrentTextAreaWidthIncludeGlyph;
+
             private Font CurrentCloseButtonGlyphFont;
+            private bool NeedNewGlyphSizeMeasurement = true;
+            private Size MeasuredGlyphSize;
 
             private Point LastKnownMouseMovePoint = new Point(-1, -1);
 
@@ -75,15 +78,29 @@ namespace Eutherion.Win.Controls
                 CurrentHorizontalTabTextMargin = OwnerTabControl.HorizontalTabTextMargin;
                 if (CurrentHorizontalTabTextMargin * 2 > CurrentTabWidth) CurrentHorizontalTabTextMargin = CurrentTabWidth / 2;
 
+                // Calculate text area width for each tab page.
+                CurrentTextAreaWidthIncludeGlyph = (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2);
+
                 // Glyph font height little less than half the tab height.
                 if (previousHeight != CurrentHeight || CurrentCloseButtonGlyphFont == null)
                 {
                     CurrentCloseButtonGlyphFont?.Dispose();
                     CurrentCloseButtonGlyphFont = new Font("Segoe UI", CurrentHeight / 2.2f, FontStyle.Bold, GraphicsUnit.Point);
-                }
 
-                // Calculate text area width for each tab page.
-                CurrentTextAreaWidthIncludeGlyph = (int)Math.Round(CurrentTabWidth - CurrentHorizontalTabTextMargin * 2);
+                    // Without the Graphics device context which is available in the Paint event handler, we cannot measure
+                    // the glyph size accurately here. Unfortunately, having an updated glyph size is necessary for
+                    // the follow up hit test, as the metrics can change after e.g. closing a tab page.
+                    // Can reasonably assume that the tab header height doesn't change, so just take an educated guess.
+                    // Hit testing can only be done after a first Paint, so if the previous height was 0 we can ignore it.
+                    NeedNewGlyphSizeMeasurement = true;
+                    if (previousHeight > 0 && CurrentHeight > 0 && MeasuredGlyphSize.Width > 0 && MeasuredGlyphSize.Height > 0)
+                    {
+                        // Scale by the height growth.
+                        MeasuredGlyphSize = new Size(
+                            MeasuredGlyphSize.Width * CurrentHeight / previousHeight,
+                            MeasuredGlyphSize.Height * CurrentHeight / previousHeight);
+                    }
+                }
 
                 // Must hit test again after updating the metrics.
                 HitTest(MousePosition);
@@ -172,6 +189,17 @@ namespace Eutherion.Win.Controls
                 var g = e.Graphics;
                 Rectangle clientRectangle = ClientRectangle;
 
+                if (NeedNewGlyphSizeMeasurement)
+                {
+                    MeasuredGlyphSize = TextRenderer.MeasureText(
+                        g,
+                        CloseButtonGlyph,
+                        CurrentCloseButtonGlyphFont,
+                        new Size((int)Math.Floor(CurrentTabWidth), CurrentHeight),
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    NeedNewGlyphSizeMeasurement = false;
+                }
+
                 // Block out the entire client area.
                 using (var inactiveAreaBrush = new SolidBrush(OwnerTabControl.BackColor))
                 {
@@ -227,20 +255,9 @@ namespace Eutherion.Win.Controls
                         drawCloseButtonGlyph = false;
                     }
 
-                    Size measuredGlyphSize = Size.Empty;
-                    int textAreaWidth = CurrentTextAreaWidthIncludeGlyph;
-                    if (drawCloseButtonGlyph)
-                    {
-                        measuredGlyphSize = TextRenderer.MeasureText(
-                            g,
-                            CloseButtonGlyph,
-                            CurrentCloseButtonGlyphFont,
-                            new Size((int)Math.Floor(CurrentTabWidth), CurrentHeight),
-                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-                        textAreaWidth -= measuredGlyphSize.Width;
-                    }
-
                     int textAreaLeftOffset = (int)Math.Floor(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin);
+                    int textAreaWidth = CurrentTextAreaWidthIncludeGlyph;
+                    if (drawCloseButtonGlyph) textAreaWidth -= MeasuredGlyphSize.Width;
 
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
@@ -248,11 +265,7 @@ namespace Eutherion.Win.Controls
                         g,
                         tabPage.Text,
                         OwnerTabControl.Font,
-                        new Rectangle(
-                            textAreaLeftOffset,
-                            0,
-                            textAreaWidth,
-                            CurrentHeight),
+                        new Rectangle(textAreaLeftOffset, 0, textAreaWidth, CurrentHeight),
                         tabForeColor,
                         tabBackColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
@@ -266,9 +279,9 @@ namespace Eutherion.Win.Controls
                             CurrentCloseButtonGlyphFont,
                             new Rectangle(
                                 textAreaLeftOffset + textAreaWidth,
-                                (CurrentHeight - measuredGlyphSize.Height) / 2 - 1,
-                                measuredGlyphSize.Width,
-                                measuredGlyphSize.Height),
+                                (CurrentHeight - MeasuredGlyphSize.Height) / 2 - 1,
+                                MeasuredGlyphSize.Width,
+                                MeasuredGlyphSize.Height),
                             tabForeColor,
                             tabBackColor,
                             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
