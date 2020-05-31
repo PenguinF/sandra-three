@@ -110,6 +110,12 @@ namespace Eutherion.Win.MdiAppTemplate
             base.OnAfterTabRemoved(e);
         }
 
+        protected override void OnAfterTabClosed(GlyphTabControlEventArgs e)
+        {
+            if (e.TabPage is MdiTabPage mdiTabPage) mdiTabPage.DeregisterDockPropertiesChangedEvent();
+            base.OnAfterTabClosed(e);
+        }
+
         protected override void OnAfterTabActivated(GlyphTabControlEventArgs e)
         {
             UpdateCaptionText(e.TabPageIndex);

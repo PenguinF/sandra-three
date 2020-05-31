@@ -197,7 +197,7 @@ namespace Eutherion.Win.Controls
             OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
         }
 
-        private void TabRemoved(TabPage tabPage, int tabPageIndex)
+        private void TabRemoved(TabPage tabPage, int tabPageIndex, bool disposeClientControl)
         {
             // Make sure the same page remains activated.
             // If the active tab page is closed, just deselect.
@@ -205,10 +205,12 @@ namespace Eutherion.Win.Controls
             else if (tabPageIndex < ActiveTabPageIndex) ActiveTabPageIndex--;
 
             tabPage.NotifyChange -= Tab_NotifyChange;
+            if (disposeClientControl) tabPage.ClientControl.Dispose();
             Controls.Remove(tabPage.ClientControl);
             HeaderPanel.UpdateMetrics();
 
-            OnAfterTabRemoved(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
+            var e = new GlyphTabControlEventArgs(tabPage, tabPageIndex);
+            if (disposeClientControl) OnAfterTabClosed(e); else OnAfterTabRemoved(e);
         }
 
         private void Tab_NotifyChange(TabPage tabPage)
@@ -227,6 +229,11 @@ namespace Eutherion.Win.Controls
             {
                 // Default is to activate the tab.
                 ActivateTab(tabPageIndex);
+            }
+            else
+            {
+                // Need to dispose the client control, this is an actual close action.
+                TabPages.RemoveTab(tabPageIndex, disposeClientControl: true);
             }
         }
 
@@ -288,6 +295,7 @@ namespace Eutherion.Win.Controls
 
         /// <summary>
         /// Occurs after a new tab page is removed.
+        /// The tab page in the event data is not part of the <see cref="TabPages"/> collection anymore.
         /// </summary>
         public event EventHandler<GlyphTabControlEventArgs> AfterTabRemoved;
 
@@ -298,6 +306,22 @@ namespace Eutherion.Win.Controls
         /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
         /// </param>
         protected virtual void OnAfterTabRemoved(GlyphTabControlEventArgs e) => AfterTabRemoved?.Invoke(this, e);
+
+        /// <summary>
+        /// Occurs after a new tab page is closed. This is similar to the <see cref="AfterTabRemoved"/> event,
+        /// but in this case the client control on the closed tab page has been disposed.
+        /// The <see cref="AfterTabRemoved"/> event is not raised for the closed tab page.
+        /// The tab page in the event data is not part of the <see cref="TabPages"/> collection anymore.
+        /// </summary>
+        public event EventHandler<GlyphTabControlEventArgs> AfterTabClosed;
+
+        /// <summary>
+        /// Raises the <see cref="AfterTabClosed"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The <see cref="GlyphTabControlEventArgs"/> providing the event data.
+        /// </param>
+        protected virtual void OnAfterTabClosed(GlyphTabControlEventArgs e) => AfterTabClosed?.Invoke(this, e);
 
         /// <summary>
         /// Occurs after a tab page is activated.

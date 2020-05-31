@@ -44,11 +44,13 @@ namespace Eutherion.Win.Controls
                 OwnerTabControl.TabInserted(tab, index);
             }
 
-            private void RemoveTab(int index)
+            private void RemoveTab(int index) => RemoveTab(index, disposeClientControl: false);
+
+            internal void RemoveTab(int index, bool disposeClientControl)
             {
                 TabPage tab = tabs[index];
                 tabs.RemoveAt(index);
-                OwnerTabControl.TabRemoved(tab, index);
+                OwnerTabControl.TabRemoved(tab, index, disposeClientControl);
             }
 
             /// <summary>
