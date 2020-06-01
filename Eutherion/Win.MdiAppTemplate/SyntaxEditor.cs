@@ -227,6 +227,11 @@ namespace Eutherion.Win.MdiAppTemplate
         public event Action DockPropertiesChanged;
 
         /// <summary>
+        /// Gets how the code file must be accessed by the syntax editor.
+        /// </summary>
+        public SyntaxEditorCodeAccessOption CodeAccessOption { get; }
+
+        /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
         public SyntaxDescriptor<TSyntaxTree, TTerminal, TError> SyntaxDescriptor { get; }
@@ -257,6 +262,9 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Initializes a new instance of a <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </summary>
+        /// <param name="codeAccessOption">
+        /// How the code file must be accessed by the syntax editor.
+        /// </param>
         /// <param name="syntaxDescriptor">
         /// The syntax descriptor.
         /// </param>
@@ -272,6 +280,7 @@ namespace Eutherion.Win.MdiAppTemplate
                             WorkingCopyTextFile codeFile,
                             SettingProperty<int> zoomSetting)
         {
+            CodeAccessOption = codeAccessOption;
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
 
