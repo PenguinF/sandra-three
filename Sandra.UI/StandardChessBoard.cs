@@ -193,6 +193,8 @@ namespace Sandra.UI
             Controls.Add(PlayingBoard);
 
             UpdateLastMoveArrowPen();
+
+            ActiveControl = PlayingBoard;
         }
 
         private void UpdateLastMoveArrowPen()
