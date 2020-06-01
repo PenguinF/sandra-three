@@ -34,6 +34,33 @@ namespace Eutherion.Utils
     /// </typeparam>
     public class SafeLazyObjectCollection<TObject> : IReadOnlyList<TObject> where TObject : class
     {
+        // Initializes each object during enumeration.
+        private class SafeEnumerator : IEnumerator<TObject>
+        {
+            private readonly SafeLazyObjectCollection<TObject> collection;
+            private int index;
+            public TObject Current { get; private set; }
+
+            public SafeEnumerator(SafeLazyObjectCollection<TObject> collection) => this.collection = collection;
+
+            public bool MoveNext()
+            {
+                if (index < collection.Count)
+                {
+                    Current = collection[index];
+                    index++;
+                    return true;
+                }
+                index++;
+                Current = null;
+                return false;
+            }
+
+            object IEnumerator.Current => Current;
+            void IDisposable.Dispose() { }
+            void IEnumerator.Reset() { }
+        }
+
         private readonly TObject[] Arr;
         private readonly Func<int, TObject> ElementConstructor;
 
@@ -94,7 +121,7 @@ namespace Eutherion.Utils
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
         /// </returns>
-        public IEnumerator<TObject> GetEnumerator() => ((ICollection<TObject>)Arr).GetEnumerator();
+        public IEnumerator<TObject> GetEnumerator() => new SafeEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
