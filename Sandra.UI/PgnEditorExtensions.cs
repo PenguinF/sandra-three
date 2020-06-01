@@ -51,5 +51,10 @@ namespace Sandra.UI
 
             return null;
         }
+
+        public static Chess.Game CreateGame(this PgnGameSyntax pgnGameSyntax)
+        {
+            return new Chess.Game();
+        }
     }
 }

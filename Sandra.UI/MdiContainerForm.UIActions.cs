@@ -88,7 +88,7 @@ namespace Sandra.UI
             {
                 StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
                 {
-                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game());
+                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, gameSyntax.CreateGame());
                     newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
                     return newChessBoard;
                 });
