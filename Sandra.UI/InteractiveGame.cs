@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 
@@ -44,20 +43,6 @@ namespace Sandra.UI
         public void ActiveMoveTreeUpdated()
         {
             if (chessBoard != null) chessBoard.GameUpdated();
-        }
-
-        public void HandleMouseWheelEvent(int delta)
-        {
-            if (delta > 0)
-            {
-                (delta / 120).Times(Game.Backward);
-                ActiveMoveTreeUpdated();
-            }
-            else if (delta < 0)
-            {
-                (-delta / 120).Times(Game.Forward);
-                ActiveMoveTreeUpdated();
-            }
         }
 
         private StandardChessBoard chessBoard;

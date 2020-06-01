@@ -231,7 +231,17 @@ namespace Sandra.UI
             }
             else if (game != null)
             {
-                game.HandleMouseWheelEvent(e.Delta);
+                var delta = e.Delta;
+                if (delta > 0)
+                {
+                    (delta / 120).Times(game.Game.Backward);
+                    GameUpdated();
+                }
+                else if (delta < 0)
+                {
+                    (-delta / 120).Times(game.Game.Forward);
+                    GameUpdated();
+                }
             }
         }
 
