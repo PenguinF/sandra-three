@@ -26,7 +26,6 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -82,34 +81,19 @@ namespace Sandra.UI
 
         public UIActionState TryOpenGame(PgnEditor pgnEditor, bool perform)
         {
-            // If there's at least one game, the action is available. Each character position is then part of some game.
-            if (pgnEditor.SyntaxTree.GameListSyntax.Games.Count == 0) return UIActionVisibility.Disabled;
+            PgnGameSyntax gameSyntax = pgnEditor.GameAtOrBeforePosition(pgnEditor.SelectionStart);
+            if (gameSyntax == null) return UIActionVisibility.Disabled;
 
             if (perform)
             {
-                // We're looking for the symbols before and after the caret position.
-                // If the caret is right at the edge between two games, open the previous game; any trivia is part of the next game,
-                // and so it's more likely we're closer to the previous game.
-                // Hence, take the first symbol from the enumeration.
-                if (pgnEditor.SyntaxTree.GameListSyntax.TerminalSymbolsInRange(pgnEditor.SelectionStart - 1, 2).Any(out IPgnSymbol symbolAtCursor))
+                StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
                 {
-                    PgnSyntax pgnSyntax = symbolAtCursor.ToSyntax();
-                    PgnGameSyntax gameSyntax = null;
-                    while (gameSyntax == null)
-                    {
-                        pgnSyntax = pgnSyntax.ParentSyntax;
-                        gameSyntax = pgnSyntax as PgnGameSyntax;
-                    }
+                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game());
+                    newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
+                    return newChessBoard;
+                });
 
-                    StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
-                    {
-                        StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game());
-                        newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
-                        return newChessBoard;
-                    });
-
-                    chessBoard.EnsureActivated();
-                }
+                chessBoard.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;
