@@ -129,6 +129,11 @@ namespace Sandra.Chess.Pgn
         public GreenPgnTagValueSyntax Green { get; }
 
         /// <summary>
+        /// Gets the value of this syntax node, or null if this is an error value.
+        /// </summary>
+        public string Value => Green.Value;
+
+        /// <summary>
         /// Gets if this tag value contains errors and therefore has an undefined value.
         /// </summary>
         public bool ContainsErrors => Green.ContainsErrors;
