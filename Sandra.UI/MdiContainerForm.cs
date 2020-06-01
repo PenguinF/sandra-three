@@ -116,26 +116,12 @@ namespace Sandra.UI
                 }
             });
 
-            // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
-            // because they would otherwise remain invisible.
-            var modifiedGotoChessBoardForm = new DefaultUIActionBinding(
-                InteractiveGame.GotoChessBoardForm.Action,
-                new ImplementationSet<IUIActionInterface>
-                {
-                    new CombinedUIActionInterface
-                    {
-                        Shortcuts = InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
-                        IsFirstInGroup = true,
-                        MenuTextProvider = LocalizedStringKeys.Chessboard.ToTextProvider(),
-                    },
-                });
-
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
-                    modifiedGotoChessBoardForm,
+                    InteractiveGame.GotoChessBoardForm,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
                     SharedUIAction.ShowErrorPane,

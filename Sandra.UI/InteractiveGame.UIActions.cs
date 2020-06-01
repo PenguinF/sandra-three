@@ -41,6 +41,8 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
+                    IsFirstInGroup = true,
+                    MenuTextProvider = LocalizedStringKeys.Chessboard.ToTextProvider(),
                 },
             });
 
@@ -60,8 +62,6 @@ namespace Sandra.UI
 
                     newChessBoard.PlayingBoard.BindActions(new UIActionBindings
                     {
-                        { GotoChessBoardForm, TryGotoChessBoardForm },
-
                         { StandardChessBoard.GotoStart, newChessBoard.TryGotoStart },
                         { StandardChessBoard.GotoFirstMove, newChessBoard.TryGotoFirstMove },
                         { StandardChessBoard.FastNavigateBackward, newChessBoard.TryFastNavigateBackward },
