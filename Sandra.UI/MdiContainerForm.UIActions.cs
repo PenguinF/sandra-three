@@ -19,11 +19,14 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -57,10 +60,56 @@ namespace Sandra.UI
 
         public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
+            if (perform) OpenChessBoard(pgnEditor, new Chess.Game()).EnsureActivated();
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding OpenGame = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenGame)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
+                    IsFirstInGroup = true,
+                    MenuTextProvider = LocalizedStringKeys.OpenGame.ToTextProvider(),
+                },
+            });
+
+        // First implementation: maintain a dictionary of open games.
+        // This needs work; when the PGN syntax is updated all PgnGameSyntax instances are recreated.
+        private readonly Dictionary<PgnGameSyntax, StandardChessBoard> OpenGames = new Dictionary<PgnGameSyntax, StandardChessBoard>();
+
+        public UIActionState TryOpenGame(PgnEditor pgnEditor, bool perform)
+        {
+            // If there's at least one game, the action is available. Each character position is then part of some game.
+            if (pgnEditor.SyntaxTree.GameListSyntax.Games.Count == 0) return UIActionVisibility.Disabled;
+
             if (perform)
             {
-                InteractiveGame game = new InteractiveGame(pgnEditor, Chess.Position.GetInitialPosition());
-                game.TryOpenGame(true);
+                // We're looking for the symbols before and after the caret position.
+                // If the caret is right at the edge between two games, open the previous game; any trivia is part of the next game,
+                // and so it's more likely we're closer to the previous game.
+                // Hence, take the first symbol from the enumeration.
+                if (pgnEditor.SyntaxTree.GameListSyntax.TerminalSymbolsInRange(pgnEditor.SelectionStart - 1, 2).Any(out IPgnSymbol symbolAtCursor))
+                {
+                    PgnSyntax pgnSyntax = symbolAtCursor.ToSyntax();
+                    PgnGameSyntax gameSyntax = null;
+                    while (gameSyntax == null)
+                    {
+                        pgnSyntax = pgnSyntax.ParentSyntax;
+                        gameSyntax = pgnSyntax as PgnGameSyntax;
+                    }
+
+                    StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
+                    {
+                        StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game());
+                        newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
+                        return newChessBoard;
+                    });
+
+                    chessBoard.EnsureActivated();
+                }
             }
 
             return UIActionVisibility.Enabled;

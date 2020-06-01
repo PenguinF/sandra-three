@@ -29,6 +29,7 @@ using Eutherion.Win.UIActions;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -121,7 +122,7 @@ namespace Sandra.UI
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
                 DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                 {
-                    InteractiveGame.OpenGame,
+                    OpenGame,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
                     SharedUIAction.ShowErrorPane,
@@ -303,6 +304,7 @@ namespace Sandra.UI
                 SettingKeys.PgnZoom);
 
             pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
+            pgnEditor.BindAction(OpenGame, perform => TryOpenGame(pgnEditor, perform));
             pgnEditor.BindActions(pgnEditor.StandardSyntaxEditorUIActionBindings);
             UIMenu.AddTo(pgnEditor);
 
@@ -354,6 +356,62 @@ namespace Sandra.UI
                 // Just return the first editor in the list. It may be docked somewhere else.
                 return pgnEditors[0];
             }
+        }
+
+        /// <summary>
+        /// Opens a chess board for a certain game at a current position.
+        /// </summary>
+        private StandardChessBoard OpenChessBoard(PgnEditor ownerPgnEditor, Chess.Game game)
+        {
+            var newChessBoard = new StandardChessBoard
+            {
+                Game = game,
+                PieceImages = PieceImages.ImageArray
+            };
+
+            newChessBoard.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+
+            newChessBoard.PlayingBoard.BindActions(new UIActionBindings
+            {
+                { StandardChessBoard.GotoStart, newChessBoard.TryGotoStart },
+                { StandardChessBoard.GotoFirstMove, newChessBoard.TryGotoFirstMove },
+                { StandardChessBoard.FastNavigateBackward, newChessBoard.TryFastNavigateBackward },
+                { StandardChessBoard.GotoPreviousMove, newChessBoard.TryGotoPreviousMove },
+                { StandardChessBoard.GotoNextMove, newChessBoard.TryGotoNextMove },
+                { StandardChessBoard.FastNavigateForward, newChessBoard.TryFastNavigateForward },
+                { StandardChessBoard.GotoLastMove, newChessBoard.TryGotoLastMove },
+                { StandardChessBoard.GotoEnd, newChessBoard.TryGotoEnd },
+
+                { StandardChessBoard.GotoPreviousVariation, newChessBoard.TryGotoPreviousVariation },
+                { StandardChessBoard.GotoNextVariation, newChessBoard.TryGotoNextVariation },
+
+                { StandardChessBoard.PromoteActiveVariation, newChessBoard.TryPromoteActiveVariation },
+                { StandardChessBoard.DemoteActiveVariation, newChessBoard.TryDemoteActiveVariation },
+                { StandardChessBoard.BreakActiveVariation, newChessBoard.TryBreakActiveVariation },
+                { StandardChessBoard.DeleteActiveVariation, newChessBoard.TryDeleteActiveVariation },
+
+                { StandardChessBoard.FlipBoard, newChessBoard.TryFlipBoard },
+                { StandardChessBoard.TakeScreenshot, newChessBoard.TryTakeScreenshot },
+
+                { SharedUIAction.ZoomIn, newChessBoard.TryZoomIn },
+                { SharedUIAction.ZoomOut, newChessBoard.TryZoomOut },
+            });
+
+            UIMenu.AddTo(newChessBoard.PlayingBoard);
+
+            newChessBoard.DockProperties.CaptionHeight = 24;
+            newChessBoard.DockProperties.Icon = Session.Current.ApplicationIcon;
+
+            var newChessBoardForm = new MenuCaptionBarForm<StandardChessBoard>(newChessBoard)
+            {
+                Owner = ownerPgnEditor.FindForm(),
+                MaximizeBox = false,
+                ClientSize = new Size(400, 400),
+            };
+
+            StandardChessBoard.ConstrainClientSize(newChessBoardForm);
+
+            return newChessBoard;
         }
     }
 }

@@ -53,10 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InteractiveGame.cs" />
-    <Compile Include="InteractiveGame.UIActions.cs">
-      <DependentUpon>InteractiveGame.cs</DependentUpon>
-    </Compile>
     <Compile Include="LocalizedStringKeys.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
