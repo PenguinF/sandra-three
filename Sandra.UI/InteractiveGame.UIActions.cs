@@ -34,19 +34,19 @@ namespace Sandra.UI
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
 
-        public static readonly DefaultUIActionBinding GotoChessBoardForm = new DefaultUIActionBinding(
-            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoChessBoardForm)),
+        public static readonly DefaultUIActionBinding OpenGame = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(OpenGame)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
                     IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.Chessboard.ToTextProvider(),
+                    MenuTextProvider = LocalizedStringKeys.OpenGame.ToTextProvider(),
                 },
             });
 
-        public UIActionState TryGotoChessBoardForm(bool perform)
+        public UIActionState TryOpenGame(bool perform)
         {
             if (perform)
             {

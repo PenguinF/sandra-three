@@ -60,7 +60,7 @@ namespace Sandra.UI
             if (perform)
             {
                 InteractiveGame game = new InteractiveGame(pgnEditor, Chess.Position.GetInitialPosition());
-                game.TryGotoChessBoardForm(true);
+                game.TryOpenGame(true);
             }
 
             return UIActionVisibility.Enabled;

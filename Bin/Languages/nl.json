@@ -3,7 +3,6 @@
   "flag_icon_file": "flag-nl.png",
   "translations": {
     "BreakAtCurrentPosition": "Afbreken in huidige stelling",
-    "Chessboard": "Schaakbord",
     "CopyDiagramToClipboard": "Diagram naar klembord kopiëren",
     "DeleteLine": "Variant verwijderen",
     "DemoteLine": "Variant degraderen",
@@ -18,6 +17,7 @@
     "NewGameFile": "Nieuw partijen bestand",
     "NextLine": "Volgende variant",
     "NextMove": "Volgende zet",
+    "OpenGame": "Partij openen",
     "OpenGameFile": "Partijen bestand openen",
     "PgnFiles": "Portable game notation bestanden",
     "PreviousLine": "Vorige variant",
