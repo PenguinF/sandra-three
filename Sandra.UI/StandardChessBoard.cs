@@ -39,6 +39,16 @@ namespace Sandra.UI
     /// </summary>
     public partial class StandardChessBoard : ContainerControl, IDockableControl, IWeakEventTarget
     {
+        private static Chess.Variation GetFirstMove(Chess.Variation variation)
+        {
+            Chess.Variation firstMoveInVariation = variation;
+            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
+            {
+                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
+            }
+            return firstMoveInVariation;
+        }
+
         public DockProperties DockProperties { get; } = new DockProperties();
 
         /// <summary>
@@ -61,9 +71,9 @@ namespace Sandra.UI
             }
         }
 
-        private InteractiveGame game;
+        private Chess.Game game;
 
-        public InteractiveGame Game
+        public Chess.Game Game
         {
             get => game;
             set
@@ -131,7 +141,7 @@ namespace Sandra.UI
                 // Copy all pieces and clear all squares that are empty.
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
                 {
-                    Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
+                    Chess.ColoredPiece? coloredPiece = game.GetColoredPiece(square);
                     if (coloredPiece == null)
                     {
                         PlayingBoard.SetForegroundImage(ToSquareLocation(square), null);
@@ -234,12 +244,12 @@ namespace Sandra.UI
                 var delta = e.Delta;
                 if (delta > 0)
                 {
-                    (delta / 120).Times(game.Game.Backward);
+                    (delta / 120).Times(game.Backward);
                     GameUpdated();
                 }
                 else if (delta < 0)
                 {
-                    (-delta / 120).Times(game.Game.Forward);
+                    (-delta / 120).Times(game.Forward);
                     GameUpdated();
                 }
             }
@@ -262,10 +272,10 @@ namespace Sandra.UI
             {
                 // Check if location is a member of all squares where a piece sits of the current color.
                 Chess.Square square = ToSquare(squareLocation);
-                Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
+                Chess.ColoredPiece? coloredPiece = game.GetColoredPiece(square);
                 if (coloredPiece != null)
                 {
-                    return ((Chess.ColoredPiece)coloredPiece).GetColor() == game.Game.SideToMove;
+                    return ((Chess.ColoredPiece)coloredPiece).GetColor() == game.SideToMove;
                 }
             }
 
@@ -570,7 +580,7 @@ namespace Sandra.UI
             foreach (var square in EnumHelper<Chess.Square>.AllValues)
             {
                 moveInfo.TargetSquare = square;
-                game.Game.TryMakeMove(ref moveInfo, false);
+                game.TryMakeMove(ref moveInfo, false);
                 var moveCheckResult = moveInfo.Result;
                 if (moveCheckResult.IsLegalMove())
                 {
@@ -614,7 +624,7 @@ namespace Sandra.UI
                         }
                     }
                 }
-                UpdateHoverQuadrant(hitQuadrant, game.Game.SideToMove);
+                UpdateHoverQuadrant(hitQuadrant, game.SideToMove);
             }
 
             if (moveStatus == MoveStatus.Dragging && dragCursor == null)
@@ -651,14 +661,14 @@ namespace Sandra.UI
                     TargetSquare = ToSquare(location),
                 };
 
-                game.Game.TryMakeMove(ref moveInfo, false);
+                game.TryMakeMove(ref moveInfo, false);
 
                 var moveCheckResult = moveInfo.Result;
                 if (moveCheckResult.IsLegalMove())
                 {
                     if (moveCheckResult == Chess.MoveCheckResult.MissingEnPassant)
                     {
-                        DisplayEnPassantEffect(game.Game.EnPassantCaptureSquare);
+                        DisplayEnPassantEffect(game.EnPassantCaptureSquare);
                     }
                     else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleQueenside)
                     {
@@ -732,16 +742,16 @@ namespace Sandra.UI
                 else if (currentSquareWithPromoteEffect != null)
                 {
                     moveInfo.MoveType = Chess.MoveType.Promotion;
-                    moveInfo.PromoteTo = GetPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
+                    moveInfo.PromoteTo = GetPromoteToPiece(hoverQuadrant, game.SideToMove).GetPiece();
                 }
 
                 ResetMoveEffects();
 
-                game.Game.TryMakeMove(ref moveInfo, true);
+                game.TryMakeMove(ref moveInfo, true);
 
                 if (moveInfo.Result == Chess.MoveCheckResult.OK)
                 {
-                    game.ActiveMoveTreeUpdated();
+                    GameUpdated();
                     PlayingBoard.ActionHandler.Invalidate();
                     moveStatus = MoveStatus.None;
                     return true;
@@ -908,9 +918,9 @@ namespace Sandra.UI
         private void PlayingBoard_Paint(object sender, PaintEventArgs e)
         {
             // Draw a dotted line between the centers of the squares of the last move.
-            if (game != null && !game.Game.IsFirstMove)
+            if (game != null && !game.IsFirstMove)
             {
-                Chess.Move lastCommittedMove = game.Game.PreviousMove();
+                Chess.Move lastCommittedMove = game.PreviousMove();
                 DrawLastMoveArrow(e.Graphics,
                                   ToSquareLocation(lastCommittedMove.SourceSquare),
                                   ToSquareLocation(lastCommittedMove.TargetSquare));
@@ -940,7 +950,7 @@ namespace Sandra.UI
                 {
                     Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
 
-                    Chess.Color promoteColor = game.Game.SideToMove;
+                    Chess.Color promoteColor = game.SideToMove;
 
                     SquareQuadrant[] allQuadrants = { SquareQuadrant.TopLeft, SquareQuadrant.TopRight, SquareQuadrant.BottomLeft, SquareQuadrant.BottomRight };
                     allQuadrants.ForEach(quadrant =>

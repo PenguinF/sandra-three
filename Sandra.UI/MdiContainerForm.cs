@@ -87,23 +87,23 @@ namespace Sandra.UI
                         DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
                         {
                             // Add all these to a submenu.
-                            InteractiveGame.GotoStart,
-                            InteractiveGame.GotoFirstMove,
-                            InteractiveGame.FastNavigateBackward,
-                            InteractiveGame.GotoPreviousMove,
-                            InteractiveGame.GotoNextMove,
-                            InteractiveGame.FastNavigateForward,
-                            InteractiveGame.GotoLastMove,
-                            InteractiveGame.GotoEnd,
-                            InteractiveGame.GotoPreviousVariation,
-                            InteractiveGame.GotoNextVariation,
+                            StandardChessBoard.GotoStart,
+                            StandardChessBoard.GotoFirstMove,
+                            StandardChessBoard.FastNavigateBackward,
+                            StandardChessBoard.GotoPreviousMove,
+                            StandardChessBoard.GotoNextMove,
+                            StandardChessBoard.FastNavigateForward,
+                            StandardChessBoard.GotoLastMove,
+                            StandardChessBoard.GotoEnd,
+                            StandardChessBoard.GotoPreviousVariation,
+                            StandardChessBoard.GotoNextVariation,
                         }
                     },
 
-                    InteractiveGame.PromoteActiveVariation,
-                    InteractiveGame.DemoteActiveVariation,
-                    InteractiveGame.BreakActiveVariation,
-                    InteractiveGame.DeleteActiveVariation,
+                    StandardChessBoard.PromoteActiveVariation,
+                    StandardChessBoard.DemoteActiveVariation,
+                    StandardChessBoard.BreakActiveVariation,
+                    StandardChessBoard.DeleteActiveVariation,
                     StandardChessBoard.FlipBoard,
                     StandardChessBoard.TakeScreenshot,
 

@@ -40,21 +40,6 @@ namespace Sandra.UI
             Game = new Chess.Game(initialPosition);
         }
 
-        public void ActiveMoveTreeUpdated()
-        {
-            if (chessBoard != null) chessBoard.GameUpdated();
-        }
-
         private StandardChessBoard chessBoard;
-
-        private static Chess.Variation GetFirstMove(Chess.Variation variation)
-        {
-            Chess.Variation firstMoveInVariation = variation;
-            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
-            {
-                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
-            }
-            return firstMoveInVariation;
-        }
     }
 }
