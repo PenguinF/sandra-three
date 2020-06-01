@@ -243,6 +243,9 @@ namespace Eutherion.Win.Controls
                     Color glyphForeColor;
                     bool drawCloseButtonGlyph;
 
+                    // True if hovering over glyph of the current tab page to draw.
+                    bool hoverOverThisTabPageGlyph = tabIndex == HoverTabIndex && HoverOverGlyph;
+
                     if (tabIndex == OwnerTabControl.ActiveTabPageIndex)
                     {
                         using (var activeTabHeaderBrush = new SolidBrush(tabPage.ActiveBackColor))
@@ -260,7 +263,7 @@ namespace Eutherion.Win.Controls
                             : tabPage.GlyphForeColor;
 
                         // Highlight when hovering.
-                        if (tabIndex == HoverTabIndex && HoverOverGlyph)
+                        if (hoverOverThisTabPageGlyph)
                         {
                             // Default to a lighter version if no color given.
                             glyphForeColor = tabPage.GlyphHoverColor.A == 0
@@ -291,7 +294,7 @@ namespace Eutherion.Win.Controls
                             : OwnerTabControl.InactiveTabHeaderGlyphForeColor;
 
                         // Highlight when hovering.
-                        if (HoverOverGlyph)
+                        if (hoverOverThisTabPageGlyph)
                         {
                             // Default to a lighter version if no color given.
                             glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphHoverColor.A == 0
@@ -324,7 +327,7 @@ namespace Eutherion.Win.Controls
 
                     if (drawCloseButtonGlyph)
                     {
-                        if (!HoverOverGlyph && tabPage.IsModified)
+                        if (!hoverOverThisTabPageGlyph && tabPage.IsModified)
                         {
                             // Subtract the padding, one from the left, two from the right side.
                             float hrzPadding = MeasuredGlyphSize.Width / EstimatedHorizontalGlyphPaddingRatio;
