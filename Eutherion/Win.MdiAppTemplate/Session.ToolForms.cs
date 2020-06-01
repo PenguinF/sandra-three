@@ -148,6 +148,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 codeFile,
                 SharedSettings.JsonZoom);
 
+            settingsEditor.BindActions(settingsEditor.StandardSyntaxEditorUIActionBindings);
+            UIMenu.AddTo(settingsEditor);
+
             JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsEditor);
 
             if (autoSaver != null) settingsEditor.Disposed += (_, __) => autoSaver.Dispose();

@@ -227,6 +227,11 @@ namespace Eutherion.Win.MdiAppTemplate
         public event Action DockPropertiesChanged;
 
         /// <summary>
+        /// Gets how the code file must be accessed by the syntax editor.
+        /// </summary>
+        public SyntaxEditorCodeAccessOption CodeAccessOption { get; }
+
+        /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
         public SyntaxDescriptor<TSyntaxTree, TTerminal, TError> SyntaxDescriptor { get; }
@@ -257,6 +262,9 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Initializes a new instance of a <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </summary>
+        /// <param name="codeAccessOption">
+        /// How the code file must be accessed by the syntax editor.
+        /// </param>
         /// <param name="syntaxDescriptor">
         /// The syntax descriptor.
         /// </param>
@@ -272,6 +280,7 @@ namespace Eutherion.Win.MdiAppTemplate
                             WorkingCopyTextFile codeFile,
                             SettingProperty<int> zoomSetting)
         {
+            CodeAccessOption = codeAccessOption;
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
 
@@ -334,30 +343,6 @@ namespace Eutherion.Win.MdiAppTemplate
             }
 
             ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(zoomSetting, e.ZoomFactor);
-
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.SaveToFile, TrySaveToFile },
-            });
-
-            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
-            {
-                this.BindActions(new UIActionBindings
-                {
-                    { SharedUIAction.SaveAs, TrySaveAs },
-                });
-            }
-
-            BindStandardEditUIActions();
-
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.ShowErrorPane, TryShowErrorPane },
-                { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
-                { SharedUIAction.GoToNextError, TryGoToNextError },
-            });
-
-            UIMenu.AddTo(this);
 
             // Changed marker.
             untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
@@ -448,6 +433,36 @@ namespace Eutherion.Win.MdiAppTemplate
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
+        /// <summary>
+        /// Gets the regular cut/copy/paste/select-all UIActions for this textbox.
+        /// </summary>
+        public UIActionBindings StandardSyntaxEditorUIActionBindings
+        {
+            get
+            {
+                var bindings = new UIActionBindings
+                {
+                    { SharedUIAction.SaveToFile, TrySaveToFile },
+                };
+
+                if (CodeAccessOption == SyntaxEditorCodeAccessOption.Default)
+                {
+                    bindings.Add(SharedUIAction.SaveAs, TrySaveAs);
+                }
+
+                bindings.AddRange(StandardUIActionBindings);
+
+                bindings.AddRange(new UIActionBindings
+                {
+                    { SharedUIAction.ShowErrorPane, TryShowErrorPane },
+                    { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
+                    { SharedUIAction.GoToNextError, TryGoToNextError },
+                });
+
+                return bindings;
+            }
+        }
+
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
             containsChangesAtSavePoint = CodeFile.ContainsChanges;
@@ -512,9 +527,13 @@ namespace Eutherion.Win.MdiAppTemplate
 
         // OnUpdateUI gets raised only once for an undo or redo action, whereas OnTextChanged gets raised for each individual keystroke.
         private bool textDirty;
-        private TSyntaxTree syntaxTree;
 
-        protected override void OnUpdateUI(UpdateUIEventArgs e)
+        /// <summary>
+        /// Gets the current syntax tree.
+        /// </summary>
+        public TSyntaxTree SyntaxTree { get; private set; }
+
+        private void VerifySyntaxAndStyle()
         {
             if (textDirty)
             {
@@ -532,11 +551,11 @@ namespace Eutherion.Win.MdiAppTemplate
                     UpdateLineNumberMargin(maxLineNumberLength);
                 }
 
-                syntaxTree = SyntaxDescriptor.Parse(code);
+                SyntaxTree = SyntaxDescriptor.Parse(code);
 
                 IndicatorClearRange(0, TextLength);
 
-                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
+                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(SyntaxTree));
 
                 // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
                 int indicatorCurrent = 0;
@@ -561,7 +580,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 UpdateErrorListForm();
             }
 
-            if (syntaxTree == null) return;
+            if (SyntaxTree == null) return;
 
             // Get the visible range of text to style.
             int firstVisibleLine = FirstVisibleLine;
@@ -578,12 +597,16 @@ namespace Eutherion.Win.MdiAppTemplate
             startPosition--;
             endPosition++;
 
-            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
+            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(SyntaxTree, startPosition, endPosition - startPosition))
             {
                 var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
             }
+        }
 
+        protected override void OnUpdateUI(UpdateUIEventArgs e)
+        {
+            VerifySyntaxAndStyle();
             base.OnUpdateUI(e);
         }
 
@@ -592,6 +615,13 @@ namespace Eutherion.Win.MdiAppTemplate
             textDirty = true;
             CallTipCancel();
             base.OnTextChanged(e);
+        }
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            // OnUpdateUI event isn't raised when editor is resized, so do it here.
+            VerifySyntaxAndStyle();
+            base.OnLayout(levent);
         }
 
         public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;

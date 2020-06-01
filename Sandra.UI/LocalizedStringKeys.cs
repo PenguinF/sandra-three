@@ -27,7 +27,6 @@ namespace Sandra.UI
     internal static class LocalizedStringKeys
     {
         internal static readonly LocalizedStringKey BreakAtCurrentPosition = new LocalizedStringKey(nameof(BreakAtCurrentPosition));
-        internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
@@ -42,6 +41,7 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey NewGameFile = new LocalizedStringKey(nameof(NewGameFile));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey OpenGame = new LocalizedStringKey(nameof(OpenGame));
         internal static readonly LocalizedStringKey OpenGameFile = new LocalizedStringKey(nameof(OpenGameFile));
         internal static readonly LocalizedStringKey PgnFiles = new LocalizedStringKey(nameof(PgnFiles));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
@@ -52,7 +52,6 @@ namespace Sandra.UI
         internal static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
         {
             { BreakAtCurrentPosition, "Break at current position" },
-            { Chessboard, "Chessboard" },
             { CopyDiagramToClipboard, "Copy diagram to clipboard" },
             { DeleteLine, "Delete line" },
             { DemoteLine, "Demote line" },
@@ -67,6 +66,7 @@ namespace Sandra.UI
             { NewGameFile, "New game file" },
             { NextLine, "Next line" },
             { NextMove, "Next move" },
+            { OpenGame, "Open game" },
             { OpenGameFile, "Open game file" },
             { PgnFiles, "Portable game notation files" },
             { PreviousLine, "Previous line" },

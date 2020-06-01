@@ -56,6 +56,13 @@ namespace Sandra.Chess
         }
 
         /// <summary>
+        /// Creates a new game with the default initial <see cref="Position"/>.
+        /// </summary>
+        public Game() : this(Position.GetInitialPosition())
+        {
+        }
+
+        /// <summary>
         /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
         /// but in which <see cref="ActiveTree"/> can be manipulated independently.
         /// </summary>

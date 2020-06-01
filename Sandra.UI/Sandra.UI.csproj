@@ -53,10 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InteractiveGame.cs" />
-    <Compile Include="InteractiveGame.UIActions.cs">
-      <DependentUpon>InteractiveGame.cs</DependentUpon>
-    </Compile>
     <Compile Include="LocalizedStringKeys.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
@@ -65,6 +61,7 @@
       <DependentUpon>MdiContainerForm.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="PgnEditorExtensions.cs" />
     <Compile Include="PgnErrorInfoExtensions.cs" />
     <Compile Include="PgnStyleSelector.cs" />
     <Compile Include="PgnSyntaxDescriptor.cs" />
