@@ -344,30 +344,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(zoomSetting, e.ZoomFactor);
 
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.SaveToFile, TrySaveToFile },
-            });
-
-            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
-            {
-                this.BindActions(new UIActionBindings
-                {
-                    { SharedUIAction.SaveAs, TrySaveAs },
-                });
-            }
-
-            BindStandardEditUIActions();
-
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.ShowErrorPane, TryShowErrorPane },
-                { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
-                { SharedUIAction.GoToNextError, TryGoToNextError },
-            });
-
-            UIMenu.AddTo(this);
-
             // Changed marker.
             untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
             untitledString.DisplayText.ValueChanged += _ =>
@@ -455,6 +431,36 @@ namespace Eutherion.Win.MdiAppTemplate
             };
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        /// <summary>
+        /// Gets the regular cut/copy/paste/select-all UIActions for this textbox.
+        /// </summary>
+        public UIActionBindings StandardSyntaxEditorUIActionBindings
+        {
+            get
+            {
+                var bindings = new UIActionBindings
+                {
+                    { SharedUIAction.SaveToFile, TrySaveToFile },
+                };
+
+                if (CodeAccessOption == SyntaxEditorCodeAccessOption.Default)
+                {
+                    bindings.Add(SharedUIAction.SaveAs, TrySaveAs);
+                }
+
+                bindings.AddRange(StandardUIActionBindings);
+
+                bindings.AddRange(new UIActionBindings
+                {
+                    { SharedUIAction.ShowErrorPane, TryShowErrorPane },
+                    { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
+                    { SharedUIAction.GoToNextError, TryGoToNextError },
+                });
+
+                return bindings;
+            }
         }
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)

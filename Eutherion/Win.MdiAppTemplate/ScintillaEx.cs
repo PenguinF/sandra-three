@@ -119,12 +119,6 @@ namespace Eutherion.Win.MdiAppTemplate
             { SharedUIAction.SelectAllText, TrySelectAllText },
         };
 
-        /// <summary>
-        /// Binds the regular cut/copy/paste/select-all UIActions to this textbox.
-        /// </summary>
-        public void BindStandardEditUIActions()
-            => this.BindActions(StandardUIActionBindings);
-
         public UIActionState TryUndo(bool perform)
         {
             if (IsDisposed || Disposing) return UIActionVisibility.Hidden;

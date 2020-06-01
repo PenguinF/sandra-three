@@ -302,6 +302,10 @@ namespace Sandra.UI
                 pgnFile,
                 SettingKeys.PgnZoom);
 
+            pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
+            pgnEditor.BindActions(pgnEditor.StandardSyntaxEditorUIActionBindings);
+            UIMenu.AddTo(pgnEditor);
+
             PgnStyleSelector.InitializeStyles(pgnEditor);
 
             // Don't index read-only pgn editors.
@@ -322,8 +326,6 @@ namespace Sandra.UI
                     Program.MainForm.RemovePgnEditor(pgnFile.OpenTextFilePath, pgnEditor);
                 };
             }
-
-            pgnEditor.BindAction(OpenNewPlayingBoard, perform => TryOpenNewPlayingBoard(pgnEditor, perform));
 
             // Open as new tab page.
             DockedControl.TabPages.Add(new MdiTabPage<PgnEditor>(pgnEditor));
