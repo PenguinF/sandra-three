@@ -533,7 +533,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public TSyntaxTree SyntaxTree { get; private set; }
 
-        protected override void OnUpdateUI(UpdateUIEventArgs e)
+        private void VerifySyntaxAndStyle()
         {
             if (textDirty)
             {
@@ -602,7 +602,11 @@ namespace Eutherion.Win.MdiAppTemplate
                 var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
             }
+        }
 
+        protected override void OnUpdateUI(UpdateUIEventArgs e)
+        {
+            VerifySyntaxAndStyle();
             base.OnUpdateUI(e);
         }
 
@@ -611,6 +615,13 @@ namespace Eutherion.Win.MdiAppTemplate
             textDirty = true;
             CallTipCancel();
             base.OnTextChanged(e);
+        }
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            // OnUpdateUI event isn't raised when editor is resized, so do it here.
+            VerifySyntaxAndStyle();
+            base.OnLayout(levent);
         }
 
         public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
