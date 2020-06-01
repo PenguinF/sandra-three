@@ -308,6 +308,8 @@ namespace Sandra.UI
             pgnEditor.BindActions(pgnEditor.StandardSyntaxEditorUIActionBindings);
             UIMenu.AddTo(pgnEditor);
 
+            pgnEditor.DoubleClick += (_, __) => TryOpenGame(pgnEditor, true);
+
             PgnStyleSelector.InitializeStyles(pgnEditor);
 
             // Don't index read-only pgn editors.
