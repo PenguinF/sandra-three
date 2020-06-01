@@ -527,7 +527,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
         // OnUpdateUI gets raised only once for an undo or redo action, whereas OnTextChanged gets raised for each individual keystroke.
         private bool textDirty;
-        private TSyntaxTree syntaxTree;
+
+        /// <summary>
+        /// Gets the current syntax tree.
+        /// </summary>
+        public TSyntaxTree SyntaxTree { get; private set; }
 
         protected override void OnUpdateUI(UpdateUIEventArgs e)
         {
@@ -547,11 +551,11 @@ namespace Eutherion.Win.MdiAppTemplate
                     UpdateLineNumberMargin(maxLineNumberLength);
                 }
 
-                syntaxTree = SyntaxDescriptor.Parse(code);
+                SyntaxTree = SyntaxDescriptor.Parse(code);
 
                 IndicatorClearRange(0, TextLength);
 
-                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
+                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(SyntaxTree));
 
                 // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
                 int indicatorCurrent = 0;
@@ -576,7 +580,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 UpdateErrorListForm();
             }
 
-            if (syntaxTree == null) return;
+            if (SyntaxTree == null) return;
 
             // Get the visible range of text to style.
             int firstVisibleLine = FirstVisibleLine;
@@ -593,7 +597,7 @@ namespace Eutherion.Win.MdiAppTemplate
             startPosition--;
             endPosition++;
 
-            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
+            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(SyntaxTree, startPosition, endPosition - startPosition))
             {
                 var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
