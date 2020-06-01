@@ -126,7 +126,7 @@ namespace Sandra.UI
                         }
                     }
 
-                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, gameSyntax.CreateGame(), white, black, whiteElo, blackElo);
+                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, pgnEditor.CreateGame(gameSyntax), white, black, whiteElo, blackElo);
                     newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
                     return newChessBoard;
                 });
