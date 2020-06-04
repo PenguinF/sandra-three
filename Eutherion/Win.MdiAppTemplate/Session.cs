@@ -544,6 +544,19 @@ namespace Eutherion.Win.MdiAppTemplate
                     settingCopy.Commit(),
                     SettingWriterOptions.SuppressSettingComments);
             }
+
+            // Generate current version number in README.txt.
+            string readMeFilePath = Path.Combine(ExecutableFolder, "README.txt");
+            string readMe = File.ReadAllText(readMeFilePath);
+            int firstNewLine = readMe.IndexOf('\n');
+            int secondNewLine = readMe.IndexOf('\n', firstNewLine + 1);
+
+            // Leave out private build if zero.
+            string displayFileVersion = ExecutableFileVersion.FilePrivatePart == 0
+                ? $"{ExecutableFileVersion.FileMajorPart}.{ExecutableFileVersion.FileMinorPart}.{ExecutableFileVersion.FileBuildPart}"
+                : ExecutableFileVersion.FileVersion;
+            string heading = $"\r\n*** {ExecutableFileNameWithoutExtension} v{displayFileVersion} ***\r\n";
+            File.WriteAllText(readMeFilePath, heading + readMe.Substring(secondNewLine + 1));
         }
 #endif
     }
