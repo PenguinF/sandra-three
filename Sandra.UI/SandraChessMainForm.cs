@@ -82,20 +82,17 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (receivedCommandLineArgs.Length > 0)
+            // First mdiContainerForm in the list gets the honor of opening the new PGN files.
+            foreach (var candidate in mdiContainerForms)
             {
-                // First mdiContainerForm in the list gets the honor of opening the new PGN files.
-                foreach (var candidate in mdiContainerForms)
+                if (candidate.IsHandleCreated && !candidate.IsDisposed)
                 {
-                    if (candidate.IsHandleCreated && !candidate.IsDisposed)
-                    {
-                        candidate.OpenCommandLineArgs(receivedCommandLineArgs);
-                        return;
-                    }
+                    candidate.OpenCommandLineArgs(receivedCommandLineArgs);
+                    return;
                 }
-
-                OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
             }
+
+            OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
         }
 
         protected override void OnLoad(EventArgs e)
