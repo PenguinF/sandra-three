@@ -33,8 +33,6 @@ namespace Sandra.UI
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
-        public const string SandraChessMainFormUIActionPrefix = nameof(SandraChessMainForm) + ".";
-
         private readonly string[] commandLineArgs;
 
         /// <summary>
