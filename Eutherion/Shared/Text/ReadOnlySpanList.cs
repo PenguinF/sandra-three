@@ -53,7 +53,7 @@ namespace Eutherion.Text
 
             public OneElement(TSpan source)
             {
-                if (source == null) throw new ArgumentException(nameof(source));
+                if (source == null) throw new ArgumentException($"One or more elements in {nameof(source)} is null", nameof(source));
                 element = source;
             }
 
@@ -75,14 +75,14 @@ namespace Eutherion.Text
 
             public TwoOrMoreElements(TSpan[] source)
             {
-                if (source[0] == null) throw new ArgumentException(nameof(source));
+                if (source[0] == null) throw new ArgumentException($"One or more elements in {nameof(source)} is null", nameof(source));
                 int length = source[0].Length;
                 arrayElementOffsets = new int[source.Length - 1];
 
                 for (int i = 1; i < source.Length; i++)
                 {
                     TSpan arrayElement = source[i];
-                    if (arrayElement == null) throw new ArgumentException(nameof(source));
+                    if (arrayElement == null) throw new ArgumentException($"One or more elements in {nameof(source)} is null", nameof(source));
                     arrayElementOffsets[i - 1] = length;
                     length += arrayElement.Length;
                 }

@@ -39,7 +39,7 @@ namespace Eutherion.Text.Json
         public static IGreenJsonSymbol Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
-            if (value.Length <= 0) throw new ArgumentException(nameof(value));
+            if (value.Length <= 0) throw new ArgumentException($"{nameof(value)} is empty", nameof(value));
 
             if (value == False) return GreenJsonBooleanLiteralSyntax.False.Instance;
             if (value == True) return GreenJsonBooleanLiteralSyntax.True.Instance;

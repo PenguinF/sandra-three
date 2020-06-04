@@ -85,7 +85,7 @@ namespace Eutherion.Text.Json
             if (validKey.IsJust(out GreenJsonStringLiteralSyntax validKeyNode)
                 && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode)
             {
-                throw new ArgumentException(nameof(validKey));
+                throw new ArgumentException("validKey and ValueSectionNodes[0].ValueNode.ContentNode shoukd be the same", nameof(validKey));
             }
         }
 
