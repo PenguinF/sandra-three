@@ -1011,7 +1011,7 @@ namespace Sandra.UI
             public Brush DarkSquareBrush;
             public Brush LightSquareBrush;
 
-            private void ReleaseUnmanagedResources()
+            private void ReleaseManagedResources()
             {
                 // Unmanaged resources: also dispose when finalizing.
                 if (BackgroundBrush != null) BackgroundBrush.Dispose();
@@ -1023,13 +1023,13 @@ namespace Sandra.UI
 
             public void Dispose()
             {
-                ReleaseUnmanagedResources();
+                ReleaseManagedResources();
                 GC.SuppressFinalize(this);
             }
 
             ~GDIPaintResources()
             {
-                ReleaseUnmanagedResources();
+                ReleaseManagedResources();
             }
         }
 
