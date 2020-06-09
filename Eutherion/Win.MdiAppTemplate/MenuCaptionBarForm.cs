@@ -609,6 +609,7 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private bool queryOpenMessageSent;
         private bool inRestoreCommand;
         private Rectangle lastKnownNormalWindowRectangle;
 
@@ -673,9 +674,21 @@ namespace Eutherion.Win.MdiAppTemplate
                     this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                 }
             }
+            else if (m.Msg == WM.QUERYOPEN)
+            {
+                // This message is sent to minimized windows to ask if a deminimize is possible, before doing anything else.
+                // Now we know that the window is about to be deminimized and a WM_WINDOWPOSCHANGED message will follow,
+                // where the base WndProc adjusts the stored restore bounds, which we want to undo.
+                // If somehow the window doesn't get deminimized, the flag will still be set, but because all code that depends
+                // on it is wrapped in a WindowState == FormWindowState.Normal check, this is not going to be a problem.
+                // If somehow the base WndProc code is altered and doesn't update the restore bounds anymore, this code has no effect.
+                queryOpenMessageSent = true;
+                base.WndProc(ref m);
+            }
             else if (m.Msg == WM.WINDOWPOSCHANGED)
             {
-                bool shouldUndoRestoredBounds = inRestoreCommand && Bounds == lastKnownNormalWindowRectangle;
+                // Undo if either in an explicit restore command (maximize button, sys commands), or if deminimizing.
+                bool shouldUndoRestoredBounds = (inRestoreCommand || queryOpenMessageSent) && Bounds == lastKnownNormalWindowRectangle;
 
                 base.WndProc(ref m);
 
@@ -683,6 +696,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     if (shouldUndoRestoredBounds && Bounds != lastKnownNormalWindowRectangle)
                     {
+                        queryOpenMessageSent = false;
+
                         // Undo effects of RestoreWindowBoundsIfNecessary(), without a non-client area the restore bounds are exactly right.
                         SetBounds(lastKnownNormalWindowRectangle.X,
                                   lastKnownNormalWindowRectangle.Y,
