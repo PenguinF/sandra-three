@@ -675,11 +675,13 @@ namespace Eutherion.Win.MdiAppTemplate
             }
             else if (m.Msg == WM.WINDOWPOSCHANGED)
             {
+                bool shouldUndoRestoredBounds = inRestoreCommand && Bounds == lastKnownNormalWindowRectangle;
+
                 base.WndProc(ref m);
 
                 if (WindowState == FormWindowState.Normal)
                 {
-                    if (inRestoreCommand)
+                    if (shouldUndoRestoredBounds && Bounds != lastKnownNormalWindowRectangle)
                     {
                         // Undo effects of RestoreWindowBoundsIfNecessary(), without a non-client area the restore bounds are exactly right.
                         SetBounds(lastKnownNormalWindowRectangle.X,
