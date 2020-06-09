@@ -63,6 +63,8 @@ namespace Eutherion.Win.Native
     /// </summary>
     public static class WM
     {
+        public const int QUERYOPEN = 0x13;
+
         public const int WINDOWPOSCHANGED = 0x47;
 
         public const int COPYDATA = 0x4A;
