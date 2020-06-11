@@ -102,6 +102,38 @@ namespace Eutherion.Win
             PostSysCommandMessage(form, result);
         }
 
+        /// <summary>
+        /// Sends a command corresponding to a window (system) menu item to a form.
+        /// Its effect is exactly what would happen if someone opened the window menu and clicked on one of its items.
+        /// </summary>
+        /// <param name="form">
+        /// The <see cref="Form"/> to which to send the window (system) menu command.
+        /// </param>
+        /// <param name="windowCommand">
+        /// The command to send.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="form"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidEnumArgumentException">
+        /// <paramref name="windowCommand"/> is not a valid <see cref="WindowCommand"/> value.
+        /// </exception>
+        /// <exception cref="Win32Exception">
+        /// The system call to execute the selected window (system) menu command returned an error.
+        /// </exception>
+        public static void SendWindowCommand(this Form form, WindowCommand windowCommand)
+        {
+            if (form == null) throw new ArgumentNullException(nameof(form));
+            if (!form.IsHandleCreated || form.IsDisposed || windowCommand == 0) return;
+
+            if (!Enum.IsDefined(typeof(WindowCommand), windowCommand))
+            {
+                throw new InvalidEnumArgumentException(nameof(windowCommand), (int)windowCommand, typeof(WindowCommand));
+            }
+
+            PostSysCommandMessage(form, (uint)windowCommand);
+        }
+
         private static void PostSysCommandMessage(Form form, uint sysCommandValue)
         {
             if (sysCommandValue != 0 && !NativeMethods.PostMessage(new HandleRef(form, form.Handle), WM.SYSCOMMAND, new IntPtr(sysCommandValue), IntPtr.Zero))
