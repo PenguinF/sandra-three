@@ -41,6 +41,57 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
+        public static readonly DefaultUIActionBinding WindowMenuRestore = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(WindowMenuRestore)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuTextProvider = SharedLocalizedStringKeys.WindowRestore .ToTextProvider(),
+                },
+            });
+
+        public static readonly DefaultUIActionBinding WindowMenuMove = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMove)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.WindowMove.ToTextProvider(),
+                },
+            });
+
+        public static readonly DefaultUIActionBinding WindowMenuSize = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(WindowMenuSize)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.WindowSize.ToTextProvider(),
+                },
+            });
+
+        public static readonly DefaultUIActionBinding WindowMenuMinimize = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMinimize)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.WindowMinimize.ToTextProvider(),
+                },
+            });
+
+        public static readonly DefaultUIActionBinding WindowMenuMaximize = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMaximize)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.WindowMaximize.ToTextProvider(),
+                },
+            });
+
         public static readonly DefaultUIActionBinding Close = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Close)),
             new ImplementationSet<IUIActionInterface>
