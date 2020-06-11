@@ -169,7 +169,7 @@ namespace Sandra.UI
 
             this.BindAction(NewPgnFile, TryNewPgnFile);
             this.BindAction(OpenPgnFile, TryOpenPgnFile);
-            this.BindAction(SharedUIAction.Exit, TryExit);
+            this.BindAction(SharedUIAction.Exit, TryClose);
 
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(DockedControl));
             this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(DockedControl));
