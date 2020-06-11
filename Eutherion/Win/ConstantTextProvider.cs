@@ -55,7 +55,7 @@ namespace Eutherion.Win
         public ConstantTextProvider(string text)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
-            if (text.Length == 0) throw new ArgumentException(nameof(text));
+            if (text.Length == 0) throw new ArgumentException($"{nameof(text)} is empty", nameof(text));
         }
 
         string ITextProvider.GetText() => Text;

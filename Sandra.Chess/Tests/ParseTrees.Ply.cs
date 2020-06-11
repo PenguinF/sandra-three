@@ -165,6 +165,16 @@ namespace Sandra.Chess.Tests
             ("1 e4$.", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, NAGNoFloats), OnePeriod)),
                 new[] { PgnErrorCode.EmptyNag, PgnErrorCode.OrphanPeriod, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
 
+            // Same tests except with a ')'.
+            (")1 e4$", OneGame(EmptyTagSection, Plies(Ply(WithFloats(OneOrphanClose, MoveNumberNoTrivia), WS_MoveNoFloats, NAGNoFloats))),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.EmptyNag, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
+            ("1) e4$", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WithFloats(OneOrphanClose, WS_Move), NAGNoFloats))),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.EmptyNag, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
+            ("1 e4) $", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, WithFloats(OneOrphanClose, WS_NAG)))),
+                new[] { PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.EmptyNag, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
+            ("1 e4$)", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats, WS_MoveNoFloats, NAGNoFloats), OneOrphanClose)),
+                new[] { PgnErrorCode.EmptyNag, PgnErrorCode.OrphanParenthesisClose, PgnErrorCode.MissingTagSection, PgnErrorCode.MissingGameTerminationMarker }),
+
             // Ply elements followed by a game termination marker.
             ("1*", OneGame(EmptyTagSection, Plies(Ply(MoveNumberNoFloats)), ResultNoTrivia),
                 new[] { PgnErrorCode.MissingMove, PgnErrorCode.MissingTagSection }),

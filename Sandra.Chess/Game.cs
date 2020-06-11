@@ -103,7 +103,7 @@ namespace Sandra.Chess
             // 'value' should be embedded somewhere inside this.moveTree.
             if (current != MoveTree)
             {
-                throw new ArgumentException(nameof(value), "value is not embedded in Game.MoveTree.");
+                throw new ArgumentException("value is not embedded in Game.MoveTree.", nameof(value));
             }
 
             Position newPosition = initialPosition.Copy();

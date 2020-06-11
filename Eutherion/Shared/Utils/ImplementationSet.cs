@@ -142,7 +142,7 @@ namespace Eutherion.Utils
             var actualType = implementation.GetType();
             if (InterfaceType == actualType)
             {
-                throw new ArgumentException(nameof(implementation), $"Attempt to add an instance of {InterfaceType.FullName}");
+                throw new ArgumentException($"Attempt to add an instance of {InterfaceType.FullName}", nameof(implementation));
             }
 
             AssignableTypes(actualType).ForEach(x => implementations.Add(x, implementation));
