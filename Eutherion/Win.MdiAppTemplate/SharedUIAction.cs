@@ -47,7 +47,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 new CombinedUIActionInterface
                 {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Alt, ConsoleKey.F4), },
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
                     IsFirstInGroup = true,
                     MenuTextProvider = SharedLocalizedStringKeys.Close.ToTextProvider(),
                 },
