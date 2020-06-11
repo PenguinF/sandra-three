@@ -46,8 +46,11 @@ namespace Eutherion.Win.Native
     {
         public const int MASK = 0xfff0;
 
+        public const int SIZE = 0xf000;
+        public const int MOVE = 0xf010;
         public const int MINIMIZE = 0xf020;
         public const int MAXIMIZE = 0xf030;
+        public const int CLOSE = 0xf060;
         public const int RESTORE = 0xf120;
     }
 
