@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
@@ -122,6 +123,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
+        private readonly ToolTip ToolTip;
+
         private readonly UIActionHandler mainMenuActionHandler;
 
         private Button currentHoverButton;
@@ -197,6 +200,9 @@ namespace Eutherion.Win.MdiAppTemplate
             Controls.Add(MainMenuStrip);
 
             ResumeLayout();
+
+            ToolTip = new ToolTip();
+            UpdateToolTips();
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
 
@@ -743,9 +749,24 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private void UpdateToolTips()
+        {
+            Localizer currentLocalizer = Session.Current.CurrentLocalizer;
+
+            new (NonSelectableButton, LocalizedStringKey)[]
+            {
+                (minimizeButton, SharedLocalizedStringKeys.WindowMinimize),
+                (maximizeButton, SharedLocalizedStringKeys.WindowMaximize),
+                (saveButton, SharedLocalizedStringKeys.Save),
+                (closeButton, SharedLocalizedStringKeys.Close),
+            }
+            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Localize(x.Item2)));
+        }
+
         private void CurrentLocalizerChanged(object sender, EventArgs e)
         {
             UIMenu.UpdateMenu(MainMenuStrip.Items);
+            UpdateToolTips();
         }
 
         private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> dropDownItems)
@@ -855,7 +876,12 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) ObservableStyle.Dispose();
+            if (disposing)
+            {
+                ToolTip.Dispose();
+                ObservableStyle.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
