@@ -299,8 +299,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 ClientSize = new Size(width, height),
             };
 
-            // This adds a Close menu item to the context menu of the textBox.
-            textBox.BindActions(readOnlyTextForm.StandardUIActionBindings);
+            // Add a Close menu item to the context menu of the textBox.
+            textBox.BindAction(SharedUIAction.Close, readOnlyTextForm.TryClose);
 
             return readOnlyTextForm;
         }

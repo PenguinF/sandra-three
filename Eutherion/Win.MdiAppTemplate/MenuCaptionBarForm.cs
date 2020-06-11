@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Controls;
@@ -122,6 +123,8 @@ namespace Eutherion.Win.MdiAppTemplate
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
+        private readonly ToolTip ToolTip;
+
         private readonly UIActionHandler mainMenuActionHandler;
 
         private Button currentHoverButton;
@@ -197,6 +200,9 @@ namespace Eutherion.Win.MdiAppTemplate
             Controls.Add(MainMenuStrip);
 
             ResumeLayout();
+
+            ToolTip = new ToolTip();
+            UpdateToolTips();
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
 
@@ -743,9 +749,24 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
+        private void UpdateToolTips()
+        {
+            Localizer currentLocalizer = Session.Current.CurrentLocalizer;
+
+            new (NonSelectableButton, LocalizedStringKey)[]
+            {
+                (minimizeButton, SharedLocalizedStringKeys.WindowMinimize),
+                (maximizeButton, SharedLocalizedStringKeys.WindowMaximize),
+                (saveButton, SharedLocalizedStringKeys.Save),
+                (closeButton, SharedLocalizedStringKeys.Close),
+            }
+            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Localize(x.Item2)));
+        }
+
         private void CurrentLocalizerChanged(object sender, EventArgs e)
         {
             UIMenu.UpdateMenu(MainMenuStrip.Items);
+            UpdateToolTips();
         }
 
         private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> dropDownItems)
@@ -855,7 +876,12 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) ObservableStyle.Dispose();
+            if (disposing)
+            {
+                ToolTip.Dispose();
+                ObservableStyle.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
@@ -864,11 +890,55 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public UIActionBindings StandardUIActionBindings => new UIActionBindings
         {
+            { SharedUIAction.WindowMenuRestore, TryWindowRestore },
+            { SharedUIAction.WindowMenuMove, TryWindowMove },
+            { SharedUIAction.WindowMenuSize, TryWindowSize },
+            { SharedUIAction.WindowMenuMinimize, TryWindowMinimize },
+            { SharedUIAction.WindowMenuMaximize, TryWindowMaximize },
             { SharedUIAction.Close, TryClose },
         };
 
+        public UIActionState TryWindowRestore(bool perform)
+        {
+            if (WindowState == FormWindowState.Normal) return UIActionVisibility.Disabled;
+            if (perform) this.SendWindowCommand(WindowCommand.Restore);
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryWindowMove(bool perform)
+        {
+            // It appears that the system menu when opened from the caption bar sometimes enables this item when the Form is maximized.
+            // I'm not sure if this is a bug, but to be safe disable this action when maximized.
+            if (WindowState != FormWindowState.Normal) return UIActionVisibility.Disabled;
+            if (perform) this.SendWindowCommand(WindowCommand.Move);
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryWindowSize(bool perform)
+        {
+            if (FormBorderStyle != FormBorderStyle.Sizable && FormBorderStyle != FormBorderStyle.SizableToolWindow) return UIActionVisibility.Disabled;
+            if (WindowState == FormWindowState.Maximized) return UIActionVisibility.Disabled;
+            if (perform) this.SendWindowCommand(WindowCommand.Size);
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryWindowMinimize(bool perform)
+        {
+            if (WindowState == FormWindowState.Minimized || !MinimizeBox) return UIActionVisibility.Disabled;
+            if (perform) this.SendWindowCommand(WindowCommand.Minimize);
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryWindowMaximize(bool perform)
+        {
+            if (WindowState == FormWindowState.Maximized || !MaximizeBox) return UIActionVisibility.Disabled;
+            if (perform) this.SendWindowCommand(WindowCommand.Maximize);
+            return UIActionVisibility.Enabled;
+        }
+
         public UIActionState TryClose(bool perform)
         {
+            if (!ControlBox) return UIActionVisibility.Disabled;
             if (perform) Close();
             return UIActionVisibility.Enabled;
         }

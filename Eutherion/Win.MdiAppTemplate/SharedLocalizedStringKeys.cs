@@ -59,6 +59,11 @@ namespace Eutherion.Win.MdiAppTemplate
         public static readonly LocalizedStringKey UnsavedChangesTitle = new LocalizedStringKey(nameof(UnsavedChangesTitle));
         public static readonly LocalizedStringKey Untitled = new LocalizedStringKey(nameof(Untitled));
         public static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
+        public static readonly LocalizedStringKey WindowMaximize = new LocalizedStringKey(nameof(WindowMaximize));
+        public static readonly LocalizedStringKey WindowMinimize = new LocalizedStringKey(nameof(WindowMinimize));
+        public static readonly LocalizedStringKey WindowMove = new LocalizedStringKey(nameof(WindowMove));
+        public static readonly LocalizedStringKey WindowRestore = new LocalizedStringKey(nameof(WindowRestore));
+        public static readonly LocalizedStringKey WindowSize = new LocalizedStringKey(nameof(WindowSize));
         public static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
         public static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
 
@@ -98,6 +103,11 @@ namespace Eutherion.Win.MdiAppTemplate
                 { UnsavedChangesTitle, "Save changes" },
                 { Untitled, "Untitled" },
                 { View, "View" },
+                { WindowMaximize, "Maximize" },
+                { WindowMinimize, "Minimize" },
+                { WindowMove, "Move" },
+                { WindowRestore, "Restore" },
+                { WindowSize, "Size" },
                 { ZoomIn, "Zoom in" },
                 { ZoomOut, "Zoom out" },
             };

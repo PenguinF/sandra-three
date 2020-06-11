@@ -55,13 +55,20 @@ namespace Sandra.UI
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                var langMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
-                langMenu.AddRange(Session.Current.RegisteredLocalizers.Select(x => (Union<DefaultUIActionBinding, MainMenuDropDownItem>)x.SwitchToLangUIActionBinding));
+                var langWindowMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
+                langWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(x => (Union<DefaultUIActionBinding, MainMenuDropDownItem>)x.SwitchToLangUIActionBinding));
+
+                langWindowMenu.Add(SharedUIAction.WindowMenuRestore);
+                langWindowMenu.Add(SharedUIAction.WindowMenuMove);
+                langWindowMenu.Add(SharedUIAction.WindowMenuSize);
+                langWindowMenu.Add(SharedUIAction.WindowMenuMinimize);
+                langWindowMenu.Add(SharedUIAction.WindowMenuMaximize);
+                langWindowMenu.Add(SharedUIAction.Close);
 
                 mainMenuRootNodes.Add(new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(null, SharedResources.globe.ToImageProvider()),
-                    DropDownItems = langMenu
+                    DropDownItems = langWindowMenu
                 });
             }
 
@@ -169,7 +176,7 @@ namespace Sandra.UI
 
             this.BindAction(NewPgnFile, TryNewPgnFile);
             this.BindAction(OpenPgnFile, TryOpenPgnFile);
-            this.BindAction(SharedUIAction.Exit, TryExit);
+            this.BindAction(SharedUIAction.Exit, TryClose);
 
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(DockedControl));
             this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(DockedControl));

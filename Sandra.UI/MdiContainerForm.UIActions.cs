@@ -40,12 +40,6 @@ namespace Sandra.UI
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
-        public UIActionState TryExit(bool perform)
-        {
-            if (perform) Close();
-            return UIActionVisibility.Enabled;
-        }
-
         public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
             new ImplementationSet<IUIActionInterface>

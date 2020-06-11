@@ -40,13 +40,18 @@ namespace Eutherion.Win.Native
 
     /// <summary>
     /// Constains constants for native system commands, e.g. the WParam of the <see cref="WM.SYSCOMMAND"/> message.
+    /// See also: https://docs.microsoft.com/en-us/windows/win32/menurc/wm-syscommand
     /// </summary>
     public static class SC
     {
         public const int MASK = 0xfff0;
-        public const int RESTORE = 0xf120;
-        public const int MAXIMIZE = 0xf030;
+
+        public const int SIZE = 0xf000;
+        public const int MOVE = 0xf010;
         public const int MINIMIZE = 0xf020;
+        public const int MAXIMIZE = 0xf030;
+        public const int CLOSE = 0xf060;
+        public const int RESTORE = 0xf120;
     }
 
     /// <summary>
