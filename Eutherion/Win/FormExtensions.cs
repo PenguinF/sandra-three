@@ -99,7 +99,12 @@ namespace Eutherion.Win
                 new HandleRef(form, hwnd),
                 IntPtr.Zero);
 
-            if (result != 0 && !NativeMethods.PostMessage(new HandleRef(form, hwnd), WM.SYSCOMMAND, new IntPtr(result), IntPtr.Zero))
+            PostSysCommandMessage(form, result);
+        }
+
+        private static void PostSysCommandMessage(Form form, uint sysCommandValue)
+        {
+            if (sysCommandValue != 0 && !NativeMethods.PostMessage(new HandleRef(form, form.Handle), WM.SYSCOMMAND, new IntPtr(sysCommandValue), IntPtr.Zero))
             {
                 throw new Win32Exception();
             }
