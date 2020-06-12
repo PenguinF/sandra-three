@@ -44,5 +44,10 @@ Microsoft in general for open sourcing much of their .NET source code:
 P/Invoke madness harnessed by:
     http://www.pinvoke.net/
 
+PGN files used for benchmarking:
+    https://chessentials.com/ (Warmly recommended.)
+    https://www.pgnmentor.com/files.html
+    https://www.tcec-chess.com/archive.html
+
 
 1-2-Drienerlo!

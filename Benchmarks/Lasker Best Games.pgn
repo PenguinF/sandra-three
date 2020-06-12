@@ -1,0 +1,938 @@
+[Event "Amsterdam"]
+[Site "Amsterdam NED"]
+[Date "1889.08.26"]
+[Round "1"]
+[White "Emanuel Lasker"]
+[Black "Johann Hermann Bauer"]
+[Result "1-0"]
+[ECO "A03"]
+[PlyCount "75"]
+[EventDate "1889.08.26"]
+
+{Already the first move of the first game shows the profound psychology of
+Emanuel Lasker. Against a lesser known opponent, he choses an offbeat opening
+just to throw him off his guard.} 1. f4 d5 2. e3 Nf6 3. b3 {[pgndiagram] After
+1..d5, White essentialy plays a reversed Dutch Defence} e6 4. Bb2 Be7 5. Bd3 $5
+{A strange looking move, but not that bad at all. White blocks his d-pawn, but
+develops his bishop on an agressive post.} b6 6. Nc3 Bb7 7. Nf3 Nbd7 8. O-O O-O
+{[pgndiagram] Black has developed naturally and is by no means worse. However,
+now he has to find a concrete plan} 9. Ne2 $6 {This is probably not the best,
+as it gives up a bishop pair for no compensation} (9. a4 a5 10. Qe1 {Trying to
+bring the queen into attack, was interesting way. The position is
+approximately equal}) 9... c5 $6 (9... Nc5 {Would have exchanged White's
+dangerous light squared bishop and given Black an excellent position}) 10. Ng3
+Qc7 11. Ne5 {[pgndiagram] Objectively, this jump shouldn't be dangerous, but
+in those years, defence wasn't the strongest point of any chess player.} Nxe5
+$2 {A mistake} (11... g6 {Was comparatively the best, blocking the d3 bishop
+and preventing future Nh5, which  makes the knight on g3 look rather silly.})
+12. Bxe5 $6 (12. fxe5 {Was much better, even though it blocks the bishop} Ne4 {
+The best move} (12... Nd7 13. Qh5 h6 {Already the only move} (13... g6 {Is
+losing immediately} 14. Qh6 {Now Nh5 is a deadly threat, there is also Rxf7 in
+the air} Nxe5 (14... Rac8 15. Nh5) 15. Nh5) 14. Rf4 {And White has an
+extremely dangerous attack}) 13. Bxe4 dxe4 14. Rf4 Rad8 15. Nxe4 {And White
+has an excellent position}) 12... Qc6 13. Qe2 $6 {Allowing Black another
+chance for g6} (13. Nh5 $1 {Was very good, solving the problem piece at once}
+d4 14. Rf2) 13... a6 {[pgndiagram] And this is the decisive mistake. Making
+this move for Black is complete luxury} (13... g6 {Was absolutely necessary.
+It is not clear how White will continue}) 14. Nh5 $1 {Now White has a winning
+attack} Nxh5 $2 {And this is going from the frying pan to fire} (14... Rfd8 {
+Is the lesser evil} 15. Nxf6+ Bxf6 16. Bxh7+ Kf8 {And White retains an
+advantage, but the game continues} (16... Kxh7 17. Qh5+ Kg8 18. Bxf6 gxf6 19.
+Qh6 {[pgndiagram] And Black is busted})) 15. Bxh7+ $1 {[pgndiagram] The first
+bishop sacrifice} Kxh7 16. Qxh5+ Kg8 17. Bxg7 $3 {[pgndiagram] The second
+bishop sacrifice and the main reason why this not particularly important games
+is famous nowadays. This attacking maneouvre is a typical idea nowadays, but
+Lasker was first to discover it in over the board game} Kxg7 18. Qg4+ $1 {Very
+important check, forcing the black king on the h-file} (18. Rf3 $2 {Would be a
+terrible mistake} Rh8 19. Rg3+ Bg5 20. Rxg5+ Kf6 {[pgndiagram] And suddenly
+White is lost}) 18... Kh7 19. Rf3 {Black has to give up his queen in order to
+defend against mate} e5 20. Rh3+ Qh6 21. Rxh6+ Kxh6 22. Qd7 $1 {[pgndiagram]
+And this is an additional problem. Without this move, Black would be probably
+be able to resist, but now White wins one of the bishops and the game is
+effectively decided} Bf6 23. Qxb7 {The rest is a matter of straightforward
+technique} Kg7 24. Rf1 Rab8 25. Qd7 Rfd8 26. Qg4+ Kf8 27. fxe5 Bg7 28. e6 Rb7
+29. Qg6 f6 30. Rxf6+ Bxf6 31. Qxf6+ Ke8 32. Qh8+ Ke7 33. Qg7+ Kxe6 34. Qxb7 Rd6
+35. Qxa6 d4 36. exd4 cxd4 37. h4 d3 38. Qxd3 {[pgndiagram] A beautiful
+attacking game, not without its errors. The best example of the "psychological
+chess" that Lasker played} 1-0
+
+[Event "St Petersburg"]
+[Site "St. Petersburg  RUS"]
+[Date "1914.05.18"]
+[Round "7"]
+[White "Emanuel Lasker"]
+[Black "Jose Raul Capablanca"]
+[Result "*"]
+[ECO "C68"]
+[PlyCount "83"]
+[EventDate "1914.04.21"]
+
+1. e4 {[pgndiagram] This game was a must win for Lasker. Two rounds before the
+finish, he was behind Capablanca by a whole point. Moreover, the Cuban had not
+lost any games in the whole tournament before this encounter.} e5 2. Nf3 Nc6 3.
+Bb5 a6 4. Bxc6 $1 {An amazing decision. Although the Exchange Variation of the
+Ruy Lopez was a formidable weapon in Lasker's hands, few could have thought
+that it would work against Capablanca, whose virtuoso endgame technique was
+already widely known.} dxc6 5. d4 (5. O-O {Nowadays, castling first is
+considered as the best move. Robert James Fischer was the first to realize the
+strength of this move}) 5... exd4 6. Qxd4 Qxd4 7. Nxd4 {[pgndiagram]
+Objectively speaking, White shouldn't claim any advantage in this position
+whatsoever. Black has great compensation for the inferior pawn structure in
+view of the two bishops and free development.} Bd6 (7... Bd7 {With castling
+long has been played more often, with comfortable game}) 8. Nc3 Ne7 9. O-O O-O
+10. f4 $6 {[pgndiagram] A rather double edged, objectively not a very good
+move. White is burning his bridges prematurely. But Lasker is laying for the
+win} (10. Be3 {Is more normal, although here White doesn't have the advantage})
+10... Re8 {Black prevents Be3 due to a knight jump, and also threatens Bc5} (
+10... Bc5 11. Be3 Re8 {Is also possible} 12. Rae1 f6 {With comfortable game}) (
+10... f6 {Is also decent}) 11. Nb3 f6 {Preparing the development of the bishop
+via b6-Lb7} (11... a5 {Is the computer way, grabbing some space for free} 12.
+e5 Bb4 13. a3 Bxc3 14. bxc3 b6 {And Black has an excellent position}) 12. f5 {
+[pgndiagram] "It has been wrongly claimed that this wins the game, but I would
+like nothing better than to have such a position again" - Capablanca.   And
+indeed, this move is double edged. On one hand it hands the e5 square for free,
+but on the other hand, White eyes the e6 square.   However, under normal
+circumstances he shouldn't be allowed to put his knight there} b6 13. Bf4 Bb7
+$2 {Only this is a serious mistake, after which White's play is completely
+justified} (13... Bxf4 14. Rxf4 c5 15. Rd1 Bb7 {Was more logical. The point is
+that White's invasion is not dangerous} 16. Rd7 Rac8 {And his knight and rook
+are stuck on b3 and f4. Black is better}) 14. Bxd6 cxd6 15. Nd4 {[pgndiagram]
+Now Black has  to keep eye over e6. Although his pawn chain looks nice, it is
+not that mobile and White's knights have many potential targets} Rad8 $2 {And
+this is allowing too much. Capablanca is rather careless and allows the White
+knight to resident permanently on e6} (15... Bc8 {Was neccessary, intending c5
+next and preventing White's plan} 16. Rad1 c5 {And now White has to give up
+the idea of occupying the e6 square} 17. Ne6 Bxe6 18. fxe6 Rad8 19. Nd5 Nc6 {
+[pgndiagram] And White doesn't have any advantage}) 16. Ne6 {After this the
+play is completely one sided} Rd7 17. Rad1 {[pgndiagram] Capablanca said that
+he was now on point of playing c6-c5, but suddenly he became ambitious. 
+Indeed, 17... c5 was better} Nc8 (17... c5 18. Rf3 $1 {Preventing d5 in a
+tactical way} (18. Nd5 {Is the only move mentioned by Kasparov and Capablanca,
+but here it seems Black can defend - the d6 weakness is shielded} Bxd5 (18...
+Nxd5 19. exd5) 19. exd5 h5 {Preventing g4. Black is ok}) 18... d5 $2 19. exd5
+Nxd5 $4 20. Rfd3 {And White wins}) 18. Rf2 b5 19. Rfd2 Rde7 20. b4 Kf7 21. a3 {
+[pgndiagram] White has a dream position. The play is completely on one goal}
+Ba8 $2 {"Once again changing my plan and this time without any good reason" -
+Capablanca.} (21... Rxe6 {Was indeed the best move} 22. fxe6+ Rxe6 {And Black
+is very much in the game}) 22. Kf2 {[pgndiagram] Now White will push his
+kingside pawns, opening a second front} Ra7 (22... h5 $2 {Simply loses a pawn}
+23. Rd3 {And after Rh3-Nf3, White will win the h5 pawn}) 23. g4 h6 24. Rd3 a5
+$2 {This is a bad idea, as only White will benefit from the opening of the
+a-file} (24... Rae7 {Waiting passively was better, although not sufficient} 25.
+h4 {And now the exchange sacrifice doesn't work that well after} Rxe6 26. fxe6+
+Rxe6 27. Kf3 Bb7 28. h5 Re5 29. Kf4 Re6 30. a4 $1 {[pgndiagram] And White is
+bound to break through sooner or later. The advance of the kingside pawns
+makes a big difference}) 25. h4 axb4 26. axb4 Rae7 $6 {[pgndiagram] It was
+probably wiser not to move the rook from the a-file} (26... Ra3 {Is a blank
+shot though} 27. g5) (26... Rh8 {Awaiting the opening of the h-file, was more
+subtle. White shouldn't rush, but prepare it with say} 27. Rg1 Ra3 28. g5 {
+[pgndiagram] But this push is strong all the same. White is close to winning;
+tactics work in his favour} hxg5 29. hxg5 Rh2+ 30. Ke3 Nb6 (30... Rxc2 {Falls
+to} 31. Nxb5 Rxd3+ (31... cxb5 32. Rxa3) 32. Kxd3) 31. gxf6 gxf6 32. Rg7+ {and
+wins}) 27. Kf3 Rg8 28. Kf4 g6 $6 (28... Rh8 {Was wiser}) 29. Rg3 (29. g5 $1 {
+Was more energetic. Black doesn't have a good reply} gxf5 30. exf5 fxg5+ 31.
+hxg5 hxg5+ 32. Nxg5+ Kf8 33. Nce4 {And wins}) 29... g5+ {[pgndiagram]} (29...
+gxf5 {It is hard to suggest a better move} 30. exf5 d5 31. Ne2 Nd6 32. N2d4 Ne4
+33. Ra3 {And White penetrates}) 30. Kf3 Nb6 $6 {Desperation. An attempt to
+jump with the knight on the e5 square} (30... Rge8 31. hxg5 fxg5 {Was more
+resistant}) 31. hxg5 hxg5 32. Rh3 Rd7 (32... Nc4 {Is met very nicely with} 33.
+Kg3 $1 {And now it is hard to suggest a move for Black. White intends e5 next}
+(33. Rh7+ Ke8 34. Nc7+ {Also wins though} Kd7 35. Rxe7+ Kxe7 36. Ra1) 33... Ne5
+34. Rxd6) 33. Kg3 Ke8 34. Rdh1 Bb7 35. e5 $1 {[pgndiagram] The knockout blow.
+With this clearance sacrifice, White opens the e4 square for his other knight
+and Black gets overwhelmed} dxe5 (35... fxe5 36. Ne4 {Was not better}) (35...
+c5 {Was more tricky, because now} 36. Rh8 {Is the onl way to win} Bxh1 37.
+Rxg8+ Ke7 38. exd6+ {[pgndiagram] And White wins a piece} Kxd6 39. bxc5+ Kc6
+40. cxb6 {And wins}) 36. Ne4 $1 {f6 and c5 are too weak, h-file is owned by
+White, the game is over} Nd5 37. N6c5 Bc8 38. Nxd7 Bxd7 39. Rh7 Rf8 40. Ra1 Kd8
+41. Ra8+ Bc8 42. Nc5 {[pgndiagram] Playing important games with great power
+and energy was always Lasker's forte and he always managed to score a win when
+he needed one the most} *
+
+[Event "St. Petersburg 1895/96"]
+[Site "St. Petersburg RUS"]
+[Date "1896.01.04"]
+[Round "10"]
+[White "Harry Nelson Pillsbury"]
+[Black "Emanuel Lasker"]
+[Result "0-1"]
+[ECO "D50"]
+[PlyCount "60"]
+[EventDate "1895.12.13"]
+
+1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 c5 5. Bg5 {[pgndiagram] This was
+Pillsbury's favourite move against the Semi-Tarrasch defence, which is
+somewhat risky from the modern viewpoint.} (5. e3) (5. cxd5 {Are both more in
+the vogue nowadays}) 5... cxd4 6. Qxd4 (6. Nxd4 {Later it was established that
+after this move} e5 $1 {Is an immediate equalizer}) 6... Nc6 {This looks
+natural, but it might not be the best, as it allows the ruination of the
+Black's kingside structure} (6... Be7 {First is correct} 7. Rd1 {And only now}
+Nc6 {With equality}) 7. Qh4 $6 (7. Bxf6 $1 {Was the right move, asking Black
+some immediate questions} gxf6 {The only correct move} (7... Nxd4 8. Bxd8 Nxf3+
+(8... Nc2+ 9. Kd2 Nxa1 10. Bh4 {[pgndiagram] And the Knight will fall}) 9. exf3
+Kxd8 10. cxd5 {[pgndiagram] And White has won a pawn}) 8. Qh4 {And White has
+chances for an opening advantage}) 7... Be7 8. O-O-O $6 {And this is extremely
+risky. Half a century later, Keres suffered a hard defeat in a similar manner
+from the hands of the Botvinnik} (8. e3 Qb6 {Is mildly unpleasant, but now
+castling makes more sense since the queen is better on a5 than on b6} 9. O-O-O
+(9. Rb1 {Also comes into consideration} h6 10. Bd3 O-O 11. Bxh6 gxh6 12. Qxh6 {
+And it would appear that White has the perpetual check.. at least.})) 8... Qa5
+{[pgndiagram] White is in danger and has to play precisely} 9. e3 $2 {And this
+is already almost the decisive error} (9. cxd5 {Was necessary.} exd5 10. e4 $1
+{Only energetic play will do in this position} (10. e3 {Subjects white to a
+strong attack once again} h6 11. Bd3 Be6 12. Nd4 Nxd4 13. exd4 O-O {
+[pgndiagram] And Black is enjoying this position}) 10... Be6 (10... dxe4 11.
+Bxf6 {Is the point} Bxf6 12. Qxe4+ Be6 13. Bc4 {And White is relatively safe})
+11. Bb5 {And White has managed to develop and shouldn't be worse}) 9... Bd7 (
+9... h6 {Was even stronger} 10. Bd3 Rf8 {Avoiding all tactics connected with
+castling} (10... O-O {On} 11. cxd5 $3 {Works} Nxd5 (11... hxg5 $2 12. Nxg5 {
+And White is almost winning}) 12. Bxe7 Ncxe7 {Is not that clear}) 11. cxd5 $4 {
+Is now bad} hxg5) 10. Kb1 $6 {Allowing h6, after which White doesn't have
+enough time for Bb5 ideas} (10. cxd5 {Was better} exd5 11. Bb5 {Eliminating
+the danger} a6 12. Bxc6 bxc6 (12... Bxc6 13. Nd4 {Is good for White}) 13. Ne5)
+10... h6 11. cxd5 exd5 12. Nd4 {[pgndiagram] White is forced to cut his losses}
+(12. Bb5 O-O {Is now a major difference, White is forced to react on the
+kingside} 13. Bxf6 Bxf6 {And White doesn't have time to swap queens due to} 14.
+Qa4 Bf5+ 15. Ka1 Qxc3 $3 16. Rd2) 12... O-O 13. Bxf6 Bxf6 14. Qh5 {It is
+apparent that White's opening hasn't been successful. But the spectacular part
+of the game is yet to follow} Nxd4 (14... Be6 {Was interesting} 15. f4 Rac8 16.
+f5 Bd7 {And Black is winning}) 15. exd4 Be6 $5 {It would appear that Lasker
+already knew how he would respond to the advance of the f-pawn} 16. f4 $6 {
+Probably not justified} (16. Bc4 {Finishing the development and bringing the
+bishop to defensive post was better}) 16... Rac8 17. f5 Rxc3 $3 {[pgndiagram]
+A brilliant combination.} (17... Bd7 {Was perfectly possible though} 18. Qf3
+Bc6 19. g4 b5 {And Black is faster with his attack nevertheless. However, we
+probably wouldn't be annotating this game in that case}) 18. fxe6 (18. bxc3 Rc8
+{Is hopeless for White} (18... Bd7 {Even this prosaic move wins easily})) 18...
+Ra3 $1 {[pgndiagram] The crux of the combination. Black sacrifices his rook on
+a3, forcing White to take the rook and shatter his kingside pawn structure} 19.
+exf7+ $2 {And this is the losing move} (19. bxa3 {Seems hopeless, but..} Qb6+
+20. Bb5 $1 {This defensive resource is also featured in the main game, but
+here it is extremely strong} (20. Ka1 Bxd4+ 21. Rxd4 Qxd4+ 22. Kb1 fxe6 {Is
+hopeless for White. Rf2 is very strong threat}) (20. Kc2 Rc8+ {Also doesn't
+finish to well after} 21. Kd2 Qxd4+ 22. Ke1 Qe3+ 23. Be2 fxe6 {And Black has
+all sorts of threats}) 20... Qxb5+ 21. Ka1 fxe6 {[pgndiagram] And White is
+worse, but the game is not over}) 19... Rxf7 20. bxa3 Qb6+ 21. Bb5 $1 {
+[pgndiagram] Similarly as in previous variations, all other moves lose more
+quickly} Qxb5+ 22. Ka1 Rc7 $2 {This move almost throws the whole advantage for
+Black} (22... Qc4 {The difference between this and previously examined
+variations is the fact that black doesn't have to recapture on e6 and has one
+tempo to create a threat. A tempo that makes every difference.} 23. Qg4 Re7 {
+The threats are Re4 and Re2 and Black wins}) 23. Rd2 Rc4 24. Rhd1 $2 {
+[pgndiagram] It is now Pillsbury's moment to go wrong} (24. Re1 {Would lead to
+a pretty draw after} Qa5 25. Re8+ Kh7 26. Qf5+ g6 27. Re7+ Bxe7 (27... Kg8 28.
+Qxg6+) 28. Qf7+ {With perpetual}) 24... Rc3 $2 {[pgndiagram] Another error,
+which even passes the advantage to white} (24... Qc6 {Would have won. The
+point is that after} 25. Kb1 Bg5 {Wins}) 25. Qf5 Qc4 {Now suddenly White has
+to make only one precise move and he can even start thinking about winning} 26.
+Kb2 $4 {A tragic move and one of the historic chess moves with grave
+consequences for Pillsbury.} (26. Kb1 {Keeping everything defended, especially
+the a2 pawn, was good for White.} Rxa3 27. Rc1 {And Black has unplesant
+problems} Qb5+ 28. Rb2 Qd3+ 29. Qxd3 Rxd3 30. Rxb7 Bxd4 {And it is hard to
+believe that Black can hold this endgame}) 26... Rxa3 $3 {[pgndiagram] For the
+second time in the game, the rook is sacrificed on a3. One of those instances
+which induced Lasker's contemporaries to accuse him that he hypnotized his
+opponents} 27. Qe6+ (27. Kxa3 {Walks into a mate} Qc3+ 28. Ka4 b5+ 29. Kxb5
+Qc4+ 30. Ka5 Bd8#) 27... Kh7 $2 {Once again a mistake} (27... Kh8 {Would have
+won. There is a crucial difference between the White queen on e6 and f5 (cf.
+the later variation)} 28. Kb1 Bxd4 29. Qe8+ (29. Rxd4 Qxa2+) 29... Kh7 30. Qe2
+Qb4+ {And wins}) 28. Kxa3 $4 {[pgndiagram] A final mistake of the game.
+Pillsbury walks in the previously examined mating pattern} (28. Qf5+ Kh8 29.
+Kb1 {WAs now possible, because with the queen on f5, White has f8 check,
+capturing the rook on a3} Rxa2 $1 {Black can force the perpetual with this move
+} (29... Bxd4 $4 30. Qf8+ Kh7 31. Qxa3) 30. Rxa2 Qb3+ 31. Kc1 Bg5+ 32. Rad2
+Qc3+ 33. Kb1 (33. Qc2 Qa1+ 34. Qb1 Qc3+) 33... Qb3+) 28... Qc3+ {Now the game
+is over} 29. Ka4 b5+ 30. Kxb5 Qc4+ {[pgndiagram] A fantastic struggle, in
+which Lasker almost threw away the deserved victory. If Pillsbury won this
+game, he would have also won the whole tournament and probably been regarded
+as the undisputed number one in the world. Alas...} 0-1
+
+[Event "Cambridge Springs"]
+[Site "Cambridge Springs, PA USA"]
+[Date "1904.04.28"]
+[Round "3.3"]
+[White "Emanuel Lasker"]
+[Black "William Ewart Napier"]
+[Result "1-0"]
+[ECO "B72"]
+[PlyCount "69"]
+[EventDate "1904.04.25"]
+
+1. e4 c5 2. Nc3 Nc6 3. Nf3 g6 4. d4 cxd4 5. Nxd4 Bg7 6. Be3 d6 {[pgndiagram]
+One of those rare instances of the Dragon variation of the Sicilian in the
+20th century} 7. h3 {The plan of the extended fianchetto is definitely not the
+most challenging one, but it is also not without it's venom if not handled
+properly} Nf6 {Nothing wrong with this, because White hardly has another
+square for this knight. The g5 push is not that significant} 8. g4 {The
+typical idea of the variation. White intends to continue with Bg2, 0-0, f4 and
+attack on the kingside.} O-O 9. g5 $6 {[pgndiagram] But this is premature in
+my opinion. White is not sufficiently developed for such displays of aggression
+} (9. Bg2 {Is more normal} Bd7 10. O-O Ne5 {With typical, Dragon play}) 9...
+Ne8 $6 (9... Nh5 {Came into consideration. The point is that} 10. Be2 {Is met
+by} Nf4) (9... Nd7 {Also seems more logical than the text move}) 10. h4 Nc7 11.
+f4 $6 {Typcial Lasker, but once again, White should complete his development
+instead} (11. Qd2) 11... e5 $5 {A typical reaction. Black responds to a wing
+attack with the central blow} 12. Nde2 d5 $6 {But this, surprisingly is not
+the best move in the position, although it is typical and does look rather
+attractive} (12... exf4 {First of all, the typical capture, opening the e5
+square for the pieces, was possible.} 13. Nxf4 Bxc3+ $1 {Capturing the
+defender of the d5 square and ruining White's queenside structure}) (12... f5
+$1 {Secondly, this unexpected resource, opening the position from the other
+side, was extremely strong. It is hard to say what Black should do} 13. gxf6
+Bxf6 14. Bf2 exf4 {And Black is almost winning}) 13. exd5 Nd4 $2 {[pgndiagram]
+And this is almost a decisive mistake. In such a sharp position, every wrong
+move is very costly.} (13... exf4 {This intermezzo was essential} 14. Bxf4 (14.
+Nxf4 Re8 15. Qd2 Bd4 $1) 14... Nb4 {And Black gets extremely good compensation
+for the piece}) 14. Nxd4 Nxd5 (14... exd4 15. Bxd4 {Is just a clear pawn for
+White}) 15. Nf5 $1 {Lasker was very strong in these positions} Nxc3 16. Qxd8
+Rxd8 17. Ne7+ Kh8 (17... Kf8 {Runs into} 18. Bc5) 18. h5 $1 {[pgndiagram] A
+fantastic conception. White ignores the piece, but simply continues to attack,
+even after the queen exchange} (18. bxc3 {Actually doesn't win a piece.} exf4
+19. Bd4 Re8) (18. f5 {Was arguably even stronger} Ne4 (18... Bxf5 19. bxc3) 19.
+f6 Bf8 20. Bc4 Nd6 21. Bb3 {With advantage}) 18... Re8 19. Bc5 (19. f5 {Is
+once again computer's suggestion, threatening the knight on c3 (removing the
+exf4 counter)} gxf5 {The only move. Tactics work in Black's favour} 20. Nxc8
+Nd5 21. Bf2 Rexc8 22. O-O-O {[pgndiagram] And White is much better}) 19... gxh5
+$2 {And this is a serious mistake} (19... exf4 {Pinning the knight on e7 and
+defending its counterpart on c3 was necessary. After} 20. hxg6 fxg6 21. Bd3 Nd5
+22. Rxh7+ Kxh7 23. Bxg6+ Kh8 24. Bxe8 Bg4 25. Nxd5 Rxe8+ 26. Kd2 {Black can
+resist in the endgame}) 20. Bc4 $2 {The way chess was played in the early 20th
+century. Taking the piece was often rejected in favour of an attacking
+continuation} (20. bxc3 {WAs now good, because the knight on e7 is defended}
+exf4 21. O-O-O) (20. Rxh5 {Was also better than the text move}) 20... exf4 $2 {
+The position is obviously very complex. Black defends the knight in an
+indirect way, but this proves to be another tactical mistake} (20... Ne4 {
+Gaining a tempo on the bishop on c5, was important} 21. Ba3 Ng3 {This move
+hurts White} 22. Rg1 exf4 23. Bxf7 Bg4 24. Bxe8 Rxe8 {[pgndiagram] And
+amazingly, computer claims Black is completely winning here. It does seem that
+White is tied up, but it is hard to find it 4 moves in advance}) 21. Bxf7 Ne4
+22. Bxe8 Bxb2 (22... Nxc5 23. Bxh5 {Is hopeless. White has a clear exchange
+and an attack}) 23. Rb1 Bc3+ 24. Kf1 {[pgndiagram]At the moment, White has a
+clear rook for two pawns, but Black can regain some of his material} Bg4 (24...
+Nxc5 {Was better} 25. Bxh5 Kg7 {And Black is still in a precarious position,
+but he has some hopes of resisting in the endgame}) 25. Bxh5 Bxh5 26. Rxh5 Ng3+
+27. Kg2 Nxh5 28. Rxb7 {[pgndiagram] It is not hard to understand why Napier
+went for this position. The material is equal, and White's position doesn't
+look that threatening. However, in reality, Black is completely tied up} a5 29.
+Rb3 {Changing the track and going for the h-pawn} Bg7 30. Rh3 Ng3 31. Kf3 {
+[pgndiagram] All Black's pawns are weak and White's pieces are much more active
+} Ra6 32. Kxf4 Ne2+ 33. Kf5 Nc3 34. a3 Na4 $2 {A final blunder} (34... a4 {WAs
+more resilient. Now Be3 is not winning immediately} 35. Be3 Ra5+ 36. Kf4) 35.
+Be3 {[pgndiagram]There is no way of preventing g6, with decisive threats.
+Black finally resigned. Another fantastic struggle with many mistakes, in
+which Lasker managed to outplay his opponent from an aggressive, but dubious
+position} 1-0
+
+[Event "Lasker - Steinitz World Championship"]
+[Site "New York, NY USA"]
+[Date "1894.04.03"]
+[Round "7"]
+[White "Emanuel Lasker"]
+[Black "Wilhelm Steinitz"]
+[Result "1-0"]
+[ECO "C62"]
+[PlyCount "91"]
+[EventDate "1894.??.??"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 Bd7 5. Nc3 Nge7 {[pgndiagram] This is
+Steinitz's classical defence. The knight is heading to g6, bolstering the e5
+square. On the other hand, Black loses some time. White should be better in
+this variation, but Black is rather solid} 6. Be3 (6. d5 Nb8 7. Bxd7+ (7. a4 $5
+) 7... Nxd7 8. Be3 {Is another way of treating this position}) 6... Ng6 7. Qd2
+Be7 8. O-O-O a6 9. Be2 (9. Bxc6 Bxc6 10. h4 $5 {Is interesting. The point is
+that} Nxh4 11. Nxh4 Bxh4 12. dxe5 dxe5 13. Rxh4 Qxh4 14. Bg5 {[pgndiagram]
+Wins for White}) 9... exd4 10. Nxd4 Nxd4 11. Qxd4 {[pgndiagram] Not allowing
+the exchange of the bishops. White has more space, but in this Spanish
+structure (e4 vs d6 pawn) Black has less space, but he doesn't have any
+weaknesses (his pawn structure is compact).} Bf6 12. Qd2 Bc6 13. Nd5 O-O 14. g4
+$6 {But this is premature agression. Pawns don't move backwards. Although this
+move is played automaticaly by many lower rated players, pawn attacks should
+always be prepared} (14. f3 {With a small plus was better}) (14. h4 {If White
+had attacking ideas, he might have considered opening the h-file instead} Bxh4
+15. g3 Be7 {With compensation for the pawn}) 14... Re8 15. g5 Bxd5 16. Qxd5 $2
+{[pgndiagram] A second mistake, after which White is seriously worse} (16. exd5
+{Was necessary, after which Black can sacrifice the exchange:} Rxe3 17. fxe3
+Bxg5 {[pgndiagram] With sufficient compensation. Still, White retains some
+advantage}) 16... Re5 $1 17. Qd2 $6 {After this white loses two pawns without
+any compensation} (17. Qxb7 {Was required} Bxg5 18. Bxg5 Rxg5 19. h4 {And
+although Black has some advantage, White has maintained the material balance
+for the moment}) 17... Bxg5 18. f4 (18. Bxg5 Qxg5 {Is just horrible. Pawn down,
+better knight, everything is in Black's favour}) 18... Rxe4 $1 {[pgndiagram]
+The tactical point. Black exploits the position of the White bishops and wins
+his piece back} 19. fxg5 Qe7 20. Rdf1 $2 {The final mistake} (20. Bf3 {
+Regaining one pawn, was the best} Rxe3 21. Bxb7 Rb8 22. Rhe1 $1 {And this is
+better for White than what he did in the game}) 20... Rxe3 21. Bc4 {
+[pgndiagram] Objectively, White should be lost. But Lasker's stubbornes is the
+main reason why this not so spectacular game has became famous. He digs in,
+creates his chances and continues playing like nothing has happened} Nh8 $5 {
+A typical Steinitz move, but slightly artificial} (21... Rf8 22. h4 b5 {Was
+more normal, asking the bishop where it wants to go} 23. Bd3 {Else Re2 is
+unpleasant} Qe5 {And Black is winning}) 22. h4 c6 (22... b5 23. Bd5 {Now gains
+a tempo} Re2 24. Qd3 Re8 25. Bc6 {But still, White's position is unenviable.
+Although this is the better version than in the previous note (the knight
+looks strange on h8)}) 23. g6 $5 {Very creative. Throwing in another pawn just
+to open the kingside completely} d5 $2 {[pgndiagram] And immediately Steinitz
+makes a mistake that probably throws the win away already} (23... hxg6 {Black
+should have taken the bait} 24. h5 gxh5 25. Rxh5 Re5 {leads to a nice variation
+} 26. Rxh8+ Kxh8 27. Qh2+ Kg8 28. Bxf7+ Qxf7 29. Rxf7 Kxf7 {[pgndiagram] And
+two rooks should outweigh the queen}) 24. gxh7+ Kxh7 25. Bd3+ Kg8 26. h5 {
+[pgndiagram] Although Black is still material up, the situation has changed.
+White's pieces are perfectly placed, the knight is out of play, and files are
+opened. Still, two pawns mean Black is not worse, but he isn't clearly better
+anymore as well} Re8 27. h6 g6 (27... gxh6 28. Rfg1+ Ng6 29. Bxg6 fxg6 30.
+Rxg6+ Kf7 {Is something only computer would consider, but Black's king is safe
+here, he has counterchances on the other side of the board}) 28. h7+ Kg7 29.
+Kb1 $5 {[pgndiagram] But this move is really amazing; at the height of the
+battle White makes a quiet move with his king and puts the ball into Black's
+court. Although it is by no means the best move in this position, this puts
+Steinitz in a hard psychological position} (29. Qh2 {Was objectively better
+and only after} Qg5 30. Kb1) 29... Qe5 {This is better place for the queen
+than g5} 30. a3 c5 31. Qf2 c4 $6 (31... f5 $1 {Is once again the computer's
+choice, nipping White's attack in the bud.} 32. Rfg1 Kf7 {And White has
+nothing.}) 32. Qh4 {[pgndiagram] "In this game there is a certain Tal effect.
+White's attack is rather abstract, but it will not come to an end."} f6 33. Bf5
+$3 {Kasparov refuses to give an exclamation mark to this move, but to my mind
+it is amazing. White simply gives up a piece} Kf7 {Not yet fatal, but there
+were better alternatives} (33... c3 $1 {Would lead to a forced draw} 34. b3
+gxf5 35. Rhg1+ Kf7 36. Qh5+ Ke7 37. Rxf5 (37. Rg8 {Is impossible due to} Kd6
+38. Rxf5 Qd4 {Leads to mate now}) 37... Re1+ 38. Ka2 Qe2 39. Rg7+ Ke6 40. Qxe8+
+Kxf5 41. Qc8+ Qe6 42. Qxh8 Re2 43. Kb1 Re1+ {[pgndiagram] With perpetual check}
+) (33... gxf5 {Was also good enough} 34. Rhg1+ Kf7 35. Qh5+ Ke7 36. Rxf5 (36.
+Rg8 $5 {Might be even better here} Kd6 37. Rxf5 Qd4 {There is no mate}) 36...
+Qe6 $1 37. Rxd5 {[pgndiagram] Although here, White can continue playing}) 34.
+Rhg1 $1 gxf5 (34... c3 {Once again came into consideration} 35. Bd3 Kg7 36. Qb4
+b5 37. bxc3 g5 {And Black is better}) 35. Qh5+ Ke7 36. Rg8 $1 {[pgndiagram]} (
+36. Rxf5 {Was also possible} Qe6 37. Rxd5 Re1+ 38. Rxe1 Qxe1+ 39. Rd1 Qe4)
+36... Kd6 $2 {With mating ideas connected with c3 unavailable, It was better
+to keep the king in touch with the rook on e8} (36... Kd7 {Was safer} 37. Rxf5
+Qe6 38. Rxe8 Qxe8 39. Qg4 {Although White is the only player playing for the
+win}) 37. Rxf5 Qe6 $2 {[pgndiagram] A final mistake} (37... Re1+ 38. Ka2 Qe2 {
+Was better nevertheless} 39. Rxd5+ Kc6 40. Rc5+ Kb6 41. Qxe2 R1xe2 42. Rxc4 {
+With only one pawn for the piece , but serious winning chances}) 38. Rxe8 Qxe8
+39. Rxf6+ Kc5 40. Qh6 {The f-pawn was more important than the d and c pawns}
+Re7 41. Qh2 {[pgndiagram] In practical game it would be extremely hard to play
+Black here, even if he wasn't completely lost} (41. Qd2 {Is probably easier
+way of winning} Qd8 42. Qb4+ Kd4 43. Rd6 {Is another way of winning} Qf8 44.
+Qd2+ Ke4 45. Qxd5+) 41... Qd7 42. Qg1+ d4 43. Qg5+ Qd5 44. Rf5 Qxf5 45. Qxf5+
+Kd6 46. Qf6+ {[pgndiagram] A fascinating game, very hard to judge from the
+modern viewpoint since it contains many mistakes detected instantly by the
+engines. But you can try to imagine how incomprehensive it was for the
+contemporaries; I really doubt highly anyone understood what a fierce battle
+between two chess gladiators this encounter really was.} 1-0
+
+[Event "Lasker - Schlechter World Championship "]
+[Site "Berlin GER"]
+[Date "1910.02.08"]
+[Round "10"]
+[White "Emanuel Lasker"]
+[Black "Carl Schlechter"]
+[Result "1-0"]
+[ECO "D94"]
+[PlyCount "141"]
+[EventDate "1910.??.??"]
+
+{To this day, the conditions surrounding this game aren't clear. According to
+some sources, the regulations of the match included a two point clause;
+Schlechter needed to win the match by a two point margin.  However, it is not
+clear whether such a clause existed. Schlechter's aggressive play was
+attributed to the fact that he was quite honorable and he played for the win
+in order not to win a match by a "fluke", after Lasker's blunder from a better
+position in game 5.  We may never find out the truth, but the players have
+provided us with a fantastic game nevertheless.} 1. d4 {This is the first time
+that Lasker avoided 1 e4 in the match} d5 2. c4 c6 3. Nf3 Nf6 4. e3 g6 $5 {At
+those time 4..g6 contradicted everything taught about chess. "I did not want
+to play for a draw in the last game and I chose a little-known continuation,
+leading to interesting complications." - Schlechter} 5. Nc3 Bg7 6. Bd3 O-O (
+6... Bg4 {Is a typical idea for this variation, exchanging the light squared
+bishop.} 7. Qb3 Bxf3 8. gxf3 Qd7 {With solid position}) 7. Qc2 $6 {Avoiding
+Bg4 at all costs, but this costs him a tempo} (7. O-O Bg4 8. h3 Bxf3 9. Qxf3 e6
+{Is a position typical of this variation. White is slightly better, but Black
+is extremely solid}) 7... Na6 (7... c5 $1 {Is a typical Grünfeld idea which
+was probably too revolutionary for those years.} 8. dxc5 Qa5 9. O-O (9. cxd5
+Nxd5 10. Bd2 Nb4 11. Qb1 Nxd3+ 12. Qxd3 Na6 {And Black is already better}) 9...
+dxc4 10. Bxc4 Qxc5 {With easy equality}) 8. a3 dxc4 (8... c5 $1 {Was once
+again more energetic}) 9. Bxc4 b5 $2 {[pgndiagram] But this is too extravagant.
+Black is weakening his queenside without any good reason} (9... c5 {Is once
+again the best}) (9... Nc7 {Is probably also better than the game move}) 10.
+Bd3 {Now Black's queenside construction is silly} b4 $6 {This is also probably
+not necessary. You can feel that equal play didn't interest Schlechter} (10...
+c5 {Was objectively better, although it loses a pawn}) (10... Bb7 11. b4 {With
+a terrible bind} Nc7 12. O-O a5 13. Bd2) 11. Na4 bxa3 12. bxa3 Bb7 $2 {But
+after this Black is indeed almost lost} (12... c5 {Was definitely the last
+chance} 13. Bxa6 (13. Nxc5 Nxc5 14. Qxc5 Bb7 {Is surprisingly equal}) 13...
+Bxa6 14. Nxc5 Rc8 {With some counterplay} 15. Qa4 Rxc5 16. Qxa6 (16. dxc5 Qd3
+17. Qd1 Qxd1+ 18. Kxd1 Ne4 {Is horrible for White}) 16... Ra5 17. Qe2 {With
+some chances of holding the game}) 13. Rb1 {[pgndiagram] Now White has
+complete control of the board and c5 is never in question} Qc7 14. Ne5 $6 {
+However, at this moment Lasker starts playing nervously} (14. O-O {Was simply
+good} c5 15. dxc5 {With a clear pawn}) 14... Nh5 $6 (14... c5 $5) 15. g4 $6 {
+Lasker explained this move with the fllowing words: "When so much depends on
+one game, the players become very excited and their imagination transforms
+into recklessness"} (15. O-O {Was once again more normal}) (15. f4 {Is also
+more solid}) 15... Bxe5 (15... Nf6 16. f4 {And White has weakened his king,
+although he retains an advantage}) (15... c5 16. Rxb7 Qxb7 17. Be4 {Is winning}
+) 16. gxh5 $2 {[pgndiagram] Also a mistake, Black's bishop was more important}
+(16. dxe5 Ng7 17. O-O {And although White doesn't have as ideal position as he
+could have reached a couple of moves ago, he is still markedly better}) 16...
+Bg7 17. hxg6 hxg6 18. Qc4 {[pgndiagram] Threatening Bxg6} Bc8 $1 (18... c5 {In
+my great predeccessors, Kasparov claims that this move is bad, but he misses a
+detail} 19. Rg1 e6 $1 (19... Qxh2 20. Rxg6 {As mentioned by Kasparov, is
+indeed not the best for Black}) 20. Rxb7 Qxb7 21. Qxa6 Qxa6 22. Bxa6 cxd4 {
+[pgndiagram] And Black is actually not worse}) 19. Rg1 $2 (19. h4 $1 {
+Definitely the best move} Qa5+ {There is nothing better} 20. Bd2 Qd5 21. Qxd5
+cxd5 22. h5 {And White has an attack}) (19. Bd2 $5 {This developing move is
+also more natural and better than Lasker's choice} Rb8 20. Rc1 Qd6 21. h4 $1)
+19... Qa5+ (19... Qxh2 $1 {Was the best move} 20. Rxg6 Nc7 $1 {Also doesn't
+lose} (20... Qh1+ $2 {Is only move mentioned by Kasparov and it indeed loses}
+21. Kd2 Be6 (21... Nc7 22. Bb2) 22. Rxg7+ Kxg7 23. Qxa6) (20... Be6 $1 21.
+Rxg7+ Kxg7 22. Qxa6 Qg1+ 23. Kd2 Qxf2+ 24. Kc3 Rab8 {And Black is not worse})
+21. Bb2 Ba6) 20. Bd2 {[pgndiagram] Now White is indeed safer and better} Qd5
+21. Rc1 Bb7 22. Qc2 $6 {Very risky} (22. Qxd5 cxd5 {Was more pragmatic}) (22.
+h4 {Is also better for White} Qh5 $2 23. Bxg6) 22... Qh5 23. Bxg6 $2 {
+Underestimating Black's counterplay} (23. Qb3 $1 Qxh2 24. Rxg6 {Was the best}
+Qh1+ 25. Bf1 Rfb8 26. Qc4 Nc7 {And White is better}) 23... Qxh2 24. Rf1 fxg6
+25. Qb3+ Rf7 26. Qxb7 Raf8 {[pgndiagram] Black's pieces, apart from the
+wayward knight on a6, are suddenly idealy placed} 27. Qb3 (27. f4 {Was
+probably better, but here Black can give a perpetual starting with} Qh4+ 28.
+Kd1 (28. Ke2 Qh5+ 29. Kd3 Qf5+ 30. e4 {Is losing here} Qh3+ 31. Be3 (31. Ke2
+Qg2+ 32. Kd3 Rd8) 31... Bxd4) 28... Qg4+ 29. Kc2 Qf5+ {And White can't avoid it
+} 30. Kc3 $2 Bxd4+ 31. exd4 Qh3+ 32. Kc2 Rb8 {[pgndiagram] And suddenly White
+is lost}) 27... Kh8 28. f4 g5 $1 (28... Qh4+ $2 {Now leads nowhere, due to} 29.
+Ke2 Qh5+ 30. Kd3 Qf5+ 31. e4 Qh3+ 32. Be3 Bxd4 33. Rh1 {[pgndiagram] The point.
+King on h8 harms Black}) (28... e5 {Was also interesting} 29. dxe5 Rd8 30. Qc2
+Qg3+ 31. Ke2 Qg4+ {And White probably can't escape the checks once again}) 29.
+Qd3 gxf4 30. exf4 Qh4+ 31. Ke2 (31. Kd1 Qg4+ 32. Kc2 Qf5 {Leads to
+simplifications and a draw}) 31... Qh2+ 32. Rf2 Qh5+ 33. Rf3 Nc7 34. Rxc6 $6 {
+[pgndiagram] This pawn grabbing when under fire is usually not to be
+recommended} (34. Nc5 {Was more sensible, including the knight into play}) (34.
+Rh1 {Winning the queen, was also an interesting possibility} Qxh1 35. Rh3+ Qxh3
+36. Qxh3+ Kg8 37. Nc5 {And White is better} Bxd4 38. Qg2+ Rg7 39. Qxc6) 34...
+Nb5 $1 35. Rc4 $2 (35. Ke1 {Thraetening Rh3} Qh1+ 36. Qf1 Qxf1+ 37. Rxf1 {Is
+safe for White, but he can probably forget about winning}) 35... Rxf4 $2 {
+[pgndiagram] The combination is incorrect} (35... Rd8 {Was strong} 36. Ke1 (36.
+Be3 {Is met by} e5 $1) 36... Kg8 {Preventing Rh3} 37. d5 Bf6 {And Black has
+the initiative}) (35... Qg4 {Thraetening Rxf4, was also decisive} 36. Nc3 Rxf4
+37. Bxf4 Rxf4 38. Nxb5 Qg2+ 39. Ke1 Rxf3 40. Rc8+ Bf8 41. Qe2 Qg1+ {And Black
+is winning}) 36. Bxf4 Rxf4 37. Rc8+ Bf8 38. Kf2 Qh2+ {[pgndiagram]} (38... Qh4+
+{Schlechter admitted that he missed that this check can be met by} 39. Kg2 Qg4+
+40. Rg3 $1 Qxc8 41. Qg6 {[pgndiagram] And suddenly White checkmates}) 39. Ke1
+Qh1+ $2 {Allowing the White king to escape from checks} (39... Qh4+ {Was
+correct} 40. Kd2 Qh2+ 41. Ke1 (41. Kc1 Qh1+ 42. Kb2 Rxf3 43. Qxb5 Rf2+ {Is
+better for Black}) 41... Qh4+ {With perpetual}) 40. Rf1 Qh4+ 41. Kd2 Rxf1 42.
+Qxf1 Qxd4+ 43. Qd3 {[pgndiagram] Now Lasker has a clear advantage} Qf2+ 44. Kd1
+Nd6 45. Rc5 (45. Rd8 {Keeping the bishop pinned, was probably more accurate})
+45... Bh6 (45... Bg7 $5) 46. Rd5 Kg8 47. Nc5 Qg1+ 48. Kc2 Qf2+ 49. Kb3 Bg7 50.
+Ne6 {[pgndiagram]} (50. Rg5 {Is probably the most accurate way of converting}
+Qb2+ 51. Ka4 Qb6 52. Qd5+ Kh7 53. Nd7 {Although it is scary to play like this
+when you are human}) 50... Qb2+ $2 (50... Qb6+ $1 {Was essential, driving the
+king back to the open kingside}) 51. Ka4 {The king is surprisingly safe here}
+Kf7 52. Nxg7 Qxg7 53. Qb3 Ke8 54. Qb8+ Kf7 55. Qxa7 {[pgndiagram] White
+captures the a-pawn and now the rest is indeed a matter of the technique and
+precision} Qg4+ 56. Qd4 Qd7+ 57. Kb3 Qb7+ 58. Ka2 Qc6 59. Qd3 Ke6 60. Rg5 Kd7
+61. Re5 Qg2+ 62. Re2 Qg4 63. Rd2 Qa4 64. Qf5+ Kc7 65. Qc2+ Qxc2+ 66. Rxc2+ Kb7
+67. Re2 Nc8 68. Kb3 Kc6 69. Rc2+ Kb7 70. Kb4 Na7 71. Kc5 {[pgndiagram] An end
+of a titanic struggle and the most difficult match for Lasker. One of the most
+beautiful games in the history, unique because of the fact that both sides
+player for the win with extremely high stakes. Naturally, the fight contained
+many mistakes, but the complications and the irrationality of the position
+easily excuse these mistakes} 1-0
+
+[Event "8, New York"]
+[Site "New York, NY USA"]
+[Date "1893.10.10"]
+[Round "8"]
+[White "Emanuel Lasker"]
+[Black "Harry Nelson Pillsbury"]
+[Result "1-0"]
+[ECO "C60"]
+[PlyCount "113"]
+[EventDate "1893.??.??"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 g6 $5 {A rare move, but a playable one nevertheless}
+4. Bxc6 {As already mentioned, Lasker enjoyed exchanging his bishop for the
+knight on c6. With this move White transposes to some sort of anti-Berlin lines
+} (4. c3 a6 5. Ba4 Nge7 {Is another variation with a lot of theory}) 4... dxc6
+5. d3 Bg7 6. Nc3 Be6 7. Be3 {[pgndiagram] The position is somewhat resembling
+a Rossolimo line of the Sicilian. White's plan might include the advance in
+the centre (d4) or play on the kingside. Black's plan will depend on the place
+of the White king} Qe7 $6 {I don't like this move, it was more flexible to
+develop a knight on this square} (7... Ne7 8. O-O O-O 9. b3 Qd6) 8. Qe2 c5 $6 {
+Black also weakens his queenside and indeed transposes to the unfavorable
+Sicilian structure. The subsequent games in the 20th century would show that
+these positions are quite dangerous for Black.   Another drawback of this move
+is that due to the queen on e7, Black's knight is far away from the d4 square}
+(8... Nf6 9. O-O Ng4 10. Bd2 f6 {Was more natural}) 9. h3 $6 {Also probably
+not necessary move} (9. O-O f6 {And now Whit can pursue a typical a3-b4 plan}
+10. a3 Nh6 11. b4 cxb4 12. axb4 Nf7 (12... Qxb4 {Is a bad idea} 13. Qd2 Nf7 14.
+Rfb1 Qd6 15. Rxb7) 13. Nd5 $1 {And White is markedly better}) 9... c6 $6 {It
+was better to refrain from this move and play only b6} (9... b6 10. O-O f6) 10.
+a4 b6 11. Nd2 (11. a5 $1 {Opening the a-file or weakening c5 was good} b5 12.
+O-O f6 13. Nd2 Nh6 14. f4 $1 {White has the initiative}) 11... Nf6 12. f3 $6 {
+I don't like Lasker's play at this particular moment} (12. a5 O-O {Is not that
+good now}) (12. O-O {Was more natural}) 12... Nd7 13. O-O g5 $2 {Preventing f4,
+but such an ugly move is weakening Black's kingside} (13... O-O 14. f4 {If
+this was White's plan, why not play it without 12 f3?!} exf4 15. Rxf4 {And
+Black has a good positiion}) 14. Nd1 h6 15. c3 $6 {[pgndiagram] The type of
+the position was too advanced for 1893! This move has no purpose, because d4
+is very hard to achieve, and now d3 is weakened} (15. Bf2 O-O 16. Ne3 Nf6 17.
+g4 $1 {Installing one knight on f5, other on c4 and continuing from there, was
+better}) 15... O-O 16. Nf2 Rfd8 17. Rfd1 Nf8 {The knight is heading for f4. 
+The position is balanced} 18. a5 {Somewhat too late} Ng6 19. axb6 axb6 20. Qf1
+{Not allowing the knight to jump on f4 with tempo. Again we see Lasker ending
+up in an unfavorable position and continuing to fight with all his might} Nf4
+21. Rxa8 Rxa8 22. Ra1 Qb7 23. Qb1 Ra6 24. Kh2 Bf8 25. g3 $2 {[pgndiagram] A
+further weakening, I guess also not mandatory} (25. Nf1 Kg7 26. Ng3 {Heading
+for f5 at once, was probably better}) 25... Ng6 26. Kg2 Qa7 27. Rxa6 Qxa6 28.
+Nf1 {[pgndiagram] Black's two bishops, his control of space and the backward
+pawn on d3 give him the advantage} Bd6 29. c4 $6 {Another "ugly" move} (29. Bd2
+{Going with the knight to e3, without other weakenings, was better}) 29... f6
+30. Bd2 h5 31. Ne3 h4 $2 (31... b5 {Not handing the g4 square to White's
+knights was wiser} 32. Nf5 Bf8 33. b3 Qa7 {And Black retains all pluses of his
+position}) 32. Nfg4 $1 Bxg4 $6 {[pgndiagram] Not a necessary exchange, giving
+up his good bishop} (32... Be7 33. Nf5 Kf8 {Was probably wiser}) 33. hxg4 hxg3
+34. Nf5 {[pgndiagram] Now this knight is a champion and it is very hard to
+challenge it} Bf8 (34... Nh4+ 35. Nxh4 gxh4 36. Kh3 {And White can simply
+collect both pawns with his king}) 35. Kxg3 Qa7 {The objective outcome of the
+game should be a draw, but wonders are awaiting us} 36. Qf1 Qd7 37. Qb1 Ne7 (
+37... Qa7 {Black should have repeated the position}) 38. Be3 Nxf5+ $6 {This
+exchange gives White the idea to sacrifice on g5. It doesn't spoil the game
+yet, but it could have been avoided} (38... Ng6 {Continuing to wait was better.
+I don't see a convincing way for White to strengthen his position}) 39. exf5
+Qh7 40. Kg2 Qd7 41. Kf2 Qa7 (41... Qh7 $5 {Nipping the Bxg5 ideas in the bud,
+was probably sounder} 42. Ke2 Bd6 43. Qf1 Qa7 44. Qh1 Qh7 $11) 42. Ke2 Bd6 43.
+Bd2 Qa4 44. Qh1 Qa7 45. Be3 Kg7 $2 {[pgndiagram] A careless move, offering
+Lasker with the opportunity he doesn't miss} (45... Qh7 {Was good enough}) (
+45... e4 $1 {Is also a nice pawn sacrifice} 46. fxe4 Qa2 47. Qh6 Qxb2+ 48. Kf3
+Qe5 {And with f6 pawn defended, Black is in no danger of losing}) 46. Bxg5 $3 {
+[pgndiagram] A fantastic move and the reason why this not particularly
+attractive game was selected for this list. Lasker finds a tactical shot out
+of nowhere. It does not win the game by itself, but it presents Black with
+difficult problems} fxg5 47. f6+ $1 Kg8 (47... Kxf6 {Would lose a queen to} 48.
+Qh6+ Ke7 49. Qh7+) 48. Qh6 Qf7 $2 {Probably the losing move, but it wasn't
+easy to find the right response here} (48... Qd7 {The computer indicates
+defending the fragile Black queen is the most important thing in this position}
+49. Qxg5+ Kf7 50. Qg7+ Ke8 51. Qg6+ Kd8 52. Qg8+ (52. Qe4 Kc7 53. g5 Qh3 {And
+Black has enough counterplay to save the game}) 52... Qe8 53. Qh7 e4 $1 54.
+fxe4 Qe5) (48... Bb8 $1 {Is another paradoxical computer move, defending the
+queen} 49. Qxg5+ Kf7 50. Qg7+ Ke6 51. Qg6 Qa4 {And Black will manage to give
+pereptual}) 49. Qxg5+ Kh8 50. Qf5 {Now Black has a difficult position. White's
+plan is simple. Just push the pawns} Bf8 51. g5 $2 {Probably too hasty,
+throwing the win away. Black's queen should have been denied of the h5 square}
+(51. Ke3) 51... Qh5 52. Qxe5 b5 $2 (52... Kg8 {Would probably save the game}
+53. Ke3 Qh4 54. Qe6+ Kh8 55. Qf5 Qe1+ 56. Kf4 Bd6+ 57. Kg4 Qg1+ 58. Kh5 Qh1+
+59. Kg4 {With perpetual}) 53. Ke3 Qh4 $4 {Losing instantly} (53... Kg8 {Was
+the only move once again}) (53... Qh1 {Is losing to the same idea} 54. f7+ Kh7
+55. Qf5+ Kh8 56. Qf6+ Kh7 57. g6+ Kh6 58. g7+) 54. f7+ {[pgndiagram] And just
+like that, the game is over. Black collapsed in 9 moves} Kh7 55. Qf5+ {Here
+Pilssbury resigned. The finish could have been} Kh8 56. Qf6+ Kh7 57. g6+ {And
+the queen on h4 is lost} 1-0
+
+[Event "Lasker - Schlechter World Championship "]
+[Site "Berlin GER"]
+[Date "1910.02.08"]
+[Round "10"]
+[White "Emanuel Lasker"]
+[Black "Carl Schlechter"]
+[Result "1-0"]
+[ECO "D94"]
+[PlyCount "141"]
+[EventDate "1910.??.??"]
+
+{To this day, the conditions surrounding this game aren't clear. According to
+some sources, the regulations of the match included a two point clause;
+Schlechter needed to win the match by a two point margin.  However, it is not
+clear whether such a clause existed. Schlechter's aggressive play was
+attributed to the fact that he was quite honorable and he played for the win
+in order not to win a match by a "fluke", after Lasker's blunder from a better
+position in game 5.  We may never find out the truth, but the players have
+provided us with a fantastic game nevertheless.} 1. d4 {This is the first time
+that Lasker avoided 1 e4 in the match} d5 2. c4 c6 3. Nf3 Nf6 4. e3 g6 $5 {At
+those time 4..g6 contradicted everything taught about chess. "I did not want
+to play for a draw in the last game and I chose a little-known continuation,
+leading to interesting complications." - Schlechter} 5. Nc3 Bg7 6. Bd3 O-O (
+6... Bg4 {Is a typical idea for this variation, exchanging the light squared
+bishop.} 7. Qb3 Bxf3 8. gxf3 Qd7 {With solid position}) 7. Qc2 $6 {Avoiding
+Bg4 at all costs, but this costs him a tempo} (7. O-O Bg4 8. h3 Bxf3 9. Qxf3 e6
+{Is a position typical of this variation. White is slightly better, but Black
+is extremely solid}) 7... Na6 (7... c5 $1 {Is a typical Grünfeld idea which
+was probably too revolutionary for those years.} 8. dxc5 Qa5 9. O-O (9. cxd5
+Nxd5 10. Bd2 Nb4 11. Qb1 Nxd3+ 12. Qxd3 Na6 {And Black is already better}) 9...
+dxc4 10. Bxc4 Qxc5 {With easy equality}) 8. a3 dxc4 (8... c5 $1 {Was once
+again more energetic}) 9. Bxc4 b5 $2 {[pgndiagram] But this is too extravagant.
+Black is weakening his queenside without any good reason} (9... c5 {Is once
+again the best}) (9... Nc7 {Is probably also better than the game move}) 10.
+Bd3 {Now Black's queenside construction is silly} b4 $6 {This is also probably
+not necessary. You can feel that equal play didn't interest Schlechter} (10...
+c5 {Was objectively better, although it loses a pawn}) (10... Bb7 11. b4 {With
+a terrible bind} Nc7 12. O-O a5 13. Bd2) 11. Na4 bxa3 12. bxa3 Bb7 $2 {But
+after this Black is indeed almost lost} (12... c5 {Was definitely the last
+chance} 13. Bxa6 (13. Nxc5 Nxc5 14. Qxc5 Bb7 {Is surprisingly equal}) 13...
+Bxa6 14. Nxc5 Rc8 {With some counterplay} 15. Qa4 Rxc5 16. Qxa6 (16. dxc5 Qd3
+17. Qd1 Qxd1+ 18. Kxd1 Ne4 {Is horrible for White}) 16... Ra5 17. Qe2 {With
+some chances of holding the game}) 13. Rb1 {[pgndiagram] Now White has
+complete control of the board and c5 is never in question} Qc7 14. Ne5 $6 {
+However, at this moment Lasker starts playing nervously} (14. O-O {Was simply
+good} c5 15. dxc5 {With a clear pawn}) 14... Nh5 $6 (14... c5 $5) 15. g4 $6 {
+Lasker explained this move with the fllowing words: "When so much depends on
+one game, the players become very excited and their imagination transforms
+into recklessness"} (15. O-O {Was once again more normal}) (15. f4 {Is also
+more solid}) 15... Bxe5 (15... Nf6 16. f4 {And White has weakened his king,
+although he retains an advantage}) (15... c5 16. Rxb7 Qxb7 17. Be4 {Is winning}
+) 16. gxh5 $2 {[pgndiagram] Also a mistake, Black's bishop was more important}
+(16. dxe5 Ng7 17. O-O {And although White doesn't have as ideal position as he
+could have reached a couple of moves ago, he is still markedly better}) 16...
+Bg7 17. hxg6 hxg6 18. Qc4 {[pgndiagram] Threatening Bxg6} Bc8 $1 (18... c5 {In
+my great predeccessors, Kasparov claims that this move is bad, but he misses a
+detail} 19. Rg1 e6 $1 (19... Qxh2 20. Rxg6 {As mentioned by Kasparov, is
+indeed not the best for Black}) 20. Rxb7 Qxb7 21. Qxa6 Qxa6 22. Bxa6 cxd4 {
+[pgndiagram] And Black is actually not worse}) 19. Rg1 $2 (19. h4 $1 {
+Definitely the best move} Qa5+ {There is nothing better} 20. Bd2 Qd5 21. Qxd5
+cxd5 22. h5 {And White has an attack}) (19. Bd2 $5 {This developing move is
+also more natural and better than Lasker's choice} Rb8 20. Rc1 Qd6 21. h4 $1)
+19... Qa5+ (19... Qxh2 $1 {Was the best move} 20. Rxg6 Nc7 $1 {Also doesn't
+lose} (20... Qh1+ $2 {Is only move mentioned by Kasparov and it indeed loses}
+21. Kd2 Be6 (21... Nc7 22. Bb2) 22. Rxg7+ Kxg7 23. Qxa6) (20... Be6 $1 21.
+Rxg7+ Kxg7 22. Qxa6 Qg1+ 23. Kd2 Qxf2+ 24. Kc3 Rab8 {And Black is not worse})
+21. Bb2 Ba6) 20. Bd2 {[pgndiagram] Now White is indeed safer and better} Qd5
+21. Rc1 Bb7 22. Qc2 $6 {Very risky} (22. Qxd5 cxd5 {Was more pragmatic}) (22.
+h4 {Is also better for White} Qh5 $2 23. Bxg6) 22... Qh5 23. Bxg6 $2 {
+Underestimating Black's counterplay} (23. Qb3 $1 Qxh2 24. Rxg6 {Was the best}
+Qh1+ 25. Bf1 Rfb8 26. Qc4 Nc7 {And White is better}) 23... Qxh2 24. Rf1 fxg6
+25. Qb3+ Rf7 26. Qxb7 Raf8 {[pgndiagram] Black's pieces, apart from the
+wayward knight on a6, are suddenly idealy placed} 27. Qb3 (27. f4 {Was
+probably better, but here Black can give a perpetual starting with} Qh4+ 28.
+Kd1 (28. Ke2 Qh5+ 29. Kd3 Qf5+ 30. e4 {Is losing here} Qh3+ 31. Be3 (31. Ke2
+Qg2+ 32. Kd3 Rd8) 31... Bxd4) 28... Qg4+ 29. Kc2 Qf5+ {And White can't avoid it
+} 30. Kc3 $2 Bxd4+ 31. exd4 Qh3+ 32. Kc2 Rb8 {[pgndiagram] And suddenly White
+is lost}) 27... Kh8 28. f4 g5 $1 (28... Qh4+ $2 {Now leads nowhere, due to} 29.
+Ke2 Qh5+ 30. Kd3 Qf5+ 31. e4 Qh3+ 32. Be3 Bxd4 33. Rh1 {[pgndiagram] The point.
+King on h8 harms Black}) (28... e5 {Was also interesting} 29. dxe5 Rd8 30. Qc2
+Qg3+ 31. Ke2 Qg4+ {And White probably can't escape the checks once again}) 29.
+Qd3 gxf4 30. exf4 Qh4+ 31. Ke2 (31. Kd1 Qg4+ 32. Kc2 Qf5 {Leads to
+simplifications and a draw}) 31... Qh2+ 32. Rf2 Qh5+ 33. Rf3 Nc7 34. Rxc6 $6 {
+[pgndiagram] This pawn grabbing when under fire is usually not to be
+recommended} (34. Nc5 {Was more sensible, including the knight into play}) (34.
+Rh1 {Winning the queen, was also an interesting possibility} Qxh1 35. Rh3+ Qxh3
+36. Qxh3+ Kg8 37. Nc5 {And White is better} Bxd4 38. Qg2+ Rg7 39. Qxc6) 34...
+Nb5 $1 35. Rc4 $2 (35. Ke1 {Thraetening Rh3} Qh1+ 36. Qf1 Qxf1+ 37. Rxf1 {Is
+safe for White, but he can probably forget about winning}) 35... Rxf4 $2 {
+[pgndiagram] The combination is incorrect} (35... Rd8 {Was strong} 36. Ke1 (36.
+Be3 {Is met by} e5 $1) 36... Kg8 {Preventing Rh3} 37. d5 Bf6 {And Black has
+the initiative}) (35... Qg4 {Thraetening Rxf4, was also decisive} 36. Nc3 Rxf4
+37. Bxf4 Rxf4 38. Nxb5 Qg2+ 39. Ke1 Rxf3 40. Rc8+ Bf8 41. Qe2 Qg1+ {And Black
+is winning}) 36. Bxf4 Rxf4 37. Rc8+ Bf8 38. Kf2 Qh2+ {[pgndiagram]} (38... Qh4+
+{Schlechter admitted that he missed that this check can be met by} 39. Kg2 Qg4+
+40. Rg3 $1 Qxc8 41. Qg6 {[pgndiagram] And suddenly White checkmates}) 39. Ke1
+Qh1+ $2 {Allowing the White king to escape from checks} (39... Qh4+ {Was
+correct} 40. Kd2 Qh2+ 41. Ke1 (41. Kc1 Qh1+ 42. Kb2 Rxf3 43. Qxb5 Rf2+ {Is
+better for Black}) 41... Qh4+ {With perpetual}) 40. Rf1 Qh4+ 41. Kd2 Rxf1 42.
+Qxf1 Qxd4+ 43. Qd3 {[pgndiagram] Now Lasker has a clear advantage} Qf2+ 44. Kd1
+Nd6 45. Rc5 (45. Rd8 {Keeping the bishop pinned, was probably more accurate})
+45... Bh6 (45... Bg7 $5) 46. Rd5 Kg8 47. Nc5 Qg1+ 48. Kc2 Qf2+ 49. Kb3 Bg7 50.
+Ne6 {[pgndiagram]} (50. Rg5 {Is probably the most accurate way of converting}
+Qb2+ 51. Ka4 Qb6 52. Qd5+ Kh7 53. Nd7 {Although it is scary to play like this
+when you are human}) 50... Qb2+ $2 (50... Qb6+ $1 {Was essential, driving the
+king back to the open kingside}) 51. Ka4 {The king is surprisingly safe here}
+Kf7 52. Nxg7 Qxg7 53. Qb3 Ke8 54. Qb8+ Kf7 55. Qxa7 {[pgndiagram] White
+captures the a-pawn and now the rest is indeed a matter of the technique and
+precision} Qg4+ 56. Qd4 Qd7+ 57. Kb3 Qb7+ 58. Ka2 Qc6 59. Qd3 Ke6 60. Rg5 Kd7
+61. Re5 Qg2+ 62. Re2 Qg4 63. Rd2 Qa4 64. Qf5+ Kc7 65. Qc2+ Qxc2+ 66. Rxc2+ Kb7
+67. Re2 Nc8 68. Kb3 Kc6 69. Rc2+ Kb7 70. Kb4 Na7 71. Kc5 {[pgndiagram] An end
+of a titanic struggle and the most difficult match for Lasker. One of the most
+beautiful games in the history, unique because of the fact that both sides
+player for the win with extremely high stakes. Naturally, the fight contained
+many mistakes, but the complications and the irrationality of the position
+easily excuse these mistakes} 1-0
+
+[Event "Lasker - Steinitz World Championship"]
+[Site "Philadelphia, PA USA"]
+[Date "1894.04.14"]
+[Round "9"]
+[White "Emanuel Lasker"]
+[Black "Wilhelm Steinitz"]
+[Result "1-0"]
+[ECO "C62"]
+[PlyCount "97"]
+[EventDate "1894.??.??"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 {Steinitz remains faithful to his favourite
+opening} 4. Nc3 {A very rare move} a6 5. Bc4 $6 {Objectively not the best
+continuation} (5. Bxc6+ {Has most sense in combination with Nc3}) 5... Be6 $6 {
+This move also comes slightly too early.} (5... Be7 {(Preventing Ng6 for the
+moment)} 6. O-O Nf6 {Was more natural}) 6. Bxe6 fxe6 7. d4 {[pgndiagram] Now
+White's position is quite good} exd4 8. Nxd4 Nxd4 9. Qxd4 Ne7 (9... Nf6 {
+Avoding ideas connected to e5} 10. O-O Be7 11. e5 {White has the advantage})
+10. Bg5 {Not necessary} (10. Be3 {Is more natural}) 10... Nc6 11. Bxd8 $2 {A
+faulty idea} (11. Qd2 Be7 12. h4 {And White retains a slight pull}) 11... Nxd4
+12. O-O-O Nb5 $2 {[pgndiagram] Steinitz takes his opponent at his word} (12...
+Rxd8 13. Rxd4 Be7 {Is just a better endgame for Black}) 13. Nxb5 axb5 (13...
+Rxd8 14. Nd4 {And White's knight is better on d4 than it was on c3.}) 14. Bxc7
+Rxa2 15. Bb6 {An equal endgame has arisen} (15. Kb1 Ra6 {Would trap the bishop}
+) 15... Be7 16. c3 $6 {Not sure if this move was required} (16. Kb1 Ra6 17. Bd4
+Kf7 18. f4 {And White has a slight pull}) 16... Kf7 $6 (16... b4 $1 {Was very
+interesting} 17. cxb4 Bf6 (17... Ra4 {Might be even better} 18. Ba5 O-O 19. f3
+b6) 18. Rhe1 Ke7 (18... Rxb2 $4 19. e5) 19. Bd4 Ra4 20. Bxf6+ gxf6 21. Re3 Rxb4
+{With equality}) 17. Kc2 {[pgndiagram] Now White activates his king and can
+start playing for the win due to his better pawn structure} Rha8 18. Kb3 R2a4
+19. f3 R8a6 20. Bd4 g6 21. Rd3 Ke8 22. Rhd1 e5 $2 {[pgndiagram] A clear
+concesion, limiting the dark squared bishop further and creating a backward d6
+pawn} (22... Rc6 {It was better to wait} 23. g4 Bf8 24. h4 Rca6 25. Bf2) 23.
+Be3 Kd7 24. Bc5 $1 {Another great move, bringing the bishop to a3 and
+hindering Black's play} Ra1 {Seeking counterplay} (24... Kc7 25. Ba3 Rc6 26.
+Rd5 Rb6 27. Bb4 {And Black is completely paralyzed}) 25. R1d2 $1 {[pgndiagram]
+Fantastic judgement by Lasker. He realizes that his attacking chances are
+higher with four rooks on the board} (25. Rxa1 Rxa1 26. Ba3 Rh1 {Is suddenly
+completely equal} 27. h3 Re1 28. Rd2 Kc6) 25... Ke6 (25... Rh1 {Would lose the
+b5 pawn after} 26. h3 Re1 27. Rd5 Kc7 28. Bb4 Rf1 (28... Rb6 $4 29. Ba5) 29.
+Rxb5) 26. Ba3 g5 $1 {Trying to create some counterplay on the kingside is the
+correct decision} 27. Rd5 Rb6 28. Kb4 g4 $1 {[pgndiagram]} 29. Ka5 $1 {Strong
+play from Lasker. His king is a monster} (29. fxg4 Re1 {Would create a lot of
+counterplay for Black} 30. Ka5 Rc6 31. Kxb5 Rxe4) 29... Ra6+ (29... Bd8 30.
+Rxb5) 30. Kxb5 h5 31. Rd1 $1 {[pgndiagram] Amazing skill in the endgame.
+Having rejected the exchange just a couple of moves ago, Lasker, having
+accomplished certain goals (b5) realizes it is time to exchange Black's active
+rook and go into the technical phase of the game} Rxd1 32. Rxd1 gxf3 33. gxf3 {
+White is a clear pawn up, but there is still some work to be done} Ra8 $2 {It
+was wiser not to allow the White king to approach the be pawn} (33... Kd7 {It
+is hard to believe that Black can save himself with passive moves, though} 34.
+Rg1 Ra8 35. Rg7 (35. Kb6 {Is now not that powerful} Rf8 36. Rf1 Kc8) 35... Rf8
+36. c4 {And White is close to winning, c5 is coming next}) 34. Kb6 $1 {
+[pgndiagram] Now the pawn on b7 falls and the game is virtually over} Rg8 35.
+Kxb7 Rg2 36. h4 Rh2 37. Kc6 Bxh4 38. Rxd6+ Kf7 39. Kd5 (39. c4 {Was even faster
+}) 39... Bf6 40. Rd7+ Kg6 41. Ke6 h4 42. Rd1 h3 43. Rg1+ Rg2 44. Rxg2+ hxg2 45.
+Bc5 Bd8 46. b4 Kg5 47. Kd7 Bf6 48. b5 Kf4 49. b6 {[pgndiagram] An impressive
+technical achievement from Lasker, who outplayed his strong opponent in
+Carlsen style, from a completely equal position} 1-0
+
+[Event "Paris"]
+[Site "Paris FRA"]
+[Date "1900.06.14"]
+[Round "15"]
+[White "Emanuel Lasker"]
+[Black "Harry Nelson Pillsbury"]
+[Result "1-0"]
+[ECO "A83"]
+[PlyCount "169"]
+[EventDate "1900.??.??"]
+
+1. d4 f5 2. e4 $1 {The so called Staunton's gambit, a sharp but not fully
+correct way of meeting the Dutch defence} fxe4 3. Nc3 Nf6 4. Bg5 c6 (4... g6 {
+I like the fiancheto of the bishop as Black in this variation} 5. Bxf6 exf6 6.
+Nxe4 d5 7. Nc3 Bh6 {And Black has a comfortable game}) 5. f3 exf3 $6 {
+Accepting the pawn on f3 is objectively dangerous, especially when Bg5 and c6
+have already been played} 6. Nxf3 e6 $6 {I don't like this move as well} (6...
+d6 7. Bc4 Qb6 8. Qd2 Bg4 {Developing some pieces, was better for Black}) 7. Bd3
+{[pgndiagram] Now White has fluid development and a strong attack in exchange
+for just one pawn} Be7 (7... d6 {Preventing the jump to e5, was necessary.}) 8.
+Ne5 $1 {White is already winning} O-O 9. Bxf6 $1 Rxf6 {The best capture} (9...
+Bxf6 10. Qh5 g6 11. Nxg6 {Is curtains}) (9... gxf6 10. Qg4+ Kh8 11. Ng6+ hxg6
+12. Bxg6 {Is also dead lost}) 10. Qh5 g6 11. Nxg6 {[pgndiagram] Black should
+be completely busted here} Qe8 12. Nxe7+ Qxe7 13. O-O-O (13. Ne4 {Including
+the knight into attack, was stronger}) 13... d5 {Now the e4 square is taken
+from the knight, but Black's bishop resembles a pawn} 14. Rde1 $2 {Not the
+strongest continuation of attack} (14. Rhf1 {If White exchanges a defensive
+piece for his attacking one, it is to his advantage, because he can easily
+bring his reserves} Nd7 (14... Rxf1 15. Rxf1 {Is of course horrible for Black}
+Nd7 16. Bxh7+ Qxh7 17. Qe8+ Kg7 18. Rf7+) 15. Rf3 Rxf3 16. gxf3 Nf6 17. Rg1+
+Kh8 18. Qh4 Bd7 19. Bxh7 {[pgndiagram] And White wins}) 14... Nd7 15. Re3 Rf7
+16. Rg3+ Kh8 17. Bg6 $2 {[pgndiagram] With this move Lasker releases major
+part of his advantage} (17. Rf1 {Once again going for the same principle of
+exchanging defensive pieces, was decisive} Rxf1+ 18. Bxf1 Nf6 19. Qe5 Bd7 20.
+Rf3 Rf8 21. Bd3 {And Black is busted} Kg8 22. Rg3+ Kh8 23. Bxh7) 17... Rg7 18.
+Rf1 Nf6 19. Qh4 Ng8 $1 {Black has managed to defend, for now} 20. Qxe7 Rxe7 21.
+Bd3 Bd7 22. Nb1 $3 {[pgndiagram] To my mind a fantastic move. When you are not
+certain what to do, then improve your worst piece. The knight is heading to f3,
+clamping down on the e5 square} Rae8 23. Nd2 e5 {Black has to play this before
+Nf3} (23... Nh6 24. Nf3 {Is just terrible for Black}) 24. dxe5 Rxe5 25. Nf3 Re3
+26. Ng5 $1 {Spoling his pawn structure, but activating the knight.} Rxg3 27.
+hxg3 h6 28. Nf7+ Kg7 29. Nd6 {White has made 5 moves out of his last seven
+with the knight. The result? He won a pawn on b7} Re7 30. Nxb7 Nf6 31. Nc5 Bg4
+32. Rf4 {[pgndiagram] Lasker is now a clear pawn up and his pieces are still
+active} Bc8 33. Ra4 Ng4 34. Ba6 (34. Kd2 {activating the king, would have
+allowed less counterplay} Ne5 (34... Ne3 35. Nb3 Nxg2 36. Nd4 {And wins}) 35.
+Be2 Kg6 36. Nb3 {And White remains in control}) 34... Bf5 35. Rf4 Ne3 36. c3 {
+[pgndiagram] Now things have improved somewhat for Black, his pieces are well
+placed} Kg6 37. Rf2 $2 (37. Bd3 {Exchanging the dangerous bishop, was good}
+Bxd3 38. Nxd3 Nxg2 39. Rf8 {And White is better}) 37... Be4 $2 {Missing his
+chance} (37... Nc4 $1 {This counterintuitive move would have boxed the White
+king and completely equalized} 38. Bxc4 dxc4 39. Kd2 Re5 40. b4 cxb3 41. Nxb3 {
+And the endgame is equal; White's doubled pawns on the g-file are suddenly
+meaningless}) 38. b3 {[pgndiagram] Now the knight can never go to c4} Bxg2 39.
+Bd3+ (39. Bb7 {Winning the pawn, was better} Rf7 40. Rxf7 Kxf7 41. Bxc6 Nf1 42.
+g4 Ne3 43. Nd3 Nxg4 44. Nf4 {And White retains some chances of success}) 39...
+Kg5 $2 (39... Be4 40. Rf8 Bxd3 41. Nxd3 Kg5 {Is equal}) 40. Rf8 Kg4 41. Rg8+ (
+41. Rf6 {Was correct, attacking Black's weak pawns}) 41... Kf3 {now the king
+is extremely active} 42. Rg6 Ng4 43. Bf5 h5 44. Rg5 Re1+ 45. Kb2 Rh1 $2 {Too
+materialistic} (45... Re2+ {Avoiding the pin on the knight was better} 46. Ka3
+Kxg3 47. Rxh5 Nf6 48. Rh6 Ne4 {Creating a passed pawn on the d-file, was good
+enough for equality}) 46. Bg6 Kxg3 47. Bxh5 Bh3 48. Bxg4 Bxg4 49. Rg6 {
+[pgndiagram] Suddenly, all Black's pieces are far away from home} Rh2+ 50. Ka3
+Rc2 $2 {Missing a tactical nuance, allowing White to win c6 and defend his own
+c3 soldier} (50... Kf4 {Would have allowed Black to go for the more important
+pawn - the a pawn.} 51. Rxc6 Bf5 52. Ra6 Bb1 53. Kb4 Rxa2 54. Na4 {And White
+will win the a7 pawn, but it is hard to judge whether the resulting endgame is
+a draw or not}) 51. Nd3 Kh4 52. Ne5 Bf5 53. Rxc6 {[pgndiagram] Now Black
+doesn't have counterplay (Bb1 is impossible) and White is winning} Kg3 54. Rc5
+Rd2 55. Nc6 (55. Nc4 $1) 55... Kf4 56. Nb4 d4 57. cxd4 Rxd4 58. Ra5 Rd7 59. Nc6
+Be4 60. Nxa7 {[pgndiagram] The rest doesn't require any commentary} Rd2 61. Nb5
+Rd5 62. Kb4 Bd3 63. Nc7 Rxa5 64. Kxa5 Ke5 65. Kb4 Kd6 66. Nb5+ Kc6 67. a4 Kb6
+68. Na3 Be2 69. Nc4+ Ka6 70. Kc3 Bd1 71. Nb2 Bh5 72. b4 Be8 73. Kb3 Bc6 74. Kc4
+Bd7 75. Kc5 Bg4 76. Nc4 Bd1 77. b5+ Ka7 78. a5 Bf3 79. Ne5 Bg2 80. Nc6+ Ka8 81.
+Kb6 Bh3 82. Nb4 Bg2 83. Na6 Bf3 84. Nc7+ Kb8 85. a6 {[pgndiagram] A fine win
+against his former competitor, although it has to be admitted that Pillsbury
+was merely a shadow of his former self at this moment .} 1-0
+
+[Event "Hastings"]
+[Site "Hastings ENG"]
+[Date "1895.08.16"]
+[Round "9"]
+[White "Emanuel Lasker"]
+[Black "Wilhelm Steinitz"]
+[Result "1-0"]
+[ECO "C75"]
+[PlyCount "79"]
+[EventDate "1895.08.05"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 {No exchange this time} d6 {A familiar
+variation} 5. O-O Nge7 6. c3 Bd7 7. d4 Ng6 8. Re1 Be7 9. Nbd2 (9. d5 Nb8 10.
+Bc2 $5) 9... O-O 10. Nf1 Qe8 $6 {This is highly artificial} (10... exd4 11.
+cxd4 b5 12. Bb3 Bf6 {Was interesting}) 11. Bc2 $1 {[pgndiagram] A good move,
+emphasizing the lack of space that Black pieces don't enjoy. Avoiding
+exchanges while having more space is a good rule of thumb one should follow} (
+11. d5 {Is now inferior} Nd4 {Revealing the point behind Qe8}) 11... Kh8 12.
+Ng3 (12. Ne3 {Preventing Bg4 and eyeing f5, was probably even better}) 12...
+Bg4 (12... Nh4 {Comes to mind} 13. d5 Nb8 14. Nxh4 Bxh4 15. Bd2 a5) 13. d5 Nb8
+14. h3 Bc8 $6 (14... Bxf3 {Was comparatively better} 15. Qxf3 Nd7 {With
+inferior position}) 15. Nf5 $1 {[pgndiagram] Now White gets a very strong
+attack} Bd8 (15... Bxf5 $2 {Is a bad decision} 16. exf5 Nh4 17. Ng5 {And White
+is winning the wayward knight}) 16. g4 $5 {The centre is blocked and there is
+no counterplay on the other side of the board. Therefore White is correct to
+start pushing the pawns on the kingside, even if his own king is residing
+there.} Ne7 17. Ng3 (17. Be3 {Was also possible, since Black doesn't really
+want to take on f5}) 17... Ng8 18. Kg2 Nd7 19. Be3 Nb6 $6 {It was probably
+wiser to keep this knight closer to the kingside} (19... Ne7) 20. b3 Bd7 21. c4
+Nc8 22. Qd2 Nce7 23. c5 $1 {[pgndiagram] Now Lasker opens up another front and
+can choose on which wing he wants to play. Since he has more space, it is
+easier for him to move his pieces from one side of the board to another.} g6 $2
+{The losing move. Black willingly weakens his kingside for no good reason} (
+23... b6 24. b4 a5 {Playing on the queenside, was better}) 24. Qc3 f5 $2 {This
+faulty plan by Black is met with a thunderous response} 25. Nxe5 $3 {
+[pgndiagram] A great sacrifice} dxe5 26. Qxe5+ $2 {Unfortunately, Lasker
+doesn't crown his play with a brilliant stroke} (26. g5 $3 {Was a fantastic
+way to win the game} Nc8 (26... Nc6 27. f4 $1) 27. exf5 gxf5 28. Bd2 {And
+Black is busted}) 26... Nf6 27. Bd4 fxg4 28. hxg4 Bxg4 (28... Kg8 {Was a
+better defence} 29. g5 Nexd5 30. exd5 Qxe5 31. Rxe5 Ng4 32. Re2 Bxg5 {And
+suddenly Black has a perfectly playable position}) 29. Qg5 Qd7 30. Bxf6+ Kg8
+31. Bd1 Bh3+ 32. Kg1 Nxd5 $2 {[pgndiagram] And this is a final mistake in a
+difficult position} (32... h6 33. Qh4 Nxd5 34. Bxd8 Qf7 {Was more tricky.
+White would be forced to find a precise way fo consolidate his advantage after}
+35. Ne2 (35. f3 Nf4 36. Nf5 (36. Be7 Qg7 {Is not so clear}) 36... gxf5 37. Qxf4
+Qg7+ {And the rook on a1 is falling}) 35... Raxd8 36. exd5 Rxd5 37. f4 {
+[pgndiagram] And White is winning. But Black still has some counterchances})
+33. Bxd8 Nf4 (33... Qf7 34. f3 Nf4 35. Nf5 {Is a huge difference compared to
+variation with the queen on h4}) 34. Bf6 {[pgndiagram] Now the game is over
+and Lasker concludes it in a spectacular fashion} Qd2 35. Re2 Nxe2+ 36. Bxe2
+Qd7 37. Rd1 Qf7 38. Bc4 Be6 39. e5 Bxc4 40. Nf5 {A brilliant, one sided game,
+in which Lasker relinquished his advantage only briefly, and essentialy
+dominated from start to finish} 1-0
+

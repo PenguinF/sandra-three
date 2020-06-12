@@ -209,12 +209,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JsonParserBenchmarks.cs" />
+    <Compile Include="PgnParserBenchmarks.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Kasparov.pgn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Lasker Best Games.pgn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
+    <Content Include="TCEC_Season_16_-_Division_Testing_Lczero_1%25_Vs_Qualification1.pgn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
@@ -224,6 +234,10 @@
     <ProjectReference Include="..\Eutherion\Shared\Eutherion.Shared.csproj">
       <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
       <Name>Eutherion.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
+      <Project>{F5E121C5-A874-4FEF-9FF5-56285420CFF6}</Project>
+      <Name>Sandra.Chess</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

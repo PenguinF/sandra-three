@@ -31,6 +31,7 @@ namespace Benchmarks
             // Command line args examples:
             // --filter *
             // --filter JsonParserBenchmarks
+            // --filter PgnParserBenchmarks
             new BenchmarkSwitcher(typeof(Program).Assembly).Run(args);
         }
     }
