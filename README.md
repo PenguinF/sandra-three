@@ -1,7 +1,7 @@
 # sandra-three
 Third incarnation of a chess UI for Windows 7 and higher.
 
-![Preview Sandra](https://github.com/PenguinF/sandra-three/tree/master/Doc/preview_sandra_0.9.png)
+![Preview Sandra](https://github.com/PenguinF/sandra-three/tree/main/Doc/preview_sandra_0.9.png)
 
 Version 1.0 is a raw PGN editor, with following features:
 
