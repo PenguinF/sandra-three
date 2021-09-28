@@ -956,11 +956,6 @@ namespace Eutherion.Win.MdiAppTemplate
                     containsChangesAtSavePoint = CodeFile.ContainsChanges;
                     SetSavePoint();
                 }
-                else
-                {
-                    // Use this value to indicate a camcel action.
-                    return UIActionVisibility.Disabled;
-                }
             }
 
             return UIActionVisibility.Enabled;
