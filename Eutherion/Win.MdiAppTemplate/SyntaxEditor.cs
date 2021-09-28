@@ -769,10 +769,9 @@ namespace Eutherion.Win.MdiAppTemplate
                         {
                             UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
 
-                            if (actionState.UIActionVisibility == UIActionVisibility.Disabled)
+                            if (ContainsChanges)
                             {
-                                // Save as dialog got canceled.
-                                // If UIActionVisibility.Hidden was returned, the action isn't available at all, which shouldn't block a form close.
+                                // Save-as dialog got canceled if changes are still not saved.
                                 cancel = true;
                             }
                         }
