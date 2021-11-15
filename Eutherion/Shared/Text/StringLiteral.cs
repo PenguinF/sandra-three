@@ -46,7 +46,6 @@ namespace Eutherion.Text
         {
             switch (c)
             {
-                case '\0': return "\\0";
                 case '\b': return "\\b";
                 case '\f': return "\\f";
                 case '\n': return "\\n";
@@ -55,7 +54,7 @@ namespace Eutherion.Text
                 case '\v': return "\\v";
                 case QuoteCharacter: return "\\\"";
                 case EscapeCharacter: return "\\\\";
-                default: return $"\\u{((int)c).ToString("x4")}";
+                default: return $"\\u{(int)c:x4}";
             }
         }
 
