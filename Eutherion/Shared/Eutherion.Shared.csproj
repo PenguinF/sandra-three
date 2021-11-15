@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Box.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
