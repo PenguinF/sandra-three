@@ -20,8 +20,8 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.Utils;
 using System;
+using System.Collections.Concurrent;
 
 namespace Sandra.Chess.Pgn
 {
