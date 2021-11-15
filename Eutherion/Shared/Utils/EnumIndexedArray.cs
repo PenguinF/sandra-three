@@ -2,7 +2,7 @@
 /*********************************************************************************
  * EnumIndexedArray.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@
 **********************************************************************************/
 #endregion
 
-using System;
 using System.Linq;
 
-namespace Eutherion.Utils
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Contains an array which is indexed by an enumeration.

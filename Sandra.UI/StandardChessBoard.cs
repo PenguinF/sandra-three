@@ -20,12 +20,12 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Utils;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Native;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
