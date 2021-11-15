@@ -19,12 +19,11 @@
 **********************************************************************************/
 #endregion
 
-using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
 
-namespace Eutherion
+namespace System
 {
     /// <summary>
     /// Contains utility extension methods.
