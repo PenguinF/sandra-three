@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ObservableValue.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Eutherion.Utils
+namespace Eutherion
 {
     /// <summary>
     /// Contains a value and provides it with an event to observe updates to it.

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Utils;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;

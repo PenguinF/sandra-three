@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using Eutherion.Win.Native;
 using System;
 using System.Threading;

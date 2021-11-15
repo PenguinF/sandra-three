@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using Eutherion.Win.Native;
 using Microsoft.Win32;
 using System;

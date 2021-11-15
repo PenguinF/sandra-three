@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win;
 using Eutherion.Win.Controls;
 using Eutherion.Win.MdiAppTemplate;
