@@ -20,11 +20,11 @@
 #endregion
 
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows.Forms;
 
