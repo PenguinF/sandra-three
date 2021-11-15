@@ -76,6 +76,29 @@ namespace Eutherion
         }
 
         /// <summary>
+        /// Sets a single value at each index of the array.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the elements of the array.
+        /// </typeparam>
+        /// <param name="array">
+        /// The two-dimensional, zero-based array to fill.
+        /// </param>
+        /// <param name="value">
+        /// The value to set at each index of the array.
+        /// </param>
+        public static void Fill<T>(this T[,] array, T value)
+        {
+            for (int i = array.GetLength(0) - 1; i >= 0; --i)
+            {
+                for (int j = array.GetLength(1) - 1; j >= 0; --j)
+                {
+                    array[i, j] = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Sets a value at each index of the array.
         /// </summary>
         /// <typeparam name="T">
@@ -97,6 +120,34 @@ namespace Eutherion
             for (int i = 0; i < array.Length; i++)
             {
                 array[i] = valueFunc(i);
+            }
+        }
+
+        /// <summary>
+        /// Sets a value at each index of the array.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the elements of the array.
+        /// </typeparam>
+        /// <param name="array">
+        /// The two-dimensional, zero-based array to fill.
+        /// </param>
+        /// <param name="valueFunc">
+        /// The function which given indices i and j returns the value to set at array[i, j].
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueFunc"/> is null.
+        /// </exception>
+        public static void Fill<T>(this T[,] array, Func<int, int, T> valueFunc)
+        {
+            if (valueFunc == null) throw new ArgumentNullException(nameof(valueFunc));
+
+            for (int i = array.GetLength(0) - 1; i >= 0; --i)
+            {
+                for (int j = array.GetLength(1) - 1; j >= 0; --j)
+                {
+                    array[i, j] = valueFunc(i, j);
+                }
             }
         }
 
