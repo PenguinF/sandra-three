@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnParser.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

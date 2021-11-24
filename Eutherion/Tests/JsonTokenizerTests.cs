@@ -457,7 +457,7 @@ namespace Eutherion.Shared.Tests
             // Disallow control characters.
             yield return new object[] { "\"\n\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\n", 1) } };
             yield return new object[] { "\"\t\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\t", 1) } };
-            yield return new object[] { "\"\0\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\0", 1) } };
+            yield return new object[] { "\"\0\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\u0000", 1) } };
             yield return new object[] { "\"\u0001\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\u0001", 1) } };
             yield return new object[] { "\"\u007f\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\u007f", 1) } };
 

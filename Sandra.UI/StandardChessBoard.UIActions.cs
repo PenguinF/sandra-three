@@ -2,7 +2,7 @@
 /*********************************************************************************
  * StandardChessBoard.UIActions.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess;
 using System;
+using System.Collections.Specialized;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;

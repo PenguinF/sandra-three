@@ -2,7 +2,7 @@
 /*********************************************************************************
  * HandlerIsAnonymousException.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Eutherion.Utils
+namespace Eutherion
 {
     /// <summary>
     /// Exception thrown when an event handler is registered on a weak event with a target that is anonymous or otherwise compiler generated.

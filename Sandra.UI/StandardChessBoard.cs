@@ -2,7 +2,7 @@
 /*********************************************************************************
  * StandardChessBoard.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2021 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Utils;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Native;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;

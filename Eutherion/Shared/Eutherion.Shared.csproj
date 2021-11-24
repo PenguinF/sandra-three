@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>$(SolutionDir)Bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET47</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -27,7 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>$(SolutionDir)Bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NET47</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Box.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
@@ -99,12 +100,14 @@
     <Compile Include="Union.cs" />
     <Compile Include="Union.Generate.cs" />
     <Compile Include="UtilityExtensions.cs" />
+    <Compile Include="Utils\BitUtilities.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
     <Compile Include="Utils\FileUtilities.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
     <Compile Include="Utils\ImplementationSet.cs" />
+    <Compile Include="Utils\ObjectPool.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\SafeLazyObjectCollection.cs" />
