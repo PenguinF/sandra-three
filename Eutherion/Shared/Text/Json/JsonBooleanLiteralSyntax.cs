@@ -180,6 +180,11 @@ namespace Eutherion.Text.Json
             /// </summary>
             public override bool Value => false;
 
+            /// <summary>
+            /// Gets the length of the text span corresponding with this syntax node.
+            /// </summary>
+            public override int Length => JsonValue.FalseSymbolLength;
+
             internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
         }
 
@@ -197,6 +202,11 @@ namespace Eutherion.Text.Json
             /// Gets the boolean value represented by this literal syntax.
             /// </summary>
             public override bool Value => true;
+
+            /// <summary>
+            /// Gets the length of the text span corresponding with this syntax node.
+            /// </summary>
+            public override int Length => JsonValue.TrueSymbolLength;
 
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
         }
@@ -220,11 +230,6 @@ namespace Eutherion.Text.Json
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public abstract GreenJsonBooleanLiteralSyntax Green { get; }
-
-        /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
-        /// </summary>
-        public override int Length => Green.Length;
 
         /// <summary>
         /// Gets the boolean value represented by this literal syntax.
