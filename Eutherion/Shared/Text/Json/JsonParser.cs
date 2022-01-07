@@ -412,6 +412,12 @@ namespace Eutherion.Text.Json
 
         private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
 
+        private IGreenJsonSymbol CreateValue(int currentIndex)
+        {
+            int length = currentIndex - SymbolStartIndex;
+            return JsonValue.Create(Json.Substring(SymbolStartIndex, length));
+        }
+
         const int symbolClassValueChar = 0;
         const int symbolClassWhitespace = 1;
         const int symbolClassSymbol = 2;
@@ -568,7 +574,7 @@ namespace Eutherion.Text.Json
                 // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
                 if (symbolClass != symbolClassValueChar)
                 {
-                    yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
+                    yield return CreateValue(currentIndex);
                     SymbolStartIndex = currentIndex;
 
                     if (symbolClass == symbolClassSymbol)
@@ -632,7 +638,7 @@ namespace Eutherion.Text.Json
 
             if (SymbolStartIndex < currentIndex)
             {
-                yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
+                yield return CreateValue(currentIndex);
             }
 
             yield break;
