@@ -83,7 +83,7 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
 
             Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
-            Assert.Throws<ArgumentException>("value", () => JsonValue.TryCreate(string.Empty));
+            Assert.Throws<ArgumentException>("value", () => JsonValue.TryCreate(string.Empty.AsSpan()));
 
             Assert.Throws<ArgumentNullException>("syntax", () => new RootJsonSyntax(
                 null,
@@ -158,7 +158,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("true", true)]
         public void BooleanJsonValues(string value, bool expectedBooleanValue)
         {
-            var node = JsonValue.TryCreate(value);
+            var node = JsonValue.TryCreate(value.AsSpan());
             GreenJsonBooleanLiteralSyntax boolNode;
             if (expectedBooleanValue)
             {
@@ -183,7 +183,7 @@ namespace Eutherion.Shared.Tests
         public void UnknownJsonValues(string value)
         {
             // Assert that none of these create a legal json value.
-            Assert.Null(JsonValue.TryCreate(value));
+            Assert.Null(JsonValue.TryCreate(value.AsSpan()));
         }
 
         [Fact]

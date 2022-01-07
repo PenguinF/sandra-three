@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Globalization;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -59,20 +58,81 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// The created value, or null if the value was unrecognized.
         /// </returns>
-        public static IGreenJsonSymbol TryCreate(string value)
+        public static IGreenJsonSymbol TryCreate(ReadOnlySpan<char> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length <= 0) throw new ArgumentException($"{nameof(value)} is empty", nameof(value));
 
-            if (value == False) return GreenJsonBooleanLiteralSyntax.False.Instance;
-            if (value == True) return GreenJsonBooleanLiteralSyntax.True.Instance;
-
-            if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
+            char firstCharacter = value[0];
+            if (firstCharacter == 'f')
             {
-                return new GreenJsonIntegerLiteralSyntax(integerValue, value.Length);
+                if (False.AsSpan().SequenceEqual(value)) return GreenJsonBooleanLiteralSyntax.False.Instance;
+                return null;
+            }
+            else if (firstCharacter == 't')
+            {
+                if (True.AsSpan().SequenceEqual(value)) return GreenJsonBooleanLiteralSyntax.True.Instance;
+                return null;
             }
 
-            return null;
+            // Avoid BigInteger if possible.
+            // This is the maximum value which when multiplied by 10 is still 10 or more below ulong.MaxValue,
+            // i.e. can take another digit with guarantee it will not overflow.
+            const ulong maxUnsignedLongValue = ulong.MaxValue / 10 - 1;
+
+            // Try to parse as an integer with a leading sign.
+            int index = 0;
+            bool minus = false;
+
+            // Process or eat sign.
+            if (firstCharacter == '-') { minus = true; index++; }
+            else if (firstCharacter == '+') { index++; }
+
+            ulong ulongValue = 0;
+
+            while (index < value.Length)
+            {
+                int digit = value[index] - '0';
+                if (digit >= 0 && digit <= 9)
+                {
+                    if (ulongValue <= maxUnsignedLongValue)
+                    {
+                        ulongValue = ulongValue * 10 + (uint)digit;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    // Only a number if all characters are digits (except perhaps for the leading sign).
+                    return null;
+                }
+
+                index++;
+            }
+
+            // Convert to BigInteger, continue if there are more characters to parse.
+            BigInteger integerValue = ulongValue;
+
+            while (index < value.Length)
+            {
+                int digit = value[index] - '0';
+                if (digit >= 0 && digit <= 9)
+                {
+                    integerValue = integerValue * 10 + digit;
+                }
+                else
+                {
+                    // Only a number if all characters are digits (except perhaps for the leading sign).
+                    return null;
+                }
+
+                index++;
+            }
+
+            return new GreenJsonIntegerLiteralSyntax(minus ? -integerValue : integerValue, value.Length);
         }
     }
 }

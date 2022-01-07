@@ -426,12 +426,12 @@ namespace Eutherion.Text.Json
         private IGreenJsonSymbol CreateValue(int currentIndex)
         {
             int length = currentIndex - SymbolStartIndex;
-            string stringValue = Json.Substring(SymbolStartIndex, length);
-            IGreenJsonSymbol value = JsonValue.TryCreate(stringValue);
+            IGreenJsonSymbol value = JsonValue.TryCreate(Json.AsSpan().Slice(SymbolStartIndex, length));
 
             if (value == null)
             {
-                Report(JsonUndefinedValueSyntax.CreateError(stringValue, SymbolStartIndex, length));
+                // Copy to a substring here, which is not necessary for JsonValue.TryCreate() anymore.
+                Report(JsonUndefinedValueSyntax.CreateError(Json.Substring(SymbolStartIndex, length), SymbolStartIndex, length));
                 value = new GreenJsonUndefinedValueSyntax(length);
             }
 
