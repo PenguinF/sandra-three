@@ -55,12 +55,12 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Green.BackgroundNodes.GetElementOffset(BackgroundNodeIndex);
+        public sealed override int Start => Parent.Green.BackgroundNodes.GetElementOffset(BackgroundNodeIndex);
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override JsonSyntax ParentSyntax => Parent;
+        public sealed override JsonSyntax ParentSyntax => Parent;
 
         internal JsonBackgroundSyntax(JsonBackgroundListSyntax parent, int backgroundNodeIndex)
         {
