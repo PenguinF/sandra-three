@@ -93,12 +93,12 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Converts this <see cref="IJsonSymbol"/> to a <see cref="JsonSyntax"/> node.
         /// </summary>
-        /// <param name="jsonSymbol">
+        /// <param name="symbol">
         /// The <see cref="IJsonSymbol"/> to convert.
         /// </param>
         /// <returns>
         /// The converted <see cref="JsonSyntax"/> node.
         /// </returns>
-        public static JsonSyntax ToSyntax(this IJsonSymbol jsonSymbol) => jsonSymbol.Accept(ToJsonSyntaxConverter.Instance);
+        public static JsonSyntax ToSyntax(this IJsonSymbol symbol) => ToJsonSyntaxConverter.Instance.Visit(symbol);
     }
 }
