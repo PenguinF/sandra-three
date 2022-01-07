@@ -37,9 +37,8 @@ namespace Eutherion.Text.Json
 
         static GreenJsonWhitespaceSyntax()
         {
-            // Do not allocate a zero length whitespace.
-            SharedInstances = new GreenJsonWhitespaceSyntax[SharedInstanceLength - 1];
-            SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i + 1));
+            SharedInstances = new GreenJsonWhitespaceSyntax[SharedInstanceLength];
+            SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i));
         }
 
         /// <summary>
@@ -65,11 +64,9 @@ namespace Eutherion.Text.Json
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
         public static GreenJsonWhitespaceSyntax Create(int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (length < SharedInstanceLength) return SharedInstances[length - 1];
-            return new GreenJsonWhitespaceSyntax(length);
-        }
+            => length <= 0 ? throw new ArgumentOutOfRangeException(nameof(length))
+            : length < SharedInstanceLength ? SharedInstances[length]
+            : new GreenJsonWhitespaceSyntax(length);
 
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
