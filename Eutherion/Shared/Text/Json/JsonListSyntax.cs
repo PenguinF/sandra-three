@@ -138,7 +138,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Returns ListItemNodes.Count, or one less if the last element is a <see cref="JsonMissingValueSyntax"/>.
         /// </summary>
-        public int FilteredListItemNodeCount => Green.FilteredListItemNodeCount;
+        public int FilteredListItemNodeCount { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -215,6 +215,8 @@ namespace Eutherion.Text.Json
             SquareBracketClose = green.MissingSquareBracketClose
                                ? Maybe<JsonSquareBracketCloseSyntax>.Nothing
                                : new JsonSquareBracketCloseSyntax(this);
+
+            FilteredListItemNodeCount = Green.FilteredListItemNodeCount;
         }
 
         internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
