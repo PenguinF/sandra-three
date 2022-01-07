@@ -40,11 +40,35 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length => ValueDelimiter.Length;
 
-        public GreenJsonRootLevelValueDelimiterSyntax(IGreenJsonSymbol valueDelimiter)
+        internal GreenJsonRootLevelValueDelimiterSyntax(IGreenJsonSymbol valueDelimiter)
         {
-            ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+            ValueDelimiter = valueDelimiter;
             Debug.Assert(ValueDelimiter.SymbolType >= JsonParser.ValueDelimiterThreshold);
         }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonRootLevelValueDelimiterSyntax"/>.
+        /// </summary>
+        /// <param name="valueDelimiter">
+        /// The value delimiter symbol.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueDelimiter"/> is null.
+        /// </exception>
+        public GreenJsonRootLevelValueDelimiterSyntax(GreenJsonCurlyCloseSyntax valueDelimiter)
+            => ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonRootLevelValueDelimiterSyntax"/>.
+        /// </summary>
+        /// <param name="valueDelimiter">
+        /// The value delimiter symbol.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueDelimiter"/> is null.
+        /// </exception>
+        public GreenJsonRootLevelValueDelimiterSyntax(GreenJsonSquareBracketCloseSyntax valueDelimiter)
+            => ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
