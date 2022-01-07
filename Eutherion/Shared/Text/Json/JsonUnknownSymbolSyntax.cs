@@ -63,9 +63,7 @@ namespace Eutherion.Text.Json
             DisplayCharValue = displayCharValue;
         }
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 
     /// <summary>
@@ -105,12 +103,7 @@ namespace Eutherion.Text.Json
 
         internal JsonUnknownSymbolSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonUnknownSymbolSyntax green) : base(parent) => Green = green;
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
-
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 }

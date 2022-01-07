@@ -32,9 +32,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public abstract int Length { get; }
 
-        public abstract void Accept(GreenJsonValueSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+        internal abstract TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 
     /// <summary>
@@ -60,8 +58,6 @@ namespace Eutherion.Text.Json
 
         internal JsonValueSyntax(JsonValueWithBackgroundSyntax parent) => Parent = parent;
 
-        public abstract void Accept(JsonValueSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+        internal abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }

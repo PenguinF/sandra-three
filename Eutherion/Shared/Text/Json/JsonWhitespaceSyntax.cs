@@ -70,9 +70,7 @@ namespace Eutherion.Text.Json
 
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
-        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 
     /// <summary>
@@ -94,8 +92,6 @@ namespace Eutherion.Text.Json
             : base(parent, backgroundNodeIndex)
             => Green = green;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 }

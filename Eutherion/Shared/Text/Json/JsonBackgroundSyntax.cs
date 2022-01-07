@@ -32,9 +32,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public abstract int Length { get; }
 
-        public abstract void Accept(GreenJsonBackgroundSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
+        internal abstract TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
 
     /// <summary>

@@ -76,8 +76,6 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyCloseSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyCloseSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyCloseSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyCloseSyntax(this, arg);
     }
 }

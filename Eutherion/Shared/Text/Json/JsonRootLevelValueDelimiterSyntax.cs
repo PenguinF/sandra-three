@@ -70,9 +70,7 @@ namespace Eutherion.Text.Json
         public GreenJsonRootLevelValueDelimiterSyntax(GreenJsonSquareBracketCloseSyntax valueDelimiter)
             => ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
 
-        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
     }
 
     /// <summary>
@@ -95,8 +93,6 @@ namespace Eutherion.Text.Json
             : base(parent, backgroundNodeIndex)
             => Green = green;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
     }
 }

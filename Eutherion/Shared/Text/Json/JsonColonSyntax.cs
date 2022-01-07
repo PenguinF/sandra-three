@@ -85,8 +85,6 @@ namespace Eutherion.Text.Json
             ColonIndex = colonIndex;
         }
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 }

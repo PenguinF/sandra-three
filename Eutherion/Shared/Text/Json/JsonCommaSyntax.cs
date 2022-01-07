@@ -97,8 +97,6 @@ namespace Eutherion.Text.Json
             CommaIndex = commaIndex;
         }
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
     }
 }

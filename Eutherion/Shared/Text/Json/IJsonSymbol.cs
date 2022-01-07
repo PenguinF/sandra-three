@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -39,9 +41,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public interface IJsonSymbol : ISpan
     {
-        void Accept(JsonSymbolVisitor visitor);
-        TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
-
         /// <summary>
         /// This method is for internal use only.
         /// </summary>
@@ -59,22 +58,22 @@ namespace Eutherion.Text.Json
 
             private ToJsonSyntaxConverter() { }
 
-            public override JsonSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => node;
-            public override JsonSyntax VisitColonSyntax(JsonColonSyntax node) => node;
-            public override JsonSyntax VisitCommaSyntax(JsonCommaSyntax node) => node;
-            public override JsonSyntax VisitCommentSyntax(JsonCommentSyntax node) => node;
-            public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node;
-            public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
-            public override JsonSyntax VisitErrorStringSyntax(JsonErrorStringSyntax node) => node;
-            public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
-            public override JsonSyntax VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => node;
-            public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node;
-            public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
-            public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;
-            public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node;
-            public override JsonSyntax VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => node;
-            public override JsonSyntax VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node;
-            public override JsonSyntax VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node;
+            public override JsonSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, _void arg) => node;
+            public override JsonSyntax VisitColonSyntax(JsonColonSyntax node, _void arg) => node;
+            public override JsonSyntax VisitCommaSyntax(JsonCommaSyntax node, _void arg) => node;
+            public override JsonSyntax VisitCommentSyntax(JsonCommentSyntax node, _void arg) => node;
+            public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node, _void arg) => node;
+            public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node, _void arg) => node;
+            public override JsonSyntax VisitErrorStringSyntax(JsonErrorStringSyntax node, _void arg) => node;
+            public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, _void arg) => node;
+            public override JsonSyntax VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, _void arg) => node;
+            public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node, _void arg) => node;
+            public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node, _void arg) => node;
+            public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node, _void arg) => node;
+            public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, _void arg) => node;
+            public override JsonSyntax VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, _void arg) => node;
+            public override JsonSyntax VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, _void arg) => node;
+            public override JsonSyntax VisitWhitespaceSyntax(JsonWhitespaceSyntax node, _void arg) => node;
         }
 
         /// <summary>

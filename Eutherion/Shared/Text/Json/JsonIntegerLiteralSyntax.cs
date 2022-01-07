@@ -63,9 +63,7 @@ namespace Eutherion.Text.Json
             Length = length;
         }
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
     }
 
     /// <summary>
@@ -90,12 +88,7 @@ namespace Eutherion.Text.Json
 
         internal JsonIntegerLiteralSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonIntegerLiteralSyntax green) : base(parent) => Green = green;
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
-
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
     }
 }

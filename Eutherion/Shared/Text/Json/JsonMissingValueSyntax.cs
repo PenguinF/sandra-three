@@ -38,9 +38,7 @@ namespace Eutherion.Text.Json
 
         private GreenJsonMissingValueSyntax() { }
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 
     /// <summary>
@@ -60,8 +58,6 @@ namespace Eutherion.Text.Json
 
         internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 }

@@ -106,9 +106,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public int GetKeyValueNodeStart(int index) => JsonSpecialCharacter.SpecialCharacterLength + KeyValueNodes.GetElementOffset(index);
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 
     /// <summary>
@@ -220,8 +218,6 @@ namespace Eutherion.Text.Json
                        : new JsonCurlyCloseSyntax(this);
         }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 }
