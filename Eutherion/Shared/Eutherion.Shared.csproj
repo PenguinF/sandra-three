@@ -80,6 +80,7 @@
     <Compile Include="Text\Json\JsonMapSyntax.cs" />
     <Compile Include="Text\Json\JsonMissingValueSyntax.cs" />
     <Compile Include="Text\Json\JsonMultiValueSyntax.cs" />
+    <Compile Include="Text\Json\JsonParseErrors.cs" />
     <Compile Include="Text\Json\JsonParser.cs" />
     <Compile Include="Text\Json\JsonRootLevelValueDelimiterSyntax.cs" />
     <Compile Include="Text\Json\JsonSpecialCharacter.cs" />

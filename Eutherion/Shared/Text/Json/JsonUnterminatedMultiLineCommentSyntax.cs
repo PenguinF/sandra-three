@@ -62,18 +62,6 @@ namespace Eutherion.Text.Json
     public sealed class JsonUnterminatedMultiLineCommentSyntax : JsonBackgroundSyntax, IJsonSymbol
     {
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated comment.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated comment.
-        /// </param>
-        public static JsonErrorInfo CreateError(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, JsonErrorLevel.Warning, start, length);
-
-        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenJsonUnterminatedMultiLineCommentSyntax Green { get; }

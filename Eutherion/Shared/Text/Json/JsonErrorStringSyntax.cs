@@ -62,36 +62,6 @@ namespace Eutherion.Text.Json
     public sealed class JsonErrorStringSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated string.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated string.
-        /// </param>
-        public static JsonErrorInfo Unterminated(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedString, start, length);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
-        /// </summary>
-        public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, start, 2, new[] { displayCharValue });
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
-        /// </summary>
-        public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
-        /// </summary>
-        public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
-            => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
-
-        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenJsonErrorStringSyntax Green { get; }

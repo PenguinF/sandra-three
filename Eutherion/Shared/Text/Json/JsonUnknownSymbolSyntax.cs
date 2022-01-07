@@ -57,21 +57,6 @@ namespace Eutherion.Text.Json
         public const int UnknownSymbolLength = 1;
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
-        /// </summary>
-        /// <param name="displayCharValue">
-        /// A friendly representation of the unknown symbol.
-        /// </param>
-        /// <param name="startPosition">
-        /// The start position for which to create the error.
-        /// </param>
-        /// <returns>
-        /// The new <see cref="JsonErrorInfo"/>.
-        /// </returns>
-        public static JsonErrorInfo CreateError(string displayCharValue, int startPosition)
-            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, startPosition, UnknownSymbolLength, new[] { displayCharValue });
-
-        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenJsonUnknownSymbolSyntax Green { get; }

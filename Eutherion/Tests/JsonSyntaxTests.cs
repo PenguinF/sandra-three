@@ -238,17 +238,17 @@ namespace Eutherion.Shared.Tests
         }
 
         [Theory]
-        [InlineData("*", 0)]
-        [InlineData("€", 0)]
-        [InlineData("≥", 0)]
+        [InlineData('*', 0)]
+        [InlineData('€', 0)]
+        [InlineData('≥', 0)]
 
-        [InlineData("▓", 200)]
-        public void UnexpectedSymbolError(string unexpectedCharacter, int position)
+        [InlineData('▓', 200)]
+        public void UnexpectedSymbolError(char unexpectedCharacter, int position)
         {
-            var error = JsonUnknownSymbolSyntax.CreateError(unexpectedCharacter, position);
+            var error = JsonParseErrors.UnexpectedSymbol(unexpectedCharacter, position);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, unexpectedCharacter);
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, unexpectedCharacter.ToString());
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -259,7 +259,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedMultiLineCommentError(int start, int length)
         {
-            var error = JsonUnterminatedMultiLineCommentSyntax.CreateError(start, length);
+            var error = JsonParseErrors.UnterminatedMultiLineComment(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedMultiLineComment, error.ErrorCode);
             JsonErrorInfoTests.AssertErrorInfoParameters(error);
@@ -273,7 +273,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedStringError(int start, int length)
         {
-            var error = JsonErrorStringSyntax.Unterminated(start, length);
+            var error = JsonParseErrors.UnterminatedString(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedString, error.ErrorCode);
             JsonErrorInfoTests.AssertErrorInfoParameters(error);
@@ -282,14 +282,14 @@ namespace Eutherion.Shared.Tests
         }
 
         [Theory]
-        [InlineData("\\u007f", 1)]
-        [InlineData("\\n", 70)]
-        [InlineData("\\0", 1)]
-        public void IllegalControlCharacterInStringError(string illegalControlCharacter, int position)
+        [InlineData('\u007f', "\\u007f", 1)]
+        [InlineData('\n', "\\n", 70)]
+        [InlineData('\0', "\\u0000", 1)]
+        public void IllegalControlCharacterInStringError(char illegalControlCharacter, string expectedDisplayString, int position)
         {
-            var error = JsonErrorStringSyntax.IllegalControlCharacter(illegalControlCharacter, position);
+            var error = JsonParseErrors.IllegalControlCharacterInString(illegalControlCharacter, position);
             Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, illegalControlCharacter);
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, expectedDisplayString);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -297,22 +297,12 @@ namespace Eutherion.Shared.Tests
         [Theory]
         [InlineData("\\ ", 2)]
         [InlineData("\\0", 1)]
-        public void UnrecognizedEscapeSequenceError(string escapeSequence, int position)
-        {
-            var error = JsonErrorStringSyntax.UnrecognizedEscapeSequence(escapeSequence, position);
-            Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, escapeSequence);
-            Assert.Equal(position, error.Start);
-            Assert.Equal(2, error.Length);
-        }
-
-        [Theory]
         [InlineData("\\u", 0)]
         [InlineData("\\u00", 1)]
         [InlineData("\\uffff", 1)]
-        public void UnrecognizedUnicodeEscapeSequenceError(string escapeSequence, int position)
+        public void UnrecognizedEscapeSequenceError(string escapeSequence, int position)
         {
-            var error = JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(escapeSequence, position, escapeSequence.Length);
+            var error = JsonParseErrors.UnrecognizedEscapeSequence(escapeSequence, position, escapeSequence.Length);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
             JsonErrorInfoTests.AssertErrorInfoParameters(error, escapeSequence);
             Assert.Equal(position, error.Start);

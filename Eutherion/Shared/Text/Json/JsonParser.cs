@@ -431,7 +431,7 @@ namespace Eutherion.Text.Json
             if (value == null)
             {
                 // Copy to a substring here, which is not necessary for JsonValue.TryCreate() anymore.
-                Report(JsonUndefinedValueSyntax.CreateError(Json.Substring(SymbolStartIndex, length), SymbolStartIndex, length));
+                Report(JsonParseErrors.UnrecognizedValue(Json.Substring(SymbolStartIndex, length), SymbolStartIndex, length));
                 value = new GreenJsonUndefinedValueSyntax(length);
             }
 
@@ -555,10 +555,7 @@ namespace Eutherion.Text.Json
                                 }
                                 goto default;
                             default:
-                                string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
-                                    ? StringLiteral.EscapedCharacterString(c)
-                                    : Convert.ToString(c);
-                                Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
+                                Report(JsonParseErrors.UnexpectedSymbol(c, currentIndex));
                                 yield return GreenJsonUnknownSymbolSyntax.Value;
                                 break;
                         }
@@ -639,10 +636,7 @@ namespace Eutherion.Text.Json
                                 }
                                 goto default;
                             default:
-                                string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
-                                    ? StringLiteral.EscapedCharacterString(c)
-                                    : Convert.ToString(c);
-                                Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
+                                Report(JsonParseErrors.UnexpectedSymbol(c, currentIndex));
                                 yield return GreenJsonUnknownSymbolSyntax.Value;
                                 break;
                         }
@@ -781,16 +775,16 @@ namespace Eutherion.Text.Json
                                     {
                                         hasStringErrors = true;
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
-                                        Report(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
+                                        Report(JsonParseErrors.UnrecognizedEscapeSequence(
                                             Json.Substring(escapeSequenceStart, escapeSequenceLength),
                                             escapeSequenceStart, escapeSequenceLength));
                                     }
                                     break;
                                 default:
                                     hasStringErrors = true;
-                                    Report(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
+                                    Report(JsonParseErrors.UnrecognizedEscapeSequence(
                                         Json.Substring(escapeSequenceStart, 2),
-                                        escapeSequenceStart));
+                                        escapeSequenceStart, 2));
                                     break;
                             }
                         }
@@ -800,9 +794,7 @@ namespace Eutherion.Text.Json
                         {
                             // Generate user friendly representation of the illegal character in error message.
                             hasStringErrors = true;
-                            Report(JsonErrorStringSyntax.IllegalControlCharacter(
-                                StringLiteral.EscapedCharacterString(c),
-                                currentIndex));
+                            Report(JsonParseErrors.IllegalControlCharacterInString(c, currentIndex));
                         }
                         else
                         {
@@ -816,7 +808,7 @@ namespace Eutherion.Text.Json
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             int unterminatedStringLength = length - SymbolStartIndex;
-            Report(JsonErrorStringSyntax.Unterminated(SymbolStartIndex, unterminatedStringLength));
+            Report(JsonParseErrors.UnterminatedString(SymbolStartIndex, unterminatedStringLength));
             yield return new GreenJsonErrorStringSyntax(unterminatedStringLength);
             yield break;
 
@@ -897,7 +889,7 @@ namespace Eutherion.Text.Json
             }
 
             int unterminatedCommentLength = length - SymbolStartIndex;
-            Report(JsonUnterminatedMultiLineCommentSyntax.CreateError(SymbolStartIndex, unterminatedCommentLength));
+            Report(JsonParseErrors.UnterminatedMultiLineComment(SymbolStartIndex, unterminatedCommentLength));
             yield return new GreenJsonUnterminatedMultiLineCommentSyntax(unterminatedCommentLength);
         }
     }
