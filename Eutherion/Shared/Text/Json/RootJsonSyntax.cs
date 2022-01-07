@@ -51,11 +51,12 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="syntax"/> and/or <paramref name="errors"/> are null.
         /// </exception>
-        public RootJsonSyntax(GreenJsonMultiValueSyntax syntax, List<JsonErrorInfo> errors)
+        public RootJsonSyntax(GreenJsonMultiValueSyntax syntax, IEnumerable<JsonErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
+            if (errors == null) throw new ArgumentNullException(nameof(errors));
             Syntax = new JsonMultiValueSyntax(syntax);
-            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+            Errors = errors is List<JsonErrorInfo> errorList ? errorList : new List<JsonErrorInfo>(errors);
         }
     }
 }
