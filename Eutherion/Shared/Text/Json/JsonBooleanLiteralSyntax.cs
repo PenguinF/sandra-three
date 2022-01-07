@@ -71,7 +71,7 @@ namespace Eutherion.Text.Json
             /// <returns>
             /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
             /// </returns>
-            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse();
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse != null ? whenFalse() : default;
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Eutherion.Text.Json
             /// <returns>
             /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
             /// </returns>
-            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue();
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue != null ? whenTrue() : default;
         }
 
         /// <summary>
