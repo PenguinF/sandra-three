@@ -101,7 +101,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => Green.Length;
+        public override int Length => UnknownSymbolLength;
 
         internal JsonUnknownSymbolSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonUnknownSymbolSyntax green) : base(parent) => Green = green;
 
