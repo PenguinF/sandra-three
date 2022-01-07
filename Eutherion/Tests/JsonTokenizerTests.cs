@@ -241,8 +241,7 @@ namespace Eutherion.Shared.Tests
                 }
                 else
                 {
-                    var valueSymbol = Assert.IsType<GreenJsonUndefinedValueSyntax>(symbol);
-                    Assert.Equal(json, valueSymbol.UndefinedValue);
+                    Assert.IsType<GreenJsonUndefinedValueSyntax>(symbol);
                 }
             });
         }

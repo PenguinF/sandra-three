@@ -432,7 +432,7 @@ namespace Eutherion.Text.Json
             if (value == null)
             {
                 Report(JsonUndefinedValueSyntax.CreateError(stringValue, SymbolStartIndex, length));
-                value = new GreenJsonUndefinedValueSyntax(stringValue);
+                value = new GreenJsonUndefinedValueSyntax(length);
             }
 
             return value;

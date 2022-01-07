@@ -28,19 +28,30 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
-        public string UndefinedValue { get; }
-
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => UndefinedValue.Length;
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.UndefinedValue;
 
-        public GreenJsonUndefinedValueSyntax(string undefinedValue) => UndefinedValue = undefinedValue ?? throw new ArgumentNullException(nameof(undefinedValue));
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonUndefinedValueSyntax"/>.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
+        public GreenJsonUndefinedValueSyntax(int length)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
 
         internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
     }
