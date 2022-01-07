@@ -79,24 +79,21 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Enumerates all semantically valid key-value pairs together with their starting positions relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
         /// </summary>
-        public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs
+        public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs()
         {
-            get
+            for (int i = 0; i < KeyValueNodes.Count; i++)
             {
-                for (int i = 0; i < KeyValueNodes.Count; i++)
+                var keyValueNode = KeyValueNodes[i];
+
+                if (keyValueNode.ValidKey.IsJust(out GreenJsonStringLiteralSyntax stringLiteral)
+                    && keyValueNode.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax multiValueNode)
+                    && !(multiValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
                 {
-                    var keyValueNode = KeyValueNodes[i];
+                    // Only the first value can be valid, even if it's undefined.
+                    int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                    int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetFirstValueNodeStart() + multiValueNode.ValueNode.BackgroundBefore.Length;
 
-                    if (keyValueNode.ValidKey.IsJust(out GreenJsonStringLiteralSyntax stringLiteral)
-                        && keyValueNode.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax multiValueNode)
-                        && !(multiValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
-                    {
-                        // Only the first value can be valid, even if it's undefined.
-                        int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                        int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetFirstValueNodeStart() + multiValueNode.ValueNode.BackgroundBefore.Length;
-
-                        yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
-                    }
+                    yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                 }
             }
         }

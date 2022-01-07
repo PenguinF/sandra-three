@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingSchema.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ namespace Eutherion.Win.Storage
             var mapBuilder = new Dictionary<string, PValue>();
 
             // Analyze values with this schema while building the PMap.
-            foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
+            foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
             {
                 if (TryGetProperty(new SettingKey(keyNode.Value), out SettingProperty property))
                 {
