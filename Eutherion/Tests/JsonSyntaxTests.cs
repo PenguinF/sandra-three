@@ -21,19 +21,52 @@
 
 using Eutherion.Text.Json;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Eutherion.Shared.Tests
 {
     public class JsonSyntaxTests
     {
+        internal static GreenJsonMultiValueSyntax CreateMultiValue(GreenJsonValueSyntax valueContentNode)
+        {
+            return new GreenJsonMultiValueSyntax(
+                new SingleElementEnumerable<GreenJsonValueWithBackgroundSyntax>(new GreenJsonValueWithBackgroundSyntax(
+                    GreenJsonBackgroundListSyntax.Empty,
+                    valueContentNode)),
+                GreenJsonBackgroundListSyntax.Empty);
+        }
+
         [Fact]
         public void ArgumentChecks()
         {
+            Assert.Throws<ArgumentNullException>("source", () => GreenJsonBackgroundListSyntax.Create(null));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonCommentSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonCommentSyntax.Create(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonIntegerLiteralSyntax(0, -1));
+
+            Assert.Throws<ArgumentNullException>("validKey", () => new GreenJsonKeyValueSyntax(null, EmptyEnumerable<GreenJsonMultiValueSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("source", () => new GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax>.Nothing, null));
+            Assert.Throws<ArgumentException>("valueSectionNodes", () => new GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax>.Nothing, EmptyEnumerable<GreenJsonMultiValueSyntax>.Instance));
+
+            Assert.Throws<ArgumentNullException>("source", () => new GreenJsonListSyntax(null, false));
+            Assert.Throws<ArgumentException>("listItemNodes", () => new GreenJsonListSyntax(EmptyEnumerable<GreenJsonMultiValueSyntax>.Instance, false));
+
+            Assert.Throws<ArgumentNullException>("source", () => new GreenJsonMapSyntax(null, false));
+            Assert.Throws<ArgumentException>("keyValueNodes", () => new GreenJsonMapSyntax(EmptyEnumerable<GreenJsonKeyValueSyntax>.Instance, false));
+
+            Assert.Throws<ArgumentNullException>("source", () => new GreenJsonMultiValueSyntax(null, GreenJsonBackgroundListSyntax.Empty));
+            Assert.Throws<ArgumentException>("valueNodes", () => new GreenJsonMultiValueSyntax(EmptyEnumerable<GreenJsonValueWithBackgroundSyntax>.Instance, GreenJsonBackgroundListSyntax.Empty));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new GreenJsonMultiValueSyntax(
+                new SingleElementEnumerable<GreenJsonValueWithBackgroundSyntax>(new GreenJsonValueWithBackgroundSyntax(
+                    GreenJsonBackgroundListSyntax.Empty, GreenJsonMissingValueSyntax.Value)), null));
+
+            Assert.Throws<ArgumentNullException>("valueDelimiter", () => new GreenJsonRootLevelValueDelimiterSyntax((GreenJsonCurlyCloseSyntax)null));
+            Assert.Throws<ArgumentNullException>("valueDelimiter", () => new GreenJsonRootLevelValueDelimiterSyntax((GreenJsonSquareBracketCloseSyntax)null));
 
             Assert.Throws<ArgumentNullException>("value", () => new GreenJsonStringLiteralSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
@@ -41,11 +74,28 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUndefinedValueSyntax(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(0));
+
+            Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenJsonValueWithBackgroundSyntax(null, GreenJsonBooleanLiteralSyntax.False.Instance));
+            Assert.Throws<ArgumentNullException>("contentNode", () => new GreenJsonValueWithBackgroundSyntax(GreenJsonBackgroundListSyntax.Empty, null));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
 
             Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
+            Assert.Throws<ArgumentException>("value", () => JsonValue.TryCreate(string.Empty));
+
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootJsonSyntax(
+                null,
+                EmptyEnumerable<JsonErrorInfo>.Instance));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootJsonSyntax(
+                CreateMultiValue(new GreenJsonIntegerLiteralSyntax(0, 1)),
+                null));
+
+            // Both GreenJsonStringLiteralSyntax instances should be the same, and in below test they are not.
+            Assert.Throws<ArgumentException>("validKey", () => new GreenJsonKeyValueSyntax(
+                new GreenJsonStringLiteralSyntax("x", 1),
+                new SingleElementEnumerable<GreenJsonMultiValueSyntax>(CreateMultiValue(new GreenJsonStringLiteralSyntax("x", 1)))));
         }
 
         private const int SharedInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength - 2;
@@ -94,11 +144,97 @@ namespace Eutherion.Shared.Tests
         }
 
         [Theory]
-        [InlineData("/*  *")]
-        public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
+        [InlineData(1)]
+        [InlineData(255)]
+        [InlineData(2000)]
+        public void UnchangedParametersInUnterminatedMultiLineComment(int commentTextLength)
         {
-            var symbol = new GreenJsonUnterminatedMultiLineCommentSyntax(commentText.Length);
-            Assert.Equal(commentText.Length, symbol.Length);
+            var symbol = new GreenJsonUnterminatedMultiLineCommentSyntax(commentTextLength);
+            Assert.Equal(commentTextLength, symbol.Length);
+        }
+
+        [Theory]
+        [InlineData("false", false)]
+        [InlineData("true", true)]
+        public void BooleanJsonValues(string value, bool expectedBooleanValue)
+        {
+            var node = JsonValue.TryCreate(value);
+            GreenJsonBooleanLiteralSyntax boolNode;
+            if (expectedBooleanValue)
+            {
+                boolNode = Assert.IsType<GreenJsonBooleanLiteralSyntax.True>(node);
+            }
+            else
+            {
+                boolNode = Assert.IsType<GreenJsonBooleanLiteralSyntax.False>(node);
+            }
+            Assert.Equal(expectedBooleanValue, boolNode.Value);
+            Assert.Equal(value, boolNode.LiteralJsonValue);
+            Assert.Equal(value.Length, boolNode.Length);
+        }
+
+        [Theory]
+        [InlineData("++0")]
+        [InlineData("--0")]
+        [InlineData("0.0")]
+        [InlineData("1e+1")]
+        [InlineData("{}")]
+        [InlineData("\"\"")]
+        public void UnknownJsonValues(string value)
+        {
+            // Assert that none of these create a legal json value.
+            Assert.Null(JsonValue.TryCreate(value));
+        }
+
+        [Fact]
+        public void KeyValueSyntaxPropertiesAreConsistent()
+        {
+            GreenJsonStringLiteralSyntax stringLiteral = new GreenJsonStringLiteralSyntax("x", 1);
+            GreenJsonIntegerLiteralSyntax integerLiteral = new GreenJsonIntegerLiteralSyntax(1, 1);
+
+            GreenJsonKeyValueSyntax keyValue = new GreenJsonKeyValueSyntax(
+                stringLiteral,
+                new GreenJsonMultiValueSyntax[]
+                {
+                    CreateMultiValue(stringLiteral),
+                    CreateMultiValue(integerLiteral),
+                });
+
+            // The first GreenJsonMultiValueSyntax must be exactly equal to the valid key.
+            Assert.True(keyValue.ValidKey.IsJust(out GreenJsonStringLiteralSyntax validKey));
+            Assert.Same(stringLiteral, validKey);
+            Assert.Same(stringLiteral, keyValue.KeyNode.ValueNode.ContentNode);
+
+            // The second GreenJsonMultiValueSyntax must be exactly equal to the first value node.
+            Assert.True(keyValue.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax firstValueNode));
+            Assert.Same(integerLiteral, firstValueNode.ValueNode.ContentNode);
+        }
+
+        [Fact]
+        public void ListSyntaxPropertiesAreConsistent()
+        {
+            GreenJsonIntegerLiteralSyntax integerLiteral = new GreenJsonIntegerLiteralSyntax(1, 1);
+            GreenJsonIntegerLiteralSyntax integerLiteral2 = new GreenJsonIntegerLiteralSyntax(1, 2);
+
+            GreenJsonListSyntax list1 = new GreenJsonListSyntax(
+                new GreenJsonMultiValueSyntax[]
+                {
+                    CreateMultiValue(integerLiteral),
+                    CreateMultiValue(integerLiteral2),
+                },
+                false);
+
+            Assert.Equal(2, list1.FilteredListItemNodeCount);
+
+            GreenJsonListSyntax list2 = new GreenJsonListSyntax(
+                new GreenJsonMultiValueSyntax[]
+                {
+                    CreateMultiValue(integerLiteral),
+                    CreateMultiValue(GreenJsonMissingValueSyntax.Value),
+                },
+                false);
+
+            Assert.Equal(1, list2.FilteredListItemNodeCount);
         }
 
         [Theory]
@@ -107,12 +243,12 @@ namespace Eutherion.Shared.Tests
         [InlineData("≥", 0)]
 
         [InlineData("▓", 200)]
-        public void UnexpectedSymbolError(string displayCharValue, int position)
+        public void UnexpectedSymbolError(string unexpectedCharacter, int position)
         {
-            var error = JsonUnknownSymbolSyntax.CreateError(displayCharValue, position);
+            var error = JsonUnknownSymbolSyntax.CreateError(unexpectedCharacter, position);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
-            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, unexpectedCharacter);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -126,7 +262,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonUnterminatedMultiLineCommentSyntax.CreateError(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedMultiLineComment, error.ErrorCode);
-            Assert.Null(error.Parameters);
+            JsonErrorInfoTests.AssertErrorInfoParameters(error);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -140,7 +276,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonErrorStringSyntax.Unterminated(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedString, error.ErrorCode);
-            Assert.Null(error.Parameters);
+            JsonErrorInfoTests.AssertErrorInfoParameters(error);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -149,11 +285,11 @@ namespace Eutherion.Shared.Tests
         [InlineData("\\u007f", 1)]
         [InlineData("\\n", 70)]
         [InlineData("\\0", 1)]
-        public void IllegalControlCharacterInStringError(string displayCharValue, int position)
+        public void IllegalControlCharacterInStringError(string illegalControlCharacter, int position)
         {
-            var error = JsonErrorStringSyntax.IllegalControlCharacter(displayCharValue, position);
+            var error = JsonErrorStringSyntax.IllegalControlCharacter(illegalControlCharacter, position);
             Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
-            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, illegalControlCharacter);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -161,11 +297,11 @@ namespace Eutherion.Shared.Tests
         [Theory]
         [InlineData("\\ ", 2)]
         [InlineData("\\0", 1)]
-        public void UnrecognizedEscapeSequenceError(string displayCharValue, int position)
+        public void UnrecognizedEscapeSequenceError(string escapeSequence, int position)
         {
-            var error = JsonErrorStringSyntax.UnrecognizedEscapeSequence(displayCharValue, position);
+            var error = JsonErrorStringSyntax.UnrecognizedEscapeSequence(escapeSequence, position);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
-            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, escapeSequence);
             Assert.Equal(position, error.Start);
             Assert.Equal(2, error.Length);
         }
@@ -174,13 +310,13 @@ namespace Eutherion.Shared.Tests
         [InlineData("\\u", 0)]
         [InlineData("\\u00", 1)]
         [InlineData("\\uffff", 1)]
-        public void UnrecognizedUnicodeEscapeSequenceError(string displayCharValue, int position)
+        public void UnrecognizedUnicodeEscapeSequenceError(string escapeSequence, int position)
         {
-            var error = JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
+            var error = JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(escapeSequence, position, escapeSequence.Length);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
-            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
+            JsonErrorInfoTests.AssertErrorInfoParameters(error, escapeSequence);
             Assert.Equal(position, error.Start);
-            Assert.Equal(displayCharValue.Length, error.Length);
+            Assert.Equal(escapeSequence.Length, error.Length);
         }
     }
 }

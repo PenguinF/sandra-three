@@ -104,8 +104,9 @@ namespace Eutherion.Shared.Tests
         }
 
         [Fact]
-        public void NullJsonThrows()
+        public void NullSourceThrows()
         {
+            Assert.Throws<ArgumentNullException>(() => JsonParser.TokenizeAll(null));
             Assert.Throws<ArgumentNullException>(() => JsonParser.Parse(null));
         }
 
@@ -147,7 +148,7 @@ namespace Eutherion.Shared.Tests
         }
 
         [Fact]
-        public void EmptyStringNoTokens()
+        public void EmptySourceNoTokens()
         {
             AssertTokens("");
         }
@@ -331,6 +332,9 @@ namespace Eutherion.Shared.Tests
             }
         }
 
+        /// <summary>
+        /// Tests all combinations of three symbols.
+        /// </summary>
         [Theory]
         [MemberData(nameof(TwoSymbolsOfEachType))]
         public void Transition(string json1, Type type1, string json2, Type type2)
@@ -364,6 +368,7 @@ namespace Eutherion.Shared.Tests
                     string json0 = x0.Item1;
                     Type type0 = x0.Item2;
 
+                    // Exceptions for when 2 or 3 symbols go together and make 1.
                     if (WillCombine(type0, type1, out Type type01))
                     {
                         if (WillCombine(type01, type2, out Type type012))
@@ -398,24 +403,74 @@ namespace Eutherion.Shared.Tests
                 }, JsonTestSymbols().Count()).ToArray());
         }
 
+        /// <summary>
+        /// Tests all combinations of a comment followed by another symbol.
+        /// </summary>
         [Theory]
         [MemberData(nameof(OneSymbolOfEachType))]
         public void SingleLineCommentTransition(string json, Type type)
         {
+            // Double slash + symbol should be lexed as a comment.
+            // Do not take a dependency upon SpecialCharacter, because tests should fail if the SpecialCharacter definition is changed.
+            var commentThenSymbolText = $"//{json}";
+
+            // Special treatment if 'symbolText' contains a line break.
+            int linefeedIndex = json.IndexOf('\n');
+            if (linefeedIndex >= 0)
+            {
+                // Only assert the single line comment, and that the next symbol is whitespace ('\n').
+                var symbols = JsonParser.TokenizeAll(commentThenSymbolText).Item1;
+                Assert.True(symbols.Count >= 2);
+                ExpectToken<GreenJsonCommentSyntax>(2 + linefeedIndex)(symbols[0]);
+                Assert.IsType<GreenJsonWhitespaceSyntax>(symbols[1]);
+            }
+            else
+            {
+                // Comment should eat everything otherwise.
+                AssertTokens(
+                    commentThenSymbolText,
+                    ExpectToken<GreenJsonCommentSyntax>(2 + json.Length));
+            }
+
+            // Comment + newline + symbol.
+            var commentThenNewLineThenSymbolText = $"//\n{json}";
+
             if (type == typeof(GreenJsonWhitespaceSyntax))
             {
                 // Test this separately because the '\n' is included in the second symbol.
                 AssertTokens(
-                    $"//\n{json}",
+                    commentThenNewLineThenSymbolText,
                     ExpectToken<GreenJsonCommentSyntax>(2),
                     ExpectToken<GreenJsonWhitespaceSyntax>(1 + json.Length));
             }
             else
             {
+                // Three symbols: comment, single newline whitespace symbol, test symbol from parameter of the expected type.
                 AssertTokens(
-                    $"//\n{json}",
+                    commentThenNewLineThenSymbolText,
                     ExpectToken<GreenJsonCommentSyntax>(2),
                     ExpectToken<GreenJsonWhitespaceSyntax>(1),
+                    ExpectToken(type, json.Length));
+            }
+
+            // Comment + windows newline + symbol.
+            commentThenNewLineThenSymbolText = $"//\r\n{json}";
+
+            if (type == typeof(GreenJsonWhitespaceSyntax))
+            {
+                // Second symbol should include the '\r' as well as the '\n'.
+                AssertTokens(
+                    commentThenNewLineThenSymbolText,
+                    ExpectToken<GreenJsonCommentSyntax>(2),
+                    ExpectToken<GreenJsonWhitespaceSyntax>(2 + json.Length));
+            }
+            else
+            {
+                // Three symbols: comment, whitespace symbol, test symbol from parameter of the expected type.
+                AssertTokens(
+                    commentThenNewLineThenSymbolText,
+                    ExpectToken<GreenJsonCommentSyntax>(2),
+                    ExpectToken<GreenJsonWhitespaceSyntax>(2),
                     ExpectToken(type, json.Length));
             }
         }
@@ -519,15 +574,8 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            int length = 0;
-
             var tokensAndErrors = JsonParser.TokenizeAll(json);
             var generatedErrors = tokensAndErrors.Item2;
-
-            foreach (var token in tokensAndErrors.Item1)
-            {
-                length += token.Length;
-            }
 
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
@@ -535,10 +583,8 @@ namespace Eutherion.Shared.Tests
                 Assert.Equal(expectedError.ErrorCode, generatedError.ErrorCode);
                 Assert.Equal(expectedError.Start, generatedError.Start);
                 Assert.Equal(expectedError.Length, generatedError.Length);
-
-                // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
-                Assert.Equal<string>(expectedError.Parameters, generatedError.Parameters);
-            })).ToArray());
+                JsonErrorInfoTests.AssertErrorInfoParameters(generatedError, expectedError.Parameters);
+            })).ToArrayEx());
         }
     }
 }
