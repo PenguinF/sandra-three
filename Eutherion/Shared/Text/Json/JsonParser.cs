@@ -429,7 +429,15 @@ namespace Eutherion.Text.Json
         private IGreenJsonSymbol CreateValue(int currentIndex)
         {
             int length = currentIndex - SymbolStartIndex;
-            return JsonValue.Create(Json.Substring(SymbolStartIndex, length));
+            string stringValue = Json.Substring(SymbolStartIndex, length);
+            IGreenJsonSymbol value = JsonValue.TryCreate(stringValue);
+
+            if (value == null)
+            {
+                value = new GreenJsonUndefinedValueSyntax(stringValue);
+            }
+
+            return value;
         }
 
         const int symbolClassValueChar = 0;

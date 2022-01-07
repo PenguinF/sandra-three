@@ -56,7 +56,10 @@ namespace Eutherion.Text.Json
         /// <param name="value">
         /// The value from which to create a syntax node.
         /// </param>
-        public static IGreenJsonSymbol Create(string value)
+        /// <returns>
+        /// The created value, or null if the value was unrecognized.
+        /// </returns>
+        public static IGreenJsonSymbol TryCreate(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length <= 0) throw new ArgumentException($"{nameof(value)} is empty", nameof(value));
@@ -69,7 +72,7 @@ namespace Eutherion.Text.Json
                 return new GreenJsonIntegerLiteralSyntax(integerValue, value.Length);
             }
 
-            return new GreenJsonUndefinedValueSyntax(value);
+            return null;
         }
     }
 }

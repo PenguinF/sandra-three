@@ -51,7 +51,7 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
 
-            Assert.Throws<ArgumentNullException>("value", () => JsonValue.Create(null));
+            Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
         }
 
         private const int SharedWhitespaceInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
@@ -90,17 +90,12 @@ namespace Eutherion.Shared.Tests
         // No newline conversions.
         [InlineData("\n", 1)]
         [InlineData("\r\n", 2)]
-        public void UnchangedValueParameter(string value, int length)
+        public void UnchangedStringLiteralValueParameter(string value, int length)
         {
             // Length includes quotes for json strings.
             var jsonString = new GreenJsonStringLiteralSyntax(value, length + 2);
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
-
-            var jsonSymbol = JsonValue.Create(value);
-            var jsonValue = Assert.IsType<GreenJsonUndefinedValueSyntax>(jsonSymbol);
-            Assert.Equal(value, jsonValue.UndefinedValue);
-            Assert.Equal(value.Length, jsonValue.Length);
         }
 
         [Theory]
