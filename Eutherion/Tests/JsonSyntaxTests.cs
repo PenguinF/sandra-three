@@ -30,7 +30,8 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonCommentSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonCommentSyntax.Create(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(0));
 
@@ -47,21 +48,22 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
         }
 
-        private const int SharedWhitespaceInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength - 2;
-        private const int SharedWhitespaceInstanceLengthMinusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength - 1;
-        private const int SharedWhitespaceInstanceLengthPlusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength + 1;
-        private const int SharedWhitespaceInstanceLengthPlusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength + 2;
+        private const int SharedInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength - 2;
+        private const int SharedInstanceLengthMinusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength - 1;
+        private const int SharedInstanceLengthPlusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength + 1;
+        private const int SharedInstanceLengthPlusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength + 2;
 
         [Theory]
         [InlineData(1)]
-        [InlineData(SharedWhitespaceInstanceLengthMinusTwo)]
-        [InlineData(SharedWhitespaceInstanceLengthMinusOne)]
+        [InlineData(SharedInstanceLengthMinusTwo)]
+        [InlineData(SharedInstanceLengthMinusOne)]
         [InlineData(GreenJsonWhitespaceSyntax.SharedInstanceLength)]
-        [InlineData(SharedWhitespaceInstanceLengthPlusOne)]
-        [InlineData(SharedWhitespaceInstanceLengthPlusTwo)]
-        public void WhitespaceHasCorrectLength(int length)
+        [InlineData(SharedInstanceLengthPlusOne)]
+        [InlineData(SharedInstanceLengthPlusTwo)]
+        public void SharedInstanceHasCorrectLength(int length)
         {
             Assert.Equal(length, GreenJsonWhitespaceSyntax.Create(length).Length);
+            Assert.Equal(length, GreenJsonCommentSyntax.Create(length).Length);
         }
 
         [Fact]

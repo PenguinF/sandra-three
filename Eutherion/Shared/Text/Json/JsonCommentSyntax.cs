@@ -29,6 +29,19 @@ namespace Eutherion.Text.Json
     public sealed class GreenJsonCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         /// <summary>
+        /// Maximum length before new <see cref="GreenJsonCommentSyntax"/> instances are always newly allocated.
+        /// </summary>
+        public const int SharedInstanceLength = GreenJsonWhitespaceSyntax.SharedInstanceLength;
+
+        private static readonly GreenJsonCommentSyntax[] SharedInstances;
+
+        static GreenJsonCommentSyntax()
+        {
+            SharedInstances = new GreenJsonCommentSyntax[SharedInstanceLength];
+            SharedInstances.Fill(i => new GreenJsonCommentSyntax(i));
+        }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length { get; }
@@ -44,14 +57,18 @@ namespace Eutherion.Text.Json
         /// <param name="length">
         /// The length of the text span corresponding with the node to create.
         /// </param>
+        /// <returns>
+        /// The new <see cref="GreenJsonCommentSyntax"/>.
+        /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
-        public GreenJsonCommentSyntax(int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-        }
+        public static GreenJsonCommentSyntax Create(int length)
+            => length <= 0 ? throw new ArgumentOutOfRangeException(nameof(length))
+            : length < SharedInstanceLength ? SharedInstances[length]
+            : new GreenJsonCommentSyntax(length);
+
+        private GreenJsonCommentSyntax(int length) => Length = length;
 
         internal override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }

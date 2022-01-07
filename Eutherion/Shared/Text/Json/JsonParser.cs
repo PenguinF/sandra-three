@@ -842,7 +842,7 @@ namespace Eutherion.Text.Json
                             char secondChar = Json[currentIndex];
                             if (secondChar == '\n')
                             {
-                                yield return new GreenJsonCommentSyntax(currentIndex - 1 - SymbolStartIndex);
+                                yield return GreenJsonCommentSyntax.Create(currentIndex - 1 - SymbolStartIndex);
 
                                 // Eat the second whitespace character.
                                 SymbolStartIndex = currentIndex - 1;
@@ -852,7 +852,7 @@ namespace Eutherion.Text.Json
                         }
                         break;
                     case '\n':
-                        yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
+                        yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
 
                         // Eat the '\n'.
                         SymbolStartIndex = currentIndex;
@@ -863,7 +863,7 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
+            yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
             yield break;
 
         inMultiLineComment:
@@ -885,7 +885,7 @@ namespace Eutherion.Text.Json
                             // Increment so the closing '*/' is regarded as part of the comment.
                             currentIndex += 2;
 
-                            yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
+                            yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
 
                             SymbolStartIndex = currentIndex;
                             goto inWhitespace;
