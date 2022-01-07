@@ -50,16 +50,16 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
         }
 
-        private const int SharedWhitespaceInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
-        private const int SharedWhitespaceInstanceLengthMinusOne = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength - 1;
-        private const int SharedWhitespaceInstanceLengthPlusOne = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength + 1;
-        private const int SharedWhitespaceInstanceLengthPlusTwo = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength + 2;
+        private const int SharedWhitespaceInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength - 2;
+        private const int SharedWhitespaceInstanceLengthMinusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength - 1;
+        private const int SharedWhitespaceInstanceLengthPlusOne = GreenJsonWhitespaceSyntax.SharedInstanceLength + 1;
+        private const int SharedWhitespaceInstanceLengthPlusTwo = GreenJsonWhitespaceSyntax.SharedInstanceLength + 2;
 
         [Theory]
         [InlineData(1)]
         [InlineData(SharedWhitespaceInstanceLengthMinusTwo)]
         [InlineData(SharedWhitespaceInstanceLengthMinusOne)]
-        [InlineData(GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength)]
+        [InlineData(GreenJsonWhitespaceSyntax.SharedInstanceLength)]
         [InlineData(SharedWhitespaceInstanceLengthPlusOne)]
         [InlineData(SharedWhitespaceInstanceLengthPlusTwo)]
         public void WhitespaceHasCorrectLength(int length)

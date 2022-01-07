@@ -31,14 +31,14 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Maximum length before new <see cref="GreenJsonWhitespaceSyntax"/> instances are always newly allocated.
         /// </summary>
-        public const int SharedWhitespaceInstanceLength = 255;
+        public const int SharedInstanceLength = 255;
 
         private static readonly GreenJsonWhitespaceSyntax[] SharedInstances;
 
         static GreenJsonWhitespaceSyntax()
         {
             // Do not allocate a zero length whitespace.
-            SharedInstances = new GreenJsonWhitespaceSyntax[SharedWhitespaceInstanceLength - 1];
+            SharedInstances = new GreenJsonWhitespaceSyntax[SharedInstanceLength - 1];
             SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i + 1));
         }
 
@@ -67,7 +67,7 @@ namespace Eutherion.Text.Json
         public static GreenJsonWhitespaceSyntax Create(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (length < SharedWhitespaceInstanceLength) return SharedInstances[length - 1];
+            if (length < SharedInstanceLength) return SharedInstances[length - 1];
             return new GreenJsonWhitespaceSyntax(length);
         }
 
