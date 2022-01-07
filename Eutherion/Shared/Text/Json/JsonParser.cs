@@ -90,6 +90,8 @@ namespace Eutherion.Text.Json
             Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
         }
 
+        private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
+
         private JsonSymbolType ShiftToNextForegroundToken()
         {
             // Skip background until encountering something meaningful.
@@ -154,7 +156,7 @@ namespace Eutherion.Text.Json
                         }
                         else
                         {
-                            Errors.Add(new JsonErrorInfo(
+                            Report(new JsonErrorInfo(
                                 JsonErrorCode.PropertyKeyAlreadyExists,
                                 parsedKeyNodeStart,
                                 parsedKeyNode.Length,
@@ -164,7 +166,7 @@ namespace Eutherion.Text.Json
                         break;
                     default:
                         gotKey = true;
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
                             parsedKeyNodeStart,
                             parsedKeyNode.Length));
@@ -183,7 +185,7 @@ namespace Eutherion.Text.Json
                     if (gotColon)
                     {
                         // Multiple ':' without a ','.
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MultiplePropertyKeySections,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -213,7 +215,7 @@ namespace Eutherion.Text.Json
                     // Report missing property key and/or value.
                     if (!gotKey)
                     {
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingPropertyKey,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -224,7 +226,7 @@ namespace Eutherion.Text.Json
                     // Skip the fist value section, it contains the key node.
                     if (jsonKeyValueSyntax.ValueSectionNodes.Skip(1).All(x => x.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
                     {
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -239,7 +241,7 @@ namespace Eutherion.Text.Json
                     }
 
                     // ']', EOF; assume missing closing bracket '}'.
-                    Errors.Add(new JsonErrorInfo(
+                    Report(new JsonErrorInfo(
                         symbolType == JsonSymbolType.Eof ? JsonErrorCode.UnexpectedEofInObject : JsonErrorCode.ControlSymbolInObject,
                         CurrentLength - CurrentToken.Length,
                         CurrentToken.Length));
@@ -267,7 +269,7 @@ namespace Eutherion.Text.Json
                     if (parsedValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
                     {
                         // Two commas or '[,'.
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -280,7 +282,7 @@ namespace Eutherion.Text.Json
                 else
                 {
                     // ':', '}', EOF; assume missing closing bracket ']'.
-                    Errors.Add(new JsonErrorInfo(
+                    Report(new JsonErrorInfo(
                         symbolType == JsonSymbolType.Eof ? JsonErrorCode.UnexpectedEofInArray : JsonErrorCode.ControlSymbolInArray,
                         CurrentLength - CurrentToken.Length,
                         CurrentToken.Length));
@@ -325,7 +327,7 @@ namespace Eutherion.Text.Json
                 if (symbolType >= ValueDelimiterThreshold) return;
 
                 // Two or more consecutive values not allowed.
-                Errors.Add(new JsonErrorInfo(
+                Report(new JsonErrorInfo(
                     multipleValuesErrorCode,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
@@ -379,7 +381,7 @@ namespace Eutherion.Text.Json
                 BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(CurrentToken));
 
                 // Report an error if no value was encountered before the control symbol.
-                Errors.Add(new JsonErrorInfo(
+                Report(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
@@ -413,6 +415,8 @@ namespace Eutherion.Text.Json
             length = json.Length;
             currentTokenizer = Default;
         }
+
+        private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
 
         private IEnumerable<IGreenJsonSymbol> Default()
         {
@@ -685,13 +689,13 @@ namespace Eutherion.Text.Json
                                     else
                                     {
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
-                                        Errors.Add(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
+                                        Report(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
                                             Json.Substring(escapeSequenceStart, escapeSequenceLength),
                                             escapeSequenceStart - SymbolStartIndex, escapeSequenceLength));
                                     }
                                     break;
                                 default:
-                                    Errors.Add(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
+                                    Report(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
                                         Json.Substring(escapeSequenceStart, 2),
                                         escapeSequenceStart - SymbolStartIndex));
                                     break;
@@ -702,7 +706,7 @@ namespace Eutherion.Text.Json
                         if (StringLiteral.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
-                            Errors.Add(JsonErrorStringSyntax.IllegalControlCharacter(
+                            Report(JsonErrorStringSyntax.IllegalControlCharacter(
                                 StringLiteral.EscapedCharacterString(c),
                                 currentIndex - SymbolStartIndex));
                         }
@@ -717,7 +721,7 @@ namespace Eutherion.Text.Json
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            Errors.Add(JsonErrorStringSyntax.Unterminated(0, length - SymbolStartIndex));
+            Report(JsonErrorStringSyntax.Unterminated(0, length - SymbolStartIndex));
 
             yield return new GreenJsonErrorStringSyntax(Errors, length - SymbolStartIndex);
 
