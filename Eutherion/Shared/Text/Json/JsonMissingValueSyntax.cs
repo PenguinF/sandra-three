@@ -51,14 +51,14 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public GreenJsonMissingValueSyntax Green { get; }
+        public GreenJsonMissingValueSyntax Green => GreenJsonMissingValueSyntax.Value;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => 0;
 
-        internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonMissingValueSyntax green) : base(parent) => Green = green;
+        internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);

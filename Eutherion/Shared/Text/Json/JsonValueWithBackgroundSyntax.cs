@@ -93,7 +93,7 @@ namespace Eutherion.Text.Json
                 => new JsonMapSyntax(parent, green);
 
             public override JsonValueSyntax VisitMissingValueSyntax(GreenJsonMissingValueSyntax green, JsonValueWithBackgroundSyntax parent)
-                => new JsonMissingValueSyntax(parent, green);
+                => new JsonMissingValueSyntax(parent);
 
             public override JsonValueSyntax VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
                 => new JsonStringLiteralSyntax(parent, green);
@@ -178,6 +178,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
             Green = parent.Green.ValueNodes[parentValueNodeIndex];
+
             backgroundBefore = new SafeLazyObject<JsonBackgroundListSyntax>(() => new JsonBackgroundListSyntax(this));
             contentNode = new SafeLazyObject<JsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
