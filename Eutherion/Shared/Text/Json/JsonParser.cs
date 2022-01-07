@@ -73,7 +73,7 @@ namespace Eutherion.Text.Json
         internal const JsonSymbolType ForegroundThreshold = JsonSymbolType.BooleanLiteral;
         internal const JsonSymbolType ValueDelimiterThreshold = JsonSymbolType.Colon;
 
-        private readonly IEnumerator<IGreenJsonSymbol> Tokens;
+        private IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
@@ -88,7 +88,6 @@ namespace Eutherion.Text.Json
         private JsonParser(string json)
         {
             Json = json ?? throw new ArgumentNullException(nameof(json));
-            Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
         }
 
         private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
@@ -362,6 +361,8 @@ namespace Eutherion.Text.Json
         // as it cannot go to a higher level in the stack to process value delimiter symbols.
         private RootJsonSyntax Parse()
         {
+            Tokens = JsonTokenizer.TokenizeAll(Json).GetEnumerator();
+
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
 
             for (; ; )
