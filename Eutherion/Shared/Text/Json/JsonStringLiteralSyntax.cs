@@ -60,9 +60,9 @@ namespace Eutherion.Text.Json
         /// </exception>
         public GreenJsonStringLiteralSyntax(string value, int length)
         {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
