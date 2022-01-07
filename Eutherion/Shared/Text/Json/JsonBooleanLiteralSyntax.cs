@@ -181,11 +181,33 @@ namespace Eutherion.Text.Json
             public override bool Value => false;
 
             /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
+            public override string LiteralJsonValue => JsonValue.False;
+
+            /// <summary>
             /// Gets the length of the text span corresponding with this syntax node.
             /// </summary>
             public override int Length => JsonValue.FalseSymbolLength;
 
             internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse != null ? whenFalse() : default;
         }
 
         /// <summary>
@@ -204,11 +226,33 @@ namespace Eutherion.Text.Json
             public override bool Value => true;
 
             /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
+            public override string LiteralJsonValue => JsonValue.True;
+
+            /// <summary>
             /// Gets the length of the text span corresponding with this syntax node.
             /// </summary>
             public override int Length => JsonValue.TrueSymbolLength;
 
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue != null ? whenTrue() : default;
         }
 
         /// <summary>
@@ -236,7 +280,29 @@ namespace Eutherion.Text.Json
         /// </summary>
         public abstract bool Value { get; }
 
+        /// <summary>
+        /// Gets the representation of this literal value in JSON source text.
+        /// </summary>
+        public abstract string LiteralJsonValue { get; }
+
         private JsonBooleanLiteralSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+        /// <summary>
+        /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// Type of the value to return.
+        /// </typeparam>
+        /// <param name="whenFalse">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+        /// </param>
+        /// <param name="whenTrue">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+        /// </param>
+        /// <returns>
+        /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+        /// </returns>
+        public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
