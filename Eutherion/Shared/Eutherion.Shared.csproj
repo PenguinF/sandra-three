@@ -70,6 +70,7 @@
     <Compile Include="Text\Json\JsonMultiValueSyntax.cs" />
     <Compile Include="Text\Json\JsonParser.cs" />
     <Compile Include="Text\Json\JsonRootLevelValueDelimiterSyntax.cs" />
+    <Compile Include="Text\Json\JsonSpecialCharacter.cs" />
     <Compile Include="Text\Json\JsonSquareBracketCloseSyntax.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />

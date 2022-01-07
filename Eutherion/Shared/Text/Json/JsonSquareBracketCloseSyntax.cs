@@ -36,7 +36,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+        public int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -53,9 +53,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonSquareBracketCloseSyntax : JsonSyntax, IJsonSymbol
     {
-        public const char SquareBracketCloseCharacter = ']';
-        public const int SquareBracketCloseLength = 1;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -69,12 +66,12 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Length - SquareBracketCloseLength;
+        public override int Start => Parent.Length - JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => SquareBracketCloseLength;
+        public override int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.

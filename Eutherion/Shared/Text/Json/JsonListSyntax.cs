@@ -90,15 +90,15 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            Length = JsonSquareBracketOpenSyntax.SquareBracketOpenLength
+            Length = JsonSpecialCharacter.SpecialCharacterLength
                    + ListItemNodes.Length
-                   + (missingSquareBracketClose ? 0 : JsonSquareBracketCloseSyntax.SquareBracketCloseLength);
+                   + (missingSquareBracketClose ? 0 : JsonSpecialCharacter.SpecialCharacterLength);
         }
 
         /// <summary>
         /// Gets the start position of an element node relative to the start position of this <see cref="GreenJsonListSyntax"/>.
         /// </summary>
-        public int GetElementNodeStart(int index) => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
+        public int GetElementNodeStart(int index) => JsonSpecialCharacter.SpecialCharacterLength + ListItemNodes.GetElementOffset(index);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
@@ -188,12 +188,12 @@ namespace Eutherion.Text.Json
 
             if (index < itemAndCommaCount)
             {
-                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
+                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             if (index == itemAndCommaCount && !Green.MissingSquareBracketClose)
             {
-                return Length - JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+                return Length - JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             throw new IndexOutOfRangeException();

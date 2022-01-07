@@ -36,7 +36,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
+        public int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -53,9 +53,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonCurlyOpenSyntax : JsonSyntax, IJsonSymbol
     {
-        public const char CurlyOpenCharacter = '{';
-        public const int CurlyOpenLength = 1;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -74,7 +71,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => CurlyOpenLength;
+        public override int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.

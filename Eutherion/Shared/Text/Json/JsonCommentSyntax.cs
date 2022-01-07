@@ -57,13 +57,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonCommentSyntax : JsonBackgroundSyntax, IJsonSymbol
     {
-        public const char CommentStartFirstCharacter = '/';
-        public const char SingleLineCommentStartSecondCharacter = '/';
-        public const char MultiLineCommentStartSecondCharacter = '*';
-
-        public static readonly string SingleLineCommentStart
-            = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
-
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>

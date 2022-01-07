@@ -133,39 +133,39 @@ namespace Eutherion.Text.Json
                     {
                         switch (c)
                         {
-                            case JsonCurlyOpenSyntax.CurlyOpenCharacter:
+                            case JsonSpecialCharacter.CurlyOpenCharacter:
                                 yield return GreenJsonCurlyOpenSyntax.Value;
                                 break;
-                            case JsonCurlyCloseSyntax.CurlyCloseCharacter:
+                            case JsonSpecialCharacter.CurlyCloseCharacter:
                                 yield return GreenJsonCurlyCloseSyntax.Value;
                                 break;
-                            case JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter:
+                            case JsonSpecialCharacter.SquareBracketOpenCharacter:
                                 yield return GreenJsonSquareBracketOpenSyntax.Value;
                                 break;
-                            case JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter:
+                            case JsonSpecialCharacter.SquareBracketCloseCharacter:
                                 yield return GreenJsonSquareBracketCloseSyntax.Value;
                                 break;
-                            case JsonColonSyntax.ColonCharacter:
+                            case JsonSpecialCharacter.ColonCharacter:
                                 yield return GreenJsonColonSyntax.Value;
                                 break;
-                            case JsonCommaSyntax.CommaCharacter:
+                            case JsonSpecialCharacter.CommaCharacter:
                                 yield return GreenJsonCommaSyntax.Value;
                                 break;
                             case StringLiteral.QuoteCharacter:
                                 currentTokenizer = InString;
                                 yield break;
-                            case JsonCommentSyntax.CommentStartFirstCharacter:
+                            case JsonSpecialCharacter.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
                                 // In all other cases, treat as an unexpected symbol.
                                 if (currentIndex + 1 < length)
                                 {
                                     char secondChar = json[currentIndex + 1];
-                                    if (secondChar == JsonCommentSyntax.SingleLineCommentStartSecondCharacter)
+                                    if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InSingleLineComment;
                                         yield break;
                                     }
-                                    else if (secondChar == JsonCommentSyntax.MultiLineCommentStartSecondCharacter)
+                                    else if (secondChar == JsonSpecialCharacter.MultiLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InMultiLineComment;
                                         yield break;

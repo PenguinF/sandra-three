@@ -37,7 +37,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public int Length => JsonCommaSyntax.CommaLength;
+        public int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -54,9 +54,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonCommaSyntax : JsonSyntax, IJsonSymbol
     {
-        public const char CommaCharacter = ',';
-        public const int CommaLength = 1;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -76,13 +73,13 @@ namespace Eutherion.Text.Json
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Match(
-            whenOption1: listSyntax => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
-            whenOption2: mapSyntax => JsonCurlyOpenSyntax.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
+            whenOption1: listSyntax => JsonSpecialCharacter.SpecialCharacterLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
+            whenOption2: mapSyntax => JsonSpecialCharacter.SpecialCharacterLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => CommaLength;
+        public override int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.

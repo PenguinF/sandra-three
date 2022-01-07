@@ -132,7 +132,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => JsonCurlyOpenSyntax.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+        public override int Start => JsonSpecialCharacter.SpecialCharacterLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.

@@ -171,7 +171,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Start => Parent.Match(
             whenOption1: _ => 0,
-            whenOption2: listSyntax => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
+            whenOption2: listSyntax => JsonSpecialCharacter.SpecialCharacterLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
             whenOption3: keyValueSyntax => keyValueSyntax.Green.ValueSectionNodes.GetElementOffset(ParentIndex));
 
         /// <summary>
