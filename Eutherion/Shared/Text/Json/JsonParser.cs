@@ -578,6 +578,9 @@ namespace Eutherion.Text.Json
 
         private IEnumerable<IGreenJsonSymbol> InString()
         {
+            // Detect errors.
+            bool hasStringErrors = false;
+
             // Eat " character, but leave SymbolStartIndex unchanged.
             currentIndex++;
 
@@ -590,7 +593,7 @@ namespace Eutherion.Text.Json
                     case StringLiteral.QuoteCharacter:
                         // Closing quote character.
                         currentIndex++;
-                        if (Errors.Count > 0)
+                        if (hasStringErrors)
                         {
                             yield return new GreenJsonErrorStringSyntax(Errors, currentIndex - SymbolStartIndex);
 
@@ -688,6 +691,7 @@ namespace Eutherion.Text.Json
                                     }
                                     else
                                     {
+                                        hasStringErrors = true;
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
                                         Report(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
                                             Json.Substring(escapeSequenceStart, escapeSequenceLength),
@@ -695,6 +699,7 @@ namespace Eutherion.Text.Json
                                     }
                                     break;
                                 default:
+                                    hasStringErrors = true;
                                     Report(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
                                         Json.Substring(escapeSequenceStart, 2),
                                         escapeSequenceStart - SymbolStartIndex));
@@ -706,6 +711,7 @@ namespace Eutherion.Text.Json
                         if (StringLiteral.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
+                            hasStringErrors = true;
                             Report(JsonErrorStringSyntax.IllegalControlCharacter(
                                 StringLiteral.EscapedCharacterString(c),
                                 currentIndex - SymbolStartIndex));
