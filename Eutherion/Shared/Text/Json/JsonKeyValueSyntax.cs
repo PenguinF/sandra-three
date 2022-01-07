@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Eutherion.Text.Json
 {
@@ -170,9 +169,7 @@ namespace Eutherion.Text.Json
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
             Green = parent.Green.KeyValueNodes[parentKeyValueNodeIndex];
 
-            // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = Green.ValueSectionNodes.Count;
-            Debug.Assert(valueSectionNodeCount > 0);
 
             ValueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 valueSectionNodeCount,
