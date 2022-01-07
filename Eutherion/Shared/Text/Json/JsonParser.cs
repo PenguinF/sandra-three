@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Eutherion.Text.Json
@@ -418,67 +419,66 @@ namespace Eutherion.Text.Json
 
         private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
 
+        const int symbolClassValueChar = 0;
+        const int symbolClassWhitespace = 1;
+        const int symbolClassSymbol = 2;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetSymbolClass(char c)
+        {
+            var category = char.GetUnicodeCategory(c);
+
+            switch (category)
+            {
+                case UnicodeCategory.UppercaseLetter:
+                case UnicodeCategory.LowercaseLetter:
+                case UnicodeCategory.TitlecaseLetter:
+                case UnicodeCategory.ModifierLetter:
+                case UnicodeCategory.OtherLetter:
+                case UnicodeCategory.NonSpacingMark:
+                case UnicodeCategory.SpacingCombiningMark:
+                case UnicodeCategory.EnclosingMark:
+                case UnicodeCategory.DecimalDigitNumber:
+                case UnicodeCategory.LetterNumber:
+                case UnicodeCategory.OtherNumber:
+                case UnicodeCategory.Surrogate:
+                case UnicodeCategory.ConnectorPunctuation:  // underscore-like characters
+                case UnicodeCategory.DashPunctuation:
+                    // Treat as part of a value.
+                    return symbolClassValueChar;
+                case UnicodeCategory.OpenPunctuation:
+                case UnicodeCategory.ClosePunctuation:
+                case UnicodeCategory.InitialQuotePunctuation:
+                case UnicodeCategory.FinalQuotePunctuation:
+                case UnicodeCategory.CurrencySymbol:
+                case UnicodeCategory.ModifierSymbol:
+                case UnicodeCategory.OtherSymbol:
+                case UnicodeCategory.OtherNotAssigned:
+                    return symbolClassSymbol;
+                case UnicodeCategory.OtherPunctuation:
+                    return c == '.' ? symbolClassValueChar : symbolClassSymbol;
+                case UnicodeCategory.MathSymbol:
+                    return c == '+' ? symbolClassValueChar : symbolClassSymbol;
+                case UnicodeCategory.SpaceSeparator:
+                case UnicodeCategory.LineSeparator:
+                case UnicodeCategory.ParagraphSeparator:
+                case UnicodeCategory.Control:
+                case UnicodeCategory.Format:
+                case UnicodeCategory.PrivateUse:
+                default:
+                    // Whitespace is a separator.
+                    return symbolClassWhitespace;
+            }
+        }
+
         private IEnumerable<IGreenJsonSymbol> Default()
         {
-            const int symbolClassValueChar = 0;
-            const int symbolClassWhitespace = 1;
-            const int symbolClassSymbol = 2;
-
             int inSymbolClass = symbolClassWhitespace;
 
             while (currentIndex < length)
             {
                 char c = Json[currentIndex];
-
-                int symbolClass;
-
-                var category = char.GetUnicodeCategory(c);
-                switch (category)
-                {
-                    case UnicodeCategory.UppercaseLetter:
-                    case UnicodeCategory.LowercaseLetter:
-                    case UnicodeCategory.TitlecaseLetter:
-                    case UnicodeCategory.ModifierLetter:
-                    case UnicodeCategory.OtherLetter:
-                    case UnicodeCategory.NonSpacingMark:
-                    case UnicodeCategory.SpacingCombiningMark:
-                    case UnicodeCategory.EnclosingMark:
-                    case UnicodeCategory.DecimalDigitNumber:
-                    case UnicodeCategory.LetterNumber:
-                    case UnicodeCategory.OtherNumber:
-                    case UnicodeCategory.Surrogate:
-                    case UnicodeCategory.ConnectorPunctuation:  // underscore-like characters
-                    case UnicodeCategory.DashPunctuation:
-                        // Treat as part of a value.
-                        symbolClass = symbolClassValueChar;
-                        break;
-                    case UnicodeCategory.OpenPunctuation:
-                    case UnicodeCategory.ClosePunctuation:
-                    case UnicodeCategory.InitialQuotePunctuation:
-                    case UnicodeCategory.FinalQuotePunctuation:
-                    case UnicodeCategory.CurrencySymbol:
-                    case UnicodeCategory.ModifierSymbol:
-                    case UnicodeCategory.OtherSymbol:
-                    case UnicodeCategory.OtherNotAssigned:
-                        symbolClass = symbolClassSymbol;
-                        break;
-                    case UnicodeCategory.OtherPunctuation:
-                        symbolClass = c == '.' ? symbolClassValueChar : symbolClassSymbol;
-                        break;
-                    case UnicodeCategory.MathSymbol:
-                        symbolClass = c == '+' ? symbolClassValueChar : symbolClassSymbol;
-                        break;
-                    case UnicodeCategory.SpaceSeparator:
-                    case UnicodeCategory.LineSeparator:
-                    case UnicodeCategory.ParagraphSeparator:
-                    case UnicodeCategory.Control:
-                    case UnicodeCategory.Format:
-                    case UnicodeCategory.PrivateUse:
-                    default:
-                        // Whitespace is a separator.
-                        symbolClass = symbolClassWhitespace;
-                        break;
-                }
+                int symbolClass = GetSymbolClass(c);
 
                 // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
                 if (symbolClass != inSymbolClass)
