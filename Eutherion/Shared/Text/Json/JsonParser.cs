@@ -60,6 +60,18 @@ namespace Eutherion.Text.Json
         /// </summary>
         public const int MaximumDepth = 40;
 
+        /// <summary>
+        /// Generates a parse tree and errors from a source text in the JSON format.
+        /// </summary>
+        /// <param name="json">
+        /// The source text to parse.
+        /// </param>
+        /// <returns>
+        /// A <see cref="RootJsonSyntax"/> instance which contains a parse tree and list of parse errors.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null.
+        /// </exception>
         public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
 
         /// <summary>
