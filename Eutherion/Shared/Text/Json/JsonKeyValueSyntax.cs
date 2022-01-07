@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonKeyValueSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -57,19 +57,20 @@ namespace Eutherion.Text.Json
         public int Length => ValueSectionNodes.Length;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="GreenJsonKeyValueSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
         /// <param name="validKey">
         /// Nothing if no valid key was found, just the valid key otherwise.
+        /// The string literal is expected to be the same as the first value node's content node in <paramref name="valueSectionNodes"/>.
         /// </param>
         /// <param name="valueSectionNodes">
-        /// The list of syntax nodes containing the key and values.
+        /// The enumeration of syntax nodes containing the key and values.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="validKey"/> and/or <paramref name="valueSectionNodes"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an enumeration containing one or less elements.
+        /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an empty enumeration.
         /// </exception>
         public GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax> validKey, IEnumerable<GreenJsonMultiValueSyntax> valueSectionNodes)
         {

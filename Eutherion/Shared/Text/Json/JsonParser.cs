@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonParser.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a single parse of a list of json tokens.
+    /// Based on https://www.json.org/.
     /// </summary>
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
     public sealed class JsonParser

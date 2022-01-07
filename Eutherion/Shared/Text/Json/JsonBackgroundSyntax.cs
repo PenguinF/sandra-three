@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonBackgroundSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a single background node in an abstract json syntax tree.
-    /// Use <see cref="GreenJsonBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
+    /// Represents a single background node in an abstract syntax tree.
+    /// Use <see cref="GreenJsonBackgroundSyntaxVisitor{T, TResult}"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenJsonBackgroundSyntax : ISpan
     {
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public abstract int Length { get; }
 
@@ -38,7 +38,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a single background node in an abstract json syntax tree.
+    /// Represents a single background node in an abstract syntax tree.
     /// </summary>
     public abstract class JsonBackgroundSyntax : JsonSyntax
     {

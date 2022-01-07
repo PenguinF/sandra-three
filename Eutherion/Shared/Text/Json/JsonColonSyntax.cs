@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonColonSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,14 +24,23 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json colon syntax node.
+    /// Represents a colon syntax node.
     /// </summary>
     public sealed class GreenJsonColonSyntax : IGreenJsonSymbol
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public int Length => JsonColonSyntax.ColonLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Colon;
 
         private GreenJsonColonSyntax() { }
@@ -40,7 +49,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json colon syntax node.
+    /// Represents a colon syntax node.
     /// </summary>
     public sealed class JsonColonSyntax : JsonSyntax, IJsonSymbol
     {

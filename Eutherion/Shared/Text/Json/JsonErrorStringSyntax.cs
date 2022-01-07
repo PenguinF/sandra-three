@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorStringSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ using System.Linq;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a string literal value syntax node which contains errors.
+    /// Represents a string literal value syntax node which contains one or more errors.
     /// </summary>
     public sealed class GreenJsonErrorStringSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
@@ -53,6 +53,9 @@ namespace Eutherion.Text.Json
                 error.Length,
                 error.Parameters));
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.ErrorString;
 
         public GreenJsonErrorStringSyntax(int length, params JsonErrorInfo[] errors)
@@ -75,7 +78,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a string literal value syntax node which contains errors.
+    /// Represents a string literal value syntax node which contains one or more errors.
     /// </summary>
     public sealed class JsonErrorStringSyntax : JsonValueSyntax, IJsonSymbol
     {

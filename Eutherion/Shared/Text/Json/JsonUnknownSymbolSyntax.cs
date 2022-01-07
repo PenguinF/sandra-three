@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonUnknownSymbolSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json syntax node with an unknown symbol.
+    /// Represents a syntax node with an unknown symbol.
     /// </summary>
     public sealed class GreenJsonUnknownSymbolSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
@@ -35,10 +35,13 @@ namespace Eutherion.Text.Json
         public string DisplayCharValue { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.UnknownSymbol;
 
         /// <summary>
@@ -80,10 +83,13 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json syntax node with an unknown symbol.
+    /// Represents a syntax node with an unknown symbol.
     /// </summary>
     public sealed class JsonUnknownSymbolSyntax : JsonValueSyntax, IJsonSymbol
     {
+        /// <summary>
+        /// Returns 1, which is always the length of an unknown symbol.
+        /// </summary>
         public const int UnknownSymbolLength = 1;
 
         /// <summary>

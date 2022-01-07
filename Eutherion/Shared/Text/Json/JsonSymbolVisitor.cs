@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonSymbolVisitor.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a single <see cref="IJsonSymbol"/>, which is a <see cref="JsonSyntax"/> node without any child nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor
@@ -48,7 +48,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a single <see cref="IJsonSymbol"/>, which is a <see cref="JsonSyntax"/> node without any child nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor<TResult>
@@ -74,7 +74,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a single <see cref="IJsonSymbol"/>, which is a <see cref="JsonSyntax"/> node without any child nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor<T, TResult>

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonMultiValueSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ using System.Threading;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Contains one or more value nodes together with all background syntax that precedes and follows it.
+    /// Represents a syntax node which contains one or more value nodes together with all background syntax that precedes and follows it.
     /// </summary>
     public sealed class GreenJsonMultiValueSyntax : ISpan
     {
@@ -80,7 +80,7 @@ namespace Eutherion.Text.Json
 
         /// <summary>
         /// Gets the syntax node containing the first value.
-        /// Is <see cref="GreenJsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
+        /// Is <see cref="GreenJsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", between both commas.)
         /// </summary>
         public GreenJsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
 
@@ -90,12 +90,12 @@ namespace Eutherion.Text.Json
         public ReadOnlySpanList<GreenJsonValueWithBackgroundSyntax> ValueNodes { get; }
 
         /// <summary>
-        /// Gets the background after the value nodes.
+        /// Gets the background symbols which directly trail the value nodes.
         /// </summary>
         public GreenJsonBackgroundListSyntax BackgroundAfter { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public int Length => ValueNodes.Length + BackgroundAfter.Length;
 
@@ -103,10 +103,10 @@ namespace Eutherion.Text.Json
         /// Initializes a new instance of <see cref="GreenJsonMultiValueSyntax"/>.
         /// </summary>
         /// <param name="valueNodes">
-        /// The non-empty list of value nodes.
+        /// The non-empty enumeration of value nodes.
         /// </param>
         /// <param name="backgroundAfter">
-        /// The background after the value nodes.
+        /// The background symbols which directly trail the value nodes.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNodes"/> and/or <paramref name="backgroundAfter"/> are null.
@@ -128,7 +128,8 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json syntax node which contains one or more value nodes together with all background syntax that precedes and follows it.
+    /// Represents a syntax node which contains one or more value nodes together with all background syntax that precedes and follows it.
+    /// The root node of any abstract syntax tree is of this type.
     /// </summary>
     public sealed class JsonMultiValueSyntax : JsonSyntax
     {
@@ -148,20 +149,20 @@ namespace Eutherion.Text.Json
         public GreenJsonMultiValueSyntax Green { get; }
 
         /// <summary>
-        /// Gets the collection of value nodes.
+        /// Gets the non-empty collection of value nodes.
         /// </summary>
         public SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
         private readonly SafeLazyObject<JsonBackgroundListSyntax> backgroundAfter;
 
         /// <summary>
-        /// Gets the background after the value nodes.
+        /// Gets the background symbols which directly trail the value nodes.
         /// </summary>
         public JsonBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
 
         /// <summary>
         /// Gets the syntax node containing the first value.
-        /// Is <see cref="JsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
+        /// Is <see cref="JsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", between both commas.)
         /// </summary>
         public JsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
 

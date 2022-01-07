@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonCurlyCloseSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,14 +24,23 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json curly close syntax node.
+    /// Represents a curly close syntax node.
     /// </summary>
     public sealed class GreenJsonCurlyCloseSyntax : IGreenJsonSymbol
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonCurlyCloseSyntax Value = new GreenJsonCurlyCloseSyntax();
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public int Length => JsonCurlyCloseSyntax.CurlyCloseLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.CurlyClose;
 
         private GreenJsonCurlyCloseSyntax() { }
@@ -40,7 +49,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json curly close syntax node.
+    /// Represents a curly close syntax node.
     /// </summary>
     public sealed class JsonCurlyCloseSyntax : JsonSyntax, IJsonSymbol
     {

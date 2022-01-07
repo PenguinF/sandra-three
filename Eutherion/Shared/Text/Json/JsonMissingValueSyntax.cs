@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonMissingValueSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,12 +22,18 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a missing value in a list. It has a length of 0.
+    /// Represents a missing value. It has a length of 0.
     /// </summary>
     public sealed class GreenJsonMissingValueSyntax : GreenJsonValueSyntax
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonMissingValueSyntax Value = new GreenJsonMissingValueSyntax();
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => 0;
 
         private GreenJsonMissingValueSyntax() { }
@@ -38,7 +44,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a missing value in a list syntax node. It has a length of 0.
+    /// Represents a missing value. It has a length of 0.
     /// </summary>
     public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {

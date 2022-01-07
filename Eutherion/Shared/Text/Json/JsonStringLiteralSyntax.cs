@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonStringLiteralSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ namespace Eutherion.Text.Json
     public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the string value represented by this literal syntax.
         /// </summary>
         public string Value { get; }
 
@@ -39,8 +39,26 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.StringLiteral;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonStringLiteralSyntax"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The string value to be represented by this literal syntax.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="value"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public GreenJsonStringLiteralSyntax(string value, int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -66,7 +84,7 @@ namespace Eutherion.Text.Json
         public GreenJsonStringLiteralSyntax Green { get; }
 
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the string value represented by this literal syntax.
         /// </summary>
         public string Value => Green.Value;
 

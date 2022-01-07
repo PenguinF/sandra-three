@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonCommaSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,14 +25,23 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json comma syntax node.
+    /// Represents a comma syntax node.
     /// </summary>
     public sealed class GreenJsonCommaSyntax : IGreenJsonSymbol
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonCommaSyntax Value = new GreenJsonCommaSyntax();
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public int Length => JsonCommaSyntax.CommaLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Comma;
 
         private GreenJsonCommaSyntax() { }
@@ -41,7 +50,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json comma syntax node.
+    /// Represents a comma syntax node.
     /// </summary>
     public sealed class JsonCommaSyntax : JsonSyntax, IJsonSymbol
     {

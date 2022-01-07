@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorCode.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,17 +42,17 @@ namespace Eutherion.Text.Json
         UnterminatedMultiLineComment,
 
         /// <summary>
-        /// Occurs when a string is not terminated before the end of the file.
+        /// Occurs when a string literal is not terminated before the end of the file.
         /// </summary>
         UnterminatedString,
 
         /// <summary>
-        /// Occurs when an escape sequence in a string is not recognized.
+        /// Occurs when an escape sequence in a string literal is not recognized.
         /// </summary>
         UnrecognizedEscapeSequence,
 
         /// <summary>
-        /// Occurs when control characters appear in a string, which should be represented by an escape sequence instead.
+        /// Occurs when control characters appear in a string literal, which should be represented by an escape sequence instead.
         /// </summary>
         IllegalControlCharacterInString,
 

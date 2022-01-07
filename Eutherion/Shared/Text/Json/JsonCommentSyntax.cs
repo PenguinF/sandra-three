@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonCommentSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,12 +25,18 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json syntax node which contains a comment.
+    /// Represents a syntax node which contains a comment.
     /// </summary>
     public sealed class GreenJsonCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Comment;
 
         public GreenJsonCommentSyntax(int length)
@@ -47,7 +53,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json syntax node which contains a comment.
+    /// Represents a syntax node which contains a comment.
     /// </summary>
     public sealed class JsonCommentSyntax : JsonBackgroundSyntax, IJsonSymbol
     {

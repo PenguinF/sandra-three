@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonUndefinedValueSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,14 +25,20 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json syntax node with an undefined or unsupported value.
+    /// Represents a syntax node with an undefined or unsupported value.
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         public string UndefinedValue { get; }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => UndefinedValue.Length;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.UndefinedValue;
 
         public GreenJsonUndefinedValueSyntax(string undefinedValue) => UndefinedValue = undefinedValue ?? throw new ArgumentNullException(nameof(undefinedValue));
@@ -47,7 +53,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a json syntax node with an undefined or unsupported value.
+    /// Represents a syntax node with an undefined or unsupported value.
     /// </summary>
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax, IJsonSymbol
     {

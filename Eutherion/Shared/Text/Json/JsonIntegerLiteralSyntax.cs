@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonIntegerLiteralSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,12 +29,30 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonIntegerLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
+        /// <summary>
+        /// Gets the integer value represented by this literal syntax.
+        /// </summary>
         public BigInteger Value { get; }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.IntegerLiteral;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonIntegerLiteralSyntax"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The integer value represented by this literal syntax.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
         public GreenJsonIntegerLiteralSyntax(BigInteger value, int length)
         {
             Value = value;
@@ -59,7 +77,7 @@ namespace Eutherion.Text.Json
         public GreenJsonIntegerLiteralSyntax Green { get; }
 
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the integer value represented by this literal syntax.
         /// </summary>
         public BigInteger Value => Green.Value;
 
