@@ -403,6 +403,7 @@ namespace Eutherion.Text.Json
 
         // Current state.
         private int currentIndex;
+        // Invariant is that this index is always at the start of the yielded symbol.
         private int SymbolStartIndex;
         private Func<IEnumerable<IGreenJsonSymbol>> currentTokenizer;
 
@@ -583,6 +584,7 @@ namespace Eutherion.Text.Json
                 switch (c)
                 {
                     case StringLiteral.QuoteCharacter:
+                        // Closing quote character.
                         currentIndex++;
                         if (Errors.Count > 0)
                         {
@@ -600,6 +602,7 @@ namespace Eutherion.Text.Json
                         yield break;
                     case StringLiteral.EscapeCharacter:
                         // Escape sequence.
+                        // Look ahead one character.
                         int escapeSequenceStart = currentIndex;
                         currentIndex++;
 
@@ -737,6 +740,7 @@ namespace Eutherion.Text.Json
                         currentIndex++;
 
                         // Look ahead to see if the next character is a linefeed.
+                        // Otherwise, the '\r' just becomes part of the comment.
                         if (currentIndex < length)
                         {
                             char secondChar = Json[currentIndex];
