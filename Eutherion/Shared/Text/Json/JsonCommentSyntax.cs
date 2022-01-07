@@ -38,9 +38,18 @@ namespace Eutherion.Text.Json
         /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Comment;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonCommentSyntax"/> with a specified length.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public GreenJsonCommentSyntax(int length)
         {
-            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 

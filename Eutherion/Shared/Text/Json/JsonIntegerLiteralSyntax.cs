@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -52,9 +53,13 @@ namespace Eutherion.Text.Json
         /// <param name="length">
         /// The length of the text span corresponding with this syntax node.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public GreenJsonIntegerLiteralSyntax(BigInteger value, int length)
         {
             Value = value;
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 
