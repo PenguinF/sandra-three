@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Eutherion.Text.Json
 {
@@ -68,6 +69,7 @@ namespace Eutherion.Text.Json
             if (ChildCount == 0 && Length > 0)
             {
                 // Contract is that all subclasses with ChildCount == 0 and Length > 0 must implement IJsonSymbol.
+                Debug.Assert(this is IJsonSymbol);
                 terminalSymbol = (IJsonSymbol)this;
                 return true;
             }
