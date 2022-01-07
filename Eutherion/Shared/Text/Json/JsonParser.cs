@@ -474,27 +474,17 @@ namespace Eutherion.Text.Json
 
         inWhitespace:
 
-            int inSymbolClass = symbolClassWhitespace;
-
             while (currentIndex < length)
             {
                 char c = Json[currentIndex];
                 int symbolClass = GetSymbolClass(c);
 
                 // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
-                if (symbolClass != inSymbolClass)
+                if (symbolClass != symbolClassWhitespace)
                 {
                     if (SymbolStartIndex < currentIndex)
                     {
-                        if (inSymbolClass == symbolClassValueChar)
-                        {
-                            yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
-                        }
-                        else
-                        {
-                            yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
-                        }
-
+                        yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
                         SymbolStartIndex = currentIndex;
                     }
 
@@ -551,8 +541,7 @@ namespace Eutherion.Text.Json
                     }
                     else
                     {
-                        // Never set inSymbolClass to symbolClassSymbol, or it will miss symbols.
-                        inSymbolClass = symbolClass;
+                        goto inValue;
                     }
                 }
 
@@ -561,14 +550,89 @@ namespace Eutherion.Text.Json
 
             if (SymbolStartIndex < currentIndex)
             {
-                if (inSymbolClass == symbolClassValueChar)
+                yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
+            }
+
+            yield break;
+
+        inValue:
+
+            // Eat the first symbol character, but leave SymbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = Json[currentIndex];
+                int symbolClass = GetSymbolClass(c);
+
+                // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
+                if (symbolClass != symbolClassValueChar)
                 {
                     yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
+                    SymbolStartIndex = currentIndex;
+
+                    if (symbolClass == symbolClassSymbol)
+                    {
+                        switch (c)
+                        {
+                            case JsonSpecialCharacter.CurlyOpenCharacter:
+                                yield return GreenJsonCurlyOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CurlyCloseCharacter:
+                                yield return GreenJsonCurlyCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketOpenCharacter:
+                                yield return GreenJsonSquareBracketOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketCloseCharacter:
+                                yield return GreenJsonSquareBracketCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.ColonCharacter:
+                                yield return GreenJsonColonSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CommaCharacter:
+                                yield return GreenJsonCommaSyntax.Value;
+                                break;
+                            case StringLiteral.QuoteCharacter:
+                                goto inString;
+                            case JsonSpecialCharacter.CommentStartFirstCharacter:
+                                // Look ahead 1 character to see if this is the start of a comment.
+                                // In all other cases, treat as an unexpected symbol.
+                                if (currentIndex + 1 < length)
+                                {
+                                    char secondChar = Json[currentIndex + 1];
+                                    if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
+                                    {
+                                        goto inSingleLineComment;
+                                    }
+                                    else if (secondChar == JsonSpecialCharacter.MultiLineCommentStartSecondCharacter)
+                                    {
+                                        goto inMultiLineComment;
+                                    }
+                                }
+                                goto default;
+                            default:
+                                string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
+                                    ? StringLiteral.EscapedCharacterString(c)
+                                    : Convert.ToString(c);
+                                yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
+                                break;
+                        }
+
+                        // Increment to indicate the current character has been yielded.
+                        SymbolStartIndex++;
+                    }
+
+                    currentIndex++;
+                    goto inWhitespace;
                 }
-                else
-                {
-                    yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
-                }
+
+                currentIndex++;
+            }
+
+            if (SymbolStartIndex < currentIndex)
+            {
+                yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
             }
 
             yield break;
