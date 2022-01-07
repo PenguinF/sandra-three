@@ -2,7 +2,7 @@
 /*********************************************************************************
  * IJsonSymbol.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a terminal json symbol.
-    /// Instances of this type are returned by <see cref="JsonTokenizer"/>.
+    /// Represents a terminal JSON symbol.
     /// </summary>
     public interface IGreenJsonSymbol : ISpan
     {
@@ -47,14 +46,18 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a terminal json symbol.
+    /// Represents a terminal JSON symbol.
     /// These are all <see cref="JsonSyntax"/> nodes which have no child <see cref="JsonSyntax"/> nodes.
-    /// Use <see cref="JsonSymbolVisitor"/> overrides to distinguish between implementations of this type.
+    /// Use <see cref="JsonSymbolVisitor{T, TResult}"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public interface IJsonSymbol : ISpan
     {
         void Accept(JsonSymbolVisitor visitor);
         TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
+
+        /// <summary>
+        /// This method is for internal use only.
+        /// </summary>
         TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
     }
 
