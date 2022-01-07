@@ -394,21 +394,21 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonTokenizer
     {
-        private readonly string json;
+        private readonly string Json;
         private readonly int length;
 
         // Reusable fields for building terminal symbols.
-        private readonly List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
+        private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly StringBuilder valueBuilder = new StringBuilder();
 
         // Current state.
         private int currentIndex;
-        private int firstUnusedIndex;
+        private int SymbolStartIndex;
         private Func<IEnumerable<IGreenJsonSymbol>> currentTokenizer;
 
         private JsonTokenizer(string json)
         {
-            this.json = json ?? throw new ArgumentNullException(nameof(json));
+            this.Json = json ?? throw new ArgumentNullException(nameof(json));
             length = json.Length;
             currentTokenizer = Default;
         }
@@ -423,7 +423,7 @@ namespace Eutherion.Text.Json
 
             while (currentIndex < length)
             {
-                char c = json[currentIndex];
+                char c = Json[currentIndex];
 
                 int symbolClass;
 
@@ -478,18 +478,18 @@ namespace Eutherion.Text.Json
                 // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
                 if (symbolClass != inSymbolClass)
                 {
-                    if (firstUnusedIndex < currentIndex)
+                    if (SymbolStartIndex < currentIndex)
                     {
                         if (inSymbolClass == symbolClassValueChar)
                         {
-                            yield return JsonValue.Create(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
+                            yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
                         }
                         else
                         {
-                            yield return GreenJsonWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                            yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
                         }
 
-                        firstUnusedIndex = currentIndex;
+                        SymbolStartIndex = currentIndex;
                     }
 
                     if (symbolClass == symbolClassSymbol)
@@ -522,7 +522,7 @@ namespace Eutherion.Text.Json
                                 // In all other cases, treat as an unexpected symbol.
                                 if (currentIndex + 1 < length)
                                 {
-                                    char secondChar = json[currentIndex + 1];
+                                    char secondChar = Json[currentIndex + 1];
                                     if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InSingleLineComment;
@@ -544,7 +544,7 @@ namespace Eutherion.Text.Json
                         }
 
                         // Increment to indicate the current character has been yielded.
-                        firstUnusedIndex++;
+                        SymbolStartIndex++;
                     }
                     else
                     {
@@ -556,15 +556,15 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            if (firstUnusedIndex < currentIndex)
+            if (SymbolStartIndex < currentIndex)
             {
                 if (inSymbolClass == symbolClassValueChar)
                 {
-                    yield return JsonValue.Create(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
+                    yield return JsonValue.Create(Json.Substring(SymbolStartIndex, currentIndex - SymbolStartIndex));
                 }
                 else
                 {
-                    yield return GreenJsonWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                    yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
                 }
             }
 
@@ -573,37 +573,40 @@ namespace Eutherion.Text.Json
 
         private IEnumerable<IGreenJsonSymbol> InString()
         {
-            // Eat " character, but leave firstUnusedIndex unchanged.
+            // Eat " character, but leave SymbolStartIndex unchanged.
             currentIndex++;
 
             while (currentIndex < length)
             {
-                char c = json[currentIndex];
+                char c = Json[currentIndex];
+
                 switch (c)
                 {
                     case StringLiteral.QuoteCharacter:
                         currentIndex++;
-                        if (errors.Count > 0)
+                        if (Errors.Count > 0)
                         {
-                            yield return new GreenJsonErrorStringSyntax(errors, currentIndex - firstUnusedIndex);
+                            yield return new GreenJsonErrorStringSyntax(Errors, currentIndex - SymbolStartIndex);
 
-                            errors.Clear();
+                            Errors.Clear();
                         }
                         else
                         {
-                            yield return new GreenJsonStringLiteralSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                            yield return new GreenJsonStringLiteralSyntax(valueBuilder.ToString(), currentIndex - SymbolStartIndex);
                         }
                         valueBuilder.Clear();
-                        firstUnusedIndex = currentIndex;
+                        SymbolStartIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
                     case StringLiteral.EscapeCharacter:
                         // Escape sequence.
                         int escapeSequenceStart = currentIndex;
                         currentIndex++;
+
                         if (currentIndex < length)
                         {
-                            char escapedChar = json[currentIndex];
+                            char escapedChar = Json[currentIndex];
+
                             switch (escapedChar)
                             {
                                 case StringLiteral.QuoteCharacter:
@@ -642,7 +645,7 @@ namespace Eutherion.Text.Json
                                         {
                                             // 1 hex character = 4 bits.
                                             unicodeValue <<= 4;
-                                            char hexChar = json[currentIndex];
+                                            char hexChar = Json[currentIndex];
                                             if ('0' <= hexChar && hexChar <= '9')
                                             {
                                                 unicodeValue = unicodeValue + hexChar - '0';
@@ -679,15 +682,15 @@ namespace Eutherion.Text.Json
                                     else
                                     {
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
-                                        errors.Add(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
-                                            json.Substring(escapeSequenceStart, escapeSequenceLength),
-                                            escapeSequenceStart - firstUnusedIndex, escapeSequenceLength));
+                                        Errors.Add(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
+                                            Json.Substring(escapeSequenceStart, escapeSequenceLength),
+                                            escapeSequenceStart - SymbolStartIndex, escapeSequenceLength));
                                     }
                                     break;
                                 default:
-                                    errors.Add(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
-                                        json.Substring(escapeSequenceStart, 2),
-                                        escapeSequenceStart - firstUnusedIndex));
+                                    Errors.Add(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
+                                        Json.Substring(escapeSequenceStart, 2),
+                                        escapeSequenceStart - SymbolStartIndex));
                                     break;
                             }
                         }
@@ -696,9 +699,9 @@ namespace Eutherion.Text.Json
                         if (StringLiteral.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
-                            errors.Add(JsonErrorStringSyntax.IllegalControlCharacter(
+                            Errors.Add(JsonErrorStringSyntax.IllegalControlCharacter(
                                 StringLiteral.EscapedCharacterString(c),
-                                currentIndex - firstUnusedIndex));
+                                currentIndex - SymbolStartIndex));
                         }
                         else
                         {
@@ -711,21 +714,21 @@ namespace Eutherion.Text.Json
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            errors.Add(JsonErrorStringSyntax.Unterminated(0, length - firstUnusedIndex));
+            Errors.Add(JsonErrorStringSyntax.Unterminated(0, length - SymbolStartIndex));
 
-            yield return new GreenJsonErrorStringSyntax(errors, length - firstUnusedIndex);
+            yield return new GreenJsonErrorStringSyntax(Errors, length - SymbolStartIndex);
 
             currentTokenizer = null;
         }
 
         private IEnumerable<IGreenJsonSymbol> InSingleLineComment()
         {
-            // Eat both / characters, but leave firstUnusedIndex unchanged.
+            // Eat both / characters, but leave SymbolStartIndex unchanged.
             currentIndex += 2;
 
             while (currentIndex < length)
             {
-                char c = json[currentIndex];
+                char c = Json[currentIndex];
 
                 switch (c)
                 {
@@ -736,13 +739,13 @@ namespace Eutherion.Text.Json
                         // Look ahead to see if the next character is a linefeed.
                         if (currentIndex < length)
                         {
-                            char secondChar = json[currentIndex];
+                            char secondChar = Json[currentIndex];
                             if (secondChar == '\n')
                             {
-                                yield return new GreenJsonCommentSyntax(currentIndex - 1 - firstUnusedIndex);
+                                yield return new GreenJsonCommentSyntax(currentIndex - 1 - SymbolStartIndex);
 
                                 // Eat the second whitespace character.
-                                firstUnusedIndex = currentIndex - 1;
+                                SymbolStartIndex = currentIndex - 1;
                                 currentIndex++;
                                 currentTokenizer = Default;
                                 yield break;
@@ -750,10 +753,10 @@ namespace Eutherion.Text.Json
                         }
                         break;
                     case '\n':
-                        yield return new GreenJsonCommentSyntax(currentIndex - firstUnusedIndex);
+                        yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
 
                         // Eat the '\n'.
-                        firstUnusedIndex = currentIndex;
+                        SymbolStartIndex = currentIndex;
                         currentIndex++;
                         currentTokenizer = Default;
                         yield break;
@@ -762,32 +765,33 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new GreenJsonCommentSyntax(currentIndex - firstUnusedIndex);
+            yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
 
             currentTokenizer = null;
         }
 
         private IEnumerable<IGreenJsonSymbol> InMultiLineComment()
         {
-            // Eat /* characters, but leave firstUnusedIndex unchanged.
+            // Eat /* characters, but leave SymbolStartIndex unchanged.
             currentIndex += 2;
 
             while (currentIndex < length)
             {
-                if (json[currentIndex] == '*')
+                if (Json[currentIndex] == '*')
                 {
                     // Look ahead to see if the next character is a slash.
                     if (currentIndex + 1 < length)
                     {
-                        char secondChar = json[currentIndex + 1];
+                        char secondChar = Json[currentIndex + 1];
+
                         if (secondChar == '/')
                         {
                             // Increment so the closing '*/' is regarded as part of the comment.
                             currentIndex += 2;
 
-                            yield return new GreenJsonCommentSyntax(currentIndex - firstUnusedIndex);
+                            yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
 
-                            firstUnusedIndex = currentIndex;
+                            SymbolStartIndex = currentIndex;
                             currentTokenizer = Default;
                             yield break;
                         }
@@ -797,7 +801,7 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new GreenJsonUnterminatedMultiLineCommentSyntax(length - firstUnusedIndex);
+            yield return new GreenJsonUnterminatedMultiLineCommentSyntax(length - SymbolStartIndex);
 
             currentTokenizer = null;
         }
