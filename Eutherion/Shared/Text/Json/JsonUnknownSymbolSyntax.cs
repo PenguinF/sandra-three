@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -29,9 +27,9 @@ namespace Eutherion.Text.Json
     public sealed class GreenJsonUnknownSymbolSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         /// <summary>
-        /// Gets a friendly representation of the unknown symbol.
+        /// Returns the singleton instance.
         /// </summary>
-        public string DisplayCharValue { get; }
+        public static readonly GreenJsonUnknownSymbolSyntax Value = new GreenJsonUnknownSymbolSyntax();
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -43,25 +41,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.UnknownSymbol;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="GreenJsonUnknownSymbolSyntax"/>.
-        /// </summary>
-        /// <param name="displayCharValue">
-        /// A friendly representation of the unknown symbol.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="displayCharValue"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="displayCharValue"/> is empty.
-        /// </exception>
-        public GreenJsonUnknownSymbolSyntax(string displayCharValue)
-        {
-            if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
-            if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
-
-            DisplayCharValue = displayCharValue;
-        }
+        private GreenJsonUnknownSymbolSyntax() { }
 
         internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }

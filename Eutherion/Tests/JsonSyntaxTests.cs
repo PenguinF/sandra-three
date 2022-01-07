@@ -37,9 +37,6 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>("value", () => new GreenJsonStringLiteralSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
 
-            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(null));
-            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(string.Empty));
-
             Assert.Throws<ArgumentNullException>("undefinedValue", () => new GreenJsonUndefinedValueSyntax(null));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
@@ -77,7 +74,7 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(1, GreenJsonCurlyOpenSyntax.Value.Length);
             Assert.Equal(1, GreenJsonSquareBracketCloseSyntax.Value.Length);
             Assert.Equal(1, GreenJsonSquareBracketOpenSyntax.Value.Length);
-            Assert.Equal(1, new GreenJsonUnknownSymbolSyntax("\\0").Length);
+            Assert.Equal(1, GreenJsonUnknownSymbolSyntax.Value.Length);
         }
 
         [Theory]
@@ -92,15 +89,6 @@ namespace Eutherion.Shared.Tests
             var jsonString = new GreenJsonStringLiteralSyntax(value, length + 2);
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
-        }
-
-        [Theory]
-        [InlineData("*")]
-        [InlineData("€")]
-        public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
-        {
-            var symbol = new GreenJsonUnknownSymbolSyntax(displayCharValue);
-            Assert.Equal(displayCharValue, symbol.DisplayCharValue);
         }
 
         [Theory]

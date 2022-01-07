@@ -559,7 +559,7 @@ namespace Eutherion.Text.Json
                                     ? StringLiteral.EscapedCharacterString(c)
                                     : Convert.ToString(c);
                                 Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
-                                yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
+                                yield return GreenJsonUnknownSymbolSyntax.Value;
                                 break;
                         }
 
@@ -643,7 +643,7 @@ namespace Eutherion.Text.Json
                                     ? StringLiteral.EscapedCharacterString(c)
                                     : Convert.ToString(c);
                                 Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
-                                yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
+                                yield return GreenJsonUnknownSymbolSyntax.Value;
                                 break;
                         }
 
