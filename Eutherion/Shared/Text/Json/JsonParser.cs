@@ -398,23 +398,16 @@ namespace Eutherion.Text.Json
     public sealed class JsonTokenizer
     {
         private readonly string Json;
-        private readonly int length;
 
         // Reusable fields for building terminal symbols.
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
-        private readonly StringBuilder valueBuilder = new StringBuilder();
 
-        // Current state.
-        private int currentIndex;
         // Invariant is that this index is always at the start of the yielded symbol.
         private int SymbolStartIndex;
-        private Func<IEnumerable<IGreenJsonSymbol>> currentTokenizer;
 
         private JsonTokenizer(string json)
         {
             this.Json = json ?? throw new ArgumentNullException(nameof(json));
-            length = json.Length;
-            currentTokenizer = Default;
         }
 
         private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
@@ -471,8 +464,16 @@ namespace Eutherion.Text.Json
             }
         }
 
-        private IEnumerable<IGreenJsonSymbol> Default()
+        private IEnumerable<IGreenJsonSymbol> _TokenizeAll()
         {
+            // This tokenizer uses labels with goto to switch between modes of tokenization.
+
+            int length = Json.Length;
+            int currentIndex = SymbolStartIndex;
+            StringBuilder valueBuilder = new StringBuilder();
+
+        inWhitespace:
+
             int inSymbolClass = symbolClassWhitespace;
 
             while (currentIndex < length)
@@ -520,8 +521,7 @@ namespace Eutherion.Text.Json
                                 yield return GreenJsonCommaSyntax.Value;
                                 break;
                             case StringLiteral.QuoteCharacter:
-                                currentTokenizer = InString;
-                                yield break;
+                                goto inString;
                             case JsonSpecialCharacter.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
                                 // In all other cases, treat as an unexpected symbol.
@@ -530,13 +530,11 @@ namespace Eutherion.Text.Json
                                     char secondChar = Json[currentIndex + 1];
                                     if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
                                     {
-                                        currentTokenizer = InSingleLineComment;
-                                        yield break;
+                                        goto inSingleLineComment;
                                     }
                                     else if (secondChar == JsonSpecialCharacter.MultiLineCommentStartSecondCharacter)
                                     {
-                                        currentTokenizer = InMultiLineComment;
-                                        yield break;
+                                        goto inMultiLineComment;
                                     }
                                 }
                                 goto default;
@@ -573,11 +571,10 @@ namespace Eutherion.Text.Json
                 }
             }
 
-            currentTokenizer = null;
-        }
+            yield break;
 
-        private IEnumerable<IGreenJsonSymbol> InString()
-        {
+        inString:
+
             // Detect errors.
             bool hasStringErrors = false;
 
@@ -605,8 +602,7 @@ namespace Eutherion.Text.Json
                         }
                         valueBuilder.Clear();
                         SymbolStartIndex = currentIndex;
-                        currentTokenizer = Default;
-                        yield break;
+                        goto inWhitespace;
                     case StringLiteral.EscapeCharacter:
                         // Escape sequence.
                         // Look ahead one character.
@@ -727,15 +723,13 @@ namespace Eutherion.Text.Json
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            Report(JsonErrorStringSyntax.Unterminated(0, length - SymbolStartIndex));
+            int unterminatedStringLength = length - SymbolStartIndex;
+            Report(JsonErrorStringSyntax.Unterminated(0, unterminatedStringLength));
+            yield return new GreenJsonErrorStringSyntax(Errors, unterminatedStringLength);
+            yield break;
 
-            yield return new GreenJsonErrorStringSyntax(Errors, length - SymbolStartIndex);
+        inSingleLineComment:
 
-            currentTokenizer = null;
-        }
-
-        private IEnumerable<IGreenJsonSymbol> InSingleLineComment()
-        {
             // Eat both / characters, but leave SymbolStartIndex unchanged.
             currentIndex += 2;
 
@@ -761,8 +755,7 @@ namespace Eutherion.Text.Json
                                 // Eat the second whitespace character.
                                 SymbolStartIndex = currentIndex - 1;
                                 currentIndex++;
-                                currentTokenizer = Default;
-                                yield break;
+                                goto inWhitespace;
                             }
                         }
                         break;
@@ -772,20 +765,17 @@ namespace Eutherion.Text.Json
                         // Eat the '\n'.
                         SymbolStartIndex = currentIndex;
                         currentIndex++;
-                        currentTokenizer = Default;
-                        yield break;
+                        goto inWhitespace;
                 }
 
                 currentIndex++;
             }
 
             yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
+            yield break;
 
-            currentTokenizer = null;
-        }
+        inMultiLineComment:
 
-        private IEnumerable<IGreenJsonSymbol> InMultiLineComment()
-        {
             // Eat /* characters, but leave SymbolStartIndex unchanged.
             currentIndex += 2;
 
@@ -806,8 +796,7 @@ namespace Eutherion.Text.Json
                             yield return new GreenJsonCommentSyntax(currentIndex - SymbolStartIndex);
 
                             SymbolStartIndex = currentIndex;
-                            currentTokenizer = Default;
-                            yield break;
+                            goto inWhitespace;
                         }
                     }
                 }
@@ -815,9 +804,8 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new GreenJsonUnterminatedMultiLineCommentSyntax(length - SymbolStartIndex);
-
-            currentTokenizer = null;
+            int unterminatedCommentLength = length - SymbolStartIndex;
+            yield return new GreenJsonUnterminatedMultiLineCommentSyntax(unterminatedCommentLength);
         }
 
         /// <summary>
@@ -834,18 +822,5 @@ namespace Eutherion.Text.Json
         /// </exception>
         public static IEnumerable<IGreenJsonSymbol> TokenizeAll(string json)
             => new JsonTokenizer(json)._TokenizeAll();
-
-        private IEnumerable<IGreenJsonSymbol> _TokenizeAll()
-        {
-            // currentTokenizer represents the state the tokenizer is in,
-            // e.g. whitespace, in a string, or whatnot.
-            while (currentTokenizer != null)
-            {
-                foreach (var symbol in currentTokenizer())
-                {
-                    yield return symbol;
-                }
-            }
-        }
     }
 }
