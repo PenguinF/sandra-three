@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -152,8 +151,6 @@ namespace Eutherion.Text.Json
         /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
         /// </returns>
         public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);

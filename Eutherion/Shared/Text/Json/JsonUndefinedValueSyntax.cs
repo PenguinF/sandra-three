@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -42,10 +41,6 @@ namespace Eutherion.Text.Json
         public JsonSymbolType SymbolType => JsonSymbolType.UndefinedValue;
 
         public GreenJsonUndefinedValueSyntax(string undefinedValue) => UndefinedValue = undefinedValue ?? throw new ArgumentNullException(nameof(undefinedValue));
-
-        public JsonErrorInfo GetError(int position) => JsonUndefinedValueSyntax.CreateError(UndefinedValue, position, Length);
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);

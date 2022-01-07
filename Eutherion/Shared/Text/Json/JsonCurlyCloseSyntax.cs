@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -44,8 +42,6 @@ namespace Eutherion.Text.Json
         public JsonSymbolType SymbolType => JsonSymbolType.CurlyClose;
 
         private GreenJsonCurlyCloseSyntax() { }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
     }
 
     /// <summary>

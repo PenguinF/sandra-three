@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -44,8 +43,6 @@ namespace Eutherion.Text.Json
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitCommentSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);

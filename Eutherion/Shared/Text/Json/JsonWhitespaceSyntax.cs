@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -73,8 +72,6 @@ namespace Eutherion.Text.Json
         }
 
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);

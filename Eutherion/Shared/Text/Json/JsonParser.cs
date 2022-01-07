@@ -48,8 +48,6 @@ namespace Eutherion.Text.Json
             private EofSymbol() { }
 
             int ISpan.Length => 0;
-
-            IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
         }
 
         private class MaximumDepthExceededException : Exception { }
@@ -134,7 +132,6 @@ namespace Eutherion.Text.Json
             for (; ; )
             {
                 IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : EofSymbol.Value;
-                Errors.AddRange(newToken.GetErrors(CurrentLength));
                 CurrentLength += newToken.Length;
                 JsonSymbolType symbolType = newToken.SymbolType;
 
@@ -434,6 +431,7 @@ namespace Eutherion.Text.Json
 
             if (value == null)
             {
+                Report(JsonUndefinedValueSyntax.CreateError(stringValue, SymbolStartIndex, length));
                 value = new GreenJsonUndefinedValueSyntax(stringValue);
             }
 
@@ -560,6 +558,7 @@ namespace Eutherion.Text.Json
                                 string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
                                     ? StringLiteral.EscapedCharacterString(c)
                                     : Convert.ToString(c);
+                                Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
                                 yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
                                 break;
                         }
@@ -643,6 +642,7 @@ namespace Eutherion.Text.Json
                                 string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
                                     ? StringLiteral.EscapedCharacterString(c)
                                     : Convert.ToString(c);
+                                Report(JsonUnknownSymbolSyntax.CreateError(displayCharValue, currentIndex));
                                 yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
                                 break;
                         }
@@ -687,7 +687,7 @@ namespace Eutherion.Text.Json
                         currentIndex++;
                         if (hasStringErrors)
                         {
-                            yield return new GreenJsonErrorStringSyntax(EmptyEnumerable<JsonErrorInfo>.Instance, currentIndex - SymbolStartIndex);
+                            yield return new GreenJsonErrorStringSyntax(currentIndex - SymbolStartIndex);
                         }
                         else
                         {
@@ -783,14 +783,14 @@ namespace Eutherion.Text.Json
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
                                         Report(JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(
                                             Json.Substring(escapeSequenceStart, escapeSequenceLength),
-                                            escapeSequenceStart - SymbolStartIndex, escapeSequenceLength));
+                                            escapeSequenceStart, escapeSequenceLength));
                                     }
                                     break;
                                 default:
                                     hasStringErrors = true;
                                     Report(JsonErrorStringSyntax.UnrecognizedEscapeSequence(
                                         Json.Substring(escapeSequenceStart, 2),
-                                        escapeSequenceStart - SymbolStartIndex));
+                                        escapeSequenceStart));
                                     break;
                             }
                         }
@@ -802,7 +802,7 @@ namespace Eutherion.Text.Json
                             hasStringErrors = true;
                             Report(JsonErrorStringSyntax.IllegalControlCharacter(
                                 StringLiteral.EscapedCharacterString(c),
-                                currentIndex - SymbolStartIndex));
+                                currentIndex));
                         }
                         else
                         {
@@ -816,8 +816,8 @@ namespace Eutherion.Text.Json
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             int unterminatedStringLength = length - SymbolStartIndex;
-            Report(JsonErrorStringSyntax.Unterminated(0, unterminatedStringLength));
-            yield return new GreenJsonErrorStringSyntax(EmptyEnumerable<JsonErrorInfo>.Instance, unterminatedStringLength);
+            Report(JsonErrorStringSyntax.Unterminated(SymbolStartIndex, unterminatedStringLength));
+            yield return new GreenJsonErrorStringSyntax(unterminatedStringLength);
             yield break;
 
         inSingleLineComment:
@@ -897,6 +897,7 @@ namespace Eutherion.Text.Json
             }
 
             int unterminatedCommentLength = length - SymbolStartIndex;
+            Report(JsonUnterminatedMultiLineCommentSyntax.CreateError(SymbolStartIndex, unterminatedCommentLength));
             yield return new GreenJsonUnterminatedMultiLineCommentSyntax(unterminatedCommentLength);
         }
     }

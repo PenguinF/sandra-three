@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -65,8 +64,6 @@ namespace Eutherion.Text.Json
             Length = length;
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

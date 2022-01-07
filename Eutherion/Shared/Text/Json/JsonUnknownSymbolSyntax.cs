@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -63,19 +62,6 @@ namespace Eutherion.Text.Json
 
             DisplayCharValue = displayCharValue;
         }
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for this syntax node.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to create the error.
-        /// </param>
-        /// <returns>
-        /// The new <see cref="JsonErrorInfo"/>.
-        /// </returns>
-        public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);

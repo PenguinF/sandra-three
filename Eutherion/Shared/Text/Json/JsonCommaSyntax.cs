@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -45,8 +44,6 @@ namespace Eutherion.Text.Json
         public JsonSymbolType SymbolType => JsonSymbolType.Comma;
 
         private GreenJsonCommaSyntax() { }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
     }
 
     /// <summary>

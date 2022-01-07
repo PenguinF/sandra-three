@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -58,8 +57,6 @@ namespace Eutherion.Text.Json
             Value = value;
             Length = length;
         }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);

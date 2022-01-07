@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -28,17 +26,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public interface IGreenJsonSymbol : ISpan
     {
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
-
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>

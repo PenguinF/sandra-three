@@ -20,8 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -30,46 +28,29 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonErrorStringSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
-        internal ReadOnlyList<JsonErrorInfo> Errors { get; }
-
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length { get; }
 
         /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        public IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
-            => Errors.Select(error => new JsonErrorInfo(
-                error.ErrorCode,
-                startPosition + error.Start,
-                error.Length,
-                error.Parameters));
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.ErrorString;
 
-        public GreenJsonErrorStringSyntax(int length, params JsonErrorInfo[] errors)
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonErrorStringSyntax"/>.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
+        public GreenJsonErrorStringSyntax(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
-        }
-
-        public GreenJsonErrorStringSyntax(IEnumerable<JsonErrorInfo> errors, int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitErrorStringSyntax(this);

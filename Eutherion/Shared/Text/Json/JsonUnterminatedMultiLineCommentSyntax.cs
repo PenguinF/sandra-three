@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -33,8 +32,6 @@ namespace Eutherion.Text.Json
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length { get; }
-
-        public JsonErrorInfo GetError(int startPosition) => JsonUnterminatedMultiLineCommentSyntax.CreateError(startPosition, Length);
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -55,8 +52,6 @@ namespace Eutherion.Text.Json
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);

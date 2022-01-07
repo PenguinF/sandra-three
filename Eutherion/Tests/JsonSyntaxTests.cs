@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonSyntaxTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 
 using Eutherion.Text.Json;
 using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Eutherion.Shared.Tests
@@ -33,10 +32,7 @@ namespace Eutherion.Shared.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
 
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(0));
 
             Assert.Throws<ArgumentNullException>("value", () => new GreenJsonStringLiteralSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
@@ -96,42 +92,6 @@ namespace Eutherion.Shared.Tests
             var jsonString = new GreenJsonStringLiteralSyntax(value, length + 2);
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
-        }
-
-        [Theory]
-        [InlineData(JsonErrorCode.Custom, "", 0, 2)]
-        [InlineData(JsonErrorCode.Unspecified, null, 0, 2)]
-        // No newline conversions.
-        [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 2)]
-        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "\\u00", 0, 3)]
-        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string errorParameter, int start, int length)
-        {
-            string[] parameters = errorParameter == null ? null : new[] { errorParameter };
-
-            var errorInfo1 = new JsonErrorInfo(errorCode, start, length, parameters);
-            var errorInfo2 = new JsonErrorInfo(errorCode, start + 1, length * 2, parameters);
-            var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
-
-            Assert.Collection(
-                new GreenJsonErrorStringSyntax(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
-                error1 => Assert.Same(errorInfo1, error1),
-                error2 => Assert.Same(errorInfo2, error2),
-                error3 => Assert.Same(errorInfo3, error3));
-
-            // Assert that the elements of the list are copied, i.e. that if this collection is modified
-            // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
-            var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new GreenJsonErrorStringSyntax(errorList, 1);
-            Assert.NotSame(errorString.Errors, errorList);
-
-            // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
-            errorList.Add(errorInfo1);
-
-            Assert.Collection(
-                errorString.Errors,
-                error1 => Assert.Same(errorInfo1, error1),
-                error2 => Assert.Same(errorInfo2, error2),
-                error3 => Assert.Same(errorInfo3, error3));
         }
 
         [Theory]
