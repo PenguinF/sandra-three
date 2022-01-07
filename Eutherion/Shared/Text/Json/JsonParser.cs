@@ -645,6 +645,9 @@ namespace Eutherion.Text.Json
             // Eat " character, but leave SymbolStartIndex unchanged.
             currentIndex++;
 
+            // Prepare for use.
+            valueBuilder.Clear();
+
             while (currentIndex < length)
             {
                 char c = Json[currentIndex];
@@ -664,7 +667,6 @@ namespace Eutherion.Text.Json
                         {
                             yield return new GreenJsonStringLiteralSyntax(valueBuilder.ToString(), currentIndex - SymbolStartIndex);
                         }
-                        valueBuilder.Clear();
                         SymbolStartIndex = currentIndex;
                         goto inWhitespace;
                     case StringLiteral.EscapeCharacter:
