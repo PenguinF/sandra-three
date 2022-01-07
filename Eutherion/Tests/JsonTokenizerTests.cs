@@ -80,7 +80,7 @@ namespace Eutherion.Shared.Tests
 
         private static void AssertTokens(string json, params Action<IGreenJsonSymbol>[] tokenInspectors)
         {
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), tokenInspectors);
+            Assert.Collection(JsonParser.TokenizeAll(json).Item1, tokenInspectors);
         }
 
         private static Action<IGreenJsonSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
@@ -106,7 +106,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullJsonThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => JsonTokenizer.TokenizeAll(null).Any());
+            Assert.Throws<ArgumentNullException>(() => JsonParser.Parse(null));
         }
 
         [Theory]
@@ -520,10 +520,12 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            var generatedErrors = new List<JsonErrorInfo>();
             int length = 0;
 
-            foreach (var token in JsonTokenizer.TokenizeAll(json))
+            var tokensAndErrors = JsonParser.TokenizeAll(json);
+            var generatedErrors = tokensAndErrors.Item2;
+
+            foreach (var token in tokensAndErrors.Item1)
             {
                 generatedErrors.AddRange(token.GetErrors(length));
                 length += token.Length;

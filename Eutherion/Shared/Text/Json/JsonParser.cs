@@ -60,6 +60,27 @@ namespace Eutherion.Text.Json
         /// </summary>
         public const int MaximumDepth = 40;
 
+        public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
+
+        /// <summary>
+        /// Tokenizes the source Json from start to end.
+        /// </summary>
+        /// <param name="json">
+        /// The Json to tokenize.
+        /// </param>
+        /// <returns>
+        /// A list of <see cref="IGreenJsonSymbol"/> instances together with a list of generated tokenization errors.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null.
+        /// </exception>
+        internal static (List<IGreenJsonSymbol>, List<JsonErrorInfo>) TokenizeAll(string json)
+        {
+            var parser = new JsonParser(json);
+            var tokens = parser._TokenizeAll().ToList();
+            return (tokens, parser.Errors);
+        }
+
         private static RootJsonSyntax CreateParseTreeTooDeepRootSyntax(int startPosition, int length)
             => new RootJsonSyntax(
                 new GreenJsonMultiValueSyntax(
@@ -77,6 +98,9 @@ namespace Eutherion.Text.Json
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
+
+        // Invariant is that this index is always at the start of the yielded symbol.
+        private int SymbolStartIndex;
 
         private IGreenJsonSymbol CurrentToken;
 
@@ -361,7 +385,7 @@ namespace Eutherion.Text.Json
         // as it cannot go to a higher level in the stack to process value delimiter symbols.
         private RootJsonSyntax Parse()
         {
-            Tokens = JsonTokenizer.TokenizeAll(Json).GetEnumerator();
+            Tokens = _TokenizeAll().GetEnumerator();
 
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
 
@@ -389,29 +413,6 @@ namespace Eutherion.Text.Json
                     CurrentToken.Length));
             }
         }
-
-        public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
-    }
-
-    /// <summary>
-    /// Based on https://www.json.org/.
-    /// </summary>
-    public sealed class JsonTokenizer
-    {
-        private readonly string Json;
-
-        // Reusable fields for building terminal symbols.
-        private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
-
-        // Invariant is that this index is always at the start of the yielded symbol.
-        private int SymbolStartIndex;
-
-        private JsonTokenizer(string json)
-        {
-            this.Json = json ?? throw new ArgumentNullException(nameof(json));
-        }
-
-        private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
 
         private IGreenJsonSymbol CreateValue(int currentIndex)
         {
@@ -666,9 +667,7 @@ namespace Eutherion.Text.Json
                         currentIndex++;
                         if (hasStringErrors)
                         {
-                            yield return new GreenJsonErrorStringSyntax(Errors, currentIndex - SymbolStartIndex);
-
-                            Errors.Clear();
+                            yield return new GreenJsonErrorStringSyntax(EmptyEnumerable<JsonErrorInfo>.Instance, currentIndex - SymbolStartIndex);
                         }
                         else
                         {
@@ -798,7 +797,7 @@ namespace Eutherion.Text.Json
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             int unterminatedStringLength = length - SymbolStartIndex;
             Report(JsonErrorStringSyntax.Unterminated(0, unterminatedStringLength));
-            yield return new GreenJsonErrorStringSyntax(Errors, unterminatedStringLength);
+            yield return new GreenJsonErrorStringSyntax(EmptyEnumerable<JsonErrorInfo>.Instance, unterminatedStringLength);
             yield break;
 
         inSingleLineComment:
@@ -880,20 +879,5 @@ namespace Eutherion.Text.Json
             int unterminatedCommentLength = length - SymbolStartIndex;
             yield return new GreenJsonUnterminatedMultiLineCommentSyntax(unterminatedCommentLength);
         }
-
-        /// <summary>
-        /// Tokenizes the source Json from start to end.
-        /// </summary>
-        /// <param name="json">
-        /// The Json to tokenize.
-        /// </param>
-        /// <returns>
-        /// An enumeration of <see cref="IGreenJsonSymbol"/> instances.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="json"/> is null/
-        /// </exception>
-        public static IEnumerable<IGreenJsonSymbol> TokenizeAll(string json)
-            => new JsonTokenizer(json)._TokenizeAll();
     }
 }
