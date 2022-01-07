@@ -541,8 +541,8 @@ namespace Eutherion.Text.Json
                                 }
                                 goto default;
                             default:
-                                string displayCharValue = category == UnicodeCategory.OtherNotAssigned
-                                    ? $"\\u{((int)c).ToString("x4")}"
+                                string displayCharValue = StringLiteral.CharacterMustBeEscaped(c)
+                                    ? StringLiteral.EscapedCharacterString(c)
                                     : Convert.ToString(c);
                                 yield return new GreenJsonUnknownSymbolSyntax(displayCharValue);
                                 break;
