@@ -173,6 +173,31 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(value.Length, boolNode.Length);
         }
 
+        public static IEnumerable<object[]> GetIntegerJsonValues()
+        {
+            yield return new object[] { "0", 0 };
+            yield return new object[] { "+1", 1 };
+            yield return new object[] { "-0", 0 };
+            yield return new object[] { "-1", -1 };
+            yield return new object[] { "-9", -9 };
+            yield return new object[] { "20", 20 };
+            yield return new object[] { "2147483647", 2147483647 };
+            yield return new object[] { "+2147483647", 2147483647 };
+            yield return new object[] { "000002147483647", 2147483647 };
+            yield return new object[] { "-2147483648", -2147483648 };
+            yield return new object[] { "-000002147483648", -2147483648 };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetIntegerJsonValues))]
+        public void IntegerJsonValues(string value, int expectedIntegerValue)
+        {
+            var node = JsonValue.TryCreate(value.AsSpan());
+            var intNode = Assert.IsType<GreenJsonIntegerLiteralSyntax>(node);
+            Assert.Equal(expectedIntegerValue, (int)intNode.Value);
+            Assert.Equal(value.Length, intNode.Length);
+        }
+
         [Theory]
         [InlineData("++0")]
         [InlineData("--0")]
