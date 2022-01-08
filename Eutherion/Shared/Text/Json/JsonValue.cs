@@ -58,6 +58,17 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// The created value, or null if the value was unrecognized.
         /// </returns>
+        public static IGreenJsonSymbol TryCreate(string value) => TryCreate(value.AsSpan());
+
+        /// <summary>
+        /// Attempts to create a syntax node from a string value.
+        /// </summary>
+        /// <param name="value">
+        /// The value from which to create a syntax node.
+        /// </param>
+        /// <returns>
+        /// The created value, or null if the value was unrecognized.
+        /// </returns>
         public static IGreenJsonSymbol TryCreate(ReadOnlySpan<char> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));

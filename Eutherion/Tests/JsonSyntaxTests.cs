@@ -82,8 +82,8 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
 
-            Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate(null));
-            Assert.Throws<ArgumentException>("value", () => JsonValue.TryCreate(string.Empty.AsSpan()));
+            Assert.Throws<ArgumentNullException>("value", () => JsonValue.TryCreate((string)null));
+            Assert.Throws<ArgumentException>("value", () => JsonValue.TryCreate(string.Empty));
 
             Assert.Throws<ArgumentNullException>("syntax", () => new RootJsonSyntax(
                 null,
@@ -158,7 +158,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("true", true)]
         public void BooleanJsonValues(string value, bool expectedBooleanValue)
         {
-            var node = JsonValue.TryCreate(value.AsSpan());
+            var node = JsonValue.TryCreate(value);
             GreenJsonBooleanLiteralSyntax boolNode;
             if (expectedBooleanValue)
             {
@@ -192,7 +192,7 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetIntegerJsonValues))]
         public void IntegerJsonValues(string value, int expectedIntegerValue)
         {
-            var node = JsonValue.TryCreate(value.AsSpan());
+            var node = JsonValue.TryCreate(value);
             var intNode = Assert.IsType<GreenJsonIntegerLiteralSyntax>(node);
             Assert.Equal(expectedIntegerValue, (int)intNode.Value);
             Assert.Equal(value.Length, intNode.Length);
@@ -208,7 +208,7 @@ namespace Eutherion.Shared.Tests
         public void UnknownJsonValues(string value)
         {
             // Assert that none of these create a legal json value.
-            Assert.Null(JsonValue.TryCreate(value.AsSpan()));
+            Assert.Null(JsonValue.TryCreate(value));
         }
 
         [Fact]
