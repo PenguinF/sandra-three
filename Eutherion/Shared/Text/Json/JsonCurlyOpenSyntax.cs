@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonCurlyOpenSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,34 +19,36 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json curly open syntax node.
+    /// Represents a curly open syntax node.
     /// </summary>
     public sealed class GreenJsonCurlyOpenSyntax : IGreenJsonSymbol
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonCurlyOpenSyntax Value = new GreenJsonCurlyOpenSyntax();
 
-        public int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.CurlyOpen;
 
         private GreenJsonCurlyOpenSyntax() { }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
     }
 
     /// <summary>
-    /// Represents a json curly open syntax node.
+    /// Represents a curly open syntax node.
     /// </summary>
     public sealed class JsonCurlyOpenSyntax : JsonSyntax, IJsonSymbol
     {
-        public const char CurlyOpenCharacter = '{';
-        public const int CurlyOpenLength = 1;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -65,7 +67,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => CurlyOpenLength;
+        public override int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -74,8 +76,6 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyOpenSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 }

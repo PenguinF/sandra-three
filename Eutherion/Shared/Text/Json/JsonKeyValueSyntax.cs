@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonKeyValueSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Eutherion.Text.Json
 {
@@ -57,19 +56,20 @@ namespace Eutherion.Text.Json
         public int Length => ValueSectionNodes.Length;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="GreenJsonKeyValueSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
         /// <param name="validKey">
         /// Nothing if no valid key was found, just the valid key otherwise.
+        /// The string literal is expected to be the same as the first value node's content node in <paramref name="valueSectionNodes"/>.
         /// </param>
         /// <param name="valueSectionNodes">
-        /// The list of syntax nodes containing the key and values.
+        /// The enumeration of syntax nodes containing the key and values.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="validKey"/> and/or <paramref name="valueSectionNodes"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an enumeration containing one or less elements.
+        /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an empty enumeration.
         /// </exception>
         public GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax> validKey, IEnumerable<GreenJsonMultiValueSyntax> valueSectionNodes)
         {
@@ -85,7 +85,7 @@ namespace Eutherion.Text.Json
             if (validKey.IsJust(out GreenJsonStringLiteralSyntax validKeyNode)
                 && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode)
             {
-                throw new ArgumentException("validKey and ValueSectionNodes[0].ValueNode.ContentNode shoukd be the same", nameof(validKey));
+                throw new ArgumentException("validKey and ValueSectionNodes[0].ValueNode.ContentNode should be the same", nameof(validKey));
             }
         }
 
@@ -131,7 +131,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => JsonCurlyOpenSyntax.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+        public override int Start => JsonSpecialCharacter.SpecialCharacterLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -169,9 +169,7 @@ namespace Eutherion.Text.Json
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
             Green = parent.Green.KeyValueNodes[parentKeyValueNodeIndex];
 
-            // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = Green.ValueSectionNodes.Count;
-            Debug.Assert(valueSectionNodeCount > 0);
 
             ValueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 valueSectionNodeCount,

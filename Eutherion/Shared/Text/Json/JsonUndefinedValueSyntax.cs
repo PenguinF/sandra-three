@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonUndefinedValueSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,43 +20,47 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json syntax node with an undefined or unsupported value.
+    /// Represents a syntax node with an undefined or unsupported value.
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
-        public string UndefinedValue { get; }
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length { get; }
 
-        public override int Length => UndefinedValue.Length;
-
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.UndefinedValue;
 
-        public GreenJsonUndefinedValueSyntax(string undefinedValue) => UndefinedValue = undefinedValue ?? throw new ArgumentNullException(nameof(undefinedValue));
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonUndefinedValueSyntax"/>.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
+        public GreenJsonUndefinedValueSyntax(int length)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
 
-        public JsonErrorInfo GetError(int position) => JsonUndefinedValueSyntax.CreateError(UndefinedValue, position, Length);
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
-
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
     }
 
     /// <summary>
-    /// Represents a json syntax node with an undefined or unsupported value.
+    /// Represents a syntax node with an undefined or unsupported value.
     /// </summary>
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax, IJsonSymbol
     {
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for an undefined value.
-        /// </summary>
-        public static JsonErrorInfo CreateError(string undefinedValue, int position, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedValue, position, length, new[] { undefinedValue });
-
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
@@ -69,12 +73,7 @@ namespace Eutherion.Text.Json
 
         internal JsonUndefinedValueSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonUndefinedValueSyntax green) : base(parent) => Green = green;
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
-
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
     }
 }

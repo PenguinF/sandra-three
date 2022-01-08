@@ -81,20 +81,20 @@ namespace Eutherion.Win.Storage
 
         private class ToBoolConverter : GreenJsonValueSyntaxVisitor<Maybe<PBoolean>>
         {
-            public override Maybe<PBoolean> DefaultVisit(GreenJsonValueSyntax node) => Maybe<PBoolean>.Nothing;
-            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
+            public override Maybe<PBoolean> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PBoolean>.Nothing;
+            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax value, _void arg) => value.Value ? PConstantValue.True : PConstantValue.False;
         }
 
         private class ToIntConverter : GreenJsonValueSyntaxVisitor<Maybe<PInteger>>
         {
-            public override Maybe<PInteger> DefaultVisit(GreenJsonValueSyntax node) => Maybe<PInteger>.Nothing;
-            public override Maybe<PInteger> VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax value) => new PInteger(value.Value);
+            public override Maybe<PInteger> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PInteger>.Nothing;
+            public override Maybe<PInteger> VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax value, _void arg) => new PInteger(value.Value);
         }
 
         private class ToStringConverter : GreenJsonValueSyntaxVisitor<Maybe<PString>>
         {
-            public override Maybe<PString> DefaultVisit(GreenJsonValueSyntax node) => Maybe<PString>.Nothing;
-            public override Maybe<PString> VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax value) => new PString(value.Value);
+            public override Maybe<PString> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PString>.Nothing;
+            public override Maybe<PString> VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax value, _void arg) => new PString(value.Value);
         }
 
         private sealed class BaseType<TValue> : PType<TValue>

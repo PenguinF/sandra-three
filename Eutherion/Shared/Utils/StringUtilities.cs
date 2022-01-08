@@ -2,7 +2,7 @@
 /*********************************************************************************
  * StringUtilities.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ namespace Eutherion
         /// Generates a display string from an array of parameters in the format "({0}, {1}, ...)".
         /// </summary>
         /// <param name="parameters">
-        /// The array of parameters to format.
+        /// The parameters to format.
         /// </param>
         /// <returns>
         /// If <paramref name="parameters"/> is null or empty, returns an empty string.

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonParser.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,12 +21,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a single parse of a list of json tokens.
+    /// Based on https://www.json.org/.
     /// </summary>
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
     public sealed class JsonParser
@@ -44,8 +48,6 @@ namespace Eutherion.Text.Json
             private EofSymbol() { }
 
             int ISpan.Length => 0;
-
-            IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
         }
 
         private class MaximumDepthExceededException : Exception { }
@@ -55,6 +57,39 @@ namespace Eutherion.Text.Json
         /// it would otherwise be vulnerable to StackOverflowExceptions.
         /// </summary>
         public const int MaximumDepth = 40;
+
+        /// <summary>
+        /// Generates a parse tree and errors from a source text in the JSON format.
+        /// </summary>
+        /// <param name="json">
+        /// The source text to parse.
+        /// </param>
+        /// <returns>
+        /// A <see cref="RootJsonSyntax"/> instance which contains a parse tree and list of parse errors.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null.
+        /// </exception>
+        public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
+
+        /// <summary>
+        /// Tokenizes the source Json from start to end.
+        /// </summary>
+        /// <param name="json">
+        /// The Json to tokenize.
+        /// </param>
+        /// <returns>
+        /// A list of <see cref="IGreenJsonSymbol"/> instances together with a list of generated tokenization errors.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null.
+        /// </exception>
+        internal static (List<IGreenJsonSymbol>, List<JsonErrorInfo>) TokenizeAll(string json)
+        {
+            var parser = new JsonParser(json);
+            var tokens = parser._TokenizeAll().ToList();
+            return (tokens, parser.Errors);
+        }
 
         private static RootJsonSyntax CreateParseTreeTooDeepRootSyntax(int startPosition, int length)
             => new RootJsonSyntax(
@@ -69,10 +104,13 @@ namespace Eutherion.Text.Json
         internal const JsonSymbolType ForegroundThreshold = JsonSymbolType.BooleanLiteral;
         internal const JsonSymbolType ValueDelimiterThreshold = JsonSymbolType.Colon;
 
-        private readonly IEnumerator<IGreenJsonSymbol> Tokens;
+        private IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
+
+        // Invariant is that this index is always at the start of the yielded symbol.
+        private int SymbolStartIndex;
 
         private IGreenJsonSymbol CurrentToken;
 
@@ -84,8 +122,9 @@ namespace Eutherion.Text.Json
         private JsonParser(string json)
         {
             Json = json ?? throw new ArgumentNullException(nameof(json));
-            Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
         }
+
+        private void Report(JsonErrorInfo errorInfo) => Errors.Add(errorInfo);
 
         private JsonSymbolType ShiftToNextForegroundToken()
         {
@@ -93,7 +132,6 @@ namespace Eutherion.Text.Json
             for (; ; )
             {
                 IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : EofSymbol.Value;
-                Errors.AddRange(newToken.GetErrors(CurrentLength));
                 CurrentLength += newToken.Length;
                 JsonSymbolType symbolType = newToken.SymbolType;
 
@@ -151,7 +189,7 @@ namespace Eutherion.Text.Json
                         }
                         else
                         {
-                            Errors.Add(new JsonErrorInfo(
+                            Report(new JsonErrorInfo(
                                 JsonErrorCode.PropertyKeyAlreadyExists,
                                 parsedKeyNodeStart,
                                 parsedKeyNode.Length,
@@ -161,7 +199,7 @@ namespace Eutherion.Text.Json
                         break;
                     default:
                         gotKey = true;
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
                             parsedKeyNodeStart,
                             parsedKeyNode.Length));
@@ -180,7 +218,7 @@ namespace Eutherion.Text.Json
                     if (gotColon)
                     {
                         // Multiple ':' without a ','.
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MultiplePropertyKeySections,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -210,7 +248,7 @@ namespace Eutherion.Text.Json
                     // Report missing property key and/or value.
                     if (!gotKey)
                     {
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingPropertyKey,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -221,7 +259,7 @@ namespace Eutherion.Text.Json
                     // Skip the fist value section, it contains the key node.
                     if (jsonKeyValueSyntax.ValueSectionNodes.Skip(1).All(x => x.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
                     {
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -236,7 +274,7 @@ namespace Eutherion.Text.Json
                     }
 
                     // ']', EOF; assume missing closing bracket '}'.
-                    Errors.Add(new JsonErrorInfo(
+                    Report(new JsonErrorInfo(
                         symbolType == JsonSymbolType.Eof ? JsonErrorCode.UnexpectedEofInObject : JsonErrorCode.ControlSymbolInObject,
                         CurrentLength - CurrentToken.Length,
                         CurrentToken.Length));
@@ -264,7 +302,7 @@ namespace Eutherion.Text.Json
                     if (parsedValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
                     {
                         // Two commas or '[,'.
-                        Errors.Add(new JsonErrorInfo(
+                        Report(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
@@ -277,7 +315,7 @@ namespace Eutherion.Text.Json
                 else
                 {
                     // ':', '}', EOF; assume missing closing bracket ']'.
-                    Errors.Add(new JsonErrorInfo(
+                    Report(new JsonErrorInfo(
                         symbolType == JsonSymbolType.Eof ? JsonErrorCode.UnexpectedEofInArray : JsonErrorCode.ControlSymbolInArray,
                         CurrentLength - CurrentToken.Length,
                         CurrentToken.Length));
@@ -322,7 +360,7 @@ namespace Eutherion.Text.Json
                 if (symbolType >= ValueDelimiterThreshold) return;
 
                 // Two or more consecutive values not allowed.
-                Errors.Add(new JsonErrorInfo(
+                Report(new JsonErrorInfo(
                     multipleValuesErrorCode,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
@@ -356,6 +394,8 @@ namespace Eutherion.Text.Json
         // as it cannot go to a higher level in the stack to process value delimiter symbols.
         private RootJsonSyntax Parse()
         {
+            Tokens = _TokenizeAll().GetEnumerator();
+
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
 
             for (; ; )
@@ -376,13 +416,481 @@ namespace Eutherion.Text.Json
                 BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(CurrentToken));
 
                 // Report an error if no value was encountered before the control symbol.
-                Errors.Add(new JsonErrorInfo(
+                Report(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
             }
         }
 
-        public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
+        private IGreenJsonSymbol CreateValue(int currentIndex)
+        {
+            int length = currentIndex - SymbolStartIndex;
+            IGreenJsonSymbol value = JsonValue.TryCreate(Json.AsSpan().Slice(SymbolStartIndex, length));
+
+            if (value == null)
+            {
+                // Copy to a substring here, which is not necessary for JsonValue.TryCreate() anymore.
+                Report(JsonParseErrors.UnrecognizedValue(Json.Substring(SymbolStartIndex, length), SymbolStartIndex, length));
+                value = new GreenJsonUndefinedValueSyntax(length);
+            }
+
+            return value;
+        }
+
+        const int symbolClassValueChar = 0;
+        const int symbolClassWhitespace = 1;
+        const int symbolClassSymbol = 2;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetSymbolClass(char c)
+        {
+            var category = char.GetUnicodeCategory(c);
+
+            switch (category)
+            {
+                case UnicodeCategory.UppercaseLetter:
+                case UnicodeCategory.LowercaseLetter:
+                case UnicodeCategory.TitlecaseLetter:
+                case UnicodeCategory.ModifierLetter:
+                case UnicodeCategory.OtherLetter:
+                case UnicodeCategory.NonSpacingMark:
+                case UnicodeCategory.SpacingCombiningMark:
+                case UnicodeCategory.EnclosingMark:
+                case UnicodeCategory.DecimalDigitNumber:
+                case UnicodeCategory.LetterNumber:
+                case UnicodeCategory.OtherNumber:
+                case UnicodeCategory.Surrogate:
+                case UnicodeCategory.ConnectorPunctuation:  // underscore-like characters
+                case UnicodeCategory.DashPunctuation:
+                    // Treat as part of a value.
+                    return symbolClassValueChar;
+                case UnicodeCategory.OpenPunctuation:
+                case UnicodeCategory.ClosePunctuation:
+                case UnicodeCategory.InitialQuotePunctuation:
+                case UnicodeCategory.FinalQuotePunctuation:
+                case UnicodeCategory.CurrencySymbol:
+                case UnicodeCategory.ModifierSymbol:
+                case UnicodeCategory.OtherSymbol:
+                case UnicodeCategory.OtherNotAssigned:
+                    return symbolClassSymbol;
+                case UnicodeCategory.OtherPunctuation:
+                    return c == '.' ? symbolClassValueChar : symbolClassSymbol;
+                case UnicodeCategory.MathSymbol:
+                    return c == '+' ? symbolClassValueChar : symbolClassSymbol;
+                case UnicodeCategory.SpaceSeparator:
+                case UnicodeCategory.LineSeparator:
+                case UnicodeCategory.ParagraphSeparator:
+                case UnicodeCategory.Control:
+                case UnicodeCategory.Format:
+                case UnicodeCategory.PrivateUse:
+                default:
+                    // Whitespace is a separator.
+                    return symbolClassWhitespace;
+            }
+        }
+
+        private IEnumerable<IGreenJsonSymbol> _TokenizeAll()
+        {
+            // This tokenizer uses labels with goto to switch between modes of tokenization.
+
+            int length = Json.Length;
+            int currentIndex = SymbolStartIndex;
+            StringBuilder valueBuilder = new StringBuilder();
+
+        inWhitespace:
+
+            while (currentIndex < length)
+            {
+                char c = Json[currentIndex];
+                int symbolClass = GetSymbolClass(c);
+
+                // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
+                if (symbolClass != symbolClassWhitespace)
+                {
+                    if (SymbolStartIndex < currentIndex)
+                    {
+                        yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
+                        SymbolStartIndex = currentIndex;
+                    }
+
+                    if (symbolClass == symbolClassSymbol)
+                    {
+                        switch (c)
+                        {
+                            case JsonSpecialCharacter.CurlyOpenCharacter:
+                                yield return GreenJsonCurlyOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CurlyCloseCharacter:
+                                yield return GreenJsonCurlyCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketOpenCharacter:
+                                yield return GreenJsonSquareBracketOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketCloseCharacter:
+                                yield return GreenJsonSquareBracketCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.ColonCharacter:
+                                yield return GreenJsonColonSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CommaCharacter:
+                                yield return GreenJsonCommaSyntax.Value;
+                                break;
+                            case StringLiteral.QuoteCharacter:
+                                goto inString;
+                            case JsonSpecialCharacter.CommentStartFirstCharacter:
+                                // Look ahead 1 character to see if this is the start of a comment.
+                                // In all other cases, treat as an unexpected symbol.
+                                if (currentIndex + 1 < length)
+                                {
+                                    char secondChar = Json[currentIndex + 1];
+                                    if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
+                                    {
+                                        goto inSingleLineComment;
+                                    }
+                                    else if (secondChar == JsonSpecialCharacter.MultiLineCommentStartSecondCharacter)
+                                    {
+                                        goto inMultiLineComment;
+                                    }
+                                }
+                                goto default;
+                            default:
+                                Report(JsonParseErrors.UnexpectedSymbol(c, currentIndex));
+                                yield return GreenJsonUnknownSymbolSyntax.Value;
+                                break;
+                        }
+
+                        // Increment to indicate the current character has been yielded.
+                        SymbolStartIndex++;
+                    }
+                    else
+                    {
+                        goto inValue;
+                    }
+                }
+
+                currentIndex++;
+            }
+
+            if (SymbolStartIndex < currentIndex)
+            {
+                yield return GreenJsonWhitespaceSyntax.Create(currentIndex - SymbolStartIndex);
+            }
+
+            yield break;
+
+        inValue:
+
+            // Eat the first symbol character, but leave SymbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = Json[currentIndex];
+                int symbolClass = GetSymbolClass(c);
+
+                // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
+                if (symbolClass != symbolClassValueChar)
+                {
+                    yield return CreateValue(currentIndex);
+                    SymbolStartIndex = currentIndex;
+
+                    if (symbolClass == symbolClassSymbol)
+                    {
+                        switch (c)
+                        {
+                            case JsonSpecialCharacter.CurlyOpenCharacter:
+                                yield return GreenJsonCurlyOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CurlyCloseCharacter:
+                                yield return GreenJsonCurlyCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketOpenCharacter:
+                                yield return GreenJsonSquareBracketOpenSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.SquareBracketCloseCharacter:
+                                yield return GreenJsonSquareBracketCloseSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.ColonCharacter:
+                                yield return GreenJsonColonSyntax.Value;
+                                break;
+                            case JsonSpecialCharacter.CommaCharacter:
+                                yield return GreenJsonCommaSyntax.Value;
+                                break;
+                            case StringLiteral.QuoteCharacter:
+                                goto inString;
+                            case JsonSpecialCharacter.CommentStartFirstCharacter:
+                                // Look ahead 1 character to see if this is the start of a comment.
+                                // In all other cases, treat as an unexpected symbol.
+                                if (currentIndex + 1 < length)
+                                {
+                                    char secondChar = Json[currentIndex + 1];
+                                    if (secondChar == JsonSpecialCharacter.SingleLineCommentStartSecondCharacter)
+                                    {
+                                        goto inSingleLineComment;
+                                    }
+                                    else if (secondChar == JsonSpecialCharacter.MultiLineCommentStartSecondCharacter)
+                                    {
+                                        goto inMultiLineComment;
+                                    }
+                                }
+                                goto default;
+                            default:
+                                Report(JsonParseErrors.UnexpectedSymbol(c, currentIndex));
+                                yield return GreenJsonUnknownSymbolSyntax.Value;
+                                break;
+                        }
+
+                        // Increment to indicate the current character has been yielded.
+                        SymbolStartIndex++;
+                    }
+
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+
+                currentIndex++;
+            }
+
+            if (SymbolStartIndex < currentIndex)
+            {
+                yield return CreateValue(currentIndex);
+            }
+
+            yield break;
+
+        inString:
+
+            // Detect errors.
+            bool hasStringErrors = false;
+
+            // Eat " character, but leave SymbolStartIndex unchanged.
+            currentIndex++;
+
+            // Prepare for use.
+            valueBuilder.Clear();
+
+            while (currentIndex < length)
+            {
+                char c = Json[currentIndex];
+
+                switch (c)
+                {
+                    case StringLiteral.QuoteCharacter:
+                        // Closing quote character.
+                        currentIndex++;
+                        if (hasStringErrors)
+                        {
+                            yield return new GreenJsonErrorStringSyntax(currentIndex - SymbolStartIndex);
+                        }
+                        else
+                        {
+                            yield return new GreenJsonStringLiteralSyntax(valueBuilder.ToString(), currentIndex - SymbolStartIndex);
+                        }
+                        SymbolStartIndex = currentIndex;
+                        goto inWhitespace;
+                    case StringLiteral.EscapeCharacter:
+                        // Escape sequence.
+                        // Look ahead one character.
+                        int escapeSequenceStart = currentIndex;
+                        currentIndex++;
+
+                        if (currentIndex < length)
+                        {
+                            char escapedChar = Json[currentIndex];
+
+                            switch (escapedChar)
+                            {
+                                case StringLiteral.QuoteCharacter:
+                                case StringLiteral.EscapeCharacter:
+                                case '/':  // Weird one, but it's in the specification.
+                                    valueBuilder.Append(escapedChar);
+                                    break;
+                                case 'b':
+                                    valueBuilder.Append('\b');
+                                    break;
+                                case 'f':
+                                    valueBuilder.Append('\f');
+                                    break;
+                                case 'n':
+                                    valueBuilder.Append('\n');
+                                    break;
+                                case 'r':
+                                    valueBuilder.Append('\r');
+                                    break;
+                                case 't':
+                                    valueBuilder.Append('\t');
+                                    break;
+                                case 'v':
+                                    valueBuilder.Append('\v');
+                                    break;
+                                case 'u':
+                                    bool validUnicodeSequence = true;
+                                    int unicodeValue = 0;
+
+                                    // Expect exactly 4 hex characters.
+                                    const int expectedHexLength = 4;
+                                    for (int i = 0; i < expectedHexLength; i++)
+                                    {
+                                        currentIndex++;
+                                        if (currentIndex < length)
+                                        {
+                                            // 1 hex character = 4 bits.
+                                            unicodeValue <<= 4;
+                                            char hexChar = Json[currentIndex];
+                                            if ('0' <= hexChar && hexChar <= '9')
+                                            {
+                                                unicodeValue = unicodeValue + hexChar - '0';
+                                            }
+                                            else if ('a' <= hexChar && hexChar <= 'f')
+                                            {
+                                                const int aValue = 'a' - 10;
+                                                unicodeValue = unicodeValue + hexChar - aValue;
+                                            }
+                                            else if ('A' <= hexChar && hexChar <= 'F')
+                                            {
+                                                const int aValue = 'A' - 10;
+                                                unicodeValue = unicodeValue + hexChar - aValue;
+                                            }
+                                            else
+                                            {
+                                                currentIndex--;
+                                                validUnicodeSequence = false;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            currentIndex--;
+                                            validUnicodeSequence = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (validUnicodeSequence)
+                                    {
+                                        valueBuilder.Append(Convert.ToChar(unicodeValue));
+                                    }
+                                    else
+                                    {
+                                        hasStringErrors = true;
+                                        int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
+                                        Report(JsonParseErrors.UnrecognizedEscapeSequence(
+                                            Json.Substring(escapeSequenceStart, escapeSequenceLength),
+                                            escapeSequenceStart, escapeSequenceLength));
+                                    }
+                                    break;
+                                default:
+                                    hasStringErrors = true;
+                                    Report(JsonParseErrors.UnrecognizedEscapeSequence(
+                                        Json.Substring(escapeSequenceStart, 2),
+                                        escapeSequenceStart, 2));
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        if (StringLiteral.CharacterMustBeEscaped(c))
+                        {
+                            // Generate user friendly representation of the illegal character in error message.
+                            hasStringErrors = true;
+                            Report(JsonParseErrors.IllegalControlCharacterInString(c, currentIndex));
+                        }
+                        else
+                        {
+                            valueBuilder.Append(c);
+                        }
+                        break;
+                }
+
+                currentIndex++;
+            }
+
+            // Use length rather than currentIndex; currentIndex is bigger after a '\'.
+            int unterminatedStringLength = length - SymbolStartIndex;
+            Report(JsonParseErrors.UnterminatedString(SymbolStartIndex, unterminatedStringLength));
+            yield return new GreenJsonErrorStringSyntax(unterminatedStringLength);
+            yield break;
+
+        inSingleLineComment:
+
+            // Eat both / characters, but leave SymbolStartIndex unchanged.
+            currentIndex += 2;
+
+            while (currentIndex < length)
+            {
+                char c = Json[currentIndex];
+
+                switch (c)
+                {
+                    case '\r':
+                        // Can already eat this whitespace character.
+                        currentIndex++;
+
+                        // Look ahead to see if the next character is a linefeed.
+                        // Otherwise, the '\r' just becomes part of the comment.
+                        if (currentIndex < length)
+                        {
+                            char secondChar = Json[currentIndex];
+                            if (secondChar == '\n')
+                            {
+                                yield return GreenJsonCommentSyntax.Create(currentIndex - 1 - SymbolStartIndex);
+
+                                // Eat the second whitespace character.
+                                SymbolStartIndex = currentIndex - 1;
+                                currentIndex++;
+                                goto inWhitespace;
+                            }
+                        }
+                        break;
+                    case '\n':
+                        yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
+
+                        // Eat the '\n'.
+                        SymbolStartIndex = currentIndex;
+                        currentIndex++;
+                        goto inWhitespace;
+                }
+
+                currentIndex++;
+            }
+
+            yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
+            yield break;
+
+        inMultiLineComment:
+
+            // Eat /* characters, but leave SymbolStartIndex unchanged.
+            currentIndex += 2;
+
+            while (currentIndex < length)
+            {
+                if (Json[currentIndex] == '*')
+                {
+                    // Look ahead to see if the next character is a slash.
+                    if (currentIndex + 1 < length)
+                    {
+                        char secondChar = Json[currentIndex + 1];
+
+                        if (secondChar == '/')
+                        {
+                            // Increment so the closing '*/' is regarded as part of the comment.
+                            currentIndex += 2;
+
+                            yield return GreenJsonCommentSyntax.Create(currentIndex - SymbolStartIndex);
+
+                            SymbolStartIndex = currentIndex;
+                            goto inWhitespace;
+                        }
+                    }
+                }
+
+                currentIndex++;
+            }
+
+            int unterminatedCommentLength = length - SymbolStartIndex;
+            Report(JsonParseErrors.UnterminatedMultiLineComment(SymbolStartIndex, unterminatedCommentLength));
+            yield return new GreenJsonUnterminatedMultiLineCommentSyntax(unterminatedCommentLength);
+        }
     }
 }

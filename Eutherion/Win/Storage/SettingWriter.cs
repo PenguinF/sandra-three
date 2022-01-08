@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingWriter.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ namespace Eutherion.Win.Storage
                 // Decrease by an extra 1 because of the space between '//' and the text.
                 int availableCommentWidth = maxLineLength
                                           - currentDepth * Indentation
-                                          - JsonCommentSyntax.SingleLineCommentStart.Length
+                                          - JsonSpecialCharacter.SingleLineCommentStart.Length
                                           - 1;
 
                 bool first = true;
@@ -146,7 +146,7 @@ namespace Eutherion.Win.Storage
                     {
                         // Extra line with empty single line comment to separate paragraphs.
                         AppendIndent();
-                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
+                        outputBuilder.Append(JsonSpecialCharacter.SingleLineCommentStart);
                         outputBuilder.AppendLine();
                     }
                     else first = false;
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
                     foreach (string commentLine in GetCommentLines(paragraph, availableCommentWidth))
                     {
                         AppendIndent();
-                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
+                        outputBuilder.Append(JsonSpecialCharacter.SingleLineCommentStart);
                         outputBuilder.Append(SpaceChar);
                         outputBuilder.Append(commentLine);
                         outputBuilder.AppendLine();
@@ -165,7 +165,7 @@ namespace Eutherion.Win.Storage
 
         public override void VisitList(PList value)
         {
-            outputBuilder.Append(JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.SquareBracketOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -177,7 +177,7 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
+                    outputBuilder.Append(JsonSpecialCharacter.CommaCharacter);
                 }
 
                 outputBuilder.AppendLine();
@@ -195,12 +195,12 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            outputBuilder.Append(JsonCurlyOpenSyntax.CurlyOpenCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -210,7 +210,7 @@ namespace Eutherion.Win.Storage
 
                 if (!first)
                 {
-                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
+                    outputBuilder.Append(JsonSpecialCharacter.CommaCharacter);
                 }
                 else
                 {
@@ -231,11 +231,11 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
                 if ((options & SettingWriterOptions.CommentOutProperties) != 0)
                 {
-                    outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
+                    outputBuilder.Append(JsonSpecialCharacter.SingleLineCommentStart);
                 }
 
                 AppendString(name);
-                outputBuilder.Append(JsonColonSyntax.ColonCharacter);
+                outputBuilder.Append(JsonSpecialCharacter.ColonCharacter);
                 outputBuilder.Append(SpaceChar);
                 Visit(kv.Value);
             }
@@ -250,7 +250,7 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonCurlyCloseSyntax.CurlyCloseCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.CurlyCloseCharacter);
         }
     }
 

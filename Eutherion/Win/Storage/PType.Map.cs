@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Map.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ namespace Eutherion.Win.Storage
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
+                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
                 {
                     // Error tolerance: ignore items of the wrong type.
                     var itemValueOrError = ItemType.TryCreateValue(

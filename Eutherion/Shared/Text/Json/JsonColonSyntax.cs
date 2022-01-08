@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonColonSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,34 +19,36 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json colon syntax node.
+    /// Represents a colon syntax node.
     /// </summary>
     public sealed class GreenJsonColonSyntax : IGreenJsonSymbol
     {
+        /// <summary>
+        /// Returns the singleton instance.
+        /// </summary>
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
-        public int Length => JsonColonSyntax.ColonLength;
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Colon;
 
         private GreenJsonColonSyntax() { }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
     }
 
     /// <summary>
-    /// Represents a json colon syntax node.
+    /// Represents a colon syntax node.
     /// </summary>
     public sealed class JsonColonSyntax : JsonSyntax, IJsonSymbol
     {
-        public const char ColonCharacter = ':';
-        public const int ColonLength = 1;
-
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -70,7 +72,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => ColonLength;
+        public override int Length => JsonSpecialCharacter.SpecialCharacterLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -83,8 +85,6 @@ namespace Eutherion.Text.Json
             ColonIndex = colonIndex;
         }
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 }

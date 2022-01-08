@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a context sensitive node in an abstract json syntax tree.
+    /// Represents a context sensitive node in an abstract syntax tree.
     /// </summary>
     public abstract class JsonSyntax : ISpan
     {
@@ -57,22 +58,23 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets if this syntax is a terminal symbol, i.e. if it has no child nodes and its <see cref="Length"/> is greater than zero.
         /// </summary>
-        /// <param name="jsonTerminalSymbol">
+        /// <param name="terminalSymbol">
         /// The terminal symbol if this syntax is a terminal symbol, otherwise a default value.
         /// </param>
         /// <returns>
         /// Whether or not this syntax is a terminal symbol, i.e. if it has no child nodes and its <see cref="Length"/> is greater than zero.
         /// </returns>
-        public bool IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol)
+        public bool IsTerminalSymbol(out IJsonSymbol terminalSymbol)
         {
             if (ChildCount == 0 && Length > 0)
             {
                 // Contract is that all subclasses with ChildCount == 0 and Length > 0 must implement IJsonSymbol.
-                jsonTerminalSymbol = (IJsonSymbol)this;
+                Debug.Assert(this is IJsonSymbol);
+                terminalSymbol = (IJsonSymbol)this;
                 return true;
             }
 
-            jsonTerminalSymbol = default;
+            terminalSymbol = default;
             return false;
         }
 
@@ -144,9 +146,9 @@ namespace Eutherion.Text.Json
                 {
                     JsonSyntax childNode = GetChild(childIndex);
 
-                    if (childNode.IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
+                    if (childNode.IsTerminalSymbol(out IJsonSymbol terminalSymbol))
                     {
-                        yield return jsonTerminalSymbol;
+                        yield return terminalSymbol;
                     }
                     else
                     {
@@ -179,9 +181,9 @@ namespace Eutherion.Text.Json
             // Yield return if ranges [start..start+length] and [0..Length] intersect.
             if (0 < length && 0 < Length && start < Length && 0 < start + length)
             {
-                if (IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
+                if (IsTerminalSymbol(out IJsonSymbol terminalSymbol))
                 {
-                    return new SingleElementEnumerable<IJsonSymbol>(jsonTerminalSymbol);
+                    return new SingleElementEnumerable<IJsonSymbol>(terminalSymbol);
                 }
                 else
                 {

@@ -21,12 +21,28 @@
 
 using Eutherion.Text.Json;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Eutherion.Shared.Tests
 {
     public class JsonErrorInfoTests
     {
+        internal static void AssertErrorInfoParameters(JsonErrorInfo actualErrorInfo, params string[] expectedParameters)
+        {
+            if (expectedParameters == null || !expectedParameters.Any())
+            {
+                Assert.True(actualErrorInfo.Parameters == null || !actualErrorInfo.Parameters.Any());
+            }
+            else
+            {
+                Assert.Collection(actualErrorInfo.Parameters, expectedParameters.Select(expected => new Action<string>(actual =>
+                {
+                    Assert.Equal(expected, actual);
+                })).ToArrayEx());
+            }
+        }
+
         [Theory]
         [InlineData(-1, 0, "start")]
         [InlineData(-1, -1, "start")]

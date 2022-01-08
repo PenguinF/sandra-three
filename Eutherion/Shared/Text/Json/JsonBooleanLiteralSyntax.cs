@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonBooleanLiteralSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -29,57 +28,131 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class GreenJsonBooleanLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
+        /// <summary>
+        /// Represents a 'false' literal value syntax node.
+        /// </summary>
         public sealed class False : GreenJsonBooleanLiteralSyntax
         {
-            public static False Instance = new False();
+            /// <summary>
+            /// Returns the singleton instance.
+            /// </summary>
+            public static readonly False Instance = new False();
 
             private False() { }
 
+            /// <summary>
+            /// Gets the boolean value represented by this literal syntax.
+            /// </summary>
             public override bool Value => false;
 
+            /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
             public override string LiteralJsonValue => JsonValue.False;
 
             /// <summary>
-            /// Gets the length of the text span corresponding with this node.
+            /// Gets the length of the text span corresponding with this syntax node.
             /// </summary>
             public override int Length => JsonValue.FalseSymbolLength;
 
-            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse();
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse != null ? whenFalse() : default;
         }
 
+        /// <summary>
+        /// Represents a 'true' literal value syntax node.
+        /// </summary>
         public sealed class True : GreenJsonBooleanLiteralSyntax
         {
+            /// <summary>
+            /// Returns the singleton instance.
+            /// </summary>
             public static readonly True Instance = new True();
 
             private True() { }
 
+            /// <summary>
+            /// Gets the boolean value represented by this literal syntax.
+            /// </summary>
             public override bool Value => true;
 
+            /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
             public override string LiteralJsonValue => JsonValue.True;
 
             /// <summary>
-            /// Gets the length of the text span corresponding with this node.
+            /// Gets the length of the text span corresponding with this syntax node.
             /// </summary>
             public override int Length => JsonValue.TrueSymbolLength;
 
-            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue();
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue != null ? whenTrue() : default;
         }
 
+        /// <summary>
+        /// Gets the boolean value represented by this literal syntax.
+        /// </summary>
         public abstract bool Value { get; }
 
+        /// <summary>
+        /// Gets the representation of this literal value in JSON source text.
+        /// </summary>
         public abstract string LiteralJsonValue { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.BooleanLiteral;
 
         private GreenJsonBooleanLiteralSyntax() { }
 
+        /// <summary>
+        /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// Type of the value to return.
+        /// </typeparam>
+        /// <param name="whenFalse">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+        /// </param>
+        /// <param name="whenTrue">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+        /// </param>
+        /// <returns>
+        /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+        /// </returns>
         public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
 
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 
     /// <summary>
@@ -98,11 +171,38 @@ namespace Eutherion.Text.Json
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.False.Instance;
 
             /// <summary>
-            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// Gets the boolean value represented by this literal syntax.
             /// </summary>
             public override bool Value => false;
 
+            /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
+            public override string LiteralJsonValue => JsonValue.False;
+
+            /// <summary>
+            /// Gets the length of the text span corresponding with this syntax node.
+            /// </summary>
+            public override int Length => JsonValue.FalseSymbolLength;
+
             internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse != null ? whenFalse() : default;
         }
 
         /// <summary>
@@ -116,13 +216,50 @@ namespace Eutherion.Text.Json
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.True.Instance;
 
             /// <summary>
-            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// Gets the boolean value represented by this literal syntax.
             /// </summary>
             public override bool Value => true;
 
+            /// <summary>
+            /// Gets the representation of this literal value in JSON source text.
+            /// </summary>
+            public override string LiteralJsonValue => JsonValue.True;
+
+            /// <summary>
+            /// Gets the length of the text span corresponding with this syntax node.
+            /// </summary>
+            public override int Length => JsonValue.TrueSymbolLength;
+
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+            /// <summary>
+            /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+            /// </summary>
+            /// <typeparam name="TResult">
+            /// Type of the value to return.
+            /// </typeparam>
+            /// <param name="whenFalse">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+            /// </param>
+            /// <param name="whenTrue">
+            /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+            /// </param>
+            /// <returns>
+            /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+            /// </returns>
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue != null ? whenTrue() : default;
         }
 
+        /// <summary>
+        /// Returns either <see cref="GreenJsonBooleanLiteralSyntax.False.Instance"/> or <see cref="GreenJsonBooleanLiteralSyntax.True.Instance"/>,
+        /// corresponding with the truth value of the parameter.
+        /// </summary>
+        /// <param name="boolValue">
+        /// Specifies which literal syntax to return.
+        /// </param>
+        /// <returns>
+        /// Either <see cref="GreenJsonBooleanLiteralSyntax.False.Instance"/> or <see cref="GreenJsonBooleanLiteralSyntax.True.Instance"/>.
+        /// </returns>
         public static GreenJsonBooleanLiteralSyntax BoolJsonLiteral(bool boolValue)
             => boolValue
             ? GreenJsonBooleanLiteralSyntax.True.Instance
@@ -134,23 +271,35 @@ namespace Eutherion.Text.Json
         public abstract GreenJsonBooleanLiteralSyntax Green { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
-        /// </summary>
-        public override int Length => Green.Length;
-
-        /// <summary>
-        /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+        /// Gets the boolean value represented by this literal syntax.
         /// </summary>
         public abstract bool Value { get; }
 
+        /// <summary>
+        /// Gets the representation of this literal value in JSON source text.
+        /// </summary>
+        public abstract string LiteralJsonValue { get; }
+
         private JsonBooleanLiteralSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+        /// <summary>
+        /// Invokes a <see cref="Func{TResult}"/> based on whether this instance represents a false or true value, and returns its result.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// Type of the value to return.
+        /// </typeparam>
+        /// <param name="whenFalse">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a false value.
+        /// </param>
+        /// <param name="whenTrue">
+        /// The <see cref="Func{TResult}"/> to invoke if this instance represents a true value.
+        /// </param>
+        /// <returns>
+        /// The result of the invoked <see cref="Func{TResult}"/>, or a default value if the passed in function is null.
+        /// </returns>
+        public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 }

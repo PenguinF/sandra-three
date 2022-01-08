@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonRootLevelValueDelimiterSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,19 +30,47 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonRootLevelValueDelimiterSyntax : GreenJsonBackgroundSyntax
     {
+        /// <summary>
+        /// Gets the value delimiter symbol.
+        /// </summary>
         public IGreenJsonSymbol ValueDelimiter { get; }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => ValueDelimiter.Length;
 
-        public GreenJsonRootLevelValueDelimiterSyntax(IGreenJsonSymbol valueDelimiter)
+        internal GreenJsonRootLevelValueDelimiterSyntax(IGreenJsonSymbol valueDelimiter)
         {
-            ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+            ValueDelimiter = valueDelimiter;
             Debug.Assert(ValueDelimiter.SymbolType >= JsonParser.ValueDelimiterThreshold);
         }
 
-        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonRootLevelValueDelimiterSyntax"/>.
+        /// </summary>
+        /// <param name="valueDelimiter">
+        /// The value delimiter symbol.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueDelimiter"/> is null.
+        /// </exception>
+        public GreenJsonRootLevelValueDelimiterSyntax(GreenJsonCurlyCloseSyntax valueDelimiter)
+            => ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonRootLevelValueDelimiterSyntax"/>.
+        /// </summary>
+        /// <param name="valueDelimiter">
+        /// The value delimiter symbol.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueDelimiter"/> is null.
+        /// </exception>
+        public GreenJsonRootLevelValueDelimiterSyntax(GreenJsonSquareBracketCloseSyntax valueDelimiter)
+            => ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+
+        internal override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
     }
 
     /// <summary>
@@ -65,8 +93,6 @@ namespace Eutherion.Text.Json
             : base(parent, backgroundNodeIndex)
             => Green = green;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitRootLevelValueDelimiterSyntax(this, arg);
     }
 }

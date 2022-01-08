@@ -36,22 +36,22 @@ namespace Eutherion.Shared.Tests
 
             private TerminalSymbolTester() { }
 
-            public override IGreenJsonSymbol VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitColonSyntax(JsonColonSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitCommaSyntax(JsonCommaSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitCommentSyntax(JsonCommentSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitErrorStringSyntax(JsonErrorStringSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => node.Green.ValueDelimiter;
-            public override IGreenJsonSymbol VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node.Green;
+            public override IGreenJsonSymbol VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitColonSyntax(JsonColonSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitCommaSyntax(JsonCommaSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitCommentSyntax(JsonCommentSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitErrorStringSyntax(JsonErrorStringSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, _void arg) => node.Green.ValueDelimiter;
+            public override IGreenJsonSymbol VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitStringLiteralSyntax(JsonStringLiteralSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, _void arg) => node.Green;
+            public override IGreenJsonSymbol VisitWhitespaceSyntax(JsonWhitespaceSyntax node, _void arg) => node.Green;
         }
 
         public abstract class ParseTree : IEnumerable<ParseTree>
@@ -157,7 +157,7 @@ namespace Eutherion.Shared.Tests
             // Sane structure as JsonTokenizerTests.Transition: first check two symbols, then all combinations of three.
             {
                 string json = json1 + json2;
-                var expectedTokens = JsonTokenizer.TokenizeAll(json);
+                var expectedTokens = JsonParser.TokenizeAll(json).Item1;
                 Action<IJsonSymbol>[] tokenInspectors = expectedTokens.Select<IGreenJsonSymbol, Action<IJsonSymbol>>((IGreenJsonSymbol expectedGreen) => (IJsonSymbol red) =>
                 {
                     IGreenJsonSymbol actualGreen = TerminalSymbolTester.Instance.Visit(red);
@@ -178,7 +178,7 @@ namespace Eutherion.Shared.Tests
                 Enumerable.Repeat<Action<(string, Type)>>(x0 =>
                 {
                     string json = x0.Item1 + json1 + json2;
-                    var expectedTokens = JsonTokenizer.TokenizeAll(json);
+                    var expectedTokens = JsonParser.TokenizeAll(json).Item1;
                     Action<IJsonSymbol>[] tokenInspectors = expectedTokens.Select<IGreenJsonSymbol, Action<IJsonSymbol>>(expectedGreen => symbol =>
                     {
                         IGreenJsonSymbol actualGreen = TerminalSymbolTester.Instance.Visit(symbol);

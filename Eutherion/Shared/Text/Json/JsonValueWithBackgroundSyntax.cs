@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonValueWithBackgroundSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using System.Threading;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a <see cref="IGreenJsonValueSyntax"/> node together with the background symbols directly before it in an abstract json syntax tree.
+    /// Represents a <see cref="GreenJsonValueSyntax"/> node together with the background symbols directly before it in an abstract syntax tree.
     /// </summary>
     public sealed class GreenJsonValueWithBackgroundSyntax : ISpan
     {
@@ -35,12 +35,12 @@ namespace Eutherion.Text.Json
         public GreenJsonBackgroundListSyntax BackgroundBefore { get; }
 
         /// <summary>
-        /// Gets the content node containing the actual json value.
+        /// Gets the content node containing the actual value.
         /// </summary>
         public GreenJsonValueSyntax ContentNode { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this syntax.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public int Length { get; }
 
@@ -51,7 +51,7 @@ namespace Eutherion.Text.Json
         /// The background symbols which directly precede the content value node.
         /// </param>
         /// <param name="contentNode">
-        /// The content node containing the actual json value.
+        /// The content node containing the actual value.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="backgroundBefore"/> and/or <paramref name="contentNode"/> are null.
@@ -65,7 +65,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols directly before it in an abstract json syntax tree.
+    /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols directly before it in an abstract syntax tree.
     /// </summary>
     public sealed class JsonValueWithBackgroundSyntax : JsonSyntax
     {
@@ -93,7 +93,7 @@ namespace Eutherion.Text.Json
                 => new JsonMapSyntax(parent, green);
 
             public override JsonValueSyntax VisitMissingValueSyntax(GreenJsonMissingValueSyntax green, JsonValueWithBackgroundSyntax parent)
-                => new JsonMissingValueSyntax(parent, green);
+                => new JsonMissingValueSyntax(parent);
 
             public override JsonValueSyntax VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
                 => new JsonStringLiteralSyntax(parent, green);
@@ -129,7 +129,7 @@ namespace Eutherion.Text.Json
         public JsonBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
 
         /// <summary>
-        /// Gets the content node containing the actual json value.
+        /// Gets the content node containing the actual value.
         /// </summary>
         public JsonValueSyntax ContentNode => contentNode.Object;
 
@@ -178,6 +178,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
             Green = parent.Green.ValueNodes[parentValueNodeIndex];
+
             backgroundBefore = new SafeLazyObject<JsonBackgroundListSyntax>(() => new JsonBackgroundListSyntax(this));
             contentNode = new SafeLazyObject<JsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }

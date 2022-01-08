@@ -2,7 +2,7 @@
 /*********************************************************************************
  * CompactSettingWriter.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -95,40 +95,40 @@ namespace Eutherion.Win.Storage
 
         public override void VisitList(PList value)
         {
-            outputBuilder.Append(JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.SquareBracketOpenCharacter);
             currentDepth++;
 
             bool first = true;
             foreach (var element in value)
             {
                 if (first) first = false;
-                else outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
+                else outputBuilder.Append(JsonSpecialCharacter.CommaCharacter);
 
                 Visit(element);
             }
 
             currentDepth--;
-            outputBuilder.Append(JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            outputBuilder.Append(JsonCurlyOpenSyntax.CurlyOpenCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
             foreach (var kv in value)
             {
                 if (first) first = false;
-                else outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
+                else outputBuilder.Append(JsonSpecialCharacter.CommaCharacter);
 
                 AppendString(kv.Key);
-                outputBuilder.Append(JsonColonSyntax.ColonCharacter);
+                outputBuilder.Append(JsonSpecialCharacter.ColonCharacter);
                 Visit(kv.Value);
             }
 
             currentDepth--;
-            outputBuilder.Append(JsonCurlyCloseSyntax.CurlyCloseCharacter);
+            outputBuilder.Append(JsonSpecialCharacter.CurlyCloseCharacter);
         }
     }
 }

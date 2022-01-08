@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonMapSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,16 +26,40 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a map syntax node.
+    /// Represents a syntax node which contains a map.
     /// </summary>
     public sealed class GreenJsonMapSyntax : GreenJsonValueSyntax
     {
+        /// <summary>
+        /// Gets the non-empty list of key-value nodes.
+        /// </summary>
         public ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, GreenJsonCommaSyntax> KeyValueNodes { get; }
 
+        /// <summary>
+        /// Gets if the map is not terminated by a closing curly brace.
+        /// </summary>
         public bool MissingCurlyClose { get; }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonMapSyntax"/>.
+        /// </summary>
+        /// <param name="keyValueNodes">
+        /// The non-empty enumeration of key-value nodes.
+        /// </param>
+        /// <param name="missingCurlyClose">
+        /// False if the list is terminated by a closing curly brace, otherwise true.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="keyValueNodes"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="keyValueNodes"/> is an empty enumeration.
+        /// </exception>
         public GreenJsonMapSyntax(IEnumerable<GreenJsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
             KeyValueNodes = ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, GreenJsonCommaSyntax>.Create(keyValueNodes, GreenJsonCommaSyntax.Value);
@@ -47,45 +71,43 @@ namespace Eutherion.Text.Json
 
             MissingCurlyClose = missingCurlyClose;
 
-            Length = JsonCurlyOpenSyntax.CurlyOpenLength
+            Length = JsonSpecialCharacter.SpecialCharacterLength
                    + KeyValueNodes.Length
-                   + (missingCurlyClose ? 0 : JsonCurlyCloseSyntax.CurlyCloseLength);
+                   + (missingCurlyClose ? 0 : JsonSpecialCharacter.SpecialCharacterLength);
         }
 
-        public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs
+        /// <summary>
+        /// Enumerates all semantically valid key-value pairs together with their starting positions relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
+        /// </summary>
+        public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs()
         {
-            get
+            for (int i = 0; i < KeyValueNodes.Count; i++)
             {
-                for (int i = 0; i < KeyValueNodes.Count; i++)
+                var keyValueNode = KeyValueNodes[i];
+
+                if (keyValueNode.ValidKey.IsJust(out GreenJsonStringLiteralSyntax stringLiteral)
+                    && keyValueNode.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax multiValueNode)
+                    && !(multiValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
                 {
-                    var keyValueNode = KeyValueNodes[i];
+                    // Only the first value can be valid, even if it's undefined.
+                    int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                    int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetFirstValueNodeStart() + multiValueNode.ValueNode.BackgroundBefore.Length;
 
-                    if (keyValueNode.ValidKey.IsJust(out GreenJsonStringLiteralSyntax stringLiteral)
-                        && keyValueNode.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax multiValueNode)
-                        && !(multiValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
-                    {
-                        // Only the first value can be valid, even if it's undefined.
-                        int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                        int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetFirstValueNodeStart() + multiValueNode.ValueNode.BackgroundBefore.Length;
-
-                        yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
-                    }
+                    yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                 }
             }
         }
 
         /// <summary>
-        /// Gets the start position of an key-value node relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
+        /// Gets the start position of a key-value node relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
         /// </summary>
-        public int GetKeyValueNodeStart(int index) => JsonCurlyOpenSyntax.CurlyOpenLength + KeyValueNodes.GetElementOffset(index);
+        public int GetKeyValueNodeStart(int index) => JsonSpecialCharacter.SpecialCharacterLength + KeyValueNodes.GetElementOffset(index);
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 
     /// <summary>
-    /// Represents a json map value syntax node.
+    /// Represents a syntax node which contains a map.
     /// </summary>
     public sealed class JsonMapSyntax : JsonValueSyntax
     {
@@ -95,13 +117,13 @@ namespace Eutherion.Text.Json
         public GreenJsonMapSyntax Green { get; }
 
         /// <summary>
-        /// Gets the <see cref="JsonCurlyOpenSyntax"/> node at the start of this map value syntax node.
+        /// Gets the <see cref="JsonCurlyOpenSyntax"/> node at the start of this map syntax node.
         /// </summary>
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
         /// <summary>
-        /// Gets the collection of key-value syntax nodes separated by comma characters.
+        /// Gets the non-empty collection of key-value nodes separated by comma characters.
         /// </summary>
         public SafeLazyObjectCollection<JsonKeyValueSyntax> KeyValueNodes { get; }
 
@@ -111,7 +133,7 @@ namespace Eutherion.Text.Json
         public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
         /// <summary>
-        /// Gets the <see cref="JsonCurlyCloseSyntax"/> node at the end of this map value syntax node, if it exists.
+        /// Gets the <see cref="JsonCurlyCloseSyntax"/> node at the end of this map syntax node, if it exists.
         /// </summary>
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
@@ -162,12 +184,12 @@ namespace Eutherion.Text.Json
 
             if (index < keyValueAndCommaCount)
             {
-                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index) + JsonCurlyOpenSyntax.CurlyOpenLength;
+                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index) + JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             if (index == keyValueAndCommaCount && !Green.MissingCurlyClose)
             {
-                return Length - JsonCurlyCloseSyntax.CurlyCloseLength;
+                return Length - JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             throw new IndexOutOfRangeException();
@@ -193,8 +215,6 @@ namespace Eutherion.Text.Json
                        : new JsonCurlyCloseSyntax(this);
         }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 }

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonWhitespaceSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,34 +20,35 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a json syntax node which contains whitespace.
+    /// Represents a syntax node which contains whitespace.
     /// </summary>
     public sealed class GreenJsonWhitespaceSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         /// <summary>
         /// Maximum length before new <see cref="GreenJsonWhitespaceSyntax"/> instances are always newly allocated.
         /// </summary>
-        public const int SharedWhitespaceInstanceLength = 255;
+        public const int SharedInstanceLength = 255;
 
         private static readonly GreenJsonWhitespaceSyntax[] SharedInstances;
 
         static GreenJsonWhitespaceSyntax()
         {
-            // Do not allocate a zero length whitespace.
-            SharedInstances = new GreenJsonWhitespaceSyntax[SharedWhitespaceInstanceLength - 1];
-            SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i + 1));
+            SharedInstances = new GreenJsonWhitespaceSyntax[SharedInstanceLength];
+            SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i));
         }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.Whitespace;
 
         /// <summary>
@@ -63,23 +64,17 @@ namespace Eutherion.Text.Json
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
         public static GreenJsonWhitespaceSyntax Create(int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (length < SharedWhitespaceInstanceLength) return SharedInstances[length - 1];
-            return new GreenJsonWhitespaceSyntax(length);
-        }
+            => length <= 0 ? throw new ArgumentOutOfRangeException(nameof(length))
+            : length < SharedInstanceLength ? SharedInstances[length]
+            : new GreenJsonWhitespaceSyntax(length);
 
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 
     /// <summary>
-    /// Represents a json syntax node which contains whitespace.
+    /// Represents a syntax node which contains whitespace.
     /// </summary>
     public sealed class JsonWhitespaceSyntax : JsonBackgroundSyntax, IJsonSymbol
     {
@@ -97,8 +92,6 @@ namespace Eutherion.Text.Json
             : base(parent, backgroundNodeIndex)
             => Green = green;
 
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 }

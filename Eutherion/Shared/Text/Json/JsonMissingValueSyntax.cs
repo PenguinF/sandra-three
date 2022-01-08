@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonMissingValueSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,40 +22,42 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a missing value in a list. It has a length of 0.
+    /// Represents a missing value. It has a length of 0.
     /// </summary>
     public sealed class GreenJsonMissingValueSyntax : GreenJsonValueSyntax
     {
-        public static readonly GreenJsonMissingValueSyntax Value = new GreenJsonMissingValueSyntax();
-
-        public override int Length => 0;
-
-        private GreenJsonMissingValueSyntax() { }
-
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a missing value in a list syntax node. It has a length of 0.
-    /// </summary>
-    public sealed class JsonMissingValueSyntax : JsonValueSyntax
-    {
         /// <summary>
-        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// Returns the singleton instance.
         /// </summary>
-        public GreenJsonMissingValueSyntax Green { get; }
+        public static readonly GreenJsonMissingValueSyntax Value = new GreenJsonMissingValueSyntax();
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => 0;
 
-        internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonMissingValueSyntax green) : base(parent) => Green = green;
+        private GreenJsonMissingValueSyntax() { }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a missing value. It has a length of 0.
+    /// </summary>
+    public sealed class JsonMissingValueSyntax : JsonValueSyntax
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonMissingValueSyntax Green => GreenJsonMissingValueSyntax.Value;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => 0;
+
+        internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 }

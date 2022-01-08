@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonListSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,16 +26,22 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a list syntax node.
+    /// Represents a syntax node which contains a list.
     /// </summary>
     public sealed class GreenJsonListSyntax : GreenJsonValueSyntax
     {
+        /// <summary>
+        /// Gets the non-empty list of list item nodes.
+        /// </summary>
         public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonCommaSyntax> ListItemNodes { get; }
 
+        /// <summary>
+        /// Gets if the list is not terminated by a closing square bracket.
+        /// </summary>
         public bool MissingSquareBracketClose { get; }
 
         /// <summary>
-        /// Returns ListItemNodes.Count, or one less if the last element is a GreenJsonMissingValueSyntax.
+        /// Returns ListItemNodes.Count, or one less if the last element is a <see cref="GreenJsonMissingValueSyntax"/>.
         /// </summary>
         public int FilteredListItemNodeCount
         {
@@ -53,8 +59,26 @@ namespace Eutherion.Text.Json
             }
         }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonListSyntax"/>.
+        /// </summary>
+        /// <param name="listItemNodes">
+        /// The non-empty enumeration of list item nodes.
+        /// </param>
+        /// <param name="missingSquareBracketClose">
+        /// False if the list is terminated by a closing square bracket, otherwise true.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="listItemNodes"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="listItemNodes"/> is an empty enumeration.
+        /// </exception>
         public GreenJsonListSyntax(IEnumerable<GreenJsonMultiValueSyntax> listItemNodes, bool missingSquareBracketClose)
         {
             ListItemNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonCommaSyntax>.Create(listItemNodes, GreenJsonCommaSyntax.Value);
@@ -66,23 +90,21 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            Length = JsonSquareBracketOpenSyntax.SquareBracketOpenLength
+            Length = JsonSpecialCharacter.SpecialCharacterLength
                    + ListItemNodes.Length
-                   + (missingSquareBracketClose ? 0 : JsonSquareBracketCloseSyntax.SquareBracketCloseLength);
+                   + (missingSquareBracketClose ? 0 : JsonSpecialCharacter.SpecialCharacterLength);
         }
 
         /// <summary>
         /// Gets the start position of an element node relative to the start position of this <see cref="GreenJsonListSyntax"/>.
         /// </summary>
-        public int GetElementNodeStart(int index) => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
+        public int GetElementNodeStart(int index) => JsonSpecialCharacter.SpecialCharacterLength + ListItemNodes.GetElementOffset(index);
 
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 
     /// <summary>
-    /// Represents a json list value syntax node.
+    /// Represents a syntax node which contains a list.
     /// </summary>
     public sealed class JsonListSyntax : JsonValueSyntax
     {
@@ -92,13 +114,13 @@ namespace Eutherion.Text.Json
         public GreenJsonListSyntax Green { get; }
 
         /// <summary>
-        /// Gets the <see cref="JsonSquareBracketOpenSyntax"/> node at the start of this list value syntax node.
+        /// Gets the <see cref="JsonSquareBracketOpenSyntax"/> node at the start of this list syntax node.
         /// </summary>
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
         /// <summary>
-        /// Gets the collection of list item nodes separated by comma characters.
+        /// Gets the non-empty collection of list item nodes separated by comma characters.
         /// </summary>
         public SafeLazyObjectCollection<JsonMultiValueSyntax> ListItemNodes { get; }
 
@@ -108,7 +130,7 @@ namespace Eutherion.Text.Json
         public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
         /// <summary>
-        /// Gets the <see cref="JsonSquareBracketCloseSyntax"/> node at the end of this list value syntax node, if it exists.
+        /// Gets the <see cref="JsonSquareBracketCloseSyntax"/> node at the end of this list syntax node, if it exists.
         /// </summary>
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
@@ -116,7 +138,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Returns ListItemNodes.Count, or one less if the last element is a <see cref="JsonMissingValueSyntax"/>.
         /// </summary>
-        public int FilteredListItemNodeCount => Green.FilteredListItemNodeCount;
+        public int FilteredListItemNodeCount { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -164,12 +186,12 @@ namespace Eutherion.Text.Json
 
             if (index < itemAndCommaCount)
             {
-                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
+                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             if (index == itemAndCommaCount && !Green.MissingSquareBracketClose)
             {
-                return Length - JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+                return Length - JsonSpecialCharacter.SpecialCharacterLength;
             }
 
             throw new IndexOutOfRangeException();
@@ -193,10 +215,10 @@ namespace Eutherion.Text.Json
             SquareBracketClose = green.MissingSquareBracketClose
                                ? Maybe<JsonSquareBracketCloseSyntax>.Nothing
                                : new JsonSquareBracketCloseSyntax(this);
+
+            FilteredListItemNodeCount = Green.FilteredListItemNodeCount;
         }
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 }

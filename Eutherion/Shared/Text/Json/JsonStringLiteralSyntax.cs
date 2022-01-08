@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonStringLiteralSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -30,7 +29,7 @@ namespace Eutherion.Text.Json
     public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the string value represented by this literal syntax.
         /// </summary>
         public string Value { get; }
 
@@ -39,20 +38,34 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
         public JsonSymbolType SymbolType => JsonSymbolType.StringLiteral;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonStringLiteralSyntax"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The string value to be represented by this literal syntax.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span corresponding with this syntax node.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="value"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public GreenJsonStringLiteralSyntax(string value, int length)
         {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+        internal override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 
     /// <summary>
@@ -66,7 +79,7 @@ namespace Eutherion.Text.Json
         public GreenJsonStringLiteralSyntax Green { get; }
 
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the string value represented by this literal syntax.
         /// </summary>
         public string Value => Green.Value;
 
@@ -77,12 +90,7 @@ namespace Eutherion.Text.Json
 
         internal JsonStringLiteralSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonStringLiteralSyntax green) : base(parent) => Green = green;
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
-
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        internal override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
         TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 }
