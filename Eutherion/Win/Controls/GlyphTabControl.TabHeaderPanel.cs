@@ -176,7 +176,16 @@ namespace Eutherion.Win.Controls
 
                 if (HoverTabIndex >= 0 && e.Button == MouseButtons.Left)
                 {
-                    OwnerTabControl.TabHeaderClicked(HoverTabIndex, HoverOverGlyph);
+                    if (!HoverOverGlyph)
+                    {
+                        // Default is to activate the tab.
+                        OwnerTabControl.ActivateTab(HoverTabIndex);
+                    }
+                    else
+                    {
+                        // Close the tab page rather than activating it.
+                        OwnerTabControl.CloseTab(HoverTabIndex);
+                    }
                 }
 
                 base.OnMouseDown(e);
