@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonParserTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 
 using Eutherion.Text.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -52,22 +51,6 @@ namespace Eutherion.Shared.Tests
             public override IGreenJsonSymbol VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, _void arg) => node.Green;
             public override IGreenJsonSymbol VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, _void arg) => node.Green;
             public override IGreenJsonSymbol VisitWhitespaceSyntax(JsonWhitespaceSyntax node, _void arg) => node.Green;
-        }
-
-        public abstract class ExpectedJsonTree : IEnumerable<ExpectedJsonTree>
-        {
-            public abstract Type ExpectedType { get; }
-            public readonly List<ExpectedJsonTree> ChildNodes = new List<ExpectedJsonTree>();
-
-            // To enable collection initializer syntax:
-            public IEnumerator<ExpectedJsonTree> GetEnumerator() => ChildNodes.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-            public void Add(ExpectedJsonTree child) => ChildNodes.Add(child);
-        }
-
-        public class ExpectedJsonTree<T> : ExpectedJsonTree where T : JsonSyntax
-        {
-            public override Type ExpectedType => typeof(T);
         }
 
         private enum JsonSymbolTypeClass { Background, ValueStarter, ValueDelimiter }

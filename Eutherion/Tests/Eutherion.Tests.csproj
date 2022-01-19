@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="CircularBufferTests.cs" />
     <Compile Include="EnumArrayTests.cs" />
+    <Compile Include="ExpectedJsonTree.cs" />
     <Compile Include="JsonErrorInfoTests.cs" />
     <Compile Include="JsonParserTests.cs" />
     <Compile Include="JsonSyntaxTests.cs" />
