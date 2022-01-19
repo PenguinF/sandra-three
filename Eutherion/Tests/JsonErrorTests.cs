@@ -103,11 +103,11 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, -1, "length")]
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.Unspecified, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, start, length));
         }
 
         [Theory]
-        [InlineData(JsonErrorCode.Unspecified, JsonErrorLevel.Message, 0, 0, null)]
+        [InlineData(JsonErrorCode.UnexpectedSymbol, JsonErrorLevel.Message, 0, 0, null)]
         [InlineData(JsonErrorCode.Custom, JsonErrorLevel.Warning, 0, 1, new string[0])]
         [InlineData(JsonErrorCode.ExpectedEof, JsonErrorLevel.Error, 1, 0, new[] { "\n", "" })]
         [InlineData(JsonErrorCode.Custom + 999, (JsonErrorLevel)(-1), 0, 2, new[] { "Aa" })]
