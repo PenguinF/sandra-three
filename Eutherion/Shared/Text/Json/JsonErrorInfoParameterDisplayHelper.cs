@@ -39,7 +39,7 @@ namespace Eutherion.Text.Json
                         ? $"'{StringLiteral.EscapedCharacterString(c)}'"
                         : $"'{c}'";
                 case JsonErrorInfoParameter<string> stringParameter:
-                    return stringParameter.Value;
+                    return $"\"{stringParameter.Value}\"";
                 default:
                     throw new UnreachableException();
             }
