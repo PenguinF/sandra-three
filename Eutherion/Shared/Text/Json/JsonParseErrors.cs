@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -28,9 +26,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public static class JsonParseErrors
     {
-        private static string GenerateCharacterErrorParameterString(char c)
-            => StringLiteral.CharacterMustBeEscaped(c) ? StringLiteral.EscapedCharacterString(c) : Convert.ToString(c);
-
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a symbol character is not recognized.
         /// </summary>
@@ -46,7 +41,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo UnexpectedSymbol(char unexpectedCharacter, int position)
             => new JsonErrorInfo(
                 JsonErrorCode.UnexpectedSymbol, position, JsonUnknownSymbolSyntax.UnknownSymbolLength,
-                new JsonErrorInfoParameter(GenerateCharacterErrorParameterString(unexpectedCharacter)));
+                new JsonErrorInfoCharParameter(unexpectedCharacter));
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a multi-line comment is not terminated before the end of the file.
@@ -111,7 +106,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo IllegalControlCharacterInString(char illegalControlCharacter, int position)
             => new JsonErrorInfo(
                 JsonErrorCode.IllegalControlCharacterInString, position, 1,
-                new JsonErrorInfoParameter(GenerateCharacterErrorParameterString(illegalControlCharacter)));
+                new JsonErrorInfoCharParameter(illegalControlCharacter));
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a value is not recognized.
