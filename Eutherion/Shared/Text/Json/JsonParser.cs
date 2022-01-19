@@ -194,7 +194,7 @@ namespace Eutherion.Text.Json
                                 parsedKeyNodeStart,
                                 parsedKeyNode.Length,
                                 // Take the substring, key may contain escape sequences.
-                                new[] { Json.Substring(parsedKeyNodeStart, parsedKeyNode.Length) }));
+                                new JsonErrorInfoParameter<string>(Json.Substring(parsedKeyNodeStart + 1, parsedKeyNode.Length - 2))));
                         }
                         break;
                     default:

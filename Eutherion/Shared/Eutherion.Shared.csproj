@@ -72,6 +72,8 @@
     <Compile Include="Text\Json\JsonCurlyOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonErrorCode.cs" />
     <Compile Include="Text\Json\JsonErrorInfo.cs" />
+    <Compile Include="Text\Json\JsonErrorInfoParameter.cs" />
+    <Compile Include="Text\Json\JsonErrorInfoParameterDisplayHelper.cs" />
     <Compile Include="Text\Json\JsonErrorLevel.cs" />
     <Compile Include="Text\Json\JsonErrorStringSyntax.cs" />
     <Compile Include="Text\Json\JsonIntegerLiteralSyntax.cs" />

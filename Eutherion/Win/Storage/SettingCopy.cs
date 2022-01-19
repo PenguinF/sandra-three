@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingCopy.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
@@ -215,7 +217,9 @@ namespace Eutherion.Win.Storage
     {
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
-            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
+            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(
+                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, Localizer.Default)));
+
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 

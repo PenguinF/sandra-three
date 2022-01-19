@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -28,9 +26,6 @@ namespace Eutherion.Text.Json
     /// </summary>
     public static class JsonParseErrors
     {
-        private static string GenerateCharacterErrorParameterString(char c)
-            => StringLiteral.CharacterMustBeEscaped(c) ? StringLiteral.EscapedCharacterString(c) : Convert.ToString(c);
-
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a symbol character is not recognized.
         /// </summary>
@@ -46,7 +41,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo UnexpectedSymbol(char unexpectedCharacter, int position)
             => new JsonErrorInfo(
                 JsonErrorCode.UnexpectedSymbol, position, JsonUnknownSymbolSyntax.UnknownSymbolLength,
-                new[] { GenerateCharacterErrorParameterString(unexpectedCharacter) });
+                new JsonErrorInfoParameter<char>(unexpectedCharacter));
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a multi-line comment is not terminated before the end of the file.
@@ -94,7 +89,9 @@ namespace Eutherion.Text.Json
         /// The new <see cref="JsonErrorInfo"/>.
         /// </returns>
         public static JsonErrorInfo UnrecognizedEscapeSequence(string escapeSequence, int position, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, position, length, new[] { escapeSequence });
+            => new JsonErrorInfo(
+                JsonErrorCode.UnrecognizedEscapeSequence, position, length,
+                new JsonErrorInfoParameter<string>(escapeSequence));
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when control characters appear in a string literal, which should be represented by an escape sequence instead.
@@ -111,7 +108,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo IllegalControlCharacterInString(char illegalControlCharacter, int position)
             => new JsonErrorInfo(
                 JsonErrorCode.IllegalControlCharacterInString, position, 1,
-                new[] { GenerateCharacterErrorParameterString(illegalControlCharacter) });
+                new JsonErrorInfoParameter<char>(illegalControlCharacter));
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for when a value is not recognized.
@@ -129,6 +126,8 @@ namespace Eutherion.Text.Json
         /// The new <see cref="JsonErrorInfo"/>.
         /// </returns>
         public static JsonErrorInfo UnrecognizedValue(string unrecognizedValue, int position, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedValue, position, length, new[] { unrecognizedValue });
+            => new JsonErrorInfo(
+                JsonErrorCode.UnrecognizedValue, position, length,
+                new JsonErrorInfoParameter<string>(unrecognizedValue));
     }
 }

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
@@ -67,9 +68,12 @@ namespace Eutherion.Win.MdiAppTemplate
                 return typeError.GetLocalizedMessage(localizer);
             }
 
-            if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
+            if (Enum.IsDefined(typeof(JsonErrorCode), jsonErrorInfo.ErrorCode))
             {
-                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+                return localizer.Localize(
+                    GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
+                    jsonErrorInfo.Parameters.Select(
+                        x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
             }
 
             return UnspecifiedMessage;
@@ -77,11 +81,14 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
         {
-            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol '{0}'" },
+            { JsonErrorInfoParameterDisplayHelper.NullString, "<null>" },
+            { JsonErrorInfoParameterDisplayHelper.UntypedObjectString, "{0}" },
+
+            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol {0}" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "unterminated multi-line comment" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "unterminated string" },
-            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
-            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "illegal control character '{0}' in string" },
+            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ({0})" },
+            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "illegal control character {0} in string" },
             { GetLocalizedStringKey(JsonErrorCode.ExpectedEof), "end of file expected" },
             { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInObject), "unexpected end of file, expected '}'" },
             { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInArray), "unexpected end of file, expected ']'" },
@@ -91,7 +98,7 @@ namespace Eutherion.Win.MdiAppTemplate
             { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "key {0} already exists in object" },
             { GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "missing property key" },
             { GetLocalizedStringKey(JsonErrorCode.MissingValue), "missing value" },
-            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "unrecognized value '{0}'" },
+            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "unrecognized value {0}" },
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeySections), "unexpected ':', expected ',' or '}'" },
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
