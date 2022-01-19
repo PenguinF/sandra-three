@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -54,7 +53,6 @@ namespace Eutherion.Text.Json
         /// Gets the list of parameters.
         /// </summary>
         public ReadOnlyList<JsonErrorInfoParameter> Parameters { get; }
-        public string[] ParametersOld => Parameters.Count == 0 ? null : Parameters.Select(x => x.UntypedValue).ToArray();
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonErrorInfo"/>.

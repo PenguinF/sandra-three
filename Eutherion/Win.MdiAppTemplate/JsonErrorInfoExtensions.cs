@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
@@ -69,7 +70,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
             {
-                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.ParametersOld);
+                return localizer.Localize(
+                    GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
+                    jsonErrorInfo.Parameters.Select(x => x.UntypedValue).ToArrayEx());
             }
 
             return UnspecifiedMessage;
