@@ -59,14 +59,15 @@ namespace Eutherion.Shared.Tests
         [InlineData(JsonErrorCode.Custom + 999, (JsonErrorLevel)(-1), 0, 2, new[] { "Aa" })]
         public void UnchangedParametersInError(JsonErrorCode errorCode, JsonErrorLevel errorLevel, int start, int length, string[] parameters)
         {
-            var errorInfo = new JsonErrorInfo(errorCode, errorLevel, start, length, parameters);
+            JsonErrorInfoParameter[] errorInfoParameters = parameters?.Select(x => new JsonErrorInfoParameter(x))?.ToArrayEx();
+
+            var errorInfo = new JsonErrorInfo(errorCode, errorLevel, start, length, errorInfoParameters);
             Assert.Equal(errorCode, errorInfo.ErrorCode);
             Assert.Equal(errorLevel, errorInfo.ErrorLevel);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
 
-            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
-            Assert.Equal<string>(parameters, errorInfo.ParametersOld);
+            AssertErrorInfoParameters(errorInfo, parameters);
         }
     }
 }
