@@ -229,7 +229,7 @@ namespace Eutherion.Shared.Tests
 
         [Theory]
         [MemberData(nameof(GetTestParseTrees))]
-        public void ParseTrees(string json, ExpectedJsonTree parseTree, JsonErrorCode[] expectedErrors)
+        public void ParseTreeTests(string json, ExpectedJsonTree parseTree, JsonErrorCode[] expectedErrors)
         {
             RootJsonSyntax rootSyntax = JsonParser.Parse(json);
             AssertParseTree(parseTree, null, 0, rootSyntax.Syntax);
