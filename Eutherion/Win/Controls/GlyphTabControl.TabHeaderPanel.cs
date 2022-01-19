@@ -58,6 +58,7 @@ namespace Eutherion.Win.Controls
 
             private int HoverTabIndex = -1;
             private bool HoverOverGlyph;
+            private int GlyphPressedIndex = -1;
 
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
@@ -183,8 +184,9 @@ namespace Eutherion.Win.Controls
                     }
                     else
                     {
-                        // Close the tab page rather than activating it.
-                        OwnerTabControl.CloseTab(HoverTabIndex);
+                        // Remember which glyph is being clicked.
+                        GlyphPressedIndex = HoverTabIndex;
+                        Invalidate();
                     }
                 }
 
@@ -205,6 +207,19 @@ namespace Eutherion.Win.Controls
             protected override void OnMouseUp(MouseEventArgs e)
             {
                 HitTest(e.Location);
+
+                if (e.Button == MouseButtons.Left && GlyphPressedIndex >= 0)
+                {
+                    // Close the tab page if releasing the mouse over the same glyph.
+                    if (HoverTabIndex == GlyphPressedIndex && HoverOverGlyph)
+                    {
+                        OwnerTabControl.CloseTab(GlyphPressedIndex);
+                    }
+
+                    GlyphPressedIndex = -1;
+                    Invalidate();
+                }
+
                 base.OnMouseUp(e);
             }
 
