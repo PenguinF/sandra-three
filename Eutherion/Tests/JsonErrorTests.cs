@@ -28,17 +28,17 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonErrorTests
     {
-        internal static void AssertErrorInfoParameters(JsonErrorInfo actualErrorInfo, params string[] expectedParameters)
+        internal static void AssertErrorInfoParameters(JsonErrorInfo actualErrorInfo, params JsonErrorInfoParameter[] expectedParameters)
         {
             if (expectedParameters == null || !expectedParameters.Any())
             {
-                Assert.True(actualErrorInfo.ParametersOld == null || !actualErrorInfo.ParametersOld.Any());
+                Assert.Empty(actualErrorInfo.Parameters);
             }
             else
             {
-                Assert.Collection(actualErrorInfo.ParametersOld, expectedParameters.Select(expected => new Action<string>(actual =>
+                Assert.Collection(actualErrorInfo.Parameters, expectedParameters.Select(expected => new Action<JsonErrorInfoParameter>(actual =>
                 {
-                    Assert.Equal(expected, actual);
+                    Assert.Equal(expected.UntypedValue, actual.UntypedValue);
                 })).ToArrayEx());
             }
         }
@@ -67,7 +67,7 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
 
-            AssertErrorInfoParameters(errorInfo, parameters);
+            AssertErrorInfoParameters(errorInfo, errorInfoParameters);
         }
     }
 }

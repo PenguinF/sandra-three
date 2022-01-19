@@ -583,7 +583,7 @@ namespace Eutherion.Shared.Tests
                 Assert.Equal(expectedError.ErrorCode, generatedError.ErrorCode);
                 Assert.Equal(expectedError.Start, generatedError.Start);
                 Assert.Equal(expectedError.Length, generatedError.Length);
-                JsonErrorTests.AssertErrorInfoParameters(generatedError, expectedError.ParametersOld);
+                JsonErrorTests.AssertErrorInfoParameters(generatedError, expectedError.Parameters.ToArrayEx());
             })).ToArrayEx());
         }
     }
