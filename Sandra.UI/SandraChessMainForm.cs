@@ -81,7 +81,7 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            // First mdiContainerForm in the list gets the honor of opening the new PGN files.
+            // Most recently activated mdiContainerForm gets the honor of opening the new PGN files.
             foreach (var candidate in mdiContainerForms)
             {
                 if (candidate.IsHandleCreated && !candidate.IsDisposed)
@@ -133,6 +133,17 @@ namespace Sandra.UI
             };
 
             mdiContainerForms.AddLast(mdiContainerForm);
+
+            mdiContainerForm.Activated += (sender, _) =>
+            {
+                // Bring to front of list if activated.
+                LinkedListNode<MdiContainerForm> node = mdiContainerForms.Find((MdiContainerForm)sender);
+                if (node != null && mdiContainerForms.First != node)
+                {
+                    mdiContainerForms.Remove(node);
+                    mdiContainerForms.AddFirst(node);
+                }
+            };
 
             return mdiContainerForm;
         }
