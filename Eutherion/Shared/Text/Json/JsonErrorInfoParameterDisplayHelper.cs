@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using System;
 
 namespace Eutherion.Text.Json
@@ -29,8 +30,39 @@ namespace Eutherion.Text.Json
     /// </summary>
     public static class JsonErrorInfoParameterDisplayHelper
     {
-        public static string GetDisplayValue(JsonErrorInfoParameter parameter)
+        /// <summary>
+        /// Gets the default localization key for displaying null values.
+        /// </summary>
+        public static readonly LocalizedStringKey NullString
+            = new LocalizedStringKey(nameof(NullString));
+
+        /// <summary>
+        /// Gets the default localization key for displaying a <see cref="JsonErrorInfoParameter"/> of an unknown type.
+        /// It expects one parameter, which is filled with the ToString() value of the value object.
+        /// </summary>
+        public static readonly LocalizedStringKey UntypedObjectString
+            = new LocalizedStringKey(nameof(UntypedObjectString));
+
+        /// <summary>
+        /// Gets a formatted and localized error message of a <see cref="JsonErrorInfoParameter"/>.
+        /// </summary>
+        /// <param name="parameter">
+        /// The <see cref="JsonErrorInfoParameter"/> to localize.
+        /// </param>
+        /// <param name="localizer">
+        /// The <see cref="Localizer"/> to use for generating a display value.
+        /// </param>
+        /// <returns>
+        /// The localized display value.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="parameter"/> and/or <paramref name="localizer"/> are null.
+        /// </exception>
+        public static string GetLocalizedDisplayValue(JsonErrorInfoParameter parameter, Localizer localizer)
         {
+            if (parameter == null) throw new ArgumentNullException(nameof(parameter));
+            if (localizer == null) throw new ArgumentNullException(nameof(localizer));
+
             switch (parameter)
             {
                 case JsonErrorInfoParameter<char> charParameter:
@@ -39,9 +71,13 @@ namespace Eutherion.Text.Json
                         ? $"'{StringLiteral.EscapedCharacterString(c)}'"
                         : $"'{c}'";
                 case JsonErrorInfoParameter<string> stringParameter:
-                    return $"\"{stringParameter.Value}\"";
+                    return stringParameter.Value == null
+                        ? localizer.Localize(NullString)
+                        : $"\"{stringParameter.Value}\"";
                 default:
-                    throw new UnreachableException();
+                    return parameter.UntypedValue == null
+                        ? localizer.Localize(NullString)
+                        : localizer.Localize(UntypedObjectString, new[] { parameter.UntypedValue.ToString() });
             }
         }
     }

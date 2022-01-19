@@ -72,7 +72,8 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 return localizer.Localize(
                     GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
-                    jsonErrorInfo.Parameters.Select(JsonErrorInfoParameterDisplayHelper.GetDisplayValue).ToArrayEx());
+                    jsonErrorInfo.Parameters.Select(
+                        x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
             }
 
             return UnspecifiedMessage;
@@ -80,6 +81,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
         {
+            { JsonErrorInfoParameterDisplayHelper.NullString, "<null>" },
+            { JsonErrorInfoParameterDisplayHelper.UntypedObjectString, "{0}" },
+
             { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol {0}" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "unterminated multi-line comment" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "unterminated string" },

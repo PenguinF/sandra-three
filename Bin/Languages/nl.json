@@ -76,6 +76,8 @@
     "WindowSize": "Formaat wijzigen",
     "ZoomIn": "Inzoomen",
     "ZoomOut": "Uitzoomen",
+    "NullString": "<leeg>",
+    "UntypedObjectString": "{0}",
     "JsonErrorUnexpectedSymbol": "onbekend symbool {0}",
     "JsonErrorUnterminatedMultiLineComment": "multi-regel commentaar niet afgesloten met '*/' karakters",
     "JsonErrorUnterminatedString": "stringwaarde niet afgesloten met een '\"' karakter",

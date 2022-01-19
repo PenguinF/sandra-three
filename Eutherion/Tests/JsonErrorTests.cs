@@ -19,8 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -42,6 +44,57 @@ namespace Eutherion.Shared.Tests
                     Assert.Equal(expected.UntypedValue, actual.UntypedValue);
                 })).ToArrayEx());
             }
+        }
+
+        [Fact]
+        public void ArgumentChecks()
+        {
+            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(null, Localizer.Default));
+            Assert.Throws<ArgumentNullException>("localizer", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
+        }
+
+        private sealed class TestLocalizer : Localizer
+        {
+            public static readonly string TestNullString = "NULL";
+            public static readonly string TestUntypedObjectString = "UNTYPED({0})";
+
+            public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+            {
+                if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.NullString)
+                    return TestNullString;
+
+                if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.UntypedObjectString)
+                    return StringUtilities.ConditionalFormat(TestUntypedObjectString, parameters);
+
+                // Throw an exception here, no other keys should be used than above 2.
+                throw new InvalidOperationException();
+            }
+        }
+
+        public static IEnumerable<object[]> ErrorParameterDisplayValuesTestData()
+        {
+            yield return new object[] { new JsonErrorInfoParameter<char>(' '), "' '" };
+            yield return new object[] { new JsonErrorInfoParameter<char>('\n'), "'\\n'" };
+            yield return new object[] { new JsonErrorInfoParameter<char>('\u0000'), "'\\u0000'" };
+            yield return new object[] { new JsonErrorInfoParameter<char>('√'), "'√'" };
+
+            yield return new object[] { new JsonErrorInfoParameter<string>(null), TestLocalizer.TestNullString };
+            yield return new object[] { new JsonErrorInfoParameter<string>(""), "\"\"" };
+            yield return new object[] { new JsonErrorInfoParameter<string>("x"), "\"x\"" };
+            yield return new object[] { new JsonErrorInfoParameter<string>("      "), "\"      \"" };
+
+            yield return new object[] { new JsonErrorInfoParameter<bool?>(null), TestLocalizer.TestNullString };
+            yield return new object[] { new JsonErrorInfoParameter<bool?>(false), string.Format(TestLocalizer.TestUntypedObjectString, bool.FalseString) };
+
+            yield return new object[] { new JsonErrorInfoParameter<int?>(null), TestLocalizer.TestNullString };
+            yield return new object[] { new JsonErrorInfoParameter<int?>(0), string.Format(TestLocalizer.TestUntypedObjectString, 0) };
+        }
+
+        [Theory]
+        [MemberData(nameof(ErrorParameterDisplayValuesTestData))]
+        public void ErrorParameterDisplayValues(JsonErrorInfoParameter parameter, string expectedDisplayValue)
+        {
+            Assert.Equal(expectedDisplayValue, JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(parameter, new TestLocalizer()));
         }
 
         [Theory]

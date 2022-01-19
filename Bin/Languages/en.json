@@ -76,6 +76,8 @@
     "WindowSize": "Size",
     "ZoomIn": "Zoom in",
     "ZoomOut": "Zoom out",
+    "NullString": "<null>",
+    "UntypedObjectString": "{0}",
     "JsonErrorUnexpectedSymbol": "unexpected symbol {0}",
     "JsonErrorUnterminatedMultiLineComment": "unterminated multi-line comment",
     "JsonErrorUnterminatedString": "unterminated string",
