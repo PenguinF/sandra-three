@@ -120,7 +120,7 @@ namespace Sandra.UI
             }
         }
 
-        private MdiContainerForm OpenNewMdiContainerForm()
+        internal MdiContainerForm OpenNewMdiContainerForm()
         {
             var mdiContainerForm = new MdiContainerForm();
 
