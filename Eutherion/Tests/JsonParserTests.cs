@@ -131,7 +131,7 @@ namespace Eutherion.Shared.Tests
         }
 
         /// <summary>
-        /// Tests if terminal symbols returned by a parsed <see cref="JsonSyntax"/> match those returned by the <see cref="JsonTokenizer"/>.
+        /// Tests if terminal symbols returned by a parsed <see cref="JsonSyntax"/> match those returned by its tokenizer.
         /// </summary>
         [Theory]
         [MemberData(nameof(TwoSymbolsWithoutType))]
