@@ -238,20 +238,6 @@ namespace Eutherion.Win.Controls
             }
         }
 
-        private void TabHeaderClicked(int tabPageIndex, bool mouseOverGlyph)
-        {
-            if (!mouseOverGlyph)
-            {
-                // Default is to activate the tab.
-                ActivateTab(tabPageIndex);
-            }
-            else
-            {
-                // Close the tab page rather than activating it.
-                CloseTab(tabPageIndex);
-            }
-        }
-
         /// <summary>
         /// Closes the <see cref="TabPage"/> with the given index and disposes its client control.
         /// </summary>

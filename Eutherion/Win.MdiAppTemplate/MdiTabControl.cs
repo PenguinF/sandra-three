@@ -38,6 +38,14 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public event Action DockPropertiesChanged;
 
+        /// <summary>
+        /// Raised when a <see cref="MdiTabPage"/> is about to be undocked.
+        /// The event handler should return a function which when called returns a <see cref="Form"/>
+        /// which is guaranteed to contain the undocked <see cref="MdiTabPage"/>.
+        /// The event handler should return null if the <see cref="MdiTabPage"/> cannot be undocked.
+        /// </summary>
+        public event Func<MdiTabPage, Func<Form>> RequestUndock;
+
         public MdiTabControl(string applicationTitle)
         {
             ApplicationTitle = applicationTitle;
@@ -138,12 +146,66 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (TabPages[e.TabPageIndex] is MdiTabPage mdiTabPage)
             {
-                bool cancel = e.Cancel;
-                mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
-                e.Cancel = cancel;
+                if (TabPages.Count == 1)
+                {
+                    // If it's the last tab page, close it.
+                    bool cancel = e.Cancel;
+                    mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
+                    e.Cancel = cancel;
+                }
+                else
+                {
+                    Undock(mdiTabPage);
+                    e.Cancel = true;
+                }
             }
 
             base.OnTabHeaderGlyphClick(e);
+        }
+
+        /// <summary>
+        /// Undocks a tab page. Returns true if the operation succeeded, otherwise false.
+        /// </summary>
+        public bool Undock(MdiTabPage mdiTabPage)
+        {
+            if (RequestUndock != null)
+            {
+                Func<Form> floatformConstructor = RequestUndock(mdiTabPage);
+
+                if (floatformConstructor != null)
+                {
+                    // To be able to restore state.
+                    int oldActiveTabPageIndex = ActiveTabPageIndex;
+                    int removedTabPageIndex = TabPages.IndexOf(mdiTabPage);
+
+                    if (TabPages.Remove(mdiTabPage))
+                    {
+                        // Set Visible to true in case an inactive tab page is undocked.
+                        mdiTabPage.ClientControl.Visible = true;
+
+                        // Redraw immediately before waiting for the end of the any caller.
+                        // Necessary because moving the Control to a different parent is going to force an update as well.
+                        Update();
+
+                        Form floatForm = floatformConstructor();
+
+                        if (floatForm == null)
+                        {
+                            // Restore original state and throw an exception.
+                            TabPages.Insert(removedTabPageIndex, mdiTabPage);
+                            if (oldActiveTabPageIndex == removedTabPageIndex) ActivateTab(oldActiveTabPageIndex);
+
+                            throw new InvalidOperationException($"Function returned from {nameof(RequestUndock)} event handler should never return null.");
+                        }
+
+                        floatForm.Show();
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 

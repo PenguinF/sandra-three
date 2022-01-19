@@ -58,6 +58,7 @@ namespace Eutherion.Win.Controls
 
             private int HoverTabIndex = -1;
             private bool HoverOverGlyph;
+            private int GlyphPressedIndex = -1;
 
             public TabHeaderPanel(GlyphTabControl ownerTabControl)
             {
@@ -176,7 +177,17 @@ namespace Eutherion.Win.Controls
 
                 if (HoverTabIndex >= 0 && e.Button == MouseButtons.Left)
                 {
-                    OwnerTabControl.TabHeaderClicked(HoverTabIndex, HoverOverGlyph);
+                    if (!HoverOverGlyph)
+                    {
+                        // Default is to activate the tab.
+                        OwnerTabControl.ActivateTab(HoverTabIndex);
+                    }
+                    else
+                    {
+                        // Remember which glyph is being clicked.
+                        GlyphPressedIndex = HoverTabIndex;
+                        Invalidate();
+                    }
                 }
 
                 base.OnMouseDown(e);
@@ -196,6 +207,19 @@ namespace Eutherion.Win.Controls
             protected override void OnMouseUp(MouseEventArgs e)
             {
                 HitTest(e.Location);
+
+                if (e.Button == MouseButtons.Left && GlyphPressedIndex >= 0)
+                {
+                    // Close the tab page if releasing the mouse over the same glyph.
+                    if (HoverTabIndex == GlyphPressedIndex && HoverOverGlyph)
+                    {
+                        OwnerTabControl.CloseTab(GlyphPressedIndex);
+                    }
+
+                    GlyphPressedIndex = -1;
+                    Invalidate();
+                }
+
                 base.OnMouseUp(e);
             }
 
@@ -241,10 +265,13 @@ namespace Eutherion.Win.Controls
                     Color tabBackColor;
                     Color tabForeColor;
                     Color glyphForeColor;
+                    Color glyphPressedBackColor;
+                    bool drawModifiedGlyph;
                     bool drawCloseButtonGlyph;
 
-                    // True if hovering over glyph of the current tab page to draw.
                     bool hoverOverThisTabPageGlyph = tabIndex == HoverTabIndex && HoverOverGlyph;
+                    bool drawGlyphPressed = hoverOverThisTabPageGlyph && tabIndex == GlyphPressedIndex;
+                    bool drawGlyphHighlight = hoverOverThisTabPageGlyph && GlyphPressedIndex == -1 || tabIndex == GlyphPressedIndex;
 
                     if (tabIndex == OwnerTabControl.ActiveTabPageIndex)
                     {
@@ -255,64 +282,81 @@ namespace Eutherion.Win.Controls
 
                         tabBackColor = tabPage.ActiveBackColor;
                         tabForeColor = tabPage.ActiveForeColor;
+                        glyphPressedBackColor = tabPage.ActiveBackColor.GetBrightness() >= 0.5f
+                            ? ControlPaint.Dark(tabPage.ActiveBackColor)
+                            : ControlPaint.Light(tabPage.ActiveBackColor);
 
-                        // Only show glyph for active and hover tabs.
-                        drawCloseButtonGlyph = true;
                         glyphForeColor = tabPage.GlyphForeColor.A == 0
                             ? tabForeColor
                             : tabPage.GlyphForeColor;
 
-                        // Highlight when hovering.
-                        if (hoverOverThisTabPageGlyph)
+                        if (drawGlyphHighlight)
                         {
+                            // Highlight when hovering or the glyph button is pressed.
                             // Default to a lighter version if no color given.
                             glyphForeColor = tabPage.GlyphHoverColor.A == 0
                                 ? ControlPaint.Light(glyphForeColor)
                                 : tabPage.GlyphHoverColor;
+
+                            drawModifiedGlyph = false;
+                            drawCloseButtonGlyph = true;
                         }
-                    }
-                    else if (tabIndex == HoverTabIndex)
-                    {
-                        using (var hoverBrush = new SolidBrush(OwnerTabControl.InactiveTabHeaderHoverColor))
+                        else
                         {
-                            g.FillRectangle(hoverBrush, tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight);
-                        }
-
-                        // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
-                        using (var hoverBorderPen = new Pen(OwnerTabControl.InactiveTabHeaderHoverBorderColor, 1))
-                        {
-                            g.DrawRectangle(hoverBorderPen, tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, CurrentHeight);
-                        }
-
-                        tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
-                        tabForeColor = OwnerTabControl.ForeColor;
-
-                        // Only show glyph for active and hover tabs.
-                        drawCloseButtonGlyph = true;
-                        glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphForeColor.A == 0
-                            ? tabForeColor
-                            : OwnerTabControl.InactiveTabHeaderGlyphForeColor;
-
-                        // Highlight when hovering.
-                        if (hoverOverThisTabPageGlyph)
-                        {
-                            // Default to a lighter version if no color given.
-                            glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphHoverColor.A == 0
-                                ? ControlPaint.Light(glyphForeColor)
-                                : OwnerTabControl.InactiveTabHeaderGlyphHoverColor;
+                            drawModifiedGlyph = tabPage.IsModified;
+                            drawCloseButtonGlyph = !tabPage.IsModified;
                         }
                     }
                     else
                     {
-                        tabBackColor = OwnerTabControl.BackColor;
+                        if (tabIndex == HoverTabIndex)
+                        {
+                            using (var hoverBrush = new SolidBrush(OwnerTabControl.InactiveTabHeaderHoverColor))
+                            {
+                                g.FillRectangle(hoverBrush, tabIndex * CurrentTabWidth, 0, CurrentTabWidth, CurrentHeight);
+                            }
+
+                            // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
+                            using (var hoverBorderPen = new Pen(OwnerTabControl.InactiveTabHeaderHoverBorderColor, 1))
+                            {
+                                g.DrawRectangle(hoverBorderPen, tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, CurrentHeight);
+                            }
+
+                            tabBackColor = OwnerTabControl.InactiveTabHeaderHoverColor;
+                        }
+                        else
+                        {
+                            tabBackColor = OwnerTabControl.BackColor;
+                        }
+
                         tabForeColor = OwnerTabControl.ForeColor;
-                        drawCloseButtonGlyph = false;
-                        glyphForeColor = tabForeColor;  // Not used.
+                        glyphPressedBackColor = OwnerTabControl.BackColor;
+
+                        glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphForeColor.A == 0
+                            ? tabForeColor
+                            : OwnerTabControl.InactiveTabHeaderGlyphForeColor;
+
+                        if (drawGlyphHighlight)
+                        {
+                            // Highlight when hovering or the glyph button is pressed.
+                            // Default to a lighter version if no color given.
+                            glyphForeColor = OwnerTabControl.InactiveTabHeaderGlyphHoverColor.A == 0
+                                ? ControlPaint.Light(glyphForeColor)
+                                : OwnerTabControl.InactiveTabHeaderGlyphHoverColor;
+
+                            drawModifiedGlyph = false;
+                            drawCloseButtonGlyph = true;
+                        }
+                        else
+                        {
+                            drawModifiedGlyph = tabPage.IsModified;
+                            drawCloseButtonGlyph = !drawModifiedGlyph && tabIndex == HoverTabIndex;
+                        }
                     }
 
                     int textAreaLeftOffset = (int)Math.Floor(tabIndex * CurrentTabWidth + CurrentHorizontalTabTextMargin);
                     int textAreaWidth = CurrentTextAreaWidthIncludeGlyph;
-                    if (drawCloseButtonGlyph) textAreaWidth -= MeasuredGlyphSize.Width;
+                    if (drawModifiedGlyph || drawCloseButtonGlyph) textAreaWidth -= MeasuredGlyphSize.Width;
 
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
@@ -325,15 +369,26 @@ namespace Eutherion.Win.Controls
                         tabBackColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
 
-                    if (drawCloseButtonGlyph)
+                    if (drawModifiedGlyph || drawCloseButtonGlyph)
                     {
-                        if (!hoverOverThisTabPageGlyph && tabPage.IsModified)
-                        {
-                            // Subtract the padding, one from the left, two from the right side.
-                            float hrzPadding = MeasuredGlyphSize.Width / EstimatedHorizontalGlyphPaddingRatio;
-                            float diameter = MeasuredGlyphSize.Width - 3 * hrzPadding;
+                        // Subtract the padding, one from the left, two from the right side.
+                        float hrzPadding = MeasuredGlyphSize.Width / EstimatedHorizontalGlyphPaddingRatio;
+                        float diameter = MeasuredGlyphSize.Width - 3 * hrzPadding;
 
-                            RectangleF glyphRectangle = new RectangleF(
+                        // Prevent drawing outside the glyph rectangle.
+                        float targetHeight = Math.Min(MeasuredGlyphSize.Height + hrzPadding * 2, CurrentHeight - hrzPadding * 2);
+
+                        RectangleF backgroundGlyphRectangle = new RectangleF(
+                            textAreaLeftOffset + textAreaWidth - hrzPadding,
+                            (CurrentHeight - targetHeight) / 2,
+                            MeasuredGlyphSize.Width + hrzPadding * 2,
+                            targetHeight);
+
+                        g.SetClip(backgroundGlyphRectangle);
+
+                        if (drawModifiedGlyph)
+                        {
+                            RectangleF modifiedGlyphRectangle = new RectangleF(
                                 textAreaLeftOffset + textAreaWidth + hrzPadding,
                                 (CurrentHeight - diameter) / 2,
                                 diameter,
@@ -342,13 +397,25 @@ namespace Eutherion.Win.Controls
                             // Draw a circle where otherwise the '×' would be.
                             using (var ellipseBrush = new SolidBrush(glyphForeColor))
                             {
-                                g.FillEllipse(ellipseBrush, glyphRectangle);
+                                g.FillEllipse(ellipseBrush, modifiedGlyphRectangle);
                             }
                         }
-                        else
+                        else if (drawCloseButtonGlyph)
                         {
+                            if (drawGlyphPressed)
+                            {
+                                g.SmoothingMode = SmoothingMode.None;
+
+                                using (var backgroundBrush = new SolidBrush(glyphPressedBackColor))
+                                {
+                                    g.FillRectangle(backgroundBrush, backgroundGlyphRectangle);
+                                }
+
+                                g.SmoothingMode = SmoothingMode.AntiAlias;
+                            }
+
                             // Make rectangle 2 pixels less high to not interfere with hover border.
-                            Rectangle glyphRectangle = new Rectangle(
+                            Rectangle glyphTextRectangle = new Rectangle(
                                 textAreaLeftOffset + textAreaWidth,
                                 1,
                                 MeasuredGlyphSize.Width,
@@ -358,11 +425,13 @@ namespace Eutherion.Win.Controls
                                 g,
                                 CloseButtonGlyph,
                                 CurrentCloseButtonGlyphFont,
-                                glyphRectangle,
+                                glyphTextRectangle,
                                 glyphForeColor,
-                                tabBackColor,
-                                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                                drawGlyphPressed ? glyphPressedBackColor : tabBackColor,
+                                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.PreserveGraphicsClipping);
                         }
+
+                        g.ResetClip();
                     }
 
                     g.SmoothingMode = SmoothingMode.None;
