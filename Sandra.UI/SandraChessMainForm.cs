@@ -40,7 +40,9 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
             = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
+        // Linked list to easily change the order in which forms were most recently activated.
+        // Locality in memory is unimportant for this collection.
+        private readonly LinkedList<MdiContainerForm> mdiContainerForms = new LinkedList<MdiContainerForm>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -130,7 +132,7 @@ namespace Sandra.UI
                 if (mdiContainerForms.Count == 0) Close();
             };
 
-            mdiContainerForms.Add(mdiContainerForm);
+            mdiContainerForms.AddLast(mdiContainerForm);
 
             return mdiContainerForm;
         }
