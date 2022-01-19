@@ -32,11 +32,11 @@ namespace Eutherion.Shared.Tests
         {
             if (expectedParameters == null || !expectedParameters.Any())
             {
-                Assert.True(actualErrorInfo.Parameters == null || !actualErrorInfo.Parameters.Any());
+                Assert.True(actualErrorInfo.ParametersOld == null || !actualErrorInfo.ParametersOld.Any());
             }
             else
             {
-                Assert.Collection(actualErrorInfo.Parameters, expectedParameters.Select(expected => new Action<string>(actual =>
+                Assert.Collection(actualErrorInfo.ParametersOld, expectedParameters.Select(expected => new Action<string>(actual =>
                 {
                     Assert.Equal(expected, actual);
                 })).ToArrayEx());
@@ -66,7 +66,7 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(length, errorInfo.Length);
 
             // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
-            Assert.Equal<string>(parameters, errorInfo.Parameters);
+            Assert.Equal<string>(parameters, errorInfo.ParametersOld);
         }
     }
 }

@@ -215,7 +215,7 @@ namespace Eutherion.Win.Storage
     {
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
-            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
+            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.ParametersOld);
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 

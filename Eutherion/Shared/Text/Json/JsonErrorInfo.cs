@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfo.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -51,7 +53,8 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the list of parameters.
         /// </summary>
-        public string[] Parameters { get; }
+        public ReadOnlyList<JsonErrorInfoParameter> Parameters { get; }
+        public string[] ParametersOld => Parameters.Count == 0 ? null : Parameters.Select(x => x.UntypedValue).ToArray();
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
@@ -149,7 +152,9 @@ namespace Eutherion.Text.Json
             ErrorLevel = errorLevel;
             Start = start;
             Length = length;
-            Parameters = parameters;
+            Parameters = parameters != null && parameters.Length > 0
+                ? ReadOnlyList<JsonErrorInfoParameter>.Create(parameters.Select(x => new JsonErrorInfoParameter(x)))
+                : ReadOnlyList<JsonErrorInfoParameter>.Empty;
         }
     }
 }

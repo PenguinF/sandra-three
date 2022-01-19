@@ -69,7 +69,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
             {
-                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.ParametersOld);
             }
 
             return UnspecifiedMessage;
