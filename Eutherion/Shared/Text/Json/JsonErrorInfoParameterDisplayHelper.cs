@@ -31,5 +31,18 @@ namespace Eutherion.Text.Json
     {
         public static string GenerateCharacterErrorParameterString(char c)
             => StringLiteral.CharacterMustBeEscaped(c) ? StringLiteral.EscapedCharacterString(c) : Convert.ToString(c);
+
+        public static string GetDisplayValue(JsonErrorInfoParameter parameter)
+        {
+            switch (parameter)
+            {
+                case JsonErrorInfoParameter<char> charParameter:
+                    return GenerateCharacterErrorParameterString(charParameter.Value);
+                case JsonErrorInfoParameter<string> stringParameter:
+                    return stringParameter.Value;
+                default:
+                    throw new UnreachableException();
+            }
+        }
     }
 }

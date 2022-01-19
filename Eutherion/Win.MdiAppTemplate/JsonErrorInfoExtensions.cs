@@ -72,7 +72,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 return localizer.Localize(
                     GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
-                    jsonErrorInfo.Parameters.Select(x => x.UntypedValue).ToArrayEx());
+                    jsonErrorInfo.Parameters.Select(JsonErrorInfoParameterDisplayHelper.GetDisplayValue).ToArrayEx());
             }
 
             return UnspecifiedMessage;

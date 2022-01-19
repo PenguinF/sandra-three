@@ -24,18 +24,40 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Holds a parameter of a <see cref="JsonErrorInfo"/>.
     /// </summary>
-    public class JsonErrorInfoParameter
+    public abstract class JsonErrorInfoParameter
     {
+        internal JsonErrorInfoParameter() { }
+
         /// <summary>
         /// Gets the untyped parameter value.
         /// </summary>
-        public string UntypedValue { get; }
-
-        public JsonErrorInfoParameter(string value) => UntypedValue = value;
+        public abstract object UntypedValue { get; }
     }
 
-    public class JsonErrorInfoCharParameter : JsonErrorInfoParameter
+    /// <summary>
+    /// Holds a parameter of a <see cref="JsonErrorInfo"/>.
+    /// </summary>
+    /// <typeparam name="ParameterType">
+    /// The type of parameter.
+    /// </typeparam>
+    public sealed class JsonErrorInfoParameter<ParameterType> : JsonErrorInfoParameter
     {
-        public JsonErrorInfoCharParameter(char value) : base(JsonErrorInfoParameterDisplayHelper.GenerateCharacterErrorParameterString(value)) { }
+        /// <summary>
+        /// Gets the parameter value.
+        /// </summary>
+        public ParameterType Value { get; }
+
+        /// <summary>
+        /// Gets the untyped parameter value.
+        /// </summary>
+        public override object UntypedValue => Value;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonErrorInfoParameter{ParameterType}"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The parameter value.
+        /// </param>
+        public JsonErrorInfoParameter(ParameterType value) => Value = value;
     }
 }

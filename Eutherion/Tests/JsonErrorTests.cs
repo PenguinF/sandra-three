@@ -38,6 +38,7 @@ namespace Eutherion.Shared.Tests
             {
                 Assert.Collection(actualErrorInfo.Parameters, expectedParameters.Select(expected => new Action<JsonErrorInfoParameter>(actual =>
                 {
+                    Assert.IsType(expected.GetType(), actual);
                     Assert.Equal(expected.UntypedValue, actual.UntypedValue);
                 })).ToArrayEx());
             }
@@ -59,7 +60,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(JsonErrorCode.Custom + 999, (JsonErrorLevel)(-1), 0, 2, new[] { "Aa" })]
         public void UnchangedParametersInError(JsonErrorCode errorCode, JsonErrorLevel errorLevel, int start, int length, string[] parameters)
         {
-            JsonErrorInfoParameter[] errorInfoParameters = parameters?.Select(x => new JsonErrorInfoParameter(x))?.ToArrayEx();
+            JsonErrorInfoParameter[] errorInfoParameters = parameters?.Select(x => new JsonErrorInfoParameter<string>(x))?.ToArrayEx();
 
             var errorInfo = new JsonErrorInfo(errorCode, errorLevel, start, length, errorInfoParameters);
             Assert.Equal(errorCode, errorInfo.ErrorCode);

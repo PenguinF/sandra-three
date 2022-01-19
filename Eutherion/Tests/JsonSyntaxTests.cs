@@ -311,7 +311,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonParseErrors.UnexpectedSymbol(unexpectedCharacter, position);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
-            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter(unexpectedCharacter.ToString()));
+            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter<char>(unexpectedCharacter));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -345,14 +345,14 @@ namespace Eutherion.Shared.Tests
         }
 
         [Theory]
-        [InlineData('\u007f', "\\u007f", 1)]
-        [InlineData('\n', "\\n", 70)]
-        [InlineData('\0', "\\u0000", 1)]
-        public void IllegalControlCharacterInStringError(char illegalControlCharacter, string expectedDisplayString, int position)
+        [InlineData('\u007f', 1)]
+        [InlineData('\n', 70)]
+        [InlineData('\0', 1)]
+        public void IllegalControlCharacterInStringError(char illegalControlCharacter, int position)
         {
             var error = JsonParseErrors.IllegalControlCharacterInString(illegalControlCharacter, position);
             Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
-            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter(expectedDisplayString));
+            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter<char>(illegalControlCharacter));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -367,7 +367,7 @@ namespace Eutherion.Shared.Tests
         {
             var error = JsonParseErrors.UnrecognizedEscapeSequence(escapeSequence, position, escapeSequence.Length);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
-            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter(escapeSequence));
+            JsonErrorTests.AssertErrorInfoParameters(error, new JsonErrorInfoParameter<string>(escapeSequence));
             Assert.Equal(position, error.Start);
             Assert.Equal(escapeSequence.Length, error.Length);
         }
