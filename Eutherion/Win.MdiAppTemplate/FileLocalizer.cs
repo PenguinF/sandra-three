@@ -2,7 +2,7 @@
 /*********************************************************************************
  * FileLocalizer.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateFromFile()
         {
-            LanguageName = LanguageFile.Settings.GetValue(Localizers.NativeName);
+            LanguageName = LanguageFile.Settings.TryGetValue(Localizers.NativeName, out string nativeName) ? nativeName : Path.GetFileName(LanguageFile.AbsoluteFilePath);
             FlagIconFileName = LanguageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
         }
 
