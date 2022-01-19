@@ -29,15 +29,15 @@ namespace Eutherion.Text.Json
     /// </summary>
     public static class JsonErrorInfoParameterDisplayHelper
     {
-        public static string GenerateCharacterErrorParameterString(char c)
-            => StringLiteral.CharacterMustBeEscaped(c) ? StringLiteral.EscapedCharacterString(c) : Convert.ToString(c);
-
         public static string GetDisplayValue(JsonErrorInfoParameter parameter)
         {
             switch (parameter)
             {
                 case JsonErrorInfoParameter<char> charParameter:
-                    return GenerateCharacterErrorParameterString(charParameter.Value);
+                    char c = charParameter.Value;
+                    return StringLiteral.CharacterMustBeEscaped(c)
+                        ? $"'{StringLiteral.EscapedCharacterString(c)}'"
+                        : $"'{c}'";
                 case JsonErrorInfoParameter<string> stringParameter:
                     return stringParameter.Value;
                 default:

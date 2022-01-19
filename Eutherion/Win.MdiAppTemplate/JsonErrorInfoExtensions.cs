@@ -80,11 +80,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
         {
-            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol '{0}'" },
+            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol {0}" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "unterminated multi-line comment" },
             { GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "unterminated string" },
             { GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
-            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "illegal control character '{0}' in string" },
+            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "illegal control character {0} in string" },
             { GetLocalizedStringKey(JsonErrorCode.ExpectedEof), "end of file expected" },
             { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInObject), "unexpected end of file, expected '}'" },
             { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInArray), "unexpected end of file, expected ']'" },
