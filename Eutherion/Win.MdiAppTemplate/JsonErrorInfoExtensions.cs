@@ -68,7 +68,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 return typeError.GetLocalizedMessage(localizer);
             }
 
-            if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
+            if (Enum.IsDefined(typeof(JsonErrorCode), jsonErrorInfo.ErrorCode))
             {
                 return localizer.Localize(
                     GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
