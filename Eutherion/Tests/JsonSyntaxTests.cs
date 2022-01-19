@@ -22,6 +22,8 @@
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using Xunit;
 
 namespace Eutherion.Shared.Tests
@@ -196,6 +198,42 @@ namespace Eutherion.Shared.Tests
             var intNode = Assert.IsType<GreenJsonIntegerLiteralSyntax>(node);
             Assert.Equal(expectedIntegerValue, (int)intNode.Value);
             Assert.Equal(value.Length, intNode.Length);
+        }
+
+        private static IEnumerable<(string, ulong)> UnsignedLongValues
+        {
+            get
+            {
+                yield return ("0000021474836470", 21474836470);
+                yield return ("18446744073709551599", 18446744073709551599);
+                yield return ("18446744073709551600", 18446744073709551600);
+                yield return ("18446744073709551609", 18446744073709551609);
+                yield return ("18446744073709551610", 18446744073709551610);
+                yield return ("18446744073709551615", 18446744073709551615);
+            }
+        }
+
+        public static IEnumerable<object[]> GetUnsignedLongJsonValues()
+            => from x in UnsignedLongValues select new object[] { x.Item1, x.Item2 };
+
+        [Theory]
+        [MemberData(nameof(GetUnsignedLongJsonValues))]
+        public void UnsignedLongJsonValues(string value, ulong expectedIntegerValue)
+        {
+            var node = JsonValue.TryCreate(value);
+            var intNode = Assert.IsType<GreenJsonIntegerLiteralSyntax>(node);
+            Assert.Equal(expectedIntegerValue, (ulong)intNode.Value);
+            Assert.Equal(value.Length, intNode.Length);
+        }
+
+        [Fact]
+        public void BigIntegerJsonValue()
+        {
+            // ulong.MaxValue + 1
+            var node = JsonValue.TryCreate("18446744073709551616");
+            var intNode = Assert.IsType<GreenJsonIntegerLiteralSyntax>(node);
+            BigInteger bigInteger = intNode.Value - 1;
+            Assert.Equal(ulong.MaxValue, (ulong)bigInteger);
         }
 
         [Theory]

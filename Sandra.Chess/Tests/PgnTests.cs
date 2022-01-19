@@ -647,7 +647,7 @@ namespace Sandra.Chess.Tests
                 "Oa1", "Oa1xb2",
             };
 
-            foreach (var invalidPawnMove in invalidMoves) yield return SMTestCase<GreenPgnTagNameSyntax>(invalidPawnMove);
+            foreach (var invalidMove in invalidMoves) yield return SMTestCase<GreenPgnTagNameSyntax>(invalidMove);
 
             var movesWithAnnotations = new[]
             {
