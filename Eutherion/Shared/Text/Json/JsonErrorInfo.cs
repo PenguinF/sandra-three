@@ -152,7 +152,7 @@ namespace Eutherion.Text.Json
             ErrorLevel = errorLevel;
             Start = start;
             Length = length;
-            Parameters = parameters != null && parameters.Length > 0
+            Parameters = parameters != null
                 ? ReadOnlyList<JsonErrorInfoParameter>.Create(parameters.Select(x => new JsonErrorInfoParameter(x)))
                 : ReadOnlyList<JsonErrorInfoParameter>.Empty;
         }
