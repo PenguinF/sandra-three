@@ -1,8 +1,8 @@
 ﻿#region License
 /*********************************************************************************
- * JsonErrorInfoTests.cs
+ * JsonErrorTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ using Xunit;
 
 namespace Eutherion.Shared.Tests
 {
-    public class JsonErrorInfoTests
+    public class JsonErrorTests
     {
         internal static void AssertErrorInfoParameters(JsonErrorInfo actualErrorInfo, params string[] expectedParameters)
         {

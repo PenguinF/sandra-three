@@ -311,7 +311,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonParseErrors.UnexpectedSymbol(unexpectedCharacter, position);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, unexpectedCharacter.ToString());
+            JsonErrorTests.AssertErrorInfoParameters(error, unexpectedCharacter.ToString());
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -325,7 +325,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonParseErrors.UnterminatedMultiLineComment(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedMultiLineComment, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error);
+            JsonErrorTests.AssertErrorInfoParameters(error);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -339,7 +339,7 @@ namespace Eutherion.Shared.Tests
             var error = JsonParseErrors.UnterminatedString(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedString, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error);
+            JsonErrorTests.AssertErrorInfoParameters(error);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -352,7 +352,7 @@ namespace Eutherion.Shared.Tests
         {
             var error = JsonParseErrors.IllegalControlCharacterInString(illegalControlCharacter, position);
             Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, expectedDisplayString);
+            JsonErrorTests.AssertErrorInfoParameters(error, expectedDisplayString);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -367,7 +367,7 @@ namespace Eutherion.Shared.Tests
         {
             var error = JsonParseErrors.UnrecognizedEscapeSequence(escapeSequence, position, escapeSequence.Length);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
-            JsonErrorInfoTests.AssertErrorInfoParameters(error, escapeSequence);
+            JsonErrorTests.AssertErrorInfoParameters(error, escapeSequence);
             Assert.Equal(position, error.Start);
             Assert.Equal(escapeSequence.Length, error.Length);
         }

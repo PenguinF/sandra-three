@@ -43,7 +43,7 @@
     <Compile Include="EnumArrayTests.cs" />
     <Compile Include="ExpectedJsonTree.cs" />
     <Compile Include="ExpectedJsonTrees.cs" />
-    <Compile Include="JsonErrorInfoTests.cs" />
+    <Compile Include="JsonErrorTests.cs" />
     <Compile Include="JsonParserTests.cs" />
     <Compile Include="JsonSyntaxTests.cs" />
     <Compile Include="JsonTokenizerTests.cs" />
