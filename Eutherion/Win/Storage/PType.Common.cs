@@ -124,17 +124,11 @@ namespace Eutherion.Win.Storage
                     return maybeSomewhere.Match(
                         whenNothing: () => localizer.Localize(
                             PTypeErrorBuilder.NoLegalValuesError,
-                            new[]
-                            {
-                                actualValueString,
-                            }),
+                            actualValueString),
                         whenJust: somewhere => localizer.Localize(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
-                            new[]
-                            {
-                                actualValueString,
-                                somewhere,
-                            }));
+                            actualValueString,
+                            somewhere));
                 }
 
                 string localizedValueList;
@@ -148,11 +142,8 @@ namespace Eutherion.Win.Storage
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
                     localizedValueList = localizer.Localize(
                         PTypeErrorBuilder.EnumerateWithOr,
-                        new[]
-                        {
-                            string.Join(", ", enumValues),
-                            lastEnumValue,
-                        });
+                        string.Join(", ", enumValues),
+                        lastEnumValue);
                 }
 
                 return maybeSomewhere.Match(
@@ -218,17 +209,11 @@ namespace Eutherion.Win.Storage
                     return maybeSomewhere.Match(
                         whenNothing: () => localizer.Localize(
                             PTypeErrorBuilder.NoLegalValuesError,
-                            new[]
-                            {
-                                actualValueString,
-                            }),
+                            actualValueString),
                         whenJust: somewhere => localizer.Localize(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
-                            new[]
-                            {
-                                actualValueString,
-                                somewhere,
-                            }));
+                            actualValueString,
+                            somewhere));
                 }
 
                 string localizedKeysList;
@@ -243,11 +228,8 @@ namespace Eutherion.Win.Storage
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
                     localizedKeysList = localizer.Localize(
                         PTypeErrorBuilder.EnumerateWithOr,
-                        new[]
-                        {
-                            string.Join(", ", keys),
-                            lastKey,
-                        });
+                        string.Join(", ", keys),
+                        lastKey);
                 }
 
                 return maybeSomewhere.Match(

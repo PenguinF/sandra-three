@@ -72,9 +72,7 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public override string GetLocalizedMessage(Localizer localizer)
-            => localizer.Localize(
-                PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError,
-                new[] { PropertyKey });
+            => localizer.Localize(PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, PropertyKey);
 
         private UnrecognizedPropertyKeyTypeError(string propertyKey, int start, int length)
             : base(start, length, JsonErrorLevel.Warning)

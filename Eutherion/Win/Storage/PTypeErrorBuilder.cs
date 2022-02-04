@@ -219,11 +219,8 @@ namespace Eutherion.Win.Storage
             string actualValueString)
             => localizer.Localize(
                 GenericJsonTypeError,
-                new[]
-                {
-                    localizedExpectedTypeDescription,
-                    actualValueString,
-                });
+                localizedExpectedTypeDescription,
+                actualValueString);
 
         /// <summary>
         /// Gets the localized description of an error for a value located at a property key.
@@ -238,7 +235,7 @@ namespace Eutherion.Win.Storage
         /// The localized description of the location of the error.
         /// </returns>
         public static string GetLocatedAtPropertyKeyMessage(Localizer localizer, string propertyKey)
-            => localizer.Localize(KeyErrorLocation, new[] { propertyKey });
+            => localizer.Localize(KeyErrorLocation, propertyKey);
 
         /// <summary>
         /// Gets the localized description of an error for a value which is an element of an array.
@@ -253,7 +250,7 @@ namespace Eutherion.Win.Storage
         /// The localized description of the location of the error.
         /// </returns>
         public static string GetLocatedAtItemIndexMessage(Localizer localizer, int itemIndex)
-            => localizer.Localize(IndexErrorLocation, new[] { itemIndex.ToStringInvariant() });
+            => localizer.Localize(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
         /// Gets the localized error message for a generic json value type error. 
@@ -280,12 +277,9 @@ namespace Eutherion.Win.Storage
             string somewhere)
             => localizer.Localize(
                 GenericJsonTypeErrorSomewhere,
-                new[]
-                {
-                    localizedExpectedTypeDescription,
-                    actualValueString,
-                    somewhere,
-                });
+                localizedExpectedTypeDescription,
+                actualValueString,
+                somewhere);
 
         /// <summary>
         /// Gets the translation key which describes the type of expected value.

@@ -77,7 +77,7 @@ namespace Eutherion.Text.Json
                 default:
                     return parameter.UntypedValue == null
                         ? localizer.Localize(NullString)
-                        : localizer.Localize(UntypedObjectString, new[] { parameter.UntypedValue.ToString() });
+                        : localizer.Localize(UntypedObjectString, parameter.UntypedValue.ToString());
             }
         }
     }

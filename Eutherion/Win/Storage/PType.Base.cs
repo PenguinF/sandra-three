@@ -331,11 +331,8 @@ namespace Eutherion.Win.Storage
             private string LocalizedExpectedTypeDescription(Localizer localizer)
                 => localizer.Localize(
                     RangedJsonInteger,
-                    new[]
-                    {
-                        MinValue.ToStringInvariant(),
-                        MaxValue.ToStringInvariant(),
-                    });
+                    MinValue.ToStringInvariant(),
+                    MaxValue.ToStringInvariant());
 
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
                 => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
