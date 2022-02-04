@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.List.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -108,9 +108,11 @@ namespace Eutherion.Win.Storage
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (jsonListSyntax.FilteredListItemNodeCount == ExpectedItemCount
-                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2))
+                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                if (TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
+                    && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2);
                     return new PList(new[] { itemValue1, itemValue2 });
@@ -159,12 +161,14 @@ namespace Eutherion.Win.Storage
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (jsonListSyntax.FilteredListItemNodeCount == ExpectedItemCount
-                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                if (TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
                     && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)
                     && TryCreateItemValue(ItemTypes.Item4, json, jsonListSyntax, 3, listSyntaxStartPosition, errors, out T4 value4, out PValue itemValue4)
-                    && TryCreateItemValue(ItemTypes.Item5, json, jsonListSyntax, 4, listSyntaxStartPosition, errors, out T5 value5, out PValue itemValue5))
+                    && TryCreateItemValue(ItemTypes.Item5, json, jsonListSyntax, 4, listSyntaxStartPosition, errors, out T5 value5, out PValue itemValue5)
+                    && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2, value3, value4, value5);
                     return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
