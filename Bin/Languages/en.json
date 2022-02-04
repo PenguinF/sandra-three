@@ -109,6 +109,7 @@
     "GenericJsonTypeError": "expected {0}, but found {1}",
     "GenericJsonTypeErrorSomewhere": "expected {0} {2}, but found {1}",
     "KeyErrorLocation": "for {0}",
+    "IndexErrorLocation": "at index {0}",
     "NoLegalValuesError": "found value {0}, but there exist no legal values",
     "NoLegalValuesErrorSomewhere": "found value {0}, but there exist no legal values {1}",
     "OpaqueColorTypeError": "string in the HTML color format (e.g. \"#808000\", or \"#DC143C\")",

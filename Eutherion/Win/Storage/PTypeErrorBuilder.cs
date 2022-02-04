@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeErrorBuilder.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,6 +54,9 @@ namespace Eutherion.Win.Storage
         /// Parameters: 0 = description of expected type, 1 = actual value, 2 = location
         /// Example: "expected an integer value at index 3, but found 'false'"
         ///          "expected _______{0}______ ____{2}___, but found __{1}__"
+        /// The location could be:
+        /// - a key error location (KeyErrorLocation)
+        /// - an index error location (IndexErrorLocation)
         /// See also: <seealso cref="GetLocalizedTypeErrorSomewhereMessage"/>.
         /// </summary>
         public static readonly LocalizedStringKey GenericJsonTypeErrorSomewhere = new LocalizedStringKey(nameof(GenericJsonTypeErrorSomewhere));
@@ -62,6 +65,11 @@ namespace Eutherion.Win.Storage
         /// Gets the translation key for displaying an error in the context of a property key.
         /// </summary>
         public static readonly LocalizedStringKey KeyErrorLocation = new LocalizedStringKey(nameof(KeyErrorLocation));
+
+        /// <summary>
+        /// Gets the translation key for displaying an error in the context of an item index in an array.
+        /// </summary>
+        public static readonly LocalizedStringKey IndexErrorLocation = new LocalizedStringKey(nameof(IndexErrorLocation));
 
         /// <summary>
         /// Gets the translation key for when there are no legal values.
@@ -231,6 +239,21 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public static string GetLocatedAtPropertyKeyMessage(Localizer localizer, string propertyKey)
             => localizer.Localize(KeyErrorLocation, new[] { propertyKey });
+
+        /// <summary>
+        /// Gets the localized description of an error for a value which is an element of an array.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="itemIndex">
+        /// The index of the array where the error occurred.
+        /// </param>
+        /// <returns>
+        /// The localized description of the location of the error.
+        /// </returns>
+        public static string GetLocatedAtItemIndexMessage(Localizer localizer, int itemIndex)
+            => localizer.Localize(IndexErrorLocation, new[] { itemIndex.ToStringInvariant() });
 
         /// <summary>
         /// Gets the localized error message for a generic json value type error. 
