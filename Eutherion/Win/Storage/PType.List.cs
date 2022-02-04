@@ -22,6 +22,7 @@
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
@@ -136,6 +137,69 @@ namespace Eutherion.Win.Storage
                 value = default;
                 return false;
             }
+        }
+
+        /// <summary>
+        /// A list with an arbitrary number of items, all of the same subtype.
+        /// </summary>
+        public sealed class ValueList<T> : ListBase<IEnumerable<T>>
+        {
+            public PType<T> ItemType { get; }
+
+            public ValueList(PType<T> itemType)
+                => ItemType = itemType;
+
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+                string json,
+                GreenJsonListSyntax jsonListSyntax,
+                out IEnumerable<T> convertedValue,
+                int listSyntaxStartPosition,
+                List<JsonErrorInfo> errors)
+            {
+                var validTargetValues = new List<T>();
+                var validValues = new List<PValue>();
+                int itemNodeCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
+                {
+                    // Error tolerance: ignore items of the wrong type.
+                    if (TryCreateItemValue(
+                        ItemType,
+                        json,
+                        jsonListSyntax,
+                        itemIndex,
+                        listSyntaxStartPosition,
+                        errors,
+                        out T convertedTargetValue,
+                        out PValue value))
+                    {
+                        validTargetValues.Add(convertedTargetValue);
+                        validValues.Add(value);
+                    }
+                }
+
+                convertedValue = validTargetValues;
+                return new PList(validValues);
+            }
+
+            public override Maybe<IEnumerable<T>> TryConvertFromList(PList list)
+            {
+                var validValues = new List<T>();
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    // Error tolerance: ignore items of the wrong type.
+                    if (ItemType.TryConvert(list[i]).IsJust(out T value))
+                    {
+                        validValues.Add(value);
+                    }
+                }
+
+                return validValues;
+            }
+
+            public override PList GetBaseValue(IEnumerable<T> value)
+                => new PList(value.Select(ItemType.GetPValue));
         }
     }
 }
