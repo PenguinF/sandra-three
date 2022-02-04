@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.List.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
@@ -50,12 +51,22 @@ namespace Eutherion.Win.Storage
                                   + jsonListSyntax.GetElementNodeStart(itemIndex)
                                   + jsonListSyntax.ListItemNodes[itemIndex].ValueNode.BackgroundBefore.Length;
 
-                return itemType.TryCreateValue(
+                var itemValueOrError = itemType.TryCreateValue(
                     json,
                     itemNode,
                     out convertedTargetValue,
                     itemNodeStart,
-                    errors).IsOption2(out value);
+                    errors);
+
+                if (itemValueOrError.IsOption2(out value))
+                {
+                    return true;
+                }
+
+                // Report type error at this index.
+                itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
+                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json, itemNodeStart));
+                return false;
             }
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
@@ -67,14 +78,16 @@ namespace Eutherion.Win.Storage
             {
                 if (valueNode is GreenJsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors);
+                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors).Match(
+                        whenOption1: error => (Union<ITypeErrorBuilder, PValue>)error,
+                        whenOption2: list => list);
                 }
 
                 convertedValue = default;
                 return ListTypeError;
             }
 
-            internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out T convertedValue,
@@ -92,115 +105,101 @@ namespace Eutherion.Win.Storage
             public abstract PList GetBaseValue(T value);
         }
 
-        public sealed class TupleType<T1, T2> : ListBase<(T1, T2)>
+        /// <summary>
+        /// A tuple with a fixed number of items greater than one, each item having a defined type.
+        /// </summary>
+        public abstract class TupleTypeBase<T> : ListBase<T>
         {
-            public const int ExpectedItemCount = 2;
-
-            public (PType<T1>, PType<T2>) ItemTypes { get; }
-
-            public TupleType((PType<T1>, PType<T2>) itemTypes)
-                => ItemTypes = itemTypes;
-
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal static bool TryCreateTupleValue<ItemT>(
+                PType<ItemT> itemType,
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
-                out (T1, T2) convertedValue,
-                int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                int itemIndex,
+                int errorReportingOffset,
+                List<JsonErrorInfo> errors,
+                out ItemT convertedTargetValue,
+                out PValue value)
             {
-                if (jsonListSyntax.FilteredListItemNodeCount == ExpectedItemCount
-                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2))
+                if (itemIndex < jsonListSyntax.FilteredListItemNodeCount)
                 {
-                    convertedValue = (value1, value2);
-                    return new PList(new[] { itemValue1, itemValue2 });
+                    return TryCreateItemValue(
+                        itemType,
+                        json,
+                        jsonListSyntax,
+                        itemIndex,
+                        errorReportingOffset,
+                        errors,
+                        out convertedTargetValue,
+                        out value);
                 }
 
-                convertedValue = default;
-                return TupleItemTypeMismatchError;
-            }
-
-            public override Maybe<(T1, T2)> TryConvertFromList(PList list)
-            {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2))
-                {
-                    return (value1, value2);
-                }
-
-                return Maybe<(T1, T2)>.Nothing;
-            }
-
-            public override PList GetBaseValue((T1, T2) value)
-            {
-                var (value1, value2) = value;
-                return new PList(new[]
-                {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
-                });
+                convertedTargetValue = default;
+                value = default;
+                return false;
             }
         }
 
-        public sealed class TupleType<T1, T2, T3, T4, T5> : ListBase<(T1, T2, T3, T4, T5)>
+        /// <summary>
+        /// A list with an arbitrary number of items, all of the same subtype.
+        /// </summary>
+        public sealed class ValueList<T> : ListBase<IEnumerable<T>>
         {
-            public const int ExpectedItemCount = 5;
+            public PType<T> ItemType { get; }
 
-            public (PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) ItemTypes { get; }
+            public ValueList(PType<T> itemType)
+                => ItemType = itemType;
 
-            public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
-                => ItemTypes = itemTypes;
-
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
-                out (T1, T2, T3, T4, T5) convertedValue,
+                out IEnumerable<T> convertedValue,
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (jsonListSyntax.FilteredListItemNodeCount == ExpectedItemCount
-                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)
-                    && TryCreateItemValue(ItemTypes.Item4, json, jsonListSyntax, 3, listSyntaxStartPosition, errors, out T4 value4, out PValue itemValue4)
-                    && TryCreateItemValue(ItemTypes.Item5, json, jsonListSyntax, 4, listSyntaxStartPosition, errors, out T5 value5, out PValue itemValue5))
+                var validTargetValues = new List<T>();
+                var validValues = new List<PValue>();
+                int itemNodeCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
                 {
-                    convertedValue = (value1, value2, value3, value4, value5);
-                    return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
+                    // Error tolerance: ignore items of the wrong type.
+                    if (TryCreateItemValue(
+                        ItemType,
+                        json,
+                        jsonListSyntax,
+                        itemIndex,
+                        listSyntaxStartPosition,
+                        errors,
+                        out T convertedTargetValue,
+                        out PValue value))
+                    {
+                        validTargetValues.Add(convertedTargetValue);
+                        validValues.Add(value);
+                    }
                 }
 
-                convertedValue = default;
-                return TupleItemTypeMismatchError;
+                convertedValue = validTargetValues;
+                return new PList(validValues);
             }
 
-            public override Maybe<(T1, T2, T3, T4, T5)> TryConvertFromList(PList list)
+            public override Maybe<IEnumerable<T>> TryConvertFromList(PList list)
             {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
-                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3)
-                    && ItemTypes.Item4.TryConvert(list[3]).IsJust(out T4 value4)
-                    && ItemTypes.Item5.TryConvert(list[4]).IsJust(out T5 value5))
+                var validValues = new List<T>();
+
+                for (int i = 0; i < list.Count; i++)
                 {
-                    return (value1, value2, value3, value4, value5);
+                    // Error tolerance: ignore items of the wrong type.
+                    if (ItemType.TryConvert(list[i]).IsJust(out T value))
+                    {
+                        validValues.Add(value);
+                    }
                 }
 
-                return Maybe<(T1, T2, T3, T4, T5)>.Nothing;
+                return validValues;
             }
 
-            public override PList GetBaseValue((T1, T2, T3, T4, T5) value)
-            {
-                var (value1, value2, value3, value4, value5) = value;
-                return new PList(new[]
-                {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
-                    ItemTypes.Item3.GetPValue(value3),
-                    ItemTypes.Item4.GetPValue(value4),
-                    ItemTypes.Item5.GetPValue(value5),
-                });
-            }
+            public override PList GetBaseValue(IEnumerable<T> value)
+                => new PList(value.Select(ItemType.GetPValue));
         }
     }
 }

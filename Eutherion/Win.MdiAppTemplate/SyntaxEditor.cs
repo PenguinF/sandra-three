@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SyntaxEditor.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                              // use the current localizer to format the localized string.
                                              let fullErrorMessage = Session.Current.CurrentLocalizer.Localize(
                                                  errorLocationString.Key,
-                                                 new[] { errorMessage, lineIndex, position })
+                                                 errorMessage, lineIndex, position)
                                              select Session.Current.CurrentLocalizer.ToSentenceCase(fullErrorMessage)).ToArray();
 
                         int oldItemCount = errorsListBox.Items.Count;
@@ -755,7 +755,7 @@ namespace Eutherion.Win.MdiAppTemplate
             if (ContainsChanges && CodeFile.AutoSaveFile == null)
             {
                 DialogResult result = MessageBox.Show(
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { CodeFilePathDisplayString }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, CodeFilePathDisplayString),
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,

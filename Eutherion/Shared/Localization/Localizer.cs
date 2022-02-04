@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Localizer.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,14 +27,9 @@ namespace Eutherion.Localization
     public abstract class Localizer
     {
         /// <summary>
-        /// Generates a localized string given a <see cref="LocalizedStringKey"/>.
-        /// </summary>
-        public string Localize(LocalizedStringKey localizedStringKey) => Localize(localizedStringKey, null);
-
-        /// <summary>
         /// Generates and formats a localized string given a <see cref="LocalizedStringKey"/> and an array of parameters.
         /// </summary>
-        public abstract string Localize(LocalizedStringKey localizedStringKey, string[] parameters);
+        public abstract string Localize(LocalizedStringKey localizedStringKey, params string[] parameters);
 
         private sealed class DefaultLocalizer : Localizer
         {

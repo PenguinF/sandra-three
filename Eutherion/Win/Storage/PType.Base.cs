@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Base.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -331,11 +331,8 @@ namespace Eutherion.Win.Storage
             private string LocalizedExpectedTypeDescription(Localizer localizer)
                 => localizer.Localize(
                     RangedJsonInteger,
-                    new[]
-                    {
-                        MinValue.ToStringInvariant(),
-                        MaxValue.ToStringInvariant(),
-                    });
+                    MinValue.ToStringInvariant(),
+                    MaxValue.ToStringInvariant());
 
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
                 => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
@@ -349,6 +346,13 @@ namespace Eutherion.Win.Storage
                     LocalizedExpectedTypeDescription(localizer),
                     actualValueString,
                     PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+
+            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                    localizer,
+                    LocalizedExpectedTypeDescription(localizer),
+                    actualValueString,
+                    PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

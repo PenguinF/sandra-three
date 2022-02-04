@@ -120,6 +120,7 @@ namespace Eutherion.Win.MdiAppTemplate
             { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} {2}, but found {1}" },
 
             { PTypeErrorBuilder.KeyErrorLocation, "for {0}" },
+            { PTypeErrorBuilder.IndexErrorLocation, "at index {0}" },
 
             { PTypeErrorBuilder.NoLegalValuesError, "found value {0}, but there exist no legal values" },
             { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values {1}" },
