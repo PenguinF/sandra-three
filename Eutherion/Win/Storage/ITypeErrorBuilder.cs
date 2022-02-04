@@ -27,7 +27,7 @@ namespace Eutherion.Win.Storage
     /// Contains information to build an error message caused by a value being of a different type than expected.
     /// </summary>
 
-    // The idea of this design is that both ITypeErrorBuilders and actual PTypeErrors both allocate little memory,
+    // The idea of this design is that ITypeErrorBuilders and actual PTypeErrors both allocate little memory,
     // because:
     //
     // a) There are only very few ITypeErrorBuilder instances, one for each PType, plus a few indexed type error
