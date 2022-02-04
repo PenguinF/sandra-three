@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeError.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -252,6 +252,84 @@ namespace Eutherion.Win.Storage
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
                 PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
+                valueNodeStart,
+                valueNode.Length);
+        }
+    }
+
+    /// <summary>
+    /// Represents an error caused by an array value being of a different type than expected.
+    /// </summary>
+    public class ValueTypeErrorAtItemIndex : ValueTypeError
+    {
+        /// <summary>
+        /// Gets the index of the array where the error occurred.
+        /// </summary>
+        public int ItemIndex { get; }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public override string GetLocalizedMessage(Localizer localizer)
+            => TypeErrorBuilder.GetLocalizedTypeErrorAtItemIndexMessage(
+                localizer,
+                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue),
+                ItemIndex);
+
+        private ValueTypeErrorAtItemIndex(
+            ITypeErrorBuilder typeErrorBuilder,
+            int itemIndex,
+            string actualValueString,
+            int start,
+            int length)
+            : base(typeErrorBuilder, actualValueString, start, length)
+        {
+            ItemIndex = itemIndex;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ValueTypeErrorAtItemIndex"/>.
+        /// </summary>
+        /// <param name="typeErrorBuilder">
+        /// The context insensitive information for this error message.
+        /// </param>
+        /// <param name="itemIndex">
+        /// The index of the array where the error occurred.
+        /// </param>
+        /// <param name="valueNode">
+        /// The value node corresponding to the value that was typechecked.
+        /// </param>
+        /// <param name="json">
+        /// The source json which contains the type error.
+        /// </param>
+        /// <param name="valueNodeStart">
+        /// The start position of the value node in the source json.
+        /// </param>
+        /// <returns>
+        /// A <see cref="ValueTypeErrorAtItemIndex"/> instance which generates a localized error message.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static ValueTypeErrorAtItemIndex Create(
+            ITypeErrorBuilder typeErrorBuilder,
+            int itemIndex,
+            GreenJsonValueSyntax valueNode,
+            string json,
+            int valueNodeStart)
+        {
+            if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
+
+            return new ValueTypeErrorAtItemIndex(
+                typeErrorBuilder,
+                itemIndex,
                 PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
                 valueNodeStart,
                 valueNode.Length);
