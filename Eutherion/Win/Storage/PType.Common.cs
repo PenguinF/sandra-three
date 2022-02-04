@@ -172,6 +172,9 @@ namespace Eutherion.Win.Storage
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+
+            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
         }
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
@@ -264,6 +267,9 @@ namespace Eutherion.Win.Storage
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+
+            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
         }
     }
 }

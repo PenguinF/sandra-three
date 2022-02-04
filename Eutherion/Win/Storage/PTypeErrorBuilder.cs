@@ -342,5 +342,27 @@ namespace Eutherion.Win.Storage
                 localizer.Localize(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="actualValueString">
+        /// A string representation of the value in the source code.
+        /// </param>
+        /// <param name="itemIndex">
+        /// The index of the array where the error occurred.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+            => GetLocalizedTypeErrorSomewhereMessage(
+                localizer,
+                localizer.Localize(ExpectedTypeDescriptionKey),
+                actualValueString,
+                GetLocatedAtItemIndexMessage(localizer, itemIndex));
     }
 }
