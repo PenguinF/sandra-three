@@ -80,6 +80,121 @@ namespace Eutherion.Win.Storage
             }
         }
 
+        public sealed class TupleType<T1, T2, T3> : ListBase<(T1, T2, T3)>
+        {
+            public const int ExpectedItemCount = 3;
+
+            public (PType<T1>, PType<T2>, PType<T3>) ItemTypes { get; }
+
+            public TupleType((PType<T1>, PType<T2>, PType<T3>) itemTypes)
+                => ItemTypes = itemTypes;
+
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+                string json,
+                GreenJsonListSyntax jsonListSyntax,
+                out (T1, T2, T3) convertedValue,
+                int listSyntaxStartPosition,
+                List<JsonErrorInfo> errors)
+            {
+                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                if (TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)
+                    && actualItemCount == ExpectedItemCount)
+                {
+                    convertedValue = (value1, value2, value3);
+                    return new PList(new[] { itemValue1, itemValue2, itemValue3 });
+                }
+
+                convertedValue = default;
+                return TupleItemTypeMismatchError;
+            }
+
+            public override Maybe<(T1, T2, T3)> TryConvertFromList(PList list)
+            {
+                if (list.Count == ExpectedItemCount
+                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
+                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
+                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3))
+                {
+                    return (value1, value2, value3);
+                }
+
+                return Maybe<(T1, T2, T3)>.Nothing;
+            }
+
+            public override PList GetBaseValue((T1, T2, T3) value)
+            {
+                var (value1, value2, value3) = value;
+                return new PList(new[]
+                {
+                    ItemTypes.Item1.GetPValue(value1),
+                    ItemTypes.Item2.GetPValue(value2),
+                    ItemTypes.Item3.GetPValue(value3),
+                });
+            }
+        }
+
+        public sealed class TupleType<T1, T2, T3, T4> : ListBase<(T1, T2, T3, T4)>
+        {
+            public const int ExpectedItemCount = 4;
+
+            public (PType<T1>, PType<T2>, PType<T3>, PType<T4>) ItemTypes { get; }
+
+            public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>) itemTypes)
+                => ItemTypes = itemTypes;
+
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+                string json,
+                GreenJsonListSyntax jsonListSyntax,
+                out (T1, T2, T3, T4) convertedValue,
+                int listSyntaxStartPosition,
+                List<JsonErrorInfo> errors)
+            {
+                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+
+                if (TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)
+                    && TryCreateItemValue(ItemTypes.Item4, json, jsonListSyntax, 3, listSyntaxStartPosition, errors, out T4 value4, out PValue itemValue4)
+                    && actualItemCount == ExpectedItemCount)
+                {
+                    convertedValue = (value1, value2, value3, value4);
+                    return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4 });
+                }
+
+                convertedValue = default;
+                return TupleItemTypeMismatchError;
+            }
+
+            public override Maybe<(T1, T2, T3, T4)> TryConvertFromList(PList list)
+            {
+                if (list.Count == ExpectedItemCount
+                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
+                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
+                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3)
+                    && ItemTypes.Item4.TryConvert(list[3]).IsJust(out T4 value4))
+                {
+                    return (value1, value2, value3, value4);
+                }
+
+                return Maybe<(T1, T2, T3, T4)>.Nothing;
+            }
+
+            public override PList GetBaseValue((T1, T2, T3, T4) value)
+            {
+                var (value1, value2, value3, value4) = value;
+                return new PList(new[]
+                {
+                    ItemTypes.Item1.GetPValue(value1),
+                    ItemTypes.Item2.GetPValue(value2),
+                    ItemTypes.Item3.GetPValue(value3),
+                    ItemTypes.Item4.GetPValue(value4),
+                });
+            }
+        }
+
         public sealed class TupleType<T1, T2, T3, T4, T5> : ListBase<(T1, T2, T3, T4, T5)>
         {
             public const int ExpectedItemCount = 5;
