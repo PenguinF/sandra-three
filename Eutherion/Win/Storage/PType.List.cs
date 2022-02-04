@@ -50,12 +50,22 @@ namespace Eutherion.Win.Storage
                                   + jsonListSyntax.GetElementNodeStart(itemIndex)
                                   + jsonListSyntax.ListItemNodes[itemIndex].ValueNode.BackgroundBefore.Length;
 
-                return itemType.TryCreateValue(
+                var itemValueOrError = itemType.TryCreateValue(
                     json,
                     itemNode,
                     out convertedTargetValue,
                     itemNodeStart,
-                    errors).IsOption2(out value);
+                    errors);
+
+                if (itemValueOrError.IsOption2(out value))
+                {
+                    return true;
+                }
+
+                // Report type error at this index.
+                itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
+                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json, itemNodeStart));
+                return false;
             }
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
