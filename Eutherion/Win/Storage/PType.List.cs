@@ -97,6 +97,33 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public abstract class TupleTypeBase<T> : ListBase<T>
         {
+            internal static bool TryCreateTupleValue<ItemT>(
+                PType<ItemT> itemType,
+                string json,
+                GreenJsonListSyntax jsonListSyntax,
+                int itemIndex,
+                int errorReportingOffset,
+                List<JsonErrorInfo> errors,
+                out ItemT convertedTargetValue,
+                out PValue value)
+            {
+                if (itemIndex < jsonListSyntax.FilteredListItemNodeCount)
+                {
+                    return TryCreateItemValue(
+                        itemType,
+                        json,
+                        jsonListSyntax,
+                        itemIndex,
+                        errorReportingOffset,
+                        errors,
+                        out convertedTargetValue,
+                        out value);
+                }
+
+                convertedTargetValue = default;
+                value = default;
+                return false;
+            }
         }
     }
 }
