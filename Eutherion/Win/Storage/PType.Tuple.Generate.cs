@@ -61,7 +61,7 @@ namespace Eutherion.Win.Storage
             public TupleType(({CommaSeparatedList(size, ValuePType)}) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,

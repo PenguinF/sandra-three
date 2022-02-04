@@ -67,14 +67,16 @@ namespace Eutherion.Win.Storage
             {
                 if (valueNode is GreenJsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors);
+                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors).Match(
+                        whenOption1: error => (Union<ITypeErrorBuilder, PValue>)error,
+                        whenOption2: list => list);
                 }
 
                 convertedValue = default;
                 return ListTypeError;
             }
 
-            internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out T convertedValue,

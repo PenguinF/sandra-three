@@ -36,7 +36,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2) convertedValue,
@@ -89,7 +89,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3) convertedValue,
@@ -145,7 +145,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4) convertedValue,
@@ -204,7 +204,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4, T5) convertedValue,
