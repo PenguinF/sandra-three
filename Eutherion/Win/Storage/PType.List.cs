@@ -91,5 +91,12 @@ namespace Eutherion.Win.Storage
 
             public abstract PList GetBaseValue(T value);
         }
+
+        /// <summary>
+        /// A tuple with a fixed number of items greater than one, each item having a defined type.
+        /// </summary>
+        public abstract class TupleTypeBase<T> : ListBase<T>
+        {
+        }
     }
 }

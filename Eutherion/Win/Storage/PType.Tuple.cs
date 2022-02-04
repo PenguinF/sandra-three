@@ -27,7 +27,7 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
-        public sealed class TupleType<T1, T2> : ListBase<(T1, T2)>
+        public sealed class TupleType<T1, T2> : TupleTypeBase<(T1, T2)>
         {
             public const int ExpectedItemCount = 2;
 
@@ -80,7 +80,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        public sealed class TupleType<T1, T2, T3> : ListBase<(T1, T2, T3)>
+        public sealed class TupleType<T1, T2, T3> : TupleTypeBase<(T1, T2, T3)>
         {
             public const int ExpectedItemCount = 3;
 
@@ -136,7 +136,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        public sealed class TupleType<T1, T2, T3, T4> : ListBase<(T1, T2, T3, T4)>
+        public sealed class TupleType<T1, T2, T3, T4> : TupleTypeBase<(T1, T2, T3, T4)>
         {
             public const int ExpectedItemCount = 4;
 
@@ -195,7 +195,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        public sealed class TupleType<T1, T2, T3, T4, T5> : ListBase<(T1, T2, T3, T4, T5)>
+        public sealed class TupleType<T1, T2, T3, T4, T5> : TupleTypeBase<(T1, T2, T3, T4, T5)>
         {
             public const int ExpectedItemCount = 5;
 

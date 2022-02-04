@@ -52,7 +52,7 @@ namespace Eutherion.Win.Storage
         private static string ValuePType(int index) => $"PType<T{index}>";
 
         private static string TupleTypeClass(int size) => $@"
-        public sealed class TupleType<{CommaSeparatedList(size, TypeParameter)}> : ListBase<({CommaSeparatedList(size, TypeParameter)})>
+        public sealed class TupleType<{CommaSeparatedList(size, TypeParameter)}> : TupleTypeBase<({CommaSeparatedList(size, TypeParameter)})>
         {{
             public const int ExpectedItemCount = {size};
 
