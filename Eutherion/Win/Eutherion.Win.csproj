@@ -97,6 +97,7 @@
     <Compile Include="Storage\PType.cs" />
     <Compile Include="Storage\PType.List.cs" />
     <Compile Include="Storage\PType.Map.cs" />
+    <Compile Include="Storage\PType.Tuple.cs" />
     <Compile Include="Storage\PTypeError.cs" />
     <Compile Include="Storage\PTypeErrorBuilder.cs" />
     <Compile Include="Storage\PValue.cs" />
