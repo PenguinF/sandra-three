@@ -131,7 +131,16 @@ namespace Sandra.UI
         {
             var mdiContainerForm = new MdiContainerForm();
             RegisterMdiContainerFormEvents(mdiContainerForm);
-            mdiContainerForm.Load += MdiContainerForm_Load;
+
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Window, out PersistableFormState formState))
+            {
+                mdiContainerForm.Load += (_, __) => RestoreMdiContainerState(mdiContainerForm, formState);
+            }
+            else
+            {
+                mdiContainerForm.Load += (_, __) => DefaultMdiContainerState(mdiContainerForm);
+            }
+
             mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
@@ -168,28 +177,19 @@ namespace Sandra.UI
             };
         }
 
-        private void MdiContainerForm_Load(object sender, EventArgs e)
+        private void RestoreMdiContainerState(MdiContainerForm mdiContainerForm, PersistableFormState formState)
         {
-            MdiContainerForm mdiContainerForm = (MdiContainerForm)sender;
-
             bool boundsInitialized = false;
 
-            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Window, out PersistableFormState formState))
-            {
-                Rectangle targetBounds = formState.Bounds;
+            Rectangle targetBounds = formState.Bounds;
 
-                // If all bounds are known initialize from those.
-                // Do make sure the window ends up on a visible working area.
-                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
-                if (targetBounds.Width >= mdiContainerForm.MinimumSize.Width && targetBounds.Height >= mdiContainerForm.MinimumSize.Height)
-                {
-                    mdiContainerForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    boundsInitialized = true;
-                }
-            }
-            else
+            // If all bounds are known initialize from those.
+            // Do make sure the window ends up on a visible working area.
+            targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+            if (targetBounds.Width >= mdiContainerForm.MinimumSize.Width && targetBounds.Height >= mdiContainerForm.MinimumSize.Height)
             {
-                formState = new PersistableFormState(false, Rectangle.Empty);
+                mdiContainerForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
+                boundsInitialized = true;
             }
 
             // Determine a window state independently if no formState was applied successfully.
@@ -207,6 +207,19 @@ namespace Sandra.UI
             mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(formState)));
 
             // Attach only after restoring.
+            formState.AttachTo(mdiContainerForm);
+            formState.Changed += (_, __) => Session.Current.AutoSave.Persist(SettingKeys.Window, formState);
+        }
+
+        private void DefaultMdiContainerState(MdiContainerForm mdiContainerForm)
+        {
+            PersistableFormState formState = new PersistableFormState(false, Rectangle.Empty);
+
+            // Determine a window state independently if no formState was applied successfully.
+            SetDefaultSizeAndPosition(mdiContainerForm);
+
+            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(formState)));
+
             formState.AttachTo(mdiContainerForm);
             formState.Changed += (_, __) => Session.Current.AutoSave.Persist(SettingKeys.Window, formState);
         }
