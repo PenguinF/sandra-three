@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiContainerForm.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -221,16 +221,15 @@ namespace Sandra.UI
             }
         }
 
-        private Func<Form> DockedControl_RequestUndock(MdiTabPage mdiTabPage) => () =>
+        private void DockedControl_RequestUndock(MdiTabPage mdiTabPage)
         {
             // Create a new MdiContainerForm which contains mdiTabPage as its sole tab page.
             var mdiContainerForm = Program.MainForm.OpenNewMdiContainerForm();
             mdiContainerForm.Size = Size;
             mdiContainerForm.DockedControl.TabPages.Add(mdiTabPage);
-            mdiContainerForm.DockedControl.EnsureActivated();
             mdiContainerForm.DockedControl.ActivateTab(0);
-            return mdiContainerForm;
-        };
+            mdiContainerForm.DockedControl.EnsureActivated();
+        }
 
         protected override void OnDragEnter(DragEventArgs e)
         {

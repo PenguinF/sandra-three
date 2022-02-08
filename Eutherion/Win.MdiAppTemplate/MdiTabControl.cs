@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiTabControl.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ namespace Eutherion.Win.MdiAppTemplate
 
         /// <summary>
         /// Raised when a <see cref="MdiTabPage"/> is about to be undocked.
-        /// The event handler should return a function which when called returns a <see cref="Form"/>
-        /// which is guaranteed to contain the undocked <see cref="MdiTabPage"/>.
-        /// The event handler should return null if the <see cref="MdiTabPage"/> cannot be undocked.
+        /// An event handler should reparent the <see cref="MdiTabPage"/> into a different control tree.
+        /// The expected behaviour is that a new <see cref="Form"/> is created which contains the previously docked control.
+        /// If the previously docked control is not reparented, the undocking operation fails and the resulting UI/UX is undefined.
         /// </summary>
-        public event Func<MdiTabPage, Func<Form>> RequestUndock;
+        public event Action<MdiTabPage> RequestUndock;
 
         public MdiTabControl(string applicationTitle)
         {
@@ -170,38 +170,30 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (RequestUndock != null)
             {
-                Func<Form> floatformConstructor = RequestUndock(mdiTabPage);
+                // To be able to restore state.
+                int oldActiveTabPageIndex = ActiveTabPageIndex;
+                int removedTabPageIndex = TabPages.IndexOf(mdiTabPage);
 
-                if (floatformConstructor != null)
+                if (TabPages.Remove(mdiTabPage))
                 {
-                    // To be able to restore state.
-                    int oldActiveTabPageIndex = ActiveTabPageIndex;
-                    int removedTabPageIndex = TabPages.IndexOf(mdiTabPage);
+                    // Set Visible to true in case an inactive tab page is undocked.
+                    mdiTabPage.ClientControl.Visible = true;
 
-                    if (TabPages.Remove(mdiTabPage))
+                    // Redraw immediately before waiting for the end of the any caller.
+                    // Necessary because moving the Control to a different parent is going to force an update as well.
+                    Update();
+
+                    // Call the handler and check if the previously docked Control has been properly reparented.
+                    RequestUndock(mdiTabPage);
+
+                    if (mdiTabPage.ClientControl.Parent == null)
                     {
-                        // Set Visible to true in case an inactive tab page is undocked.
-                        mdiTabPage.ClientControl.Visible = true;
-
-                        // Redraw immediately before waiting for the end of the any caller.
-                        // Necessary because moving the Control to a different parent is going to force an update as well.
-                        Update();
-
-                        Form floatForm = floatformConstructor();
-
-                        if (floatForm == null)
-                        {
-                            // Restore original state and throw an exception.
-                            TabPages.Insert(removedTabPageIndex, mdiTabPage);
-                            if (oldActiveTabPageIndex == removedTabPageIndex) ActivateTab(oldActiveTabPageIndex);
-
-                            throw new InvalidOperationException($"Function returned from {nameof(RequestUndock)} event handler should never return null.");
-                        }
-
-                        floatForm.Show();
-
-                        return true;
+                        // Restore original state.
+                        TabPages.Insert(removedTabPageIndex, mdiTabPage);
+                        if (oldActiveTabPageIndex == removedTabPageIndex) ActivateTab(oldActiveTabPageIndex);
                     }
+
+                    return true;
                 }
             }
 
