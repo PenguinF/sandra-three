@@ -90,7 +90,7 @@ namespace Sandra.UI
                 }
             }
 
-            OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
+            ShowNewMdiContainerForm(receivedCommandLineArgs);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -111,12 +111,15 @@ namespace Sandra.UI
                 PieceImages.LoadChessPieceImages();
 
                 Visible = false;
-                var mdiContainerForm = OpenNewMdiContainerForm();
-
-                // Only the first one should auto-save and open the stored command line arguments.
-                mdiContainerForm.Load += MdiContainerForm_Load;
-                mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
+                ShowNewMdiContainerForm(commandLineArgs);
             }
+        }
+
+        private void ShowNewMdiContainerForm(string[] commandLineArgs)
+        {
+            var mdiContainerForm = OpenNewMdiContainerForm();
+            mdiContainerForm.Load += MdiContainerForm_Load;
+            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
         internal MdiContainerForm OpenNewMdiContainerForm()
