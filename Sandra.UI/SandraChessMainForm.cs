@@ -25,6 +25,7 @@ using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -41,7 +42,7 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
             = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
+        private readonly List<MdiContainerWithState> mdiContainers = new List<MdiContainerWithState>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -81,7 +82,7 @@ namespace Sandra.UI
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             // Most recently activated MdiContainerForm gets the honor of opening the new PGN files.
-            foreach (var candidate in mdiContainerForms)
+            foreach (var candidate in mdiContainers.Select(x => x.Form))
             {
                 if (candidate.IsHandleCreated && !candidate.IsDisposed)
                 {
@@ -91,6 +92,17 @@ namespace Sandra.UI
             }
 
             ShowNewMdiContainerForm(receivedCommandLineArgs);
+        }
+
+        private bool FindMdiContainer(MdiContainerForm form, out int index)
+        {
+            // Linear search.
+            for (index = 0; index < mdiContainers.Count; index++)
+            {
+                if (mdiContainers[index].Form == form) return true;
+            }
+
+            return false;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -117,38 +129,43 @@ namespace Sandra.UI
 
         private void ShowNewMdiContainerForm(string[] commandLineArgs)
         {
-            var mdiContainerForm = OpenNewMdiContainerForm();
+            var mdiContainerForm = new MdiContainerForm();
+            RegisterMdiContainerFormEvents(mdiContainerForm);
             mdiContainerForm.Load += MdiContainerForm_Load;
             mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
-        internal MdiContainerForm OpenNewMdiContainerForm()
+        internal MdiContainerForm CreateNewMdiContainerForm()
         {
             var mdiContainerForm = new MdiContainerForm();
+            RegisterMdiContainerFormEvents(mdiContainerForm);
+            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(new PersistableFormState(false, Rectangle.Empty))));
+            return mdiContainerForm;
+        }
 
-            mdiContainerForm.FormClosed += (_, __) =>
+        private void RegisterMdiContainerFormEvents(MdiContainerForm mdiContainerForm)
+        {
+            mdiContainerForm.FormClosed += (sender, _) =>
             {
-                mdiContainerForms.Remove(mdiContainerForm);
+                if (FindMdiContainer((MdiContainerForm)sender, out int index))
+                {
+                    mdiContainers.RemoveAt(index);
 
-                // Close the entire process after the last form is closed.
-                if (mdiContainerForms.Count == 0) Close();
+                    // Close the entire process after the last form is closed.
+                    if (mdiContainers.Count == 0) Close();
+                }
             };
-
-            mdiContainerForms.Add(mdiContainerForm);
 
             mdiContainerForm.Activated += (sender, _) =>
             {
                 // Bring to front of list if activated.
-                MdiContainerForm activatedForm = (MdiContainerForm)sender;
-                int index = mdiContainerForms.IndexOf(activatedForm);
-                if (index > 0)
+                if (FindMdiContainer((MdiContainerForm)sender, out int index))
                 {
-                    mdiContainerForms.RemoveAt(index);
-                    mdiContainerForms.Insert(0, activatedForm);
+                    var activatedFormWithState = mdiContainers[index];
+                    mdiContainers.RemoveAt(index);
+                    mdiContainers.Insert(0, activatedFormWithState);
                 }
             };
-
-            return mdiContainerForm;
         }
 
         private void MdiContainerForm_Load(object sender, EventArgs e)
@@ -186,6 +203,8 @@ namespace Sandra.UI
             {
                 mdiContainerForm.WindowState = FormWindowState.Maximized;
             }
+
+            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(formState)));
 
             // Attach only after restoring.
             formState.AttachTo(mdiContainerForm);
