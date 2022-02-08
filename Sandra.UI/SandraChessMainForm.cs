@@ -116,7 +116,7 @@ namespace Sandra.UI
 
                 // Only the first one should auto-save and open the stored command line arguments.
                 mdiContainerForm.Load += MdiContainerForm_Load;
-                mdiContainerForm.Show();
+                mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
             }
         }
 
@@ -168,8 +168,6 @@ namespace Sandra.UI
                     // Update the bounds of the form.
                     mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
-
-            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
         }
 
         internal bool TryGetPgnEditors(string key, out List<PgnEditor> pgnEditors)
