@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MenuCaptionBarForm.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -76,10 +76,6 @@ namespace Eutherion.Win.MdiAppTemplate
             public int MaximizeButtonLeft;
             public int SaveButtonLeft;
             public int CloseButtonLeft;
-
-            // Need to display the entire menu, the system buttons, and the border thickness.
-            public int MinimumWidth => MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
-            public int MinimumHeight => CaptionHeight + VerticalResizeBorderThickness * 2;
 
             public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible, bool mininizeButtonVisible)
             {
@@ -531,7 +527,26 @@ namespace Eutherion.Win.MdiAppTemplate
                 currentMetrics.ClientAreaWidth,
                 currentMetrics.ClientAreaHeight);
 
-            MinimumSize = new Size(currentMetrics.MinimumWidth, currentMetrics.MinimumHeight);
+            // Setting MinimumSize on an inactive Form will activate it.
+            // To work around this issue, I tried delaying updates to MinimumSize until the window is active.
+            // However, this prevents a window from being restored to a maximized state from an auto-save file,
+            // even if e.g. a nonce is used.
+            //
+            // See also:
+            // https://github.com/dotnet/winforms/issues/3020
+            // https://social.msdn.microsoft.com/Forums/en-US/9625570d-4bd7-48f2-b158-15dcbd96c60b/bug-in-form-class-setting-formminimumsize-triggers-an-activated-event-even-when-the-form-is
+            // https://social.msdn.microsoft.com/Forums/en-US/31f9d493-f8d6-4b39-92c9-912399ed3964/why-parentformdeactivate-event-getting-triggered-when-try-to-set-the-minimum-size-for-child-form
+            //
+            // An appopriate MinimumSize is a size which allows the entire menu and the system buttons to be displayed,
+            // taking border thickness into account. Using the current metrics:
+            //
+            // MinimumWidth  = MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft
+            // MinimumHeight = CaptionHeight + VerticalResizeBorderThickness * 2
+            // MinimumSize   = new Size(MinimumWidth, MinimumHeight)
+            //
+            // Setting MinimumSize to a fixed size for the time being, since a likely fix is going to be to trap
+            // the property getters and setters, and reimplementing what they do by hand.
+            MinimumSize = new Size(500, 80);
 
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
