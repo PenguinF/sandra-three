@@ -1040,7 +1040,10 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
 
-        public static readonly Color ErrorColor = Color.Red;
+        // Color.Red shows up as a transparent color in the Scintilla editor.
+        // Rather than trying to work out why this is the case and write a genuine fix, use a slightly different color as a workaround.
+        // TODO: write the actual fix, especially if these colors ever become configurable in the preferences file.
+        public static readonly Color ErrorColor = Color.FromArgb(255, 8, 8);
         public static readonly Color WarningColor = Color.Yellow;
 
         public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
