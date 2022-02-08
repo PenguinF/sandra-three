@@ -41,9 +41,7 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
             = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        // Linked list to easily change the order in which forms were most recently activated.
-        // Locality in memory is unimportant for this collection.
-        private readonly LinkedList<MdiContainerForm> mdiContainerForms = new LinkedList<MdiContainerForm>();
+        private readonly List<MdiContainerForm> mdiContainerForms = new List<MdiContainerForm>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -82,7 +80,7 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            // Most recently activated mdiContainerForm gets the honor of opening the new PGN files.
+            // Most recently activated MdiContainerForm gets the honor of opening the new PGN files.
             foreach (var candidate in mdiContainerForms)
             {
                 if (candidate.IsHandleCreated && !candidate.IsDisposed)
@@ -133,16 +131,17 @@ namespace Sandra.UI
                 if (mdiContainerForms.Count == 0) Close();
             };
 
-            mdiContainerForms.AddLast(mdiContainerForm);
+            mdiContainerForms.Add(mdiContainerForm);
 
             mdiContainerForm.Activated += (sender, _) =>
             {
                 // Bring to front of list if activated.
-                LinkedListNode<MdiContainerForm> node = mdiContainerForms.Find((MdiContainerForm)sender);
-                if (node != null && mdiContainerForms.First != node)
+                MdiContainerForm activatedForm = (MdiContainerForm)sender;
+                int index = mdiContainerForms.IndexOf(activatedForm);
+                if (index > 0)
                 {
-                    mdiContainerForms.Remove(node);
-                    mdiContainerForms.AddFirst(node);
+                    mdiContainerForms.RemoveAt(index);
+                    mdiContainerForms.Insert(0, activatedForm);
                 }
             };
 
