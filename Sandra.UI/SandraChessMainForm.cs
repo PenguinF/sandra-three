@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SandraChessMainForm.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@
 #endregion
 
 using Eutherion.Win.MdiAppTemplate;
+using Eutherion.Win.Storage;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -40,9 +42,7 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<PgnEditor>> OpenPgnEditors
             = new Dictionary<string, List<PgnEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        // Linked list to easily change the order in which forms were most recently activated.
-        // Locality in memory is unimportant for this collection.
-        private readonly LinkedList<MdiContainerForm> mdiContainerForms = new LinkedList<MdiContainerForm>();
+        private readonly List<MdiContainerWithState> mdiContainers = new List<MdiContainerWithState>();
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
@@ -81,8 +81,8 @@ namespace Sandra.UI
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            // Most recently activated mdiContainerForm gets the honor of opening the new PGN files.
-            foreach (var candidate in mdiContainerForms)
+            // Most recently activated MdiContainerForm gets the honor of opening the new PGN files.
+            foreach (var candidate in mdiContainers.Select(x => x.Form))
             {
                 if (candidate.IsHandleCreated && !candidate.IsDisposed)
                 {
@@ -91,7 +91,23 @@ namespace Sandra.UI
                 }
             }
 
-            OpenNewMdiContainerForm().OpenCommandLineArgs(receivedCommandLineArgs);
+            ShowNewMdiContainerForm(receivedCommandLineArgs);
+        }
+
+        private bool FindMdiContainer(MdiContainerForm form, out int index)
+        {
+            // Linear search.
+            for (index = 0; index < mdiContainers.Count; index++)
+            {
+                if (mdiContainers[index].Form == form) return true;
+            }
+
+            return false;
+        }
+
+        private void AutoSaveMdiContainerList()
+        {
+            Session.Current.AutoSave.Persist(SettingKeys.Windows, mdiContainers.Select(x => x.State.FormState));
         }
 
         protected override void OnLoad(EventArgs e)
@@ -112,64 +128,152 @@ namespace Sandra.UI
                 PieceImages.LoadChessPieceImages();
 
                 Visible = false;
-                var mdiContainerForm = OpenNewMdiContainerForm();
 
-                // Only the first one should auto-save and open the stored command line arguments.
-                mdiContainerForm.Load += MdiContainerForm_Load;
-                mdiContainerForm.Show();
+                if (Session.Current.TryGetAutoSaveValue(SettingKeys.Windows, out IEnumerable<PersistableFormState> states))
+                {
+                    // First restore all states, then attach auto-save events.
+                    // Create all forms before doing anything else.
+                    foreach (PersistableFormState formState in states)
+                    {
+                        mdiContainers.Add(new MdiContainerWithState(new MdiContainerForm(), new MdiContainerState(formState)));
+                    }
+
+                    // Activate from back to front.
+                    for (int i = mdiContainers.Count - 1; i >= 0; i--)
+                    {
+                        MdiContainerWithState formWithState = mdiContainers[i];
+                        formWithState.Form.Load += (_, __) => RestoreMdiContainerState(formWithState);
+
+                        if (i > 0)
+                        {
+                            // Activate by activating the docked control.
+                            formWithState.Form.DockedControl.EnsureActivated();
+                        }
+                        else
+                        {
+                            // Most recently activated window should open command line arguments.
+                            // Alternative is to open an additional new window, but this is inconsistent with ReceivedMessageFromAnotherInstance().
+                            // TODO: maybe turn this into a preference? E.g. "open_files_in_new_window_on_launch".
+                            formWithState.Form.OpenCommandLineArgs(commandLineArgs);
+                        }
+                    }
+
+                    // Only now register auto-save events.
+                    foreach (MdiContainerWithState formWithState in mdiContainers)
+                    {
+                        RegisterMdiContainerFormEvents(formWithState.Form);
+                        AttachFormStateAutoSaver(formWithState);
+                    }
+                }
+                else
+                {
+                    ShowNewMdiContainerForm(commandLineArgs);
+                }
             }
         }
 
-        internal MdiContainerForm OpenNewMdiContainerForm()
+        private void ShowNewMdiContainerForm(string[] commandLineArgs)
+        {
+            CreateNewMdiContainerForm().OpenCommandLineArgs(commandLineArgs);
+        }
+
+        internal MdiContainerForm CreateNewMdiContainerForm()
         {
             var mdiContainerForm = new MdiContainerForm();
-
-            mdiContainerForm.FormClosed += (_, __) =>
+            RegisterMdiContainerFormEvents(mdiContainerForm);
+            var formWithDefaultState = new MdiContainerWithState(mdiContainerForm, new MdiContainerState(new PersistableFormState(false, Rectangle.Empty)));
+            mdiContainers.Add(formWithDefaultState);
+            mdiContainerForm.Load += (_, __) =>
             {
-                mdiContainerForms.Remove(mdiContainerForm);
-
-                // Close the entire process after the last form is closed.
-                if (mdiContainerForms.Count == 0) Close();
+                SetDefaultSizeAndPosition(mdiContainerForm);
+                AttachFormStateAutoSaver(formWithDefaultState);
             };
+            return mdiContainerForm;
+        }
 
-            mdiContainerForms.AddLast(mdiContainerForm);
+        private void RegisterMdiContainerFormEvents(MdiContainerForm mdiContainerForm)
+        {
+            mdiContainerForm.FormClosed += (sender, _) =>
+            {
+                if (FindMdiContainer((MdiContainerForm)sender, out int index))
+                {
+                    mdiContainers.RemoveAt(index);
+
+                    if (mdiContainers.Count > 0)
+                    {
+                        AutoSaveMdiContainerList();
+                    }
+                    else
+                    {
+                        // Close the entire process after the last form is closed.
+                        // When the application is reopened, the state of this last form is restored.
+                        Close();
+                    }
+                }
+            };
 
             mdiContainerForm.Activated += (sender, _) =>
             {
                 // Bring to front of list if activated.
-                LinkedListNode<MdiContainerForm> node = mdiContainerForms.Find((MdiContainerForm)sender);
-                if (node != null && mdiContainerForms.First != node)
+                if (FindMdiContainer((MdiContainerForm)sender, out int index))
                 {
-                    mdiContainerForms.Remove(node);
-                    mdiContainerForms.AddFirst(node);
+                    var activatedFormWithState = mdiContainers[index];
+                    mdiContainers.RemoveAt(index);
+                    mdiContainers.Insert(0, activatedFormWithState);
+                    AutoSaveMdiContainerList();
                 }
             };
-
-            return mdiContainerForm;
         }
 
-        private void MdiContainerForm_Load(object sender, EventArgs e)
+        private void RestoreMdiContainerState(MdiContainerWithState mdiContainerWithState)
         {
-            MdiContainerForm mdiContainerForm = (MdiContainerForm)sender;
+            MdiContainerForm mdiContainerForm = mdiContainerWithState.Form;
+            PersistableFormState formState = mdiContainerWithState.State.FormState;
 
-            // Initialize from settings if available.
-            Session.Current.AttachFormStateAutoSaver(
-                mdiContainerForm,
-                SettingKeys.Window,
-                () =>
-                {
-                    // Show in the center of the monitor where the mouse currently is.
-                    var activeScreen = Screen.FromPoint(MousePosition);
-                    Rectangle workingArea = activeScreen.WorkingArea;
+            bool boundsInitialized = false;
 
-                    // Two thirds the size of the active monitor's working area.
-                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+            Rectangle targetBounds = formState.Bounds;
 
-                    // Update the bounds of the form.
-                    mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                });
+            // If all bounds are known initialize from those.
+            // Do make sure the window ends up on a visible working area.
+            targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+            if (targetBounds.Width >= mdiContainerForm.MinimumSize.Width && targetBounds.Height >= mdiContainerForm.MinimumSize.Height)
+            {
+                mdiContainerForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
+                boundsInitialized = true;
+            }
 
-            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
+            // Determine a window state independently if no formState was applied successfully.
+            if (!boundsInitialized)
+            {
+                SetDefaultSizeAndPosition(mdiContainerForm);
+            }
+
+            // Restore maximized setting after setting the Bounds.
+            if (formState.Maximized)
+            {
+                mdiContainerForm.WindowState = FormWindowState.Maximized;
+            }
+        }
+
+        private void AttachFormStateAutoSaver(MdiContainerWithState mdiContainerWithState)
+        {
+            PersistableFormState formState = mdiContainerWithState.State.FormState;
+            formState.AttachTo(mdiContainerWithState.Form);
+            formState.Changed += (_, __) => AutoSaveMdiContainerList();
+        }
+
+        private static void SetDefaultSizeAndPosition(MdiContainerForm mdiContainerForm)
+        {
+            // Show in the center of the monitor where the mouse currently is.
+            var activeScreen = Screen.FromPoint(MousePosition);
+            Rectangle workingArea = activeScreen.WorkingArea;
+
+            // Two thirds the size of the active monitor's working area.
+            workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+            // Update the bounds of the form.
+            mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
         }
 
         internal bool TryGetPgnEditors(string key, out List<PgnEditor> pgnEditors)
