@@ -191,6 +191,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         // Restore original state.
                         TabPages.Insert(removedTabPageIndex, mdiTabPage);
                         if (oldActiveTabPageIndex == removedTabPageIndex) ActivateTab(oldActiveTabPageIndex);
+                        return false;
                     }
 
                     return true;
