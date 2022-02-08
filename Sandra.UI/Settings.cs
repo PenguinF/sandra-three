@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Settings.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Sandra.UI
@@ -51,9 +52,9 @@ namespace Sandra.UI
                 => new PInteger(value);
         }
 
-        public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
-            PersistableFormState.Type);
+        public static readonly SettingProperty<IEnumerable<PersistableFormState>> Windows = new SettingProperty<IEnumerable<PersistableFormState>>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Windows))),
+            new PType.ValueList<PersistableFormState>(PersistableFormState.Type));
 
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PgnZoom))),
@@ -135,7 +136,7 @@ namespace Sandra.UI
         {
             return new SettingSchema(
                 session.LangSetting,
-                SettingKeys.Window,
+                SettingKeys.Windows,
                 SharedSettings.AutoSaveCounter,
                 SettingKeys.PgnZoom,
                 SharedSettings.DefaultSettingsAutoSave,

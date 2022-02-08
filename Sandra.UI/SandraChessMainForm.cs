@@ -105,6 +105,11 @@ namespace Sandra.UI
             return false;
         }
 
+        private void AutoSaveMdiContainerList()
+        {
+            Session.Current.AutoSave.Persist(SettingKeys.Windows, mdiContainers.Select(x => x.State.FormState));
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -123,32 +128,66 @@ namespace Sandra.UI
                 PieceImages.LoadChessPieceImages();
 
                 Visible = false;
-                ShowNewMdiContainerForm(commandLineArgs);
+
+                if (Session.Current.TryGetAutoSaveValue(SettingKeys.Windows, out IEnumerable<PersistableFormState> states))
+                {
+                    // First restore all states, then attach auto-save events.
+                    // Create all forms before doing anything else.
+                    foreach (PersistableFormState formState in states)
+                    {
+                        mdiContainers.Add(new MdiContainerWithState(new MdiContainerForm(), new MdiContainerState(formState)));
+                    }
+
+                    // Activate from back to front.
+                    for (int i = mdiContainers.Count - 1; i >= 0; i--)
+                    {
+                        MdiContainerWithState formWithState = mdiContainers[i];
+                        formWithState.Form.Load += (_, __) => RestoreMdiContainerState(formWithState);
+
+                        if (i > 0)
+                        {
+                            // Activate by activating the docked control.
+                            formWithState.Form.DockedControl.EnsureActivated();
+                        }
+                        else
+                        {
+                            // Most recently activated window should open command line arguments.
+                            // Alternative is to open an additional new window, but this is inconsistent with ReceivedMessageFromAnotherInstance().
+                            // TODO: maybe turn this into a preference? E.g. "open_files_in_new_window_on_launch".
+                            formWithState.Form.OpenCommandLineArgs(commandLineArgs);
+                        }
+                    }
+
+                    // Only now register auto-save events.
+                    foreach (MdiContainerWithState formWithState in mdiContainers)
+                    {
+                        RegisterMdiContainerFormEvents(formWithState.Form);
+                        AttachFormStateAutoSaver(formWithState);
+                    }
+                }
+                else
+                {
+                    ShowNewMdiContainerForm(commandLineArgs);
+                }
             }
         }
 
         private void ShowNewMdiContainerForm(string[] commandLineArgs)
         {
-            var mdiContainerForm = new MdiContainerForm();
-            RegisterMdiContainerFormEvents(mdiContainerForm);
-
-            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Window, out PersistableFormState formState))
-            {
-                mdiContainerForm.Load += (_, __) => RestoreMdiContainerState(mdiContainerForm, formState);
-            }
-            else
-            {
-                mdiContainerForm.Load += (_, __) => DefaultMdiContainerState(mdiContainerForm);
-            }
-
-            mdiContainerForm.OpenCommandLineArgs(commandLineArgs);
+            CreateNewMdiContainerForm().OpenCommandLineArgs(commandLineArgs);
         }
 
         internal MdiContainerForm CreateNewMdiContainerForm()
         {
             var mdiContainerForm = new MdiContainerForm();
             RegisterMdiContainerFormEvents(mdiContainerForm);
-            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(new PersistableFormState(false, Rectangle.Empty))));
+            var formWithDefaultState = new MdiContainerWithState(mdiContainerForm, new MdiContainerState(new PersistableFormState(false, Rectangle.Empty)));
+            mdiContainers.Add(formWithDefaultState);
+            mdiContainerForm.Load += (_, __) =>
+            {
+                SetDefaultSizeAndPosition(mdiContainerForm);
+                AttachFormStateAutoSaver(formWithDefaultState);
+            };
             return mdiContainerForm;
         }
 
@@ -160,8 +199,16 @@ namespace Sandra.UI
                 {
                     mdiContainers.RemoveAt(index);
 
-                    // Close the entire process after the last form is closed.
-                    if (mdiContainers.Count == 0) Close();
+                    if (mdiContainers.Count > 0)
+                    {
+                        AutoSaveMdiContainerList();
+                    }
+                    else
+                    {
+                        // Close the entire process after the last form is closed.
+                        // When the application is reopened, the state of this last form is restored.
+                        Close();
+                    }
                 }
             };
 
@@ -173,12 +220,16 @@ namespace Sandra.UI
                     var activatedFormWithState = mdiContainers[index];
                     mdiContainers.RemoveAt(index);
                     mdiContainers.Insert(0, activatedFormWithState);
+                    AutoSaveMdiContainerList();
                 }
             };
         }
 
-        private void RestoreMdiContainerState(MdiContainerForm mdiContainerForm, PersistableFormState formState)
+        private void RestoreMdiContainerState(MdiContainerWithState mdiContainerWithState)
         {
+            MdiContainerForm mdiContainerForm = mdiContainerWithState.Form;
+            PersistableFormState formState = mdiContainerWithState.State.FormState;
+
             bool boundsInitialized = false;
 
             Rectangle targetBounds = formState.Bounds;
@@ -203,25 +254,13 @@ namespace Sandra.UI
             {
                 mdiContainerForm.WindowState = FormWindowState.Maximized;
             }
-
-            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(formState)));
-
-            // Attach only after restoring.
-            formState.AttachTo(mdiContainerForm);
-            formState.Changed += (_, __) => Session.Current.AutoSave.Persist(SettingKeys.Window, formState);
         }
 
-        private void DefaultMdiContainerState(MdiContainerForm mdiContainerForm)
+        private void AttachFormStateAutoSaver(MdiContainerWithState mdiContainerWithState)
         {
-            PersistableFormState formState = new PersistableFormState(false, Rectangle.Empty);
-
-            // Determine a window state independently if no formState was applied successfully.
-            SetDefaultSizeAndPosition(mdiContainerForm);
-
-            mdiContainers.Add(new MdiContainerWithState(mdiContainerForm, new MdiContainerState(formState)));
-
-            formState.AttachTo(mdiContainerForm);
-            formState.Changed += (_, __) => Session.Current.AutoSave.Persist(SettingKeys.Window, formState);
+            PersistableFormState formState = mdiContainerWithState.State.FormState;
+            formState.AttachTo(mdiContainerWithState.Form);
+            formState.Changed += (_, __) => AutoSaveMdiContainerList();
         }
 
         private static void SetDefaultSizeAndPosition(MdiContainerForm mdiContainerForm)
