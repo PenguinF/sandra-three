@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SandraChessMainForm.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Win.MdiAppTemplate;
+using Eutherion.Win.Storage;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
@@ -152,22 +153,54 @@ namespace Sandra.UI
         {
             MdiContainerForm mdiContainerForm = (MdiContainerForm)sender;
 
-            // Initialize from settings if available.
-            Session.Current.AttachFormStateAutoSaver(
-                mdiContainerForm,
-                SettingKeys.Window,
-                () =>
+            bool boundsInitialized = false;
+
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Window, out PersistableFormState formState))
+            {
+                Rectangle targetBounds = formState.Bounds;
+
+                // If all bounds are known initialize from those.
+                // Do make sure the window ends up on a visible working area.
+                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+                if (targetBounds.Width >= mdiContainerForm.MinimumSize.Width && targetBounds.Height >= mdiContainerForm.MinimumSize.Height)
                 {
-                    // Show in the center of the monitor where the mouse currently is.
-                    var activeScreen = Screen.FromPoint(MousePosition);
-                    Rectangle workingArea = activeScreen.WorkingArea;
+                    mdiContainerForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
+                    boundsInitialized = true;
+                }
+            }
+            else
+            {
+                formState = new PersistableFormState(false, Rectangle.Empty);
+            }
 
-                    // Two thirds the size of the active monitor's working area.
-                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+            // Determine a window state independently if no formState was applied successfully.
+            if (!boundsInitialized)
+            {
+                SetDefaultSizeAndPosition(mdiContainerForm);
+            }
 
-                    // Update the bounds of the form.
-                    mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                });
+            // Restore maximized setting after setting the Bounds.
+            if (formState.Maximized)
+            {
+                mdiContainerForm.WindowState = FormWindowState.Maximized;
+            }
+
+            // Attach only after restoring.
+            formState.AttachTo(mdiContainerForm);
+            formState.Changed += (_, __) => Session.Current.AutoSave.Persist(SettingKeys.Window, formState);
+        }
+
+        private static void SetDefaultSizeAndPosition(MdiContainerForm mdiContainerForm)
+        {
+            // Show in the center of the monitor where the mouse currently is.
+            var activeScreen = Screen.FromPoint(MousePosition);
+            Rectangle workingArea = activeScreen.WorkingArea;
+
+            // Two thirds the size of the active monitor's working area.
+            workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+            // Update the bounds of the form.
+            mdiContainerForm.SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
         }
 
         internal bool TryGetPgnEditors(string key, out List<PgnEditor> pgnEditors)
