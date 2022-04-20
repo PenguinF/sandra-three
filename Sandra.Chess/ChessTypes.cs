@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ChessTypes.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 
 using Sandra.Chess;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Sandra.Chess
@@ -147,9 +148,9 @@ namespace Sandra
         /// </summary>
         public static IEnumerable<Square> AllSquares(this ulong vector)
         {
-            foreach (var index in vector.Indices())
+            foreach (var index in vector.SetBits().Select(BitOperations.Log2))
             {
-                yield return ((Square)index);
+                yield return (Square)index;
             }
         }
 

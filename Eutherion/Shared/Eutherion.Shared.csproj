@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Eutherion.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Eutherion.Common.1.0.0-rc\lib\net472\Eutherion.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
@@ -50,12 +53,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Box.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="LinqExtensions.cs" />
     <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
-    <Compile Include="Maybe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeLazy.cs" />
     <Compile Include="SafeLazyObject.cs" />
@@ -112,10 +111,6 @@
     <Compile Include="UIActions\UIActionBinding.cs" />
     <Compile Include="UIActions\UIActionHandler.cs" />
     <Compile Include="UIActions\UIActionHandlerFunc.cs" />
-    <Compile Include="Union.cs" />
-    <Compile Include="Union.Generate.cs" />
-    <Compile Include="UtilityExtensions.cs" />
-    <Compile Include="Utils\BitUtilities.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
@@ -128,10 +123,8 @@
     <Compile Include="Utils\SafeLazyObjectCollection.cs" />
     <Compile Include="Utils\SpecializedEnumerable.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
-    <Compile Include="Utils\UnreachableException.cs" />
     <Compile Include="Utils\WeakEvent.cs" />
     <Compile Include="Utils\WeakEventInvocationException.cs" />
-    <Compile Include="_void.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

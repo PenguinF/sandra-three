@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingsFile.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -127,10 +127,9 @@ namespace Eutherion.Win.Storage
             foreach (var property in Settings.Schema.AllProperties)
             {
                 // Change if added, updated or deleted.
-                PValue newValue;
                 if (Settings.TryGetRawValue(property, out PValue oldValue))
                 {
-                    if (newSettings.TryGetRawValue(property, out newValue))
+                    if (newSettings.TryGetRawValue(property, out PValue newValue))
                     {
                         if (!eq.AreEqual(oldValue, newValue))
                         {
@@ -144,7 +143,7 @@ namespace Eutherion.Win.Storage
                         yield return property;
                     }
                 }
-                else if (newSettings.TryGetRawValue(property, out newValue))
+                else if (newSettings.TryGetRawValue(property, out _))
                 {
                     // Added.
                     yield return property;

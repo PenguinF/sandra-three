@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SpecializedEnumerable.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ namespace System.Collections.Generic
     /// <typeparam name="TResult">
     /// The type of the enumerated elements.
     /// </typeparam>
-    public class EmptyEnumerable<TResult> : IEnumerable<TResult>
+    public class EmptyEnumerable<TResult> : IReadOnlyList<TResult>
     {
         /// <summary>
         /// Gets the only <see cref="EmptyEnumerable{TResult}"/> instance.
@@ -41,6 +41,8 @@ namespace System.Collections.Generic
         /// </summary>
         public IEnumerator<TResult> GetEnumerator() => EmptyEnumerator<TResult>.Instance;
 
+        int IReadOnlyCollection<TResult>.Count => 0;
+        TResult IReadOnlyList<TResult>.this[int index] => throw new IndexOutOfRangeException();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
@@ -72,7 +74,7 @@ namespace System.Collections.Generic
     /// <typeparam name="TResult">
     /// The type of the enumerated elements.
     /// </typeparam>
-    public struct SingleElementEnumerable<TResult> : IEnumerable<TResult>
+    public struct SingleElementEnumerable<TResult> : IReadOnlyList<TResult>
     {
         /// <summary>
         /// Gets or sets the element to enumerate.
@@ -92,6 +94,8 @@ namespace System.Collections.Generic
         /// </summary>
         public IEnumerator<TResult> GetEnumerator() => new SingleElementEnumerator<TResult>(Element);
 
+        int IReadOnlyCollection<TResult>.Count => 1;
+        TResult IReadOnlyList<TResult>.this[int index] => index == 0 ? Element : throw new IndexOutOfRangeException();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 

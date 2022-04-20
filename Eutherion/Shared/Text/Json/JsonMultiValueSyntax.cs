@@ -183,7 +183,7 @@ namespace Eutherion.Text.Json
         /// Gets the parent syntax node of this instance. Returns null for the root node.
         /// </summary>
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
-            whenOption1: null,
+            whenOption1: _ => null,
             whenOption2: x => x,
             whenOption3: x => x);
 

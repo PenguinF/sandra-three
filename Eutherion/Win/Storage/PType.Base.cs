@@ -117,7 +117,7 @@ namespace Eutherion.Win.Storage
                 List<JsonErrorInfo> errors)
                 => converter.Visit(valueNode).IsJust(out convertedValue)
                 ? convertedValue
-                : (Union<ITypeErrorBuilder, PValue>)typeError;
+                : Union<ITypeErrorBuilder, PValue>.Option1(typeError);
 
             public override Maybe<TValue> TryConvert(PValue value)
                 => value is TValue targetValue
