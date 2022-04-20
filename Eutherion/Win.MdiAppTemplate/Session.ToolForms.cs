@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Session.ToolForms.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         public const string SessionUIActionPrefix = nameof(Session) + ".";
 
-        private readonly Box<SettingsEditor> localSettingsEditorBox = new Box<SettingsEditor>();
-        private readonly Box<SettingsEditor> defaultSettingsEditorBox = new Box<SettingsEditor>();
+        private readonly Box<SettingsEditor> localSettingsEditorBox = new Box<SettingsEditor>(null);
+        private readonly Box<SettingsEditor> defaultSettingsEditorBox = new Box<SettingsEditor>(null);
 
         // Indexed by language file.
         private readonly Dictionary<string, Box<SettingsEditor>> languageEditorBoxes = new Dictionary<string, Box<SettingsEditor>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>();
-        private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> aboutFormBox = new Box<MenuCaptionBarForm>(null);
+        private readonly Box<MenuCaptionBarForm> creditsFormBox = new Box<MenuCaptionBarForm>(null);
 
         internal void OpenOrActivateSettingsEditor(MdiTabControl dockHostControl, Box<SettingsEditor> settingsEditor, Func<SettingsEditor> settingsEditorConstructor)
         {
@@ -379,7 +379,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 OpenOrActivateSettingsEditor(
                     dockHostControl,
-                    languageEditorBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<SettingsEditor>()),
+                    languageEditorBoxes.GetOrAdd(fileLocalizer.LanguageFile.AbsoluteFilePath, key => new Box<SettingsEditor>(null)),
                     () =>
                     {
                         // Generate translations into language file if empty.

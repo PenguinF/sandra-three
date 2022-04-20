@@ -217,7 +217,7 @@ namespace Eutherion.Win.MdiAppTemplate
         private const int WarningIndicatorIndex = 9;
         private const int MessageIndicatorIndex = 10;
 
-        private readonly Box<MenuCaptionBarForm> errorListFormBox = new Box<MenuCaptionBarForm>();
+        private readonly Box<MenuCaptionBarForm> errorListFormBox = new Box<MenuCaptionBarForm>(null);
 
         private readonly LocalizedString untitledString;
 
