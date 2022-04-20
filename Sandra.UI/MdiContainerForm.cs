@@ -56,7 +56,8 @@ namespace Sandra.UI
             {
                 // More than one localizer: can switch between them.
                 var langWindowMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
-                langWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(x => (Union<DefaultUIActionBinding, MainMenuDropDownItem>)x.SwitchToLangUIActionBinding));
+                langWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(
+                    x => Union<DefaultUIActionBinding, MainMenuDropDownItem>.Option1(x.SwitchToLangUIActionBinding)));
 
                 langWindowMenu.Add(SharedUIAction.WindowMenuRestore);
                 langWindowMenu.Add(SharedUIAction.WindowMenuMove);

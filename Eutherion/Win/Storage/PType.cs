@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ namespace Eutherion.Win.Storage
     /// Represents a type of <see cref="PValue"/>, which controls the range of values that are possible.
     /// </summary>
     /// <typeparam name="T">
-    /// The .NET target <see cref="System.Type"/> to convert to and from.
+    /// The .NET target <see cref="Type"/> to convert to and from.
     /// </typeparam>
     public abstract class PType<T>
     {
