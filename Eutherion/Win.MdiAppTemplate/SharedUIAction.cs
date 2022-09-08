@@ -29,8 +29,8 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         public const string SharedUIActionPrefix = nameof(SharedUIAction) + ".";
 
-        public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(Exit)),
+        public static readonly UIAction Exit = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(Exit)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -41,8 +41,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding WindowMenuRestore = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(WindowMenuRestore)),
+        public static readonly UIAction WindowMenuRestore = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(WindowMenuRestore)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -52,8 +52,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding WindowMenuMove = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMove)),
+        public static readonly UIAction WindowMenuMove = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(WindowMenuMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -62,8 +62,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding WindowMenuSize = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(WindowMenuSize)),
+        public static readonly UIAction WindowMenuSize = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(WindowMenuSize)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -72,8 +72,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding WindowMenuMinimize = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMinimize)),
+        public static readonly UIAction WindowMenuMinimize = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(WindowMenuMinimize)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -82,8 +82,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding WindowMenuMaximize = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(WindowMenuMaximize)),
+        public static readonly UIAction WindowMenuMaximize = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(WindowMenuMaximize)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -92,8 +92,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding Close = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(Close)),
+        public static readonly UIAction Close = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(Close)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -104,8 +104,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding Undo = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(Undo)),
+        public static readonly UIAction Undo = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(Undo)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -117,8 +117,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding Redo = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(Redo)),
+        public static readonly UIAction Redo = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(Redo)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -129,8 +129,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
+        public static readonly UIAction ZoomIn = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(ZoomIn)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -142,8 +142,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(ZoomOut)),
+        public static readonly UIAction ZoomOut = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(ZoomOut)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -154,8 +154,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
+        public static readonly UIAction CutSelectionToClipBoard = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -167,8 +167,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
+        public static readonly UIAction CopySelectionToClipBoard = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -179,8 +179,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
+        public static readonly UIAction PasteSelectionFromClipBoard = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -191,8 +191,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(SelectAllText)),
+        public static readonly UIAction SelectAllText = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(SelectAllText)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -203,8 +203,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(SaveToFile)),
+        public static readonly UIAction SaveToFile = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(SaveToFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -216,8 +216,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding SaveAs = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(SaveAs)),
+        public static readonly UIAction SaveAs = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(SaveAs)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -232,8 +232,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding ShowErrorPane = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(ShowErrorPane)),
+        public static readonly UIAction ShowErrorPane = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(ShowErrorPane)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -243,8 +243,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding GoToPreviousError = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(GoToPreviousError)),
+        public static readonly UIAction GoToPreviousError = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(GoToPreviousError)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -254,8 +254,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding GoToNextError = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(GoToNextError)),
+        public static readonly UIAction GoToNextError = new UIAction(
+            new StringKey<UIAction>(SharedUIActionPrefix + nameof(GoToNextError)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface

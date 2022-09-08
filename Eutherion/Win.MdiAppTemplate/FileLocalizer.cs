@@ -113,9 +113,9 @@ namespace Eutherion.Win.MdiAppTemplate
             ? FormatUtilities.ConditionalFormat(displayText, parameters)
             : Default.Format(localizedStringKey, parameters);
 
-        private DefaultUIActionBinding switchToLangUIActionBinding;
+        private UIAction switchToLangUIActionBinding;
 
-        public DefaultUIActionBinding SwitchToLangUIActionBinding
+        public UIAction SwitchToLangUIActionBinding
         {
             get
             {
@@ -123,8 +123,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     var languageMenuItemProvider = new LanguageMenuItemProvider(this);
 
-                    switchToLangUIActionBinding = new DefaultUIActionBinding(
-                        new UIAction(nameof(FileLocalizer) + "." + LanguageFile.AbsoluteFilePath),
+                    switchToLangUIActionBinding = new UIAction(
+                        new StringKey<UIAction>(nameof(FileLocalizer) + "." + LanguageFile.AbsoluteFilePath),
                         new ImplementationSet<IUIActionInterface>
                         {
                             new CombinedUIActionInterface

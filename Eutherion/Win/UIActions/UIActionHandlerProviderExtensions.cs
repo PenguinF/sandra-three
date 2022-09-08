@@ -31,8 +31,8 @@ namespace Eutherion.UIActions
     public static class UIActionHandlerProviderExtensions
     {
         /// <summary>
-        /// Binds a handler function for a <see cref="UIAction"/> to this <see cref="IUIActionHandlerProvider"/>,
-        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
+        /// Binds a handler function for a <see cref="UIAction"/> key to this <see cref="IUIActionHandlerProvider"/>,
+        /// and specifies how this <see cref="UIAction"/> key is exposed to the user interface.
         /// </summary>
         /// <typeparam name="T">
         /// The type of <paramref name="provider"/>.
@@ -42,7 +42,7 @@ namespace Eutherion.UIActions
         /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
         /// </param>
         /// <param name="binding">
-        /// The <see cref="UIActionBinding"/> containing the <see cref="UIAction"/> to bind, its interfaces, and its handler.
+        /// The <see cref="UIActionBinding"/> containing the <see cref="UIAction"/> key to bind, its interfaces, and its handler.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="binding"/> is null.
@@ -57,8 +57,34 @@ namespace Eutherion.UIActions
         }
 
         /// <summary>
-        /// Binds a handler function for a <see cref="UIAction"/> to a <see cref="IUIActionHandlerProvider"/>,
-        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
+        /// Binds a handler function for a <see cref="UIAction"/> key to a <see cref="IUIActionHandlerProvider"/>,
+        /// and specifies how this <see cref="UIAction"/> key is exposed to the user interface.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of <paramref name="provider"/>.
+        /// </typeparam>
+        /// <param name="provider">
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// </param>
+        /// <param name="actionKey">
+        /// The <see cref="UIAction"/> key to bind.
+        /// </param>
+        /// <param name="interfaces">
+        /// The <see cref="IUIActionInterface"/> set which defines how the action is exposed to the user interface.
+        /// </param>
+        /// <param name="handler">
+        /// The handler function used to perform the <see cref="UIAction"/> key and determine its <see cref="UIActionState"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="actionKey"/> and/or <paramref name="interfaces"/> and/or <paramref name="handler"/> are null.
+        /// </exception>
+        public static void BindAction<T>(this T provider, StringKey<UIAction> actionKey, ImplementationSet<IUIActionInterface> interfaces, UIActionHandlerFunc handler)
+            where T : Control, IUIActionHandlerProvider
+            => BindAction(provider, new UIActionBinding(actionKey, interfaces, handler));
+
+        /// <summary>
+        /// Binds a handler function for a <see cref="UIAction"/> key to a <see cref="IUIActionHandlerProvider"/>,
+        /// and specifies how this <see cref="UIAction"/> key is exposed to the user interface.
         /// </summary>
         /// <typeparam name="T">
         /// The type of <paramref name="provider"/>.
@@ -67,46 +93,20 @@ namespace Eutherion.UIActions
         /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
         /// </param>
         /// <param name="action">
-        /// The <see cref="UIAction"/> to bind.
-        /// </param>
-        /// <param name="interfaces">
-        /// The <see cref="IUIActionInterface"/> set which defines how the action is exposed to the user interface.
+        /// Contains the <see cref="UIAction"/> key with its suggested default <see cref="IUIActionInterface"/> set.
         /// </param>
         /// <param name="handler">
-        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// The handler function used to perform the <see cref="UIAction"/> key and determine its <see cref="UIActionState"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="action"/> and/or <paramref name="interfaces"/> and/or <paramref name="handler"/> are null.
+        /// <paramref name="action"/> and/or <paramref name="handler"/> are null.
         /// </exception>
-        public static void BindAction<T>(this T provider, UIAction action, ImplementationSet<IUIActionInterface> interfaces, UIActionHandlerFunc handler)
+        public static void BindAction<T>(this T provider, UIAction action, UIActionHandlerFunc handler)
             where T : Control, IUIActionHandlerProvider
-            => BindAction(provider, new UIActionBinding(action, interfaces, handler));
+            => BindAction(provider, new UIActionBinding(action, handler));
 
         /// <summary>
-        /// Binds a handler function for a <see cref="UIAction"/> to a <see cref="IUIActionHandlerProvider"/>,
-        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of <paramref name="provider"/>.
-        /// </typeparam>
-        /// <param name="provider">
-        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
-        /// </param>
-        /// <param name="binding">
-        /// Contains the <see cref="UIAction"/> with its suggested default <see cref="IUIActionInterface"/> set.
-        /// </param>
-        /// <param name="handler">
-        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="binding"/> and/or <paramref name="handler"/> are null.
-        /// </exception>
-        public static void BindAction<T>(this T provider, DefaultUIActionBinding binding, UIActionHandlerFunc handler)
-            where T : Control, IUIActionHandlerProvider
-            => BindAction(provider, new UIActionBinding(binding, handler));
-
-        /// <summary>
-        /// Binds a collection of handlers for <see cref="UIAction"/>s to a <see cref="IUIActionHandlerProvider"/>.
+        /// Binds a collection of handlers for <see cref="UIAction"/> keys to a <see cref="IUIActionHandlerProvider"/>.
         /// </summary>
         /// <typeparam name="T">
         /// The type of <paramref name="provider"/>.
@@ -115,8 +115,8 @@ namespace Eutherion.UIActions
         /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
         /// </param>
         /// <param name="bindings">
-        /// A collection of triples of a <see cref="UIAction"/> to bind, a <see cref="IUIActionInterface"/> set that defines how the action
-        /// is exposed to the user interface, and a handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// A collection of triples of a <see cref="UIAction"/> key to bind, a <see cref="IUIActionInterface"/> set that defines how the action
+        /// is exposed to the user interface, and a handler function used to perform the <see cref="UIAction"/> key and determine its <see cref="UIActionState"/>.
         /// </param>
         public static void BindActions<T>(this T provider, UIActionBindings bindings)
             where T : Control, IUIActionHandlerProvider

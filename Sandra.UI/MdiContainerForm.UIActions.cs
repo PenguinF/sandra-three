@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Collections;
 using Eutherion.UIActions;
 using Eutherion.Win.MdiAppTemplate;
@@ -39,8 +40,8 @@ namespace Sandra.UI
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
-        public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
+        public static readonly UIAction OpenNewPlayingBoard = new UIAction(
+            new StringKey<UIAction>(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -57,8 +58,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding OpenGame = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenGame)),
+        public static readonly UIAction OpenGame = new UIAction(
+            new StringKey<UIAction>(MdiContainerFormUIActionPrefix + nameof(OpenGame)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -130,8 +131,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPgnFile)),
+        public static readonly UIAction NewPgnFile = new UIAction(
+            new StringKey<UIAction>(MdiContainerFormUIActionPrefix + nameof(NewPgnFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -148,8 +149,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPgnFile)),
+        public static readonly UIAction OpenPgnFile = new UIAction(
+            new StringKey<UIAction>(MdiContainerFormUIActionPrefix + nameof(OpenPgnFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface

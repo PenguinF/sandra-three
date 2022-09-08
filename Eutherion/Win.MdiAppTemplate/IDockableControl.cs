@@ -134,6 +134,6 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Enumerates the collection of drop down item definitions and action bindings to add to the container.
         /// </summary>
-        public IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> DropDownItems;
+        public IEnumerable<Union<UIAction, MainMenuDropDownItem>> DropDownItems;
     }
 }

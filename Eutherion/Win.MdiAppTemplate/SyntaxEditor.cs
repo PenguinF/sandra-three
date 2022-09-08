@@ -360,13 +360,13 @@ namespace Eutherion.Win.MdiAppTemplate
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Initialize menu strip.
-            List<Union<DefaultUIActionBinding, MainMenuDropDownItem>> fileMenu;
+            List<Union<UIAction, MainMenuDropDownItem>> fileMenu;
 
             switch (codeAccessOption)
             {
                 default:
                 case SyntaxEditorCodeAccessOption.Default:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.SaveAs,
@@ -374,14 +374,14 @@ namespace Eutherion.Win.MdiAppTemplate
                     };
                     break;
                 case SyntaxEditorCodeAccessOption.FixedFile:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.Close
                     };
                     break;
                 case SyntaxEditorCodeAccessOption.ReadOnly:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.Close
                     };
@@ -405,7 +405,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
-                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.Undo,
                         SharedUIAction.Redo,
@@ -418,7 +418,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
-                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.ZoomIn,
                         SharedUIAction.ZoomOut,
@@ -766,7 +766,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                            UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Key, true);
 
                             if (ContainsChanges)
                             {
