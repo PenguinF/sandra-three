@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
@@ -26,7 +27,6 @@ using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;

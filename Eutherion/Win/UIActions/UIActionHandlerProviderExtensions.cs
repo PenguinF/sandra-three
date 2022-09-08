@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using Eutherion.Win.UIActions;
 using System;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Windows.Forms;
 

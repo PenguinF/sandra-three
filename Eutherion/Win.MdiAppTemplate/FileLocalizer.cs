@@ -19,12 +19,12 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.IO;
 

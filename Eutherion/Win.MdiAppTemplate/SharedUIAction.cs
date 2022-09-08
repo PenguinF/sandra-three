@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using Eutherion.UIActions;
 using System;
-using System.Collections.Specialized;
 
 namespace Eutherion.Win.MdiAppTemplate
 {

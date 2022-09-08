@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 
 namespace Eutherion.UIActions
