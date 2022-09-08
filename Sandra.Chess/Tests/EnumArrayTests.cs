@@ -20,14 +20,13 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 
-namespace Eutherion.Shared.Tests
+namespace Sandra.Chess.Tests
 {
     public class EnumArrayTests
     {
-        private void AssertEnumIsIllegal<T>() where T : struct
+        private void AssertEnumIsIllegal<T>() where T : Enum
         {
             // The beauty of this is that the static constructor is only run when already inside the closure.
             Assert.Throws<TypeInitializationException>(() => EnumIndexedArray<T, int>.New());

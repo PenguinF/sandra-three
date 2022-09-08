@@ -42,6 +42,7 @@
     <Compile Include="ChessConstants.cs" />
     <Compile Include="ChessTypes.cs" />
     <Compile Include="ColorSquareIndexedArray.cs" />
+    <Compile Include="EnumIndexedArray.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MoveFormatter.cs" />

@@ -49,6 +49,7 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="EnumArrayTests.cs" />
     <Compile Include="ParseTrees.cs" />
     <Compile Include="ParseTrees.Misc.cs" />
     <Compile Include="ParseTrees.MoveTree.cs" />

@@ -38,7 +38,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CircularBufferTests.cs" />
-    <Compile Include="EnumArrayTests.cs" />
     <Compile Include="ExpectedJsonTree.cs" />
     <Compile Include="ExpectedJsonTrees.cs" />
     <Compile Include="JsonErrorTests.cs" />
