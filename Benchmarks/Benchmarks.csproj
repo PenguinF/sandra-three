@@ -77,6 +77,9 @@
     <PackageReference Include="Eutherion.Common">
       <Version>1.2.0</Version>
     </PackageReference>
+    <PackageReference Include="Eutherion.Utilities">
+      <Version>1.2.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
