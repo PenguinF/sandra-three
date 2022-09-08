@@ -41,7 +41,6 @@
     <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SafeLazyObject.cs" />
     <Compile Include="Text\ISpan.cs" />
     <Compile Include="Text\Json\IJsonSymbol.cs" />
     <Compile Include="Text\Json\JsonBackgroundListSyntax.cs" />
