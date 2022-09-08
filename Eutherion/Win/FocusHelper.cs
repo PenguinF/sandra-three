@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Threading;
 using Eutherion.Win.Native;
 using System;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Eutherion.Win
