@@ -54,6 +54,6 @@ namespace Eutherion.Win.Storage
         }
 
         public override string GetBaseValue(Color value)
-            => $"#{value.R.ToString("X2")}{value.G.ToString("X2")}{value.B.ToString("X2")}";
+            => $"#{value.R:X2}{value.G:X2}{value.B:X2}";
     }
 }
