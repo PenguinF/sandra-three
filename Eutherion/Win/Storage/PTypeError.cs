@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 
@@ -49,7 +49,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public abstract string GetLocalizedMessage(Localizer localizer);
+        public abstract string GetLocalizedMessage(TextFormatter localizer);
     }
 
     /// <summary>
@@ -71,8 +71,8 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public override string GetLocalizedMessage(Localizer localizer)
-            => localizer.Localize(PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, PropertyKey);
+        public override string GetLocalizedMessage(TextFormatter localizer)
+            => localizer.Format(PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, PropertyKey);
 
         private UnrecognizedPropertyKeyTypeError(string propertyKey, int start, int length)
             : base(start, length, JsonErrorLevel.Warning)
@@ -129,10 +129,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public override string GetLocalizedMessage(Localizer localizer)
+        public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
                 localizer,
-                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue));
 
         internal ValueTypeError(ITypeErrorBuilder typeErrorBuilder, string actualValueString, int start, int length)
             : base(start, length)
@@ -193,10 +193,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public override string GetLocalizedMessage(Localizer localizer)
+        public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorAtPropertyKeyMessage(
                 localizer,
-                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue),
+                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue),
                 PropertyKey);
 
         private ValueTypeErrorAtPropertyKey(
@@ -275,10 +275,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public override string GetLocalizedMessage(Localizer localizer)
+        public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorAtItemIndexMessage(
                 localizer,
-                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue),
+                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue),
                 ItemIndex);
 
         private ValueTypeErrorAtItemIndex(

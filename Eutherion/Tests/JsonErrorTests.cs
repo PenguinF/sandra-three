@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -49,16 +49,16 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(null, Localizer.Default));
+            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(null, TextFormatter.Default));
             Assert.Throws<ArgumentNullException>("localizer", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
         }
 
-        private sealed class TestLocalizer : Localizer
+        private sealed class TestLocalizer : TextFormatter
         {
             public static readonly string TestNullString = "NULL";
             public static readonly string TestUntypedObjectString = "UNTYPED({0})";
 
-            public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+            public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
             {
                 if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.NullString)
                     return TestNullString;

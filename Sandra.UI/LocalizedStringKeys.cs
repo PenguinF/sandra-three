@@ -19,37 +19,38 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion;
+using Eutherion.Text;
 using System.Collections.Generic;
 
 namespace Sandra.UI
 {
     internal static class LocalizedStringKeys
     {
-        internal static readonly LocalizedStringKey BreakAtCurrentPosition = new LocalizedStringKey(nameof(BreakAtCurrentPosition));
-        internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
-        internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
-        internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
-        internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
-        internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
-        internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
-        internal static readonly LocalizedStringKey FirstMove = new LocalizedStringKey(nameof(FirstMove));
-        internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
-        internal static readonly LocalizedStringKey GoTo = new LocalizedStringKey(nameof(GoTo));
-        internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
-        internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
-        internal static readonly LocalizedStringKey NewGameFile = new LocalizedStringKey(nameof(NewGameFile));
-        internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
-        internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
-        internal static readonly LocalizedStringKey OpenGame = new LocalizedStringKey(nameof(OpenGame));
-        internal static readonly LocalizedStringKey OpenGameFile = new LocalizedStringKey(nameof(OpenGameFile));
-        internal static readonly LocalizedStringKey PgnFiles = new LocalizedStringKey(nameof(PgnFiles));
-        internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
-        internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
-        internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
-        internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
+        internal static readonly StringKey<ForFormattedText> BreakAtCurrentPosition = new StringKey<ForFormattedText>(nameof(BreakAtCurrentPosition));
+        internal static readonly StringKey<ForFormattedText> CopyDiagramToClipboard = new StringKey<ForFormattedText>(nameof(CopyDiagramToClipboard));
+        internal static readonly StringKey<ForFormattedText> DeleteLine = new StringKey<ForFormattedText>(nameof(DeleteLine));
+        internal static readonly StringKey<ForFormattedText> DemoteLine = new StringKey<ForFormattedText>(nameof(DemoteLine));
+        internal static readonly StringKey<ForFormattedText> EndOfGame = new StringKey<ForFormattedText>(nameof(EndOfGame));
+        internal static readonly StringKey<ForFormattedText> FastBackward = new StringKey<ForFormattedText>(nameof(FastBackward));
+        internal static readonly StringKey<ForFormattedText> FastForward = new StringKey<ForFormattedText>(nameof(FastForward));
+        internal static readonly StringKey<ForFormattedText> FirstMove = new StringKey<ForFormattedText>(nameof(FirstMove));
+        internal static readonly StringKey<ForFormattedText> FlipBoard = new StringKey<ForFormattedText>(nameof(FlipBoard));
+        internal static readonly StringKey<ForFormattedText> GoTo = new StringKey<ForFormattedText>(nameof(GoTo));
+        internal static readonly StringKey<ForFormattedText> LastMove = new StringKey<ForFormattedText>(nameof(LastMove));
+        internal static readonly StringKey<ForFormattedText> NewGame = new StringKey<ForFormattedText>(nameof(NewGame));
+        internal static readonly StringKey<ForFormattedText> NewGameFile = new StringKey<ForFormattedText>(nameof(NewGameFile));
+        internal static readonly StringKey<ForFormattedText> NextLine = new StringKey<ForFormattedText>(nameof(NextLine));
+        internal static readonly StringKey<ForFormattedText> NextMove = new StringKey<ForFormattedText>(nameof(NextMove));
+        internal static readonly StringKey<ForFormattedText> OpenGame = new StringKey<ForFormattedText>(nameof(OpenGame));
+        internal static readonly StringKey<ForFormattedText> OpenGameFile = new StringKey<ForFormattedText>(nameof(OpenGameFile));
+        internal static readonly StringKey<ForFormattedText> PgnFiles = new StringKey<ForFormattedText>(nameof(PgnFiles));
+        internal static readonly StringKey<ForFormattedText> PreviousLine = new StringKey<ForFormattedText>(nameof(PreviousLine));
+        internal static readonly StringKey<ForFormattedText> PreviousMove = new StringKey<ForFormattedText>(nameof(PreviousMove));
+        internal static readonly StringKey<ForFormattedText> PromoteLine = new StringKey<ForFormattedText>(nameof(PromoteLine));
+        internal static readonly StringKey<ForFormattedText> StartOfGame = new StringKey<ForFormattedText>(nameof(StartOfGame));
 
-        internal static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
+        internal static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishTranslations => new Dictionary<StringKey<ForFormattedText>, string>
         {
             { BreakAtCurrentPosition, "Break at current position" },
             { CopyDiagramToClipboard, "Copy diagram to clipboard" },

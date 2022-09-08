@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -32,23 +32,23 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the key for this <see cref="LocalizedTextProvider"/>.
         /// </summary>
-        public readonly LocalizedStringKey Key;
+        public readonly StringKey<ForFormattedText> Key;
 
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public string GetText() => Session.Current.CurrentLocalizer.Localize(Key);
+        public string GetText() => Session.Current.CurrentLocalizer.Format(Key);
 
         /// <summary>
-        /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="LocalizedStringKey"/>.
+        /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/>.
         /// </summary>
         /// <param name="key">
-        /// The <see cref="LocalizedStringKey"/> for the <see cref="LocalizedTextProvider"/>.
+        /// The <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for the <see cref="LocalizedTextProvider"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public LocalizedTextProvider(LocalizedStringKey key)
+        public LocalizedTextProvider(StringKey<ForFormattedText> key)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
         }

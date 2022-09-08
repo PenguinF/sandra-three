@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 
@@ -33,12 +33,12 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for concatenating a list of values.
         /// </summary>
-        public static readonly LocalizedStringKey EnumerateWithOr = new LocalizedStringKey(nameof(EnumerateWithOr));
+        public static readonly StringKey<ForFormattedText> EnumerateWithOr = new StringKey<ForFormattedText>(nameof(EnumerateWithOr));
 
         /// <summary>
         /// Gets the translation key for property keys that are not recognized.
         /// </summary>
-        public static readonly LocalizedStringKey UnrecognizedPropertyKeyTypeError = new LocalizedStringKey(nameof(UnrecognizedPropertyKeyTypeError));
+        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyTypeError));
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
@@ -47,7 +47,7 @@ namespace Eutherion.Win.Storage
         ///          "expected _______{0}______, but found __{1}__"
         /// See also: <seealso cref="GetLocalizedTypeErrorMessage"/>.
         /// </summary>
-        public static readonly LocalizedStringKey GenericJsonTypeError = new LocalizedStringKey(nameof(GenericJsonTypeError));
+        public static readonly StringKey<ForFormattedText> GenericJsonTypeError = new StringKey<ForFormattedText>(nameof(GenericJsonTypeError));
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
@@ -59,32 +59,32 @@ namespace Eutherion.Win.Storage
         /// - an index error location (IndexErrorLocation)
         /// See also: <seealso cref="GetLocalizedTypeErrorSomewhereMessage"/>.
         /// </summary>
-        public static readonly LocalizedStringKey GenericJsonTypeErrorSomewhere = new LocalizedStringKey(nameof(GenericJsonTypeErrorSomewhere));
+        public static readonly StringKey<ForFormattedText> GenericJsonTypeErrorSomewhere = new StringKey<ForFormattedText>(nameof(GenericJsonTypeErrorSomewhere));
 
         /// <summary>
         /// Gets the translation key for displaying an error in the context of a property key.
         /// </summary>
-        public static readonly LocalizedStringKey KeyErrorLocation = new LocalizedStringKey(nameof(KeyErrorLocation));
+        public static readonly StringKey<ForFormattedText> KeyErrorLocation = new StringKey<ForFormattedText>(nameof(KeyErrorLocation));
 
         /// <summary>
         /// Gets the translation key for displaying an error in the context of an item index in an array.
         /// </summary>
-        public static readonly LocalizedStringKey IndexErrorLocation = new LocalizedStringKey(nameof(IndexErrorLocation));
+        public static readonly StringKey<ForFormattedText> IndexErrorLocation = new StringKey<ForFormattedText>(nameof(IndexErrorLocation));
 
         /// <summary>
         /// Gets the translation key for when there are no legal values.
         /// </summary>
-        public static readonly LocalizedStringKey NoLegalValuesError = new LocalizedStringKey(nameof(NoLegalValuesError));
+        public static readonly StringKey<ForFormattedText> NoLegalValuesError = new StringKey<ForFormattedText>(nameof(NoLegalValuesError));
 
         /// <summary>
         /// Gets the translation key for when there are no legal values.
         /// </summary>
-        public static readonly LocalizedStringKey NoLegalValuesErrorSomewhere = new LocalizedStringKey(nameof(NoLegalValuesErrorSomewhere));
+        public static readonly StringKey<ForFormattedText> NoLegalValuesErrorSomewhere = new StringKey<ForFormattedText>(nameof(NoLegalValuesErrorSomewhere));
 
         /// <summary>
         /// Gets the translation key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.
         /// </summary>
-        public static readonly LocalizedStringKey TupleItemTypeMismatchError = new LocalizedStringKey(nameof(TupleItemTypeMismatchError));
+        public static readonly StringKey<ForFormattedText> TupleItemTypeMismatchError = new StringKey<ForFormattedText>(nameof(TupleItemTypeMismatchError));
 
         /// <summary>
         /// Surrounds a string value with double quote characters.
@@ -214,10 +214,10 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public static string GetLocalizedTypeErrorMessage(
-            Localizer localizer,
+            TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString)
-            => localizer.Localize(
+            => localizer.Format(
                 GenericJsonTypeError,
                 localizedExpectedTypeDescription,
                 actualValueString);
@@ -234,8 +234,8 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
-        public static string GetLocatedAtPropertyKeyMessage(Localizer localizer, string propertyKey)
-            => localizer.Localize(KeyErrorLocation, propertyKey);
+        public static string GetLocatedAtPropertyKeyMessage(TextFormatter localizer, string propertyKey)
+            => localizer.Format(KeyErrorLocation, propertyKey);
 
         /// <summary>
         /// Gets the localized description of an error for a value which is an element of an array.
@@ -249,8 +249,8 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
-        public static string GetLocatedAtItemIndexMessage(Localizer localizer, int itemIndex)
-            => localizer.Localize(IndexErrorLocation, itemIndex.ToStringInvariant());
+        public static string GetLocatedAtItemIndexMessage(TextFormatter localizer, int itemIndex)
+            => localizer.Format(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
         /// Gets the localized error message for a generic json value type error. 
@@ -271,11 +271,11 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public static string GetLocalizedTypeErrorSomewhereMessage(
-            Localizer localizer,
+            TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString,
             string somewhere)
-            => localizer.Localize(
+            => localizer.Format(
                 GenericJsonTypeErrorSomewhere,
                 localizedExpectedTypeDescription,
                 actualValueString,
@@ -286,7 +286,7 @@ namespace Eutherion.Win.Storage
         /// </summary>
         // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
         // Instead, GetLocalizedTypeErrorMessage() handles the localization.
-        public LocalizedStringKey ExpectedTypeDescriptionKey { get; }
+        public StringKey<ForFormattedText> ExpectedTypeDescriptionKey { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
@@ -294,7 +294,7 @@ namespace Eutherion.Win.Storage
         /// <param name="expectedTypeDescriptionKey">
         /// The translation key which describes the type of expected value.
         /// </param>
-        public PTypeErrorBuilder(LocalizedStringKey expectedTypeDescriptionKey)
+        public PTypeErrorBuilder(StringKey<ForFormattedText> expectedTypeDescriptionKey)
             => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
@@ -309,10 +309,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+        public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
             => GetLocalizedTypeErrorMessage(
                 localizer,
-                localizer.Localize(ExpectedTypeDescriptionKey),
+                localizer.Format(ExpectedTypeDescriptionKey),
                 actualValueString);
 
         /// <summary>
@@ -330,10 +330,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+        public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Localize(ExpectedTypeDescriptionKey),
+                localizer.Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
@@ -352,10 +352,10 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+        public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Localize(ExpectedTypeDescriptionKey),
+                localizer.Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtItemIndexMessage(localizer, itemIndex));
     }

@@ -20,7 +20,7 @@
 #endregion
 
 using Eutherion.Collections;
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Win.Storage;
@@ -390,7 +390,7 @@ namespace Eutherion.Win.MdiAppTemplate
                             // Fill with built-in default dictionary, or if not provided, an empty dictionary.
                             settingCopy.AddOrReplace(
                                 Localizers.Translations,
-                                defaultLocalizerDictionary ?? new Dictionary<LocalizedStringKey, string>());
+                                defaultLocalizerDictionary ?? new Dictionary<StringKey<ForFormattedText>, string>());
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.

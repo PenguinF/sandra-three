@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Storage;
@@ -152,7 +152,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                              let position = (syntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
                                              // Instead of using errorLocationString.DisplayText.Value,
                                              // use the current localizer to format the localized string.
-                                             let fullErrorMessage = Session.Current.CurrentLocalizer.Localize(
+                                             let fullErrorMessage = Session.Current.CurrentLocalizer.Format(
                                                  errorLocationString.Key,
                                                  errorMessage, lineIndex, position)
                                              select Session.Current.CurrentLocalizer.ToSentenceCase(fullErrorMessage)).ToArray();
@@ -755,8 +755,8 @@ namespace Eutherion.Win.MdiAppTemplate
             if (ContainsChanges && CodeFile.AutoSaveFile == null)
             {
                 DialogResult result = MessageBox.Show(
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, CodeFilePathDisplayString),
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.SaveChangesQuery, CodeFilePathDisplayString),
+                    Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.UnsavedChangesTitle),
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button3);
@@ -935,10 +935,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     AutoUpgradeEnabled = true,
                     DereferenceLinks = true,
                     DefaultExt = extension,
-                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    Filter = $"{Session.Current.CurrentLocalizer.Format(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
                     SupportMultiDottedExtensions = true,
                     RestoreDirectory = true,
-                    Title = Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveAs),
+                    Title = Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.SaveAs),
                     ValidateNames = true,
                 };
 
@@ -983,7 +983,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the localized description for the default file extension.
         /// </summary>
-        public abstract LocalizedStringKey FileExtensionLocalizedKey { get; }
+        public abstract StringKey<ForFormattedText> FileExtensionLocalizedKey { get; }
 
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.

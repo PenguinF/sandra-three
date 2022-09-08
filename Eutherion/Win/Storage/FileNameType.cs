@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System.IO;
 
 namespace Eutherion.Win.Storage
@@ -30,7 +30,7 @@ namespace Eutherion.Win.Storage
     public sealed class FileNameType : PType.Filter<string>
     {
         public static readonly PTypeErrorBuilder FileNameTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
+            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(FileNameTypeError)));
 
         public static readonly FileNameType Instance = new FileNameType(allowStartWithDots: false);
 

@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
@@ -765,16 +765,16 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateToolTips()
         {
-            Localizer currentLocalizer = Session.Current.CurrentLocalizer;
+            TextFormatter currentLocalizer = Session.Current.CurrentLocalizer;
 
-            new (NonSelectableButton, LocalizedStringKey)[]
+            new (NonSelectableButton, StringKey<ForFormattedText>)[]
             {
                 (minimizeButton, SharedLocalizedStringKeys.WindowMinimize),
                 (maximizeButton, SharedLocalizedStringKeys.WindowMaximize),
                 (saveButton, SharedLocalizedStringKeys.Save),
                 (closeButton, SharedLocalizedStringKeys.Close),
             }
-            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Localize(x.Item2)));
+            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Format(x.Item2)));
         }
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)
