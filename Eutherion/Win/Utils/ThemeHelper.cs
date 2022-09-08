@@ -19,11 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Threading;
 using Eutherion.Win.Native;
 using Microsoft.Win32;
 using System;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Utils

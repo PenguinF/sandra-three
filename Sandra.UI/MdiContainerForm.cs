@@ -55,9 +55,9 @@ namespace Sandra.UI
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                var langWindowMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>();
+                var langWindowMenu = new List<Union<UIAction, MainMenuDropDownItem>>();
                 langWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(
-                    x => Union<DefaultUIActionBinding, MainMenuDropDownItem>.Option1(x.SwitchToLangUIActionBinding)));
+                    x => Union<UIAction, MainMenuDropDownItem>.Option1(x.SwitchToLangUIActionBinding)));
 
                 langWindowMenu.Add(SharedUIAction.WindowMenuRestore);
                 langWindowMenu.Add(SharedUIAction.WindowMenuMove);
@@ -76,7 +76,7 @@ namespace Sandra.UI
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()),
-                DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     NewPgnFile,
                     OpenPgnFile,
@@ -87,13 +87,13 @@ namespace Sandra.UI
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
-                DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     OpenNewPlayingBoard,
                     new MainMenuDropDownItem
                     {
                         Container = new UIMenuNode.Container(LocalizedStringKeys.GoTo.ToTextProvider()) { IsFirstInGroup = true },
-                        DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                        DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                         {
                             // Add all these to a submenu.
                             StandardChessBoard.GotoStart,
@@ -128,7 +128,7 @@ namespace Sandra.UI
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
-                DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     OpenGame,
                     SharedUIAction.ZoomIn,
@@ -142,7 +142,7 @@ namespace Sandra.UI
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools.ToTextProvider()),
-                DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     Session.EditPreferencesFile,
                     Session.ShowDefaultSettingsFile,
@@ -155,7 +155,7 @@ namespace Sandra.UI
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Help.ToTextProvider()),
-                DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     Session.OpenAbout,
                     Session.ShowCredits,

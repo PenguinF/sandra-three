@@ -19,7 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion;
+using Eutherion.Text;
 using Sandra.Chess.Pgn;
 using System.Collections.Generic;
 
@@ -27,16 +28,16 @@ namespace Sandra.UI
 {
     public static class PgnErrorInfoExtensions
     {
-        public static LocalizedStringKey GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
-            => new LocalizedStringKey($"PgnError{pgnErrorCode}");
+        public static StringKey<ForFormattedText> GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
+            => new StringKey<ForFormattedText>($"PgnError{pgnErrorCode}");
 
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="PgnErrorInfo"/>.
         /// </summary>
-        public static string Message(this PgnErrorInfo pgnErrorInfo, Localizer localizer)
-            => localizer.Localize(GetLocalizedStringKey(pgnErrorInfo.ErrorCode), pgnErrorInfo.Parameters);
+        public static string Message(this PgnErrorInfo pgnErrorInfo, TextFormatter localizer)
+            => localizer.Format(GetLocalizedStringKey(pgnErrorInfo.ErrorCode), pgnErrorInfo.Parameters);
 
-        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<LocalizedStringKey, string>
+        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>
         {
             { GetLocalizedStringKey(PgnErrorCode.IllegalCharacter), "illegal character '{0}'" },
             { GetLocalizedStringKey(PgnErrorCode.UnterminatedTagValue), "unterminated tag value" },

@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Native;
@@ -163,7 +163,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 try
                 {
-                    ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                    ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Key, true);
                 }
                 catch (Exception exc)
                 {
@@ -175,7 +175,7 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 // Update the save button each time the handler is invalidated.
                 // Some kind of checked state doesn't seem to be supported, so ignore UIActionState.Checked.
-                UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
+                UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Key, false);
                 saveButton.Visible = currentActionState.Visible;
                 saveButton.Enabled = currentActionState.Enabled;
                 if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = ObservableStyle.BackColor;
@@ -395,10 +395,10 @@ namespace Eutherion.Win.MdiAppTemplate
             {
                 if (toolStripItem is UIActionToolStripMenuItem menuItem)
                 {
-                    UIActionState actionState = mainMenuActionHandler.TryPerformAction(menuItem.Action, false);
+                    UIActionState actionState = mainMenuActionHandler.TryPerformAction(menuItem.ActionKey, false);
                     menuItem.Update(actionState);
 
-                    if (Session.IsDeveloperTool(menuItem.Action))
+                    if (Session.IsDeveloperTool(menuItem.ActionKey))
                     {
                         // Hide instead of disable developer tool items.
                         bool visible = actionState.UIActionVisibility == UIActionVisibility.Enabled;
@@ -765,16 +765,16 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateToolTips()
         {
-            Localizer currentLocalizer = Session.Current.CurrentLocalizer;
+            TextFormatter currentLocalizer = Session.Current.CurrentLocalizer;
 
-            new (NonSelectableButton, LocalizedStringKey)[]
+            new (NonSelectableButton, StringKey<ForFormattedText>)[]
             {
                 (minimizeButton, SharedLocalizedStringKeys.WindowMinimize),
                 (maximizeButton, SharedLocalizedStringKeys.WindowMaximize),
                 (saveButton, SharedLocalizedStringKeys.Save),
                 (closeButton, SharedLocalizedStringKeys.Close),
             }
-            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Localize(x.Item2)));
+            .ForEach(x => ToolTip.SetToolTip(x.Item1, currentLocalizer.Format(x.Item2)));
         }
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)
@@ -783,27 +783,27 @@ namespace Eutherion.Win.MdiAppTemplate
             UpdateToolTips();
         }
 
-        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<DefaultUIActionBinding, MainMenuDropDownItem>> dropDownItems)
+        private List<UIMenuNode> BindMainMenuItemActions(IEnumerable<Union<UIAction, MainMenuDropDownItem>> dropDownItems)
         {
             var menuNodes = new List<UIMenuNode>();
 
             foreach (var dropDownItem in dropDownItems)
             {
-                if (dropDownItem.IsOption1(out DefaultUIActionBinding binding))
+                if (dropDownItem.IsOption1(out UIAction action))
                 {
-                    if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                    if (action.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                     {
-                        menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+                        menuNodes.Add(new UIMenuNode.Element(action.Key, contextMenuInterface));
 
-                        mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                        mainMenuActionHandler.BindAction(new UIActionBinding(action, perform =>
                         {
                             try
                             {
                                 // Try to find a UIActionHandler that is willing to validate/perform the given action.
                                 foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                                 {
-                                    UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                                    if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                    UIActionState currentActionState = actionHandler.TryPerformAction(action.Key, perform);
+                                    if (currentActionState.UIActionVisibility != UIActionVisibility.Undetermined)
                                     {
                                         return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
                                             ? UIActionVisibility.Disabled

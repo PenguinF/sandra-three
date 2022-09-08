@@ -55,8 +55,8 @@ namespace Eutherion.Win.UIActions
         }
 
         /// <summary>
-        /// Searches for an <see cref="UIActionHandler"/> to convert a user command key to a <see cref="UIAction"/>
-        /// and then perform the action.
+        /// Searches for an <see cref="UIActionHandler"/> to convert a user command key to a <see cref="UIAction"/> key
+        /// and then invokes the associated handler.
         /// </summary>
         /// <param name="shortcut">
         /// The shortcut key pressed by the user.
@@ -80,7 +80,7 @@ namespace Eutherion.Win.UIActions
                         // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
                     where KeyUtilities.IsMatch(registeredShortcut, shortcut)
                     select actionHandler.TryPerformAction(interfaceActionPair.Item2, true).UIActionVisibility)
-                    .Any(x => x != UIActionVisibility.Parent);
+                    .Any(x => x != UIActionVisibility.Undetermined);
         }
     }
 }

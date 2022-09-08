@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -163,7 +164,7 @@ namespace Sandra.Chess
         {
             ulong squareVector = square.ToVector();
 
-            if (EnumHelper<Piece>.AllValues.Any(x => currentPosition.GetVector(x).Test(squareVector), out Piece piece))
+            if (EnumValues<Piece>.List.Any(x => currentPosition.GetVector(x).Test(squareVector), out Piece piece))
             {
                 if (currentPosition.GetVector(Color.White).Test(squareVector))
                 {

@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Threading;
 using System;
-using System.Threading;
 
 namespace Sandra.Chess.Pgn
 {

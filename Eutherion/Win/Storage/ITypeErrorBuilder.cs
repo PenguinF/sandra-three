@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 
 namespace Eutherion.Win.Storage
 {
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString);
+        string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString);
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -71,7 +71,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey);
+        string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey);
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -88,6 +88,6 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex);
+        string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex);
     }
 }

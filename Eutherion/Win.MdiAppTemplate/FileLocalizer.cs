@@ -19,22 +19,22 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Collections;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.IO;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
-    /// Apart from being a <see cref="Localizer"/>, contains properties
+    /// Apart from being a <see cref="TextFormatter"/>, contains properties
     /// to allow construction of <see cref="UIAction"/> bindings and interact with settings.
     /// </summary>
-    public sealed class FileLocalizer : Localizer, IWeakEventTarget, IDisposable
+    public sealed class FileLocalizer : TextFormatter, IWeakEventTarget, IDisposable
     {
         private class LanguageMenuItemProvider : ITextProvider, IImageProvider
         {
@@ -83,7 +83,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public string FlagIconFileName { get; private set; }
 
-        public Dictionary<LocalizedStringKey, string> Dictionary { get; private set; }
+        public Dictionary<StringKey<ForFormattedText>, string> Dictionary { get; private set; }
 
         public FileLocalizer(Session session, SettingsFile languageFile)
         {
@@ -105,17 +105,17 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateDictionary()
         {
-            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
+            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<StringKey<ForFormattedText>, string> dict) ? dict : new Dictionary<StringKey<ForFormattedText>, string>();
         }
 
-        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+        public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? StringUtilities.ConditionalFormat(displayText, parameters)
-            : Default.Localize(localizedStringKey, parameters);
+            ? FormatUtilities.ConditionalFormat(displayText, parameters)
+            : Default.Format(localizedStringKey, parameters);
 
-        private DefaultUIActionBinding switchToLangUIActionBinding;
+        private UIAction switchToLangUIActionBinding;
 
-        public DefaultUIActionBinding SwitchToLangUIActionBinding
+        public UIAction SwitchToLangUIActionBinding
         {
             get
             {
@@ -123,8 +123,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     var languageMenuItemProvider = new LanguageMenuItemProvider(this);
 
-                    switchToLangUIActionBinding = new DefaultUIActionBinding(
-                        new UIAction(nameof(FileLocalizer) + "." + LanguageFile.AbsoluteFilePath),
+                    switchToLangUIActionBinding = new UIAction(
+                        new StringKey<UIAction>(nameof(FileLocalizer) + "." + LanguageFile.AbsoluteFilePath),
                         new ImplementationSet<IUIActionInterface>
                         {
                             new CombinedUIActionInterface

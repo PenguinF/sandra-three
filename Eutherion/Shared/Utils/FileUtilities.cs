@@ -133,7 +133,7 @@ namespace System.IO
             {
                 string attemptPath
                     = counter == 0 ? path
-                    : Path.Combine(directory, $"{fileNameWithoutExtension}_{counter.ToString("X")}{extension}");
+                    : Path.Combine(directory, $"{fileNameWithoutExtension}_{counter:X}{extension}");
 
                 try
                 {

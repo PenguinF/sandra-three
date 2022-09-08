@@ -19,9 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
+using System;
 using System.Linq;
 
-namespace System.Collections.Generic
+namespace Sandra
 {
     /// <summary>
     /// Contains an array which is indexed by an enumeration.
@@ -31,15 +33,16 @@ namespace System.Collections.Generic
     /// </code>
     /// </summary>
     /// <remarks>
-    /// Declaring an <see cref="EnumIndexedArray{TEnum, TValue}"/> with a non-enumeration key type
+    /// Declaring an <see cref="EnumIndexedArray{TEnum, TValue}"/> with an enumeration key type
+    /// that is discontinuous (has missing values) or has a non-zero lower bound
     /// results in a <see cref="TypeInitializationException"/> being thrown.
     /// </remarks>
-    public struct EnumIndexedArray<TEnum, TValue> where TEnum : struct
+    public struct EnumIndexedArray<TEnum, TValue> where TEnum : Enum
     {
         static EnumIndexedArray()
         {
             // Examine the enumeration.
-            TEnum[] values = EnumHelper<TEnum>.AllValues.ToArray();
+            TEnum[] values = EnumValues<TEnum>.List.ToArray();
             for (int i = values.Length - 1; i >= 0; --i)
             {
                 if ((int)(object)values[i] != i)
@@ -69,7 +72,7 @@ namespace System.Collections.Generic
         /// <summary>
         /// Gets the number of keys in the array, which is equal to the number of members in the enumeration.
         /// </summary>
-        public int Length => EnumHelper<TEnum>.EnumCount;
+        public int Length => EnumValues<TEnum>.List.Count;
 
         public TValue this[TEnum index]
         {

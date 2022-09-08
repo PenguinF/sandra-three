@@ -60,9 +60,9 @@ namespace Eutherion.Win.UIActions
         public sealed class Element : UIMenuNode
         {
             /// <summary>
-            /// Gets the <see cref="UIAction"/> for which this element generates a menu item.
+            /// Gets the <see cref="UIAction"/> key for which this element generates a menu item.
             /// </summary>
-            public UIAction Action { get; }
+            public StringKey<UIAction> ActionKey { get; }
 
             /// <summary>
             /// Generates the shortcut key to display in the menu item.
@@ -76,10 +76,10 @@ namespace Eutherion.Win.UIActions
             /// </summary>
             public bool OpensDialog { get; }
 
-            public Element(UIAction action, IContextMenuUIActionInterface contextMenuInterface)
+            public Element(StringKey<UIAction> actionKey, IContextMenuUIActionInterface contextMenuInterface)
                 : base(contextMenuInterface.MenuTextProvider, contextMenuInterface.MenuIcon)
             {
-                Action = action ?? throw new ArgumentNullException(nameof(action));
+                ActionKey = actionKey ?? throw new ArgumentNullException(nameof(actionKey));
 
                 ShortcutKeyDisplayTextProviders = contextMenuInterface.DisplayShortcutKeys;
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
@@ -210,14 +210,14 @@ namespace Eutherion.Win.UIActions
     }
 
     /// <summary>
-    /// <see cref="ToolStripMenuItem"/> override which contains a reference to an <see cref="UIAction"/>.
+    /// <see cref="ToolStripMenuItem"/> override which contains a reference to a <see cref="UIAction"/> key.
     /// </summary>
     public class UIActionToolStripMenuItem : LocalizedToolStripMenuItem
     {
         /// <summary>
         /// Gets action for this menu item.
         /// </summary>
-        public UIAction Action { get; }
+        public StringKey<UIAction> ActionKey { get; }
 
         private UIActionToolStripMenuItem(UIMenuNode.Element element)
             : base(element.TextProvider,
@@ -225,7 +225,7 @@ namespace Eutherion.Win.UIActions
                    element.ShortcutKeyDisplayTextProviders,
                    element.OpensDialog)
         {
-            Action = element.Action;
+            ActionKey = element.ActionKey;
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace Eutherion.Win.UIActions
         {
             if (element.TextProvider == null && element.IconProvider == null) return null;
 
-            UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
+            UIActionState currentActionState = ActionHandler.TryPerformAction(element.ActionKey, false);
 
             if (!currentActionState.Visible) return null;
 
@@ -447,7 +447,7 @@ namespace Eutherion.Win.UIActions
             {
                 try
                 {
-                    actionHandler.TryPerformAction(element.Action, true);
+                    actionHandler.TryPerformAction(element.ActionKey, true);
                 }
                 catch (Exception exc)
                 {

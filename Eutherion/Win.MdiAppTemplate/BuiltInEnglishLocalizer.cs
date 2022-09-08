@@ -19,24 +19,24 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    public sealed class BuiltInEnglishLocalizer : Localizer
+    public sealed class BuiltInEnglishLocalizer : TextFormatter
     {
-        public readonly Dictionary<LocalizedStringKey, string> Dictionary;
+        public readonly Dictionary<StringKey<ForFormattedText>, string> Dictionary;
 
-        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+        public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? StringUtilities.ConditionalFormat(displayText, parameters)
-            : Default.Localize(localizedStringKey, parameters);
+            ? FormatUtilities.ConditionalFormat(displayText, parameters)
+            : Default.Format(localizedStringKey, parameters);
 
-        public BuiltInEnglishLocalizer(params IEnumerable<KeyValuePair<LocalizedStringKey, string>>[] subDictionaries)
+        public BuiltInEnglishLocalizer(params IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>>[] subDictionaries)
         {
-            Dictionary = new Dictionary<LocalizedStringKey, string>();
+            Dictionary = new Dictionary<StringKey<ForFormattedText>, string>();
 
             if (subDictionaries != null)
             {

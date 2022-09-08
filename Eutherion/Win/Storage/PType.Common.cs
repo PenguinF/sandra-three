@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,15 +117,15 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
-            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToEnum.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Localize(
+                        whenNothing: () => localizer.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Localize(
+                        whenJust: somewhere => localizer.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
@@ -140,7 +140,7 @@ namespace Eutherion.Win.Storage
                 {
                     IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
-                    localizedValueList = localizer.Localize(
+                    localizedValueList = localizer.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", enumValues),
                         lastEnumValue);
@@ -158,13 +158,13 @@ namespace Eutherion.Win.Storage
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
                 => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
         }
 
@@ -202,15 +202,15 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToTarget.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Localize(
+                        whenNothing: () => localizer.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Localize(
+                        whenJust: somewhere => localizer.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
@@ -226,7 +226,7 @@ namespace Eutherion.Win.Storage
                     // TODO: escape characters in KeyedSet keys.
                     IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
-                    localizedKeysList = localizer.Localize(
+                    localizedKeysList = localizer.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", keys),
                         lastKey);
@@ -244,13 +244,13 @@ namespace Eutherion.Win.Storage
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
                 => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
                 => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
         }
     }

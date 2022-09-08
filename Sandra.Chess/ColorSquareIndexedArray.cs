@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess
 {
@@ -37,7 +37,7 @@ namespace Sandra.Chess
 
         private void Init()
         {
-            if (arr == null) arr = new TValue[EnumHelper<Color>.EnumCount, EnumHelper<Square>.EnumCount];
+            if (arr == null) arr = new TValue[EnumValues<Color>.List.Count, EnumValues<Square>.List.Count];
         }
 
         /// <summary>

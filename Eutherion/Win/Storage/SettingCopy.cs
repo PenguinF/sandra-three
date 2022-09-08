@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -218,7 +218,7 @@ namespace Eutherion.Win.Storage
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
             string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(
-                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, Localizer.Default)));
+                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, TextFormatter.Default)));
 
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }

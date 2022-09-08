@@ -20,12 +20,12 @@
 #endregion
 
 using Eutherion;
+using Eutherion.Collections;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Native;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -139,7 +139,7 @@ namespace Sandra.UI
             if (game != null)
             {
                 // Copy all pieces and clear all squares that are empty.
-                foreach (var square in EnumHelper<Chess.Square>.AllValues)
+                foreach (var square in EnumValues<Chess.Square>.List)
                 {
                     Chess.ColoredPiece? coloredPiece = game.GetColoredPiece(square);
                     if (coloredPiece == null)
@@ -579,7 +579,7 @@ namespace Sandra.UI
                 SourceSquare = moveStartSquare,
             };
 
-            foreach (var square in EnumHelper<Chess.Square>.AllValues)
+            foreach (var square in EnumValues<Chess.Square>.List)
             {
                 moveInfo.TargetSquare = square;
                 game.TryMakeMove(ref moveInfo, false);

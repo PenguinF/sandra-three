@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
 using System;
@@ -62,11 +62,11 @@ namespace Eutherion.Win.MdiAppTemplate
         public bool OpensDialog { get; set; }
 
         /// <summary>
-        /// Enumerates the <see cref="LocalizedStringKey"/>s which combined construct a localized display string
+        /// Enumerates the <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </summary>
         /// <returns>
-        /// The <see cref="LocalizedStringKey"/>s enumerable which combined construct a localized display string
+        /// The <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> enumerable which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </returns>
         public IEnumerable<ITextProvider> DisplayShortcutKeys
@@ -141,7 +141,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public static ITextProvider ToTextProvider(this string displayText)
             => new ConstantTextProvider(displayText);
 
-        public static ITextProvider ToTextProvider(this LocalizedStringKey key)
+        public static ITextProvider ToTextProvider(this StringKey<ForFormattedText> key)
             => key == null ? null : new LocalizedTextProvider(key);
 
         public static IImageProvider ToImageProvider(this Image image)

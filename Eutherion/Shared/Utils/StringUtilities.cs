@@ -19,16 +19,12 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion
 {
-    /// <summary>
-    /// Contains utility methods for strings.
-    /// </summary>
-    public static class StringUtilities
+    public static class FormatUtilities
     {
         /// <summary>
         /// Conditionally formats a string, based on whether or not it has parameters.
@@ -48,40 +44,8 @@ namespace Eutherion
                 // Examples:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
                 // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {ToDefaultParameterListDisplayString(parameters)}";
+                return $"{localizedString} {StringUtilities.ToDefaultParameterListDisplayString(parameters)}";
             }
         }
-
-        /// <summary>
-        /// Generates a display string from an array of parameters in the format "({0}, {1}, ...)".
-        /// </summary>
-        /// <param name="parameters">
-        /// The parameters to format.
-        /// </param>
-        /// <returns>
-        /// If <paramref name="parameters"/> is null or empty, returns an empty string.
-        /// If <paramref name="parameters"/> has exactly one element, returns "({0})" where {0} is replaced by the single element.
-        /// If <paramref name="parameters"/> has more than one element, returns "({0}, {1}, ...)" where {0}, {1}... are replaced by elements of the array.
-        /// </returns>
-        public static string ToDefaultParameterListDisplayString(params string[] parameters)
-            => parameters == null || parameters.Length == 0
-            ? string.Empty
-            : $"({string.Join(", ", parameters)})";
-
-        /// <summary>
-        /// Generates a display string from an array of parameters in the format "({0}, {1}, ...)".
-        /// </summary>
-        /// <param name="parameters">
-        /// The parameters to format.
-        /// </param>
-        /// <returns>
-        /// If <paramref name="parameters"/> is null or empty, returns an empty string.
-        /// If <paramref name="parameters"/> has exactly one element, returns "({0})" where {0} is replaced by the single element.
-        /// If <paramref name="parameters"/> has more than one element, returns "({0}, {1}, ...)" where {0}, {1}... are replaced by elements of the array.
-        /// </returns>
-        public static string ToDefaultParameterListDisplayString(IEnumerable<string> parameters)
-            => parameters == null || !parameters.Any()
-            ? string.Empty
-            : $"({string.Join(", ", parameters)})";
     }
 }

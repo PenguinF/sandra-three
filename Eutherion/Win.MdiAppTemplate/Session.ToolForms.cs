@@ -19,14 +19,14 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Collections;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -95,8 +95,8 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(EditPreferencesFile)),
+        public static readonly UIAction EditPreferencesFile = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -199,8 +199,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
+        public static readonly UIAction ShowDefaultSettingsFile = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -305,8 +305,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return readOnlyTextForm;
         }
 
-        public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(OpenAbout)),
+        public static readonly UIAction OpenAbout = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -330,8 +330,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(ShowCredits)),
+        public static readonly UIAction ShowCredits = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -355,8 +355,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
+        public static readonly UIAction EditCurrentLanguage = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -390,7 +390,7 @@ namespace Eutherion.Win.MdiAppTemplate
                             // Fill with built-in default dictionary, or if not provided, an empty dictionary.
                             settingCopy.AddOrReplace(
                                 Localizers.Translations,
-                                defaultLocalizerDictionary ?? new Dictionary<LocalizedStringKey, string>());
+                                defaultLocalizerDictionary ?? new Dictionary<StringKey<ForFormattedText>, string>());
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
@@ -410,8 +410,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding OpenLocalAppDataFolder = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(OpenLocalAppDataFolder)),
+        public static readonly UIAction OpenLocalAppDataFolder = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(OpenLocalAppDataFolder)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -430,8 +430,8 @@ namespace Eutherion.Win.MdiAppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding OpenExecutableFolder = new DefaultUIActionBinding(
-            new UIAction(SessionUIActionPrefix + nameof(OpenExecutableFolder)),
+        public static readonly UIAction OpenExecutableFolder = new UIAction(
+            new StringKey<UIAction>(SessionUIActionPrefix + nameof(OpenExecutableFolder)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -453,11 +453,11 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets if an action is considered a developer tool and is therefore allowed to be hidden in a main menu.
         /// </summary>
-        internal static bool IsDeveloperTool(UIAction action)
+        internal static bool IsDeveloperTool(StringKey<UIAction> action)
         {
-            return action == EditCurrentLanguage.Action
-                || action == OpenLocalAppDataFolder.Action
-                || action == OpenExecutableFolder.Action;
+            return action == EditCurrentLanguage.Key
+                || action == OpenLocalAppDataFolder.Key
+                || action == OpenExecutableFolder.Key;
         }
     }
 }

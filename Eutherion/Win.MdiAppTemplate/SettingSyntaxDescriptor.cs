@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Win.Storage;
 using ScintillaNET;
@@ -54,7 +54,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public override string FileExtension => JsonSyntaxDescriptor.JsonFileExtension;
 
-        public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
+        public override StringKey<ForFormattedText> FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
         public override SettingSyntaxTree Parse(string code)
         {

@@ -19,7 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion;
+using Eutherion.Text;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using ScintillaNET;
@@ -42,7 +43,7 @@ namespace Sandra.UI
 
         public override string FileExtension => PgnFileExtension;
 
-        public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
+        public override StringKey<ForFormattedText> FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
         public override RootPgnSyntax Parse(string code)
         {

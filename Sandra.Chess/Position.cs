@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,7 +47,7 @@ namespace Sandra.Chess
             ulong occupied = colorVectors[Color.White] | colorVectors[Color.Black];
 
             // Disjunct pieces.
-            foreach (Piece piece1 in EnumHelper<Piece>.AllValues)
+            foreach (Piece piece1 in EnumValues<Piece>.List)
             {
                 for (Piece piece2 = piece1 + 1; piece2 <= Piece.King; ++piece2)
                 {
@@ -341,7 +342,7 @@ namespace Sandra.Chess
             }
 
             // Obtain moving piece.
-            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out move.MovingPiece))
+            if (!EnumValues<Piece>.List.Any(x => pieceVectors[x].Test(sourceVector), out move.MovingPiece))
             {
                 moveInfo.Result |= MoveCheckResult.SourceSquareIsEmpty;
             }
@@ -497,7 +498,7 @@ namespace Sandra.Chess
                 {
                     // Find the possible piece on the target square.
                     captureVector = targetVector;
-                    move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out move.CapturedPiece);
+                    move.IsCapture = EnumValues<Piece>.List.Any(x => pieceVectors[x].Test(captureVector), out move.CapturedPiece);
                 }
 
                 // Remove whatever was captured.
@@ -678,7 +679,7 @@ namespace Sandra.Chess
             ulong oppositeColorVector = colorVectors[SideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
 
-            foreach (var movingPiece in EnumHelper<Piece>.AllValues)
+            foreach (var movingPiece in EnumValues<Piece>.List)
             {
                 // Enumerate over all squares occupied by this piece.
                 ulong coloredPieceVector = pieceVectors[movingPiece] & colorVectors[SideToMove];
@@ -741,7 +742,7 @@ namespace Sandra.Chess
                         {
                             // Find the possible piece on the target square.
                             captureVector = targetVector;
-                            isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
+                            isCapture = EnumValues<Piece>.List.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
                         }
 
                         // Remove whatever was captured.

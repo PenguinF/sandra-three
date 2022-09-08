@@ -19,81 +19,81 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
-    /// Contains a collection of <see cref="LocalizedStringKey"/>s which generate localized display strings
+    /// Contains a collection of <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> which generate localized display strings
     /// for keyboard shortcuts (<see cref="Eutherion.UIActions.ShortcutKeys"/>).
     /// </summary>
     public static class LocalizedConsoleKeys
     {
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Alt"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="Eutherion.UIActions.KeyModifiers.Alt"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyAlt = new LocalizedStringKey(nameof(ConsoleKeyAlt));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyAlt = new StringKey<ForFormattedText>(nameof(ConsoleKeyAlt));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Control"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="Eutherion.UIActions.KeyModifiers.Control"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyCtrl = new LocalizedStringKey(nameof(ConsoleKeyCtrl));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyCtrl = new StringKey<ForFormattedText>(nameof(ConsoleKeyCtrl));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.Delete"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.Delete"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyDelete = new LocalizedStringKey(nameof(ConsoleKeyDelete));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyDelete = new StringKey<ForFormattedText>(nameof(ConsoleKeyDelete));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.DownArrow"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.DownArrow"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyDownArrow = new LocalizedStringKey(nameof(ConsoleKeyDownArrow));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyDownArrow = new StringKey<ForFormattedText>(nameof(ConsoleKeyDownArrow));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.End"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.End"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyEnd = new LocalizedStringKey(nameof(ConsoleKeyEnd));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyEnd = new StringKey<ForFormattedText>(nameof(ConsoleKeyEnd));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.Home"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.Home"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyHome = new LocalizedStringKey(nameof(ConsoleKeyHome));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyHome = new StringKey<ForFormattedText>(nameof(ConsoleKeyHome));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.LeftArrow"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.LeftArrow"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyLeftArrow = new LocalizedStringKey(nameof(ConsoleKeyLeftArrow));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyLeftArrow = new StringKey<ForFormattedText>(nameof(ConsoleKeyLeftArrow));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.PageDown"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.PageDown"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyPageDown = new LocalizedStringKey(nameof(ConsoleKeyPageDown));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyPageDown = new StringKey<ForFormattedText>(nameof(ConsoleKeyPageDown));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.PageUp"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.PageUp"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyPageUp = new LocalizedStringKey(nameof(ConsoleKeyPageUp));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyPageUp = new StringKey<ForFormattedText>(nameof(ConsoleKeyPageUp));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.RightArrow"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.RightArrow"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyRightArrow = new LocalizedStringKey(nameof(ConsoleKeyRightArrow));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyRightArrow = new StringKey<ForFormattedText>(nameof(ConsoleKeyRightArrow));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Shift"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="Eutherion.UIActions.KeyModifiers.Shift"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyShift = new LocalizedStringKey(nameof(ConsoleKeyShift));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyShift = new StringKey<ForFormattedText>(nameof(ConsoleKeyShift));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.UpArrow"/>.
+        /// Gets the <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for <see cref="System.ConsoleKey.UpArrow"/>.
         /// </summary>
-        public static readonly LocalizedStringKey ConsoleKeyUpArrow = new LocalizedStringKey(nameof(ConsoleKeyUpArrow));
+        public static readonly StringKey<ForFormattedText> ConsoleKeyUpArrow = new StringKey<ForFormattedText>(nameof(ConsoleKeyUpArrow));
 
         /// <summary>
-        /// Enumerates all <see cref="LocalizedStringKey"/>s in this class with a suggested default English translation.
+        /// Enumerates all <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> in this class with a suggested default English translation.
         /// </summary>
-        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
+        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishTranslations => new Dictionary<StringKey<ForFormattedText>, string>
         {
             { ConsoleKeyCtrl, "Ctrl" },
             { ConsoleKeyShift, "Shift" },

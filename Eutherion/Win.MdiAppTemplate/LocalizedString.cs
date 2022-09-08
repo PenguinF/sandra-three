@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -34,7 +34,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
 
-        public LocalizedString(LocalizedStringKey key)
+        public LocalizedString(StringKey<ForFormattedText> key)
             : base(key)
         {
             DisplayText.Value = GetText();

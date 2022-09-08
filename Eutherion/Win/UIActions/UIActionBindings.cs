@@ -67,17 +67,17 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Adds a binding.
         /// </summary>
-        /// <param name="binding">
-        /// The <see cref="DefaultUIActionBinding"/> to add.
+        /// <param name="action">
+        /// The <see cref="UIAction"/> to add.
         /// </param>
         /// <param name="handler">
         /// The handler to add for the binding.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="binding"/> and/or <paramref name="handler"/> are null.
+        /// <paramref name="action"/> and/or <paramref name="handler"/> are null.
         /// </exception>
-        public void Add(DefaultUIActionBinding binding, UIActionHandlerFunc handler)
-            => added.Add(new UIActionBinding(binding, handler));
+        public void Add(UIAction action, UIActionHandlerFunc handler)
+            => added.Add(new UIActionBinding(action, handler));
 
         /// <summary>
         /// Adds a collection of bindings.

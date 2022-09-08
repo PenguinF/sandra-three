@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System;
 using System.IO;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace Eutherion.Win.Storage
     public sealed class SubFolderNameType : PType.Filter<string>
     {
         public static readonly PTypeErrorBuilder SubFolderNameTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(SubFolderNameTypeError)));
+            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(SubFolderNameTypeError)));
 
         public static readonly SubFolderNameType Instance = new SubFolderNameType();
 

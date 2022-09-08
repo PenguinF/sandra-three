@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using System;
 
 namespace Eutherion.Text.Json
@@ -33,15 +32,15 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the default localization key for displaying null values.
         /// </summary>
-        public static readonly LocalizedStringKey NullString
-            = new LocalizedStringKey(nameof(NullString));
+        public static readonly StringKey<ForFormattedText> NullString
+            = new StringKey<ForFormattedText>(nameof(NullString));
 
         /// <summary>
         /// Gets the default localization key for displaying a <see cref="JsonErrorInfoParameter"/> of an unknown type.
         /// It expects one parameter, which is filled with the ToString() value of the value object.
         /// </summary>
-        public static readonly LocalizedStringKey UntypedObjectString
-            = new LocalizedStringKey(nameof(UntypedObjectString));
+        public static readonly StringKey<ForFormattedText> UntypedObjectString
+            = new StringKey<ForFormattedText>(nameof(UntypedObjectString));
 
         /// <summary>
         /// Gets a formatted and localized error message of a <see cref="JsonErrorInfoParameter"/>.
@@ -50,7 +49,7 @@ namespace Eutherion.Text.Json
         /// The <see cref="JsonErrorInfoParameter"/> to localize.
         /// </param>
         /// <param name="localizer">
-        /// The <see cref="Localizer"/> to use for generating a display value.
+        /// The <see cref="TextFormatter"/> to use for generating a display value.
         /// </param>
         /// <returns>
         /// The localized display value.
@@ -58,7 +57,7 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="parameter"/> and/or <paramref name="localizer"/> are null.
         /// </exception>
-        public static string GetLocalizedDisplayValue(JsonErrorInfoParameter parameter, Localizer localizer)
+        public static string GetLocalizedDisplayValue(JsonErrorInfoParameter parameter, TextFormatter localizer)
         {
             if (parameter == null) throw new ArgumentNullException(nameof(parameter));
             if (localizer == null) throw new ArgumentNullException(nameof(localizer));
@@ -72,12 +71,12 @@ namespace Eutherion.Text.Json
                         : $"'{c}'";
                 case JsonErrorInfoParameter<string> stringParameter:
                     return stringParameter.Value == null
-                        ? localizer.Localize(NullString)
+                        ? localizer.Format(NullString)
                         : $"\"{stringParameter.Value}\"";
                 default:
                     return parameter.UntypedValue == null
-                        ? localizer.Localize(NullString)
-                        : localizer.Localize(UntypedObjectString, parameter.UntypedValue.ToString());
+                        ? localizer.Format(NullString)
+                        : localizer.Format(UntypedObjectString, parameter.UntypedValue.ToString());
             }
         }
     }

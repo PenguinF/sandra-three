@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Win.Storage;
 using System;
@@ -31,8 +31,8 @@ namespace Eutherion.Win.MdiAppTemplate
 {
     public static class JsonErrorInfoExtensions
     {
-        public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
-            => new LocalizedStringKey($"JsonError{jsonErrorCode}");
+        public static StringKey<ForFormattedText> GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
+            => new StringKey<ForFormattedText>($"JsonError{jsonErrorCode}");
 
         /// <summary>
         /// Capitalizes error messages after generating them.
@@ -43,7 +43,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// harder to test.
         /// TODO: figure out how to incorporate this into localizers.
         /// </summary>
-        public static string ToSentenceCase(this Localizer localizer, string errorMessage)
+        public static string ToSentenceCase(this TextFormatter localizer, string errorMessage)
         {
             GC.KeepAlive(localizer); // Only to disable the warning that variable is unused.
             if (errorMessage == null || errorMessage.Length == 0) return errorMessage;
@@ -59,7 +59,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
         /// </summary>
-        public static string Message(this JsonErrorInfo jsonErrorInfo, Localizer localizer)
+        public static string Message(this JsonErrorInfo jsonErrorInfo, TextFormatter localizer)
         {
             const string UnspecifiedMessage = "Unspecified error";
 
@@ -70,7 +70,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             if (Enum.IsDefined(typeof(JsonErrorCode), jsonErrorInfo.ErrorCode))
             {
-                return localizer.Localize(
+                return localizer.Format(
                     GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
                     jsonErrorInfo.Parameters.Select(
                         x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
@@ -79,7 +79,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return UnspecifiedMessage;
         }
 
-        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
+        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>
         {
             { JsonErrorInfoParameterDisplayHelper.NullString, "<null>" },
             { JsonErrorInfoParameterDisplayHelper.UntypedObjectString, "{0}" },

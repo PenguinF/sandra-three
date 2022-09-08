@@ -19,11 +19,12 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using Eutherion.Collections;
 using Eutherion.UIActions;
 using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess;
 using System;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -34,8 +35,8 @@ namespace Sandra.UI
     {
         public const string StandardChessBoardUIActionPrefix = nameof(StandardChessBoard) + ".";
 
-        public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(FlipBoard)),
+        public static readonly UIAction FlipBoard = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(FlipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -53,8 +54,8 @@ namespace Sandra.UI
             return new UIActionState(UIActionVisibility.Enabled, IsBoardFlipped);
         }
 
-        public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(TakeScreenshot)),
+        public static readonly UIAction TakeScreenshot = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(TakeScreenshot)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -92,8 +93,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoStart = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoStart)),
+        public static readonly UIAction GotoStart = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoStart)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -115,8 +116,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoFirstMove)),
+        public static readonly UIAction GotoFirstMove = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoFirstMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -143,8 +144,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding FastNavigateBackward = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(FastNavigateBackward)),
+        public static readonly UIAction FastNavigateBackward = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(FastNavigateBackward)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -169,8 +170,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoPreviousMove)),
+        public static readonly UIAction GotoPreviousMove = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoPreviousMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -195,8 +196,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoNextMove)),
+        public static readonly UIAction GotoNextMove = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoNextMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -233,8 +234,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding FastNavigateForward = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(FastNavigateForward)),
+        public static readonly UIAction FastNavigateForward = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(FastNavigateForward)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -259,8 +260,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoLastMove = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoLastMove)),
+        public static readonly UIAction GotoLastMove = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoLastMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -281,8 +282,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoEnd = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoEnd)),
+        public static readonly UIAction GotoEnd = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoEnd)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -309,8 +310,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoPreviousVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoPreviousVariation)),
+        public static readonly UIAction GotoPreviousVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoPreviousVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -344,8 +345,8 @@ namespace Sandra.UI
             return UIActionVisibility.Disabled;
         }
 
-        public static readonly DefaultUIActionBinding GotoNextVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(GotoNextVariation)),
+        public static readonly UIAction GotoNextVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoNextVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -375,8 +376,8 @@ namespace Sandra.UI
             return UIActionVisibility.Disabled;
         }
 
-        public static readonly DefaultUIActionBinding PromoteActiveVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(PromoteActiveVariation)),
+        public static readonly UIAction PromoteActiveVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(PromoteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -410,8 +411,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding DemoteActiveVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(DemoteActiveVariation)),
+        public static readonly UIAction DemoteActiveVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(DemoteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -449,8 +450,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding BreakActiveVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(BreakActiveVariation)),
+        public static readonly UIAction BreakActiveVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(BreakActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -472,8 +473,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding DeleteActiveVariation = new DefaultUIActionBinding(
-            new UIAction(StandardChessBoardUIActionPrefix + nameof(DeleteActiveVariation)),
+        public static readonly UIAction DeleteActiveVariation = new UIAction(
+            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(DeleteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface

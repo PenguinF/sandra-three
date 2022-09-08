@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
@@ -88,8 +88,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static Session Configure(SingleInstanceMainForm singleInstanceMainForm,
                                         ISettingsProvider settingsProvider,
-                                        Localizer defaultLocalizer,
-                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                                        TextFormatter defaultLocalizer,
+                                        Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary,
                                         Icon applicationIcon)
         {
             var session = new Session(singleInstanceMainForm,
@@ -111,7 +111,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return Current;
         }
 
-        private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
+        private readonly Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
         /// <summary>
@@ -125,12 +125,12 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         internal readonly byte[] TodaysMagic;
 
-        private Localizer currentLocalizer;
+        private TextFormatter currentLocalizer;
 
         private Session(SingleInstanceMainForm singleInstanceMainForm,
                         ISettingsProvider settingsProvider,
-                        Localizer defaultLocalizer,
-                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                        TextFormatter defaultLocalizer,
+                        Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary,
                         Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
@@ -315,7 +315,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 }
 
                 // Fall back onto defaults if still null.
-                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
+                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? TextFormatter.Default;
             }
             catch
             {
@@ -407,12 +407,12 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         /// <summary>
-        /// Gets or sets the current <see cref="Localizer"/>.
+        /// Gets or sets the current <see cref="TextFormatter"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">
         /// The provided new value for <see cref="CurrentLocalizer"/> is null.
         /// </exception>
-        public Localizer CurrentLocalizer
+        public TextFormatter CurrentLocalizer
         {
             get => currentLocalizer;
             set

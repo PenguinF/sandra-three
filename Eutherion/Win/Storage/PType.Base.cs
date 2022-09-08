@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -32,37 +32,37 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for referring to a json boolean.
         /// </summary>
-        public static readonly LocalizedStringKey JsonBoolean = new LocalizedStringKey(nameof(JsonBoolean));
+        public static readonly StringKey<ForFormattedText> JsonBoolean = new StringKey<ForFormattedText>(nameof(JsonBoolean));
 
         /// <summary>
         /// Gets the translation key for referring to a json integer.
         /// </summary>
-        public static readonly LocalizedStringKey JsonInteger = new LocalizedStringKey(nameof(JsonInteger));
+        public static readonly StringKey<ForFormattedText> JsonInteger = new StringKey<ForFormattedText>(nameof(JsonInteger));
 
         /// <summary>
         /// Gets the translation key for referring to a json integer within a specific range.
         /// </summary>
-        public static readonly LocalizedStringKey RangedJsonInteger = new LocalizedStringKey(nameof(RangedJsonInteger));
+        public static readonly StringKey<ForFormattedText> RangedJsonInteger = new StringKey<ForFormattedText>(nameof(RangedJsonInteger));
 
         /// <summary>
         /// Gets the translation key for referring to a json string.
         /// </summary>
-        public static readonly LocalizedStringKey JsonString = new LocalizedStringKey(nameof(JsonString));
+        public static readonly StringKey<ForFormattedText> JsonString = new StringKey<ForFormattedText>(nameof(JsonString));
 
         /// <summary>
         /// Gets the translation key for referring to a general json array (list).
         /// </summary>
-        public static readonly LocalizedStringKey JsonArray = new LocalizedStringKey(nameof(JsonArray));
+        public static readonly StringKey<ForFormattedText> JsonArray = new StringKey<ForFormattedText>(nameof(JsonArray));
 
         /// <summary>
         /// Gets the translation key for referring to a general json object (map).
         /// </summary>
-        public static readonly LocalizedStringKey JsonObject = new LocalizedStringKey(nameof(JsonObject));
+        public static readonly StringKey<ForFormattedText> JsonObject = new StringKey<ForFormattedText>(nameof(JsonObject));
 
         /// <summary>
         /// Gets the translation key for referring to an undefined value.
         /// </summary>
-        public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));
+        public static readonly StringKey<ForFormattedText> JsonUndefinedValue = new StringKey<ForFormattedText>(nameof(JsonUndefinedValue));
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
@@ -103,7 +103,7 @@ namespace Eutherion.Win.Storage
             private readonly PTypeErrorBuilder typeError;
             private readonly GreenJsonValueSyntaxVisitor<Maybe<TValue>> converter;
 
-            public BaseType(LocalizedStringKey expectedTypeDescriptionKey, GreenJsonValueSyntaxVisitor<Maybe<TValue>> converter)
+            public BaseType(StringKey<ForFormattedText> expectedTypeDescriptionKey, GreenJsonValueSyntaxVisitor<Maybe<TValue>> converter)
             {
                 typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;
@@ -328,26 +328,26 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            private string LocalizedExpectedTypeDescription(Localizer localizer)
-                => localizer.Localize(
+            private string LocalizedExpectedTypeDescription(TextFormatter localizer)
+                => localizer.Format(
                     RangedJsonInteger,
                     MinValue.ToStringInvariant(),
                     MaxValue.ToStringInvariant());
 
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
                 => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
                     localizer,
                     LocalizedExpectedTypeDescription(localizer),
                     actualValueString);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
                 => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
                     localizer,
                     LocalizedExpectedTypeDescription(localizer),
                     actualValueString,
                     PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(Localizer localizer, string actualValueString, int itemIndex)
+            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
                 => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
                     localizer,
                     LocalizedExpectedTypeDescription(localizer),

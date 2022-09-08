@@ -127,11 +127,11 @@ namespace Eutherion.Win.UIActions
             DropDownItemsActionHandler = new UIActionHandler();
         }
 
-        public void BindAction(DefaultUIActionBinding binding, bool alwaysVisible)
+        public void BindAction(UIAction action, bool alwaysVisible)
         {
-            if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface _))
+            if (action.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface _))
             {
-                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                DropDownItemsActionHandler.BindAction(new UIActionBinding(action, perform =>
                 {
                     try
                     {
@@ -140,8 +140,8 @@ namespace Eutherion.Win.UIActions
                         // Try to find a UIActionHandler that is willing to validate/perform the given action.
                         foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                         {
-                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            UIActionState currentActionState = actionHandler.TryPerformAction(action.Key, perform);
+                            if (currentActionState.UIActionVisibility != UIActionVisibility.Undetermined)
                             {
                                 return currentActionState.UIActionVisibility == UIActionVisibility.Hidden && alwaysVisible
                                     ? UIActionVisibility.Disabled
@@ -160,11 +160,11 @@ namespace Eutherion.Win.UIActions
             }
         }
 
-        public void BindAction(DefaultUIActionBinding binding)
-            => BindAction(binding, alwaysVisible: true);
+        public void BindAction(UIAction action)
+            => BindAction(action, alwaysVisible: true);
 
-        public void BindActions(params DefaultUIActionBinding[] bindings)
-            => bindings.ForEach(BindAction);
+        public void BindActions(params UIAction[] actions)
+            => actions.ForEach(BindAction);
 
         private bool UpdateMenu()
         {
@@ -172,7 +172,7 @@ namespace Eutherion.Win.UIActions
 
             foreach (var menuItem in MenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
             {
-                var state = DropDownItemsActionHandler.TryPerformAction(menuItem.Action, false);
+                var state = DropDownItemsActionHandler.TryPerformAction(menuItem.ActionKey, false);
                 menuItem.Update(state);
                 atLeastOneItemEnabled |= state.Enabled;
             }

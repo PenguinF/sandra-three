@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Storage;
@@ -116,7 +116,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void UpdateText()
             {
-                DockProperties.CaptionText = StringUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
+                DockProperties.CaptionText = FormatUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
                 DockPropertiesChanged?.Invoke();
             }
 
@@ -152,7 +152,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                              let position = (syntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
                                              // Instead of using errorLocationString.DisplayText.Value,
                                              // use the current localizer to format the localized string.
-                                             let fullErrorMessage = Session.Current.CurrentLocalizer.Localize(
+                                             let fullErrorMessage = Session.Current.CurrentLocalizer.Format(
                                                  errorLocationString.Key,
                                                  errorMessage, lineIndex, position)
                                              select Session.Current.CurrentLocalizer.ToSentenceCase(fullErrorMessage)).ToArray();
@@ -360,13 +360,13 @@ namespace Eutherion.Win.MdiAppTemplate
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Initialize menu strip.
-            List<Union<DefaultUIActionBinding, MainMenuDropDownItem>> fileMenu;
+            List<Union<UIAction, MainMenuDropDownItem>> fileMenu;
 
             switch (codeAccessOption)
             {
                 default:
                 case SyntaxEditorCodeAccessOption.Default:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.SaveAs,
@@ -374,14 +374,14 @@ namespace Eutherion.Win.MdiAppTemplate
                     };
                     break;
                 case SyntaxEditorCodeAccessOption.FixedFile:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.SaveToFile,
                         SharedUIAction.Close
                     };
                     break;
                 case SyntaxEditorCodeAccessOption.ReadOnly:
-                    fileMenu = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    fileMenu = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.Close
                     };
@@ -405,7 +405,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()),
-                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.Undo,
                         SharedUIAction.Redo,
@@ -418,7 +418,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 new MainMenuDropDownItem
                 {
                     Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
-                    DropDownItems = new List<Union<DefaultUIActionBinding, MainMenuDropDownItem>>
+                    DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                     {
                         SharedUIAction.ZoomIn,
                         SharedUIAction.ZoomOut,
@@ -755,8 +755,8 @@ namespace Eutherion.Win.MdiAppTemplate
             if (ContainsChanges && CodeFile.AutoSaveFile == null)
             {
                 DialogResult result = MessageBox.Show(
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, CodeFilePathDisplayString),
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.SaveChangesQuery, CodeFilePathDisplayString),
+                    Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.UnsavedChangesTitle),
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button3);
@@ -766,7 +766,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                            UIActionState actionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Key, true);
 
                             if (ContainsChanges)
                             {
@@ -935,10 +935,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     AutoUpgradeEnabled = true,
                     DereferenceLinks = true,
                     DefaultExt = extension,
-                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    Filter = $"{Session.Current.CurrentLocalizer.Format(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
                     SupportMultiDottedExtensions = true,
                     RestoreDirectory = true,
-                    Title = Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveAs),
+                    Title = Session.Current.CurrentLocalizer.Format(SharedLocalizedStringKeys.SaveAs),
                     ValidateNames = true,
                 };
 
@@ -983,7 +983,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the localized description for the default file extension.
         /// </summary>
-        public abstract LocalizedStringKey FileExtensionLocalizedKey { get; }
+        public abstract StringKey<ForFormattedText> FileExtensionLocalizedKey { get; }
 
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.

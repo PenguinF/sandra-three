@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
+using Eutherion.Text;
 using System;
 using System.Drawing;
 using System.Globalization;
@@ -33,7 +33,7 @@ namespace Eutherion.Win.Storage
     public sealed class OpaqueColorType : PType.Derived<string, Color>
     {
         public static readonly PTypeErrorBuilder OpaqueColorTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(OpaqueColorTypeError)));
+            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(OpaqueColorTypeError)));
 
         public static readonly OpaqueColorType Instance = new OpaqueColorType();
 
@@ -54,6 +54,6 @@ namespace Eutherion.Win.Storage
         }
 
         public override string GetBaseValue(Color value)
-            => $"#{value.R.ToString("X2")}{value.G.ToString("X2")}{value.B.ToString("X2")}";
+            => $"#{value.R:X2}{value.G:X2}{value.B:X2}";
     }
 }
