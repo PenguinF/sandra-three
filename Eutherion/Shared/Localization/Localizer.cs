@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+
 namespace Eutherion.Localization
 {
     /// <summary>

@@ -110,7 +110,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? StringUtilities.ConditionalFormat(displayText, parameters)
+            ? FormatUtilities.ConditionalFormat(displayText, parameters)
             : Default.Localize(localizedStringKey, parameters);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;

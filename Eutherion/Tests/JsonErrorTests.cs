@@ -64,7 +64,7 @@ namespace Eutherion.Shared.Tests
                     return TestNullString;
 
                 if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.UntypedObjectString)
-                    return StringUtilities.ConditionalFormat(TestUntypedObjectString, parameters);
+                    return FormatUtilities.ConditionalFormat(TestUntypedObjectString, parameters);
 
                 // Throw an exception here, no other keys should be used than above 2.
                 throw new InvalidOperationException();
