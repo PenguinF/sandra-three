@@ -87,7 +87,6 @@
     <Compile Include="Utils\CircularBuffer.cs" />
     <Compile Include="Utils\FileUtilities.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
-    <Compile Include="Utils\ObjectPool.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\SafeLazyObjectCollection.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
