@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingProperty.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
-        public SettingKey Name { get; }
+        public StringKey<SettingProperty> Name { get; }
 
         /// <summary>
         /// Gets the built-in description of the property in a settings file.
@@ -52,7 +52,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> is null.
         /// </exception>
-        public SettingProperty(SettingKey name, SettingComment description)
+        public SettingProperty(StringKey<SettingProperty> name, SettingComment description)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Description = description;
@@ -121,7 +121,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
         /// </exception>
-        public SettingProperty(SettingKey name, PType<T> pType) : this(name, pType, null)
+        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType) : this(name, pType, null)
         {
         }
 
@@ -140,7 +140,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
         /// </exception>
-        public SettingProperty(SettingKey name, PType<T> pType, SettingComment description) : base(name, description)
+        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType, SettingComment description) : base(name, description)
         {
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }

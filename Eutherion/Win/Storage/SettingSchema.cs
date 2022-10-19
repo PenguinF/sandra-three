@@ -121,7 +121,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
         /// </exception>
-        public bool TryGetProperty(SettingKey settingKey, out SettingProperty property)
+        public bool TryGetProperty(StringKey<SettingProperty> settingKey, out SettingProperty property)
         {
             if (settingKey == null) throw new ArgumentNullException(nameof(settingKey));
 
@@ -167,7 +167,7 @@ namespace Eutherion.Win.Storage
             // Analyze values with this schema while building the PMap.
             foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
             {
-                if (TryGetProperty(new SettingKey(keyNode.Value), out SettingProperty property))
+                if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
                     var valueOrError = property.TryCreateValue(
                         json,

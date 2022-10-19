@@ -100,8 +100,8 @@ namespace Eutherion.Win.Storage
             return workingCopy.Commit();
         }
 
-        private readonly Dictionary<SettingKey, WeakEvent<object, EventArgs>> settingsChangedEvents
-            = new Dictionary<SettingKey, WeakEvent<object, EventArgs>>();
+        private readonly Dictionary<StringKey<SettingProperty>, WeakEvent<object, EventArgs>> settingsChangedEvents
+            = new Dictionary<StringKey<SettingProperty>, WeakEvent<object, EventArgs>>();
 
         /// <summary>
         /// Registers a handler for the weak event which occurs after the <see cref="Settings"/> have been updated in the file.

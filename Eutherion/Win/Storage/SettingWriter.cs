@@ -221,7 +221,7 @@ namespace Eutherion.Win.Storage
 
                 string name = kv.Key;
                 if ((options & SettingWriterOptions.SuppressSettingComments) == 0
-                    && schema.TryGetProperty(new SettingKey(name), out SettingProperty property))
+                    && schema.TryGetProperty(new StringKey<SettingProperty>(name), out SettingProperty property))
                 {
                     if (extraNewLineBeforeComment) outputBuilder.AppendLine();
                     AppendCommentLines(property.Description);
