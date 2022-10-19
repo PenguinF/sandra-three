@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonErrorTests.cs
+ * MiscTests.cs
  *
  * Copyright (c) 2004-2022 Henk Nicolai
  *
@@ -25,9 +25,9 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Eutherion.Shared.Tests
+namespace Eutherion.Win.Tests
 {
-    public class JsonErrorTests
+    public class MiscTests
     {
         [Fact]
         public void ArgumentChecks()
