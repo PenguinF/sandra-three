@@ -36,16 +36,16 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </summary>
     public sealed class FileLocalizer : TextFormatter, IWeakEventTarget, IDisposable
     {
-        private class LanguageMenuItemProvider : ITextProvider, IImageProvider
+        private class LanguageMenuItemProvider : IFunc<string>, IFunc<Image>
         {
             private readonly FileLocalizer FileLocalizer;
 
             public LanguageMenuItemProvider(FileLocalizer fileLocalizer)
                 => FileLocalizer = fileLocalizer;
 
-            public string GetText() => FileLocalizer.LanguageName;
+            string IFunc<string>.Eval() => FileLocalizer.LanguageName;
 
-            public Image GetImage()
+            Image IFunc<Image>.Eval()
             {
                 try
                 {
@@ -110,7 +110,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? FormatUtilities.ConditionalFormat(displayText, parameters)
+            ? FormatUtilities.SoftFormat(displayText, parameters)
             : Default.Format(localizedStringKey, parameters);
 
         private UIAction switchToLangUIActionBinding;

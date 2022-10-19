@@ -61,7 +61,7 @@ namespace Sandra.Chess.Pgn
                 PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
                 PgnParenthesisOpenSyntax.ParenthesisOpenCharacter,
                 PgnPeriodSyntax.PeriodCharacter,
-                StringLiteral.QuoteCharacter,
+                CStyleStringLiteral.QuoteCharacter,
                 PgnCommentSyntax.EndOfLineCommentStartCharacter,
                 PgnCommentSyntax.MultiLineCommentStartCharacter,
                 PgnNagSyntax.NagCharacter,

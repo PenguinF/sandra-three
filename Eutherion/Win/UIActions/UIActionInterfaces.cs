@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Eutherion.Win.UIActions
 {
@@ -49,18 +50,18 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Defines the text provider used to generate the display text for the menu item.
         /// </summary>
-        ITextProvider MenuTextProvider { get; }
+        IFunc<string> MenuTextProvider { get; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        IImageProvider MenuIcon { get; }
+        IFunc<Image> MenuIcon { get; }
 
         /// <summary>
         /// Defines the shortcut key to display in the menu item.
         /// If the enumeration is null or empty, no shortcut key will be shown.
         /// </summary>
-        IEnumerable<ITextProvider> DisplayShortcutKeys { get; }
+        IEnumerable<IFunc<string>> DisplayShortcutKeys { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.

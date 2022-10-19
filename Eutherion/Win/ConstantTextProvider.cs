@@ -26,7 +26,7 @@ namespace Eutherion.Win
     /// <summary>
     /// <see cref="ITextProvider"/> which always provides the same text to a UI element.
     /// </summary>
-    public class ConstantTextProvider : ITextProvider
+    public class ConstantTextProvider : IFunc<string>
     {
         /// <summary>
         /// Gets the <see cref="ConstantTextProvider"/> which returns an empty string.
@@ -58,6 +58,6 @@ namespace Eutherion.Win
             if (text.Length == 0) throw new ArgumentException($"{nameof(text)} is empty", nameof(text));
         }
 
-        string ITextProvider.GetText() => Text;
+        string IFunc<string>.Eval() => Text;
     }
 }

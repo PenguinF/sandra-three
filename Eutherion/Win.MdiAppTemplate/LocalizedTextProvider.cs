@@ -27,7 +27,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// <summary>
     /// <see cref="ITextProvider"/> which provides a localized text to a UI element.
     /// </summary>
-    public class LocalizedTextProvider : ITextProvider
+    public class LocalizedTextProvider : IFunc<string>
     {
         /// <summary>
         /// Gets the key for this <see cref="LocalizedTextProvider"/>.
@@ -37,7 +37,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public string GetText() => Session.Current.CurrentLocalizer.Format(Key);
+        public string Eval() => Session.Current.CurrentLocalizer.Format(Key);
 
         /// <summary>
         /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/>.

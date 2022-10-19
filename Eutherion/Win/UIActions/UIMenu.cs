@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -35,24 +36,24 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Gets the text to display for this node. If null or empty, no menu item is generated for this node.
         /// </summary>
-        public ITextProvider TextProvider { get; }
+        public IFunc<string> TextProvider { get; }
 
         /// <summary>
         /// Defines the icon to display for this node.
         /// </summary>
-        public IImageProvider IconProvider { get; }
+        public IFunc<Image> IconProvider { get; }
 
         /// <summary>
         /// Gets or sets if this node is the first in a group of nodes.
         /// </summary>
         public bool IsFirstInGroup { get; set; }
 
-        protected UIMenuNode(ITextProvider textProvider)
+        protected UIMenuNode(IFunc<string> textProvider)
         {
             TextProvider = textProvider;
         }
 
-        protected UIMenuNode(ITextProvider textProvider, IImageProvider iconProvider) : this(textProvider)
+        protected UIMenuNode(IFunc<string> textProvider, IFunc<Image> iconProvider) : this(textProvider)
         {
             IconProvider = iconProvider;
         }
@@ -68,7 +69,7 @@ namespace Eutherion.Win.UIActions
             /// Generates the shortcut key to display in the menu item.
             /// If the enumeration is null or empty, no shortcut key will be shown.
             /// </summary>
-            public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
+            public IEnumerable<IFunc<string>> ShortcutKeyDisplayTextProviders { get; }
 
             /// <summary>
             /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -93,11 +94,11 @@ namespace Eutherion.Win.UIActions
         {
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
 
-            public Container(ITextProvider textProvider) : base(textProvider)
+            public Container(IFunc<string> textProvider) : base(textProvider)
             {
             }
 
-            public Container(ITextProvider textProvider, IImageProvider iconProvider) : base(textProvider, iconProvider)
+            public Container(IFunc<string> textProvider, IFunc<Image> iconProvider) : base(textProvider, iconProvider)
             {
             }
 
@@ -121,18 +122,18 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Generates the text to display for this menu item.
         /// </summary>
-        public ITextProvider TextProvider { get; }
+        public IFunc<string> TextProvider { get; }
 
         /// <summary>
         /// Generates the image to display for this menu item.
         /// </summary>
-        public IImageProvider IconProvider { get; }
+        public IFunc<Image> IconProvider { get; }
 
         /// <summary>
         /// Generates the shortcut key to display in the menu item.
         /// If the enumeration is null or empty, no shortcut key will be shown.
         /// </summary>
-        public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
+        public IEnumerable<IFunc<string>> ShortcutKeyDisplayTextProviders { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -140,9 +141,9 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public bool OpensDialog { get; }
 
-        protected LocalizedToolStripMenuItem(ITextProvider textProvider,
-                                             IImageProvider iconProvider,
-                                             IEnumerable<ITextProvider> shortcutKeyDisplayTextProviders,
+        protected LocalizedToolStripMenuItem(IFunc<string> textProvider,
+                                             IFunc<Image> iconProvider,
+                                             IEnumerable<IFunc<string>> shortcutKeyDisplayTextProviders,
                                              bool opensDialog)
         {
             ImageScaling = ToolStripItemImageScaling.None;
@@ -160,7 +161,7 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public void Update()
         {
-            string displayText = TextProvider?.GetText();
+            string displayText = TextProvider?.Eval();
 
             if (!string.IsNullOrWhiteSpace(displayText))
             {
@@ -181,11 +182,11 @@ namespace Eutherion.Win.UIActions
                 Text = string.Empty;
             }
 
-            Image = IconProvider?.GetImage();
+            Image = IconProvider?.Eval();
 
             if (ShortcutKeyDisplayTextProviders != null)
             {
-                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayTextProviders.Select(x => x.GetText()));
+                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayTextProviders.Select(x => x.Eval()));
             }
             else
             {

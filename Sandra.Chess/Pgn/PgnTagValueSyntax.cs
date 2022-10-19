@@ -121,7 +121,7 @@ namespace Sandra.Chess.Pgn
         /// The position of the illegal control character relative to the start position of the tag value.
         /// </param>
         public static PgnErrorInfo IllegalControlCharacterError(char illegalCharacter, int position)
-            => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
+            => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { CStyleStringLiteral.EscapedCharacterString(illegalCharacter) });
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.

@@ -27,7 +27,7 @@ namespace Eutherion.Win
     /// <summary>
     /// <see cref="IImageProvider"/> which always provides the same image to a UI element.
     /// </summary>
-    public class ConstantImageProvider : IImageProvider
+    public class ConstantImageProvider : IFunc<Image>
     {
         /// <summary>
         /// Gets the <see cref="ConstantImageProvider"/> which returns a null <see cref="System.Drawing.Image"/>.
@@ -53,6 +53,6 @@ namespace Eutherion.Win
         public ConstantImageProvider(Image image)
             => Image = image ?? throw new ArgumentNullException(nameof(image));
 
-        Image IImageProvider.GetImage() => Image;
+        Image IFunc<Image>.Eval() => Image;
     }
 }

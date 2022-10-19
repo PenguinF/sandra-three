@@ -66,8 +66,8 @@ namespace Eutherion.Text.Json
             {
                 case JsonErrorInfoParameter<char> charParameter:
                     char c = charParameter.Value;
-                    return StringLiteral.CharacterMustBeEscaped(c)
-                        ? $"'{StringLiteral.EscapedCharacterString(c)}'"
+                    return CStyleStringLiteral.CharacterMustBeEscaped(c)
+                        ? $"'{CStyleStringLiteral.EscapedCharacterString(c)}'"
                         : $"'{c}'";
                 case JsonErrorInfoParameter<string> stringParameter:
                     return stringParameter.Value == null

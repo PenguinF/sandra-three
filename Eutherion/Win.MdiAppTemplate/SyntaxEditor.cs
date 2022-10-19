@@ -116,7 +116,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void UpdateText()
             {
-                DockProperties.CaptionText = FormatUtilities.ConditionalFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
+                DockProperties.CaptionText = FormatUtilities.SoftFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
                 DockPropertiesChanged?.Invoke();
             }
 

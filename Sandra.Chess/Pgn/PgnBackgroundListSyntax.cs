@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Concurrent;
 
 namespace Sandra.Chess.Pgn
 {

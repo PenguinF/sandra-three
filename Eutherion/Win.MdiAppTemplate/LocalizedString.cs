@@ -32,18 +32,18 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
+        public readonly ObservableValue<string> DisplayText = ObservableValue<string>.Create(string.Empty, StringComparer.Ordinal);
 
         public LocalizedString(StringKey<ForFormattedText> key)
             : base(key)
         {
-            DisplayText.Value = GetText();
+            DisplayText.Value = Eval();
             Session.Current.CurrentLocalizerChanged += Localizer_CurrentChanged;
         }
 
         private void Localizer_CurrentChanged(object sender, EventArgs e)
         {
-            DisplayText.Value = GetText();
+            DisplayText.Value = Eval();
         }
 
         public bool IsDisposed { get; private set; }

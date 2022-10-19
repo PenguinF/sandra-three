@@ -48,12 +48,12 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Defines the text provider used to generate the display text for the menu item.
         /// </summary>
-        public ITextProvider MenuTextProvider { get; set; }
+        public IFunc<string> MenuTextProvider { get; set; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        public IImageProvider MenuIcon { get; set; }
+        public IFunc<Image> MenuIcon { get; set; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -69,7 +69,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// The <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> enumerable which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </returns>
-        public IEnumerable<ITextProvider> DisplayShortcutKeys
+        public IEnumerable<IFunc<string>> DisplayShortcutKeys
         {
             get
             {
@@ -138,13 +138,13 @@ namespace Eutherion.Win.MdiAppTemplate
 
     public static class CombinedUIActionInterfaceExtensions
     {
-        public static ITextProvider ToTextProvider(this string displayText)
+        public static IFunc<string> ToTextProvider(this string displayText)
             => new ConstantTextProvider(displayText);
 
-        public static ITextProvider ToTextProvider(this StringKey<ForFormattedText> key)
+        public static IFunc<string> ToTextProvider(this StringKey<ForFormattedText> key)
             => key == null ? null : new LocalizedTextProvider(key);
 
-        public static IImageProvider ToImageProvider(this Image image)
+        public static IFunc<Image> ToImageProvider(this Image image)
             => image == null ? null : new ConstantImageProvider(image);
     }
 }

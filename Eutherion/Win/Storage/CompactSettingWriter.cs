@@ -43,7 +43,7 @@ namespace Eutherion.Win.Storage
 
         internal void AppendString(string value)
         {
-            outputBuilder.Append(StringLiteral.QuoteCharacter);
+            outputBuilder.Append(CStyleStringLiteral.QuoteCharacter);
 
             if (value != null)
             {
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
                 for (int i = 0; i < value.Length; i++)
                 {
                     char c = value[i];
-                    if (StringLiteral.CharacterMustBeEscaped(c))
+                    if (CStyleStringLiteral.CharacterMustBeEscaped(c))
                     {
                         // Non-empty substring between this character and the last?
                         if (firstNonEscapedCharPosition < i)
@@ -66,7 +66,7 @@ namespace Eutherion.Win.Storage
                         }
 
                         // Append the escape sequence.
-                        outputBuilder.Append(StringLiteral.EscapedCharacterString(c));
+                        outputBuilder.Append(CStyleStringLiteral.EscapedCharacterString(c));
 
                         firstNonEscapedCharPosition = i + 1;
                     }
@@ -81,7 +81,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            outputBuilder.Append(StringLiteral.QuoteCharacter);
+            outputBuilder.Append(CStyleStringLiteral.QuoteCharacter);
         }
 
         public override void VisitBoolean(PBoolean value)
