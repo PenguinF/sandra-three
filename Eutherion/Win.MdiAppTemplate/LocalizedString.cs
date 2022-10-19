@@ -37,13 +37,13 @@ namespace Eutherion.Win.MdiAppTemplate
         public LocalizedString(StringKey<ForFormattedText> key)
             : base(key)
         {
-            DisplayText.Value = GetText();
+            DisplayText.Value = Eval();
             Session.Current.CurrentLocalizerChanged += Localizer_CurrentChanged;
         }
 
         private void Localizer_CurrentChanged(object sender, EventArgs e)
         {
-            DisplayText.Value = GetText();
+            DisplayText.Value = Eval();
         }
 
         public bool IsDisposed { get; private set; }

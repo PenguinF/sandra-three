@@ -36,14 +36,14 @@ namespace Eutherion.Win.MdiAppTemplate
     /// </summary>
     public sealed class FileLocalizer : TextFormatter, IWeakEventTarget, IDisposable
     {
-        private class LanguageMenuItemProvider : ITextProvider, IImageProvider
+        private class LanguageMenuItemProvider : IFunc<string>, IImageProvider
         {
             private readonly FileLocalizer FileLocalizer;
 
             public LanguageMenuItemProvider(FileLocalizer fileLocalizer)
                 => FileLocalizer = fileLocalizer;
 
-            public string GetText() => FileLocalizer.LanguageName;
+            string IFunc<string>.Eval() => FileLocalizer.LanguageName;
 
             public Image GetImage()
             {

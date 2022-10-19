@@ -76,7 +76,6 @@
     <Compile Include="Forms\SnapGrid.cs" />
     <Compile Include="Forms\SnapHelper.cs" />
     <Compile Include="IImageProvider.cs" />
-    <Compile Include="ITextProvider.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="LiveTextFile.cs" />
     <Compile Include="Native\Constants.cs" />
