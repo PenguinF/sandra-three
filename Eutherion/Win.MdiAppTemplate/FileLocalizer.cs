@@ -110,7 +110,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? FormatUtilities.ConditionalFormat(displayText, parameters)
+            ? FormatUtilities.SoftFormat(displayText, parameters)
             : Default.Format(localizedStringKey, parameters);
 
         private UIAction switchToLangUIActionBinding;

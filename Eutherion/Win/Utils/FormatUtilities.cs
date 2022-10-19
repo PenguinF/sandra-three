@@ -27,25 +27,40 @@ namespace Eutherion
     public static class FormatUtilities
     {
         /// <summary>
-        /// Conditionally formats a string, based on whether or not it has parameters.
+        /// Formats a string, replacing substitution markers in the format string with a string value from a specified array
+        /// or the empty string if this parameter is unavailable.
         /// </summary>
-        public static string ConditionalFormat(string localizedString, string[] parameters)
+        /// <param name="format">
+        /// A composite format string.
+        /// </param>
+        /// <param name="args">
+        /// A string array that contains zero or more objects to format.
+        /// </param>
+        /// <returns>
+        /// A copy of <paramref name="format"/> in which substitution markers have been replaced by values from <paramref name="args"/>,
+        /// -or- a default representation if <paramref name="format"/> is null or invalid and <seealso cref="string.Format(string, object[])"/>
+        /// would throw.
+        /// </returns>
+        /// <remarks>
+        /// This implementation differs from <seealso cref="string.Format(string, object[])"/> in the sense
+        /// that if a substitution point indexes outside of the args array, it does not throw, but rather replaces with an empty string.
+        /// If <paramref name="format"/> is in an incorrect format, it returns a default representation using <see cref="ToDefaultParameterListDisplayString(string[])"/>.
+        /// </remarks>
+        public static string SoftFormat(string format, params string[] args)
         {
-            if (parameters == null || parameters.Length == 0) return localizedString;
+            int requiredParameterCount = StringUtilities.FormatStringRequiredArgumentCount(format, out bool wouldThrowException);
 
-            try
+            if (wouldThrowException)
             {
-                return string.Format(localizedString, parameters);
-            }
-            catch (FormatException)
-            {
-                // The provided localized format string is in an incorrect format, and/or it contains
-                // more parameter substitution locations than there are parameters provided.
-                // Examples:
+                // The provided localized format string is in an incorrect format.
+                // Example:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
-                // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {StringUtilities.ToDefaultParameterListDisplayString(parameters)}";
+                return $"{format}{StringUtilities.ToDefaultParameterListDisplayString(args)}";
             }
+
+            args = args ?? Array.Empty<string>();
+
+            return string.Format(format, args.PadRight(requiredParameterCount, string.Empty));
         }
     }
 }
