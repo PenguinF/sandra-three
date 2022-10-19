@@ -61,10 +61,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Eutherion\Shared\Eutherion.Shared.csproj">
-      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
-      <Name>Eutherion.Shared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Sandra.Chess.csproj">
       <Project>{f5e121c5-a874-4fef-9ff5-56285420cff6}</Project>
       <Name>Sandra.Chess</Name>

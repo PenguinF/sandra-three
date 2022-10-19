@@ -1,6 +1,6 @@
-﻿#region License
+#region License
 /*********************************************************************************
- * StringUtilities.cs
+ * FormatUtilities.cs
  *
  * Copyright (c) 2004-2022 Henk Nicolai
  *

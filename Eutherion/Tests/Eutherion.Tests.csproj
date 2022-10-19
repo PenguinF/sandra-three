@@ -37,12 +37,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ExpectedJsonTree.cs" />
-    <Compile Include="ExpectedJsonTrees.cs" />
     <Compile Include="JsonErrorTests.cs" />
-    <Compile Include="JsonParserTests.cs" />
-    <Compile Include="JsonSyntaxTests.cs" />
-    <Compile Include="JsonTokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkingCopyTextFileTests.cs" />
   </ItemGroup>
@@ -51,10 +46,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Eutherion.Shared.csproj">
-      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
-      <Name>Eutherion.Shared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Win\Eutherion.Win.csproj">
       <Project>{078cb2b5-bf6c-497a-8a0e-2633367e4759}</Project>
       <Name>Eutherion.Win</Name>

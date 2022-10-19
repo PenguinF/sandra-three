@@ -117,17 +117,17 @@
     <Compile Include="UIActions\UIActionUtilities.cs" />
     <Compile Include="UIActions\UIAutoHideMainMenu.cs" />
     <Compile Include="UIActions\UIMenu.cs" />
+    <Compile Include="Utils\FileUtilities.cs" />
+    <Compile Include="Utils\FormatUtilities.cs" />
+    <Compile Include="Utils\JsonErrorInfoParameterDisplayHelper.cs" />
     <Compile Include="Utils\KeyUtilities.cs" />
     <Compile Include="Utils\RegistryHelper.cs" />
     <Compile Include="Utils\ShortcutKeys.cs" />
     <Compile Include="Utils\ThemeHelper.cs" />
+    <Compile Include="WeakEvent\HandlerIsAnonymousException.cs" />
+    <Compile Include="WeakEvent\WeakEvent.cs" />
+    <Compile Include="WeakEvent\WeakEventInvocationException.cs" />
     <Compile Include="WorkingCopyTextFile.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Shared\Eutherion.Shared.csproj">
-      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
-      <Name>Eutherion.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Eutherion.Common">
