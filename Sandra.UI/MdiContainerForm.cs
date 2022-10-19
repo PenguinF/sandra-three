@@ -52,26 +52,27 @@ namespace Sandra.UI
             // Define the main menu.
             var mainMenuRootNodes = new List<MainMenuDropDownItem>();
 
+            var systemWindowMenu = new List<Union<UIAction, MainMenuDropDownItem>>();
+
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                var langWindowMenu = new List<Union<UIAction, MainMenuDropDownItem>>();
-                langWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(
+                systemWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(
                     x => Union<UIAction, MainMenuDropDownItem>.Option1(x.SwitchToLangUIActionBinding)));
-
-                langWindowMenu.Add(SharedUIAction.WindowMenuRestore);
-                langWindowMenu.Add(SharedUIAction.WindowMenuMove);
-                langWindowMenu.Add(SharedUIAction.WindowMenuSize);
-                langWindowMenu.Add(SharedUIAction.WindowMenuMinimize);
-                langWindowMenu.Add(SharedUIAction.WindowMenuMaximize);
-                langWindowMenu.Add(SharedUIAction.Close);
-
-                mainMenuRootNodes.Add(new MainMenuDropDownItem
-                {
-                    Container = new UIMenuNode.Container(null, SharedResources.globe.ToImageProvider()),
-                    DropDownItems = langWindowMenu
-                });
             }
+
+            systemWindowMenu.Add(SharedUIAction.WindowMenuRestore);
+            systemWindowMenu.Add(SharedUIAction.WindowMenuMove);
+            systemWindowMenu.Add(SharedUIAction.WindowMenuSize);
+            systemWindowMenu.Add(SharedUIAction.WindowMenuMinimize);
+            systemWindowMenu.Add(SharedUIAction.WindowMenuMaximize);
+            systemWindowMenu.Add(SharedUIAction.Close);
+
+            mainMenuRootNodes.Add(new MainMenuDropDownItem
+            {
+                Container = new UIMenuNode.Container(null, SharedResources.globe.ToImageProvider()),
+                DropDownItems = systemWindowMenu
+            });
 
             mainMenuRootNodes.Add(new MainMenuDropDownItem
             {
