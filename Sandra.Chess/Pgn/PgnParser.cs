@@ -70,7 +70,7 @@ namespace Sandra.Chess.Pgn
         }
 
         /// <summary>
-        /// See also <see cref="StringLiteral.EscapeCharacter"/>.
+        /// See also <see cref="CStyleStringLiteral.EscapeCharacter"/>.
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
@@ -1092,8 +1092,8 @@ namespace Sandra.Chess.Pgn
         private void ReportIllegalCharacterSyntaxError(char c, int position)
         {
             Errors.Add(PgnIllegalCharacterSyntax.CreateError(
-                StringLiteral.CharacterMustBeEscaped(c)
-                ? StringLiteral.EscapedCharacterString(c)
+                CStyleStringLiteral.CharacterMustBeEscaped(c)
+                ? CStyleStringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c), position));
         }
 
@@ -1176,7 +1176,7 @@ namespace Sandra.Chess.Pgn
                                 Yield(GreenPgnPeriodSyntax.Value);
                                 symbolStartIndex++;
                                 break;
-                            case StringLiteral.QuoteCharacter:
+                            case CStyleStringLiteral.QuoteCharacter:
                                 goto inString;
                             case PgnCommentSyntax.EndOfLineCommentStartCharacter:
                                 goto inEndOfLineComment;
@@ -1267,7 +1267,7 @@ namespace Sandra.Chess.Pgn
                             case PgnPeriodSyntax.PeriodCharacter:
                                 characterToYield = GreenPgnPeriodSyntax.Value;
                                 goto yieldSymbolThenCharacter;
-                            case StringLiteral.QuoteCharacter:
+                            case CStyleStringLiteral.QuoteCharacter:
                                 if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inString;
@@ -1342,7 +1342,7 @@ namespace Sandra.Chess.Pgn
                 char c = pgnText[currentIndex];
 
                 // Closing quote character?
-                if (c == StringLiteral.QuoteCharacter)
+                if (c == CStyleStringLiteral.QuoteCharacter)
                 {
                     // Include last character in the syntax node.
                     currentIndex++;
@@ -1360,7 +1360,7 @@ namespace Sandra.Chess.Pgn
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
                 }
-                else if (c == StringLiteral.EscapeCharacter)
+                else if (c == CStyleStringLiteral.EscapeCharacter)
                 {
                     // Look ahead one character.
                     int escapeSequenceStart = currentIndex;
@@ -1371,7 +1371,7 @@ namespace Sandra.Chess.Pgn
                         char escapedChar = pgnText[currentIndex];
 
                         // Only two escape sequences are supported in the PGN standard: \" and \\
-                        if (escapedChar == StringLiteral.QuoteCharacter || escapedChar == StringLiteral.EscapeCharacter)
+                        if (escapedChar == CStyleStringLiteral.QuoteCharacter || escapedChar == CStyleStringLiteral.EscapeCharacter)
                         {
                             valueBuilder.Append(escapedChar);
                         }
@@ -1384,7 +1384,7 @@ namespace Sandra.Chess.Pgn
                                 Errors.Add(PgnTagValueSyntax.IllegalControlCharacterError(escapedChar, currentIndex));
                             }
 
-                            if (StringLiteral.CharacterMustBeEscaped(escapedChar))
+                            if (CStyleStringLiteral.CharacterMustBeEscaped(escapedChar))
                             {
                                 // Just don't show the control character.
                                 Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
@@ -1395,7 +1395,7 @@ namespace Sandra.Chess.Pgn
                             else
                             {
                                 Errors.Add(PgnTagValueSyntax.UnrecognizedEscapeSequenceError(
-                                    new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
+                                    new string(new[] { CStyleStringLiteral.EscapeCharacter, escapedChar }),
                                     escapeSequenceStart,
                                     2));
                             }

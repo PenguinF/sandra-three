@@ -27,7 +27,7 @@ namespace Eutherion.Text
     /// Contains utility methods to deal with string literals, in particular to support the implementation
     /// of an escape character standard, which is shared by multiple languages.
     /// </summary>
-    public static class StringLiteral
+    public static class CStyleStringLiteral
     {
         /// <summary>
         /// The character used to delimit string literals.
@@ -64,7 +64,7 @@ namespace Eutherion.Text
         // An index in memory is as fast as it gets for determining whether or not a character should be escaped.
         public static readonly bool[] CharacterMustBeEscapedIndex;
 
-        static StringLiteral()
+        static CStyleStringLiteral()
         {
             // Will be initialized with all false values.
             CharacterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];

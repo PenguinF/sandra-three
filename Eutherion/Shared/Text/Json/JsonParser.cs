@@ -536,7 +536,7 @@ namespace Eutherion.Text.Json
                             case JsonSpecialCharacter.CommaCharacter:
                                 yield return GreenJsonCommaSyntax.Value;
                                 break;
-                            case StringLiteral.QuoteCharacter:
+                            case CStyleStringLiteral.QuoteCharacter:
                                 goto inString;
                             case JsonSpecialCharacter.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
@@ -617,7 +617,7 @@ namespace Eutherion.Text.Json
                             case JsonSpecialCharacter.CommaCharacter:
                                 yield return GreenJsonCommaSyntax.Value;
                                 break;
-                            case StringLiteral.QuoteCharacter:
+                            case CStyleStringLiteral.QuoteCharacter:
                                 goto inString;
                             case JsonSpecialCharacter.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
@@ -676,7 +676,7 @@ namespace Eutherion.Text.Json
 
                 switch (c)
                 {
-                    case StringLiteral.QuoteCharacter:
+                    case CStyleStringLiteral.QuoteCharacter:
                         // Closing quote character.
                         currentIndex++;
                         if (hasStringErrors)
@@ -689,7 +689,7 @@ namespace Eutherion.Text.Json
                         }
                         SymbolStartIndex = currentIndex;
                         goto inWhitespace;
-                    case StringLiteral.EscapeCharacter:
+                    case CStyleStringLiteral.EscapeCharacter:
                         // Escape sequence.
                         // Look ahead one character.
                         int escapeSequenceStart = currentIndex;
@@ -701,8 +701,8 @@ namespace Eutherion.Text.Json
 
                             switch (escapedChar)
                             {
-                                case StringLiteral.QuoteCharacter:
-                                case StringLiteral.EscapeCharacter:
+                                case CStyleStringLiteral.QuoteCharacter:
+                                case CStyleStringLiteral.EscapeCharacter:
                                 case '/':  // Weird one, but it's in the specification.
                                     valueBuilder.Append(escapedChar);
                                     break;
@@ -790,7 +790,7 @@ namespace Eutherion.Text.Json
                         }
                         break;
                     default:
-                        if (StringLiteral.CharacterMustBeEscaped(c))
+                        if (CStyleStringLiteral.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
                             hasStringErrors = true;
