@@ -32,7 +32,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
+        public readonly ObservableValue<string> DisplayText = ObservableValue<string>.Create(string.Empty, StringComparer.Ordinal);
 
         public LocalizedString(StringKey<ForFormattedText> key)
             : base(key)
