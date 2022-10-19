@@ -23,6 +23,7 @@ using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -40,7 +41,7 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Defines the icon to display for this node.
         /// </summary>
-        public IImageProvider IconProvider { get; }
+        public IFunc<Image> IconProvider { get; }
 
         /// <summary>
         /// Gets or sets if this node is the first in a group of nodes.
@@ -52,7 +53,7 @@ namespace Eutherion.Win.UIActions
             TextProvider = textProvider;
         }
 
-        protected UIMenuNode(IFunc<string> textProvider, IImageProvider iconProvider) : this(textProvider)
+        protected UIMenuNode(IFunc<string> textProvider, IFunc<Image> iconProvider) : this(textProvider)
         {
             IconProvider = iconProvider;
         }
@@ -97,7 +98,7 @@ namespace Eutherion.Win.UIActions
             {
             }
 
-            public Container(IFunc<string> textProvider, IImageProvider iconProvider) : base(textProvider, iconProvider)
+            public Container(IFunc<string> textProvider, IFunc<Image> iconProvider) : base(textProvider, iconProvider)
             {
             }
 
@@ -126,7 +127,7 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Generates the image to display for this menu item.
         /// </summary>
-        public IImageProvider IconProvider { get; }
+        public IFunc<Image> IconProvider { get; }
 
         /// <summary>
         /// Generates the shortcut key to display in the menu item.
@@ -141,7 +142,7 @@ namespace Eutherion.Win.UIActions
         public bool OpensDialog { get; }
 
         protected LocalizedToolStripMenuItem(IFunc<string> textProvider,
-                                             IImageProvider iconProvider,
+                                             IFunc<Image> iconProvider,
                                              IEnumerable<IFunc<string>> shortcutKeyDisplayTextProviders,
                                              bool opensDialog)
         {
@@ -181,7 +182,7 @@ namespace Eutherion.Win.UIActions
                 Text = string.Empty;
             }
 
-            Image = IconProvider?.GetImage();
+            Image = IconProvider?.Eval();
 
             if (ShortcutKeyDisplayTextProviders != null)
             {

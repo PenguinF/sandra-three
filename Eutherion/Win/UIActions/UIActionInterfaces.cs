@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Eutherion.Win.UIActions
 {
@@ -54,7 +55,7 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        IImageProvider MenuIcon { get; }
+        IFunc<Image> MenuIcon { get; }
 
         /// <summary>
         /// Defines the shortcut key to display in the menu item.

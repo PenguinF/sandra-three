@@ -53,7 +53,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        public IImageProvider MenuIcon { get; set; }
+        public IFunc<Image> MenuIcon { get; set; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -144,7 +144,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public static IFunc<string> ToTextProvider(this StringKey<ForFormattedText> key)
             => key == null ? null : new LocalizedTextProvider(key);
 
-        public static IImageProvider ToImageProvider(this Image image)
+        public static IFunc<Image> ToImageProvider(this Image image)
             => image == null ? null : new ConstantImageProvider(image);
     }
 }
