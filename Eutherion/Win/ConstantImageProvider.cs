@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ConstantImageProvider.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using System.Drawing;
 namespace Eutherion.Win
 {
     /// <summary>
-    /// <see cref="IImageProvider"/> which always provides the same image to a UI element.
+    /// <see cref="IFunc{TResult}"/> of <see cref="System.Drawing.Image"/> which always provides the same image to a UI element.
     /// </summary>
     public class ConstantImageProvider : IFunc<Image>
     {
