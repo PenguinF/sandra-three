@@ -54,7 +54,7 @@ namespace Sandra.UI
 
             var systemWindowMenu = new List<Union<UIAction, MainMenuDropDownItem>>();
 
-            if (Session.Current.RegisteredLocalizers.Count() >= 2)
+            if (Session.Current.RegisteredLocalizers.Skip(1).Any())
             {
                 // More than one localizer: can switch between them.
                 systemWindowMenu.AddRange(Session.Current.RegisteredLocalizers.Select(
