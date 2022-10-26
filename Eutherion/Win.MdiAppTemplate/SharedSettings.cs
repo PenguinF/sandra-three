@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SharedSettings.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ namespace Eutherion.Win.MdiAppTemplate
             + "Instead, forward slashes ('/') can be used to separate directories as well.";
 
         public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(AppDataSubFolderNameDescription));
 
@@ -44,7 +44,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "File name in the %LOCALAPPDATA% subfolder which contains the user-specific preferences.";
 
         public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
 
@@ -54,24 +54,24 @@ namespace Eutherion.Win.MdiAppTemplate
             + "Instead, forward slashes ('/') can be used to separate directories as well.";
 
         public static readonly SettingProperty<string> LangFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LangFolderName))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LangFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(LangFolderNameDescription));
 
         public static readonly SettingProperty<uint> AutoSaveCounter = new SettingProperty<uint>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(AutoSaveCounter))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(AutoSaveCounter))),
             PType.CLR.UInt32);
 
         public static readonly SettingProperty<AutoSaveFileNamePair> DefaultSettingsAutoSave = new SettingProperty<AutoSaveFileNamePair>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsAutoSave))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DefaultSettingsAutoSave))),
             AutoSaveFilePairPType.Instance);
 
         public static readonly SettingProperty<AutoSaveFileNamePair> PreferencesAutoSave = new SettingProperty<AutoSaveFileNamePair>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesAutoSave))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(PreferencesAutoSave))),
             AutoSaveFilePairPType.Instance);
 
         public static readonly SettingProperty<int> JsonZoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(JsonZoom))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(JsonZoom))),
             ScintillaZoomFactor.Instance);
     }
 }

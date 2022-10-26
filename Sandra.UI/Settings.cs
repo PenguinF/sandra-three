@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System;
@@ -35,7 +36,7 @@ namespace Sandra.UI
             = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
 
         public static readonly SettingProperty<int> Version = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Version))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Version))),
             VersionRange.Instance,
             new SettingComment(VersionDescription));
 
@@ -53,11 +54,11 @@ namespace Sandra.UI
         }
 
         public static readonly SettingProperty<IEnumerable<PersistableFormState>> Windows = new SettingProperty<IEnumerable<PersistableFormState>>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Windows))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Windows))),
             new PType.ValueList<PersistableFormState>(PersistableFormState.Type));
 
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PgnZoom))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(PgnZoom))),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -65,7 +66,7 @@ namespace Sandra.UI
             + $"This value must be between {FastNavigationPlyCountRange.MinPlyCount} and {FastNavigationPlyCountRange.MaxPlyCount}.";
 
         public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
 
@@ -90,7 +91,7 @@ namespace Sandra.UI
             + "for example \"#808000\" is the Olive color.";
 
         public static readonly SettingProperty<Color> DarkSquareColor = new SettingProperty<Color>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DarkSquareColor))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DarkSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(DarkSquareColorDescription));
 
@@ -99,7 +100,7 @@ namespace Sandra.UI
             + "for example \"#F0E68C\" is the Khaki color.";
 
         public static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(LightSquareColorDescription));
 
@@ -108,7 +109,7 @@ namespace Sandra.UI
             + "for example \"#DC143C\" is the Crimson color.";
 
         public static readonly SettingProperty<Color> LastMoveArrowColor = new SettingProperty<Color>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
             OpaqueColorType.Instance,
             new SettingComment(LastMoveArrowColorDescription));
 
@@ -116,7 +117,7 @@ namespace Sandra.UI
             = "Whether or not to display all legal target squares of a piece when it is selected.";
 
         public static readonly SettingProperty<bool> DisplayLegalTargetSquares = new SettingProperty<bool>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
             PType.CLR.Boolean,
             new SettingComment(DisplayLegalTargetSquaresDescription));
 
@@ -125,7 +126,7 @@ namespace Sandra.UI
             + "for example \"#B0E0E6\" is the PowderBlue color.";
 
         public static readonly SettingProperty<Color> LegalTargetSquaresColor = new SettingProperty<Color>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LegalTargetSquaresColor))),
+            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LegalTargetSquaresColor))),
             OpaqueColorType.Instance,
             new SettingComment(LegalTargetSquaresColorDescription));
     }

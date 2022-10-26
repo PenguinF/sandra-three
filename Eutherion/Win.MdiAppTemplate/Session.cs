@@ -149,7 +149,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
-                new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
+                new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
                 PType.CLR.Boolean,
                 new SettingComment($"Enables tools which assist with {ExecutableFileNameWithoutExtension} development and debugging."));
 
@@ -173,7 +173,7 @@ namespace Eutherion.Win.MdiAppTemplate
             registeredLocalizers = Localizers.ScanLocalizers(this, Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
-                new SettingKey(LangSettingKey),
+                new StringKey<SettingProperty>(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
             // Now attempt to get exclusive write access to the .lock file so it becomes a safe mutex.
