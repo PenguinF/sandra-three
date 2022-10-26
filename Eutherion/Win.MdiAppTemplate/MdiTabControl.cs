@@ -146,18 +146,10 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (TabPages[e.TabPageIndex] is MdiTabPage mdiTabPage)
             {
-                if (TabPages.Count == 1)
-                {
-                    // If it's the last tab page, close it.
-                    bool cancel = e.Cancel;
-                    mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
-                    e.Cancel = cancel;
-                }
-                else
-                {
-                    Undock(mdiTabPage);
-                    e.Cancel = true;
-                }
+                // If it's the last tab page, close it.
+                bool cancel = e.Cancel;
+                mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
+                e.Cancel = cancel;
             }
 
             base.OnTabHeaderGlyphClick(e);
