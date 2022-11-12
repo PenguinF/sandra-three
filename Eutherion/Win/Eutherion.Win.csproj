@@ -46,7 +46,7 @@
     <Compile Include="Controls\GlyphTabControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\GlyphTabControl.TabHeaderPanel.cs">
+    <Compile Include="Controls\GlyphTabControl.Drawing.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\GlyphTabControl.TabPage.cs">
