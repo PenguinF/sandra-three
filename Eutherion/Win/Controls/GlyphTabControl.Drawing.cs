@@ -215,6 +215,44 @@ namespace Eutherion.Win.Controls
             base.OnMouseLeave(e);
         }
 
+        /// <summary>
+        /// Raises the <see cref="Control.Layout"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// A <see cref="LayoutEventArgs"/> that contains the event data.
+        /// </param>
+        protected override void OnLayout(LayoutEventArgs e)
+        {
+            UpdateMetrics();
+
+            var clientSize = ClientSize;
+
+            foreach (var tabPage in TabPages)
+            {
+                tabPage.ClientControl.SetBounds(0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight);
+            }
+
+            base.OnLayout(e);
+        }
+
+        /// <summary>
+        /// Paints the background of the control.
+        /// </summary>
+        /// <param name="e">
+        /// A <see cref="PaintEventArgs"/> that contains the event data.
+        /// </param>
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            if (ActiveTabPageIndex < 0)
+            {
+                // Default behavior if there is no control to display in the tab client area.
+                var clientSize = ClientSize;
+
+                e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
+                    0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
@@ -416,17 +454,6 @@ namespace Eutherion.Win.Controls
 
                 g.SmoothingMode = SmoothingMode.None;
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                ToolTip.Dispose();
-                CurrentCloseButtonGlyphFont?.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
     }
 }

@@ -395,42 +395,15 @@ namespace Eutherion.Win.Controls
         /// </param>
         protected virtual void OnTabHeaderGlyphClick(GlyphTabControlCancelEventArgs e) => TabHeaderGlyphClick?.Invoke(this, e);
 
-        /// <summary>
-        /// Raises the <see cref="Control.Layout"/> event.
-        /// </summary>
-        /// <param name="e">
-        /// A <see cref="LayoutEventArgs"/> that contains the event data.
-        /// </param>
-        protected override void OnLayout(LayoutEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            UpdateMetrics();
-
-            var clientSize = ClientSize;
-
-            foreach (var tabPage in TabPages)
+            if (disposing)
             {
-                tabPage.ClientControl.SetBounds(0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight);
+                ToolTip.Dispose();
+                CurrentCloseButtonGlyphFont?.Dispose();
             }
 
-            base.OnLayout(e);
-        }
-
-        /// <summary>
-        /// Paints the background of the control.
-        /// </summary>
-        /// <param name="e">
-        /// A <see cref="PaintEventArgs"/> that contains the event data.
-        /// </param>
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            if (ActiveTabPageIndex < 0)
-            {
-                // Default behavior if there is no control to display in the tab client area.
-                var clientSize = ClientSize;
-
-                e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
-                    0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
-            }
+            base.Dispose(disposing);
         }
     }
 
