@@ -194,7 +194,7 @@ namespace Sandra.UI
 
             DockedControl.AfterTabRemoved += DockedControl_AfterTabRemoved;
             DockedControl.AfterTabClosed += DockedControl_AfterTabRemoved;
-            DockedControl.RequestUndock += DockedControl_RequestUndock;
+            DockedControl.RequestTear += DockedControl_RequestTear;
         }
 
         private void ObservableStyle_NotifyChange(object sender, EventArgs e)
@@ -223,15 +223,8 @@ namespace Sandra.UI
             }
         }
 
-        private void DockedControl_RequestUndock(MdiTabPage mdiTabPage)
-        {
-            // Create a new MdiContainerForm which contains mdiTabPage as its sole tab page.
-            var mdiContainerForm = Program.MainForm.CreateNewMdiContainerForm(setCenterWorkingScreenStartPosition: false);
-            mdiContainerForm.Size = Size;
-            mdiContainerForm.DockedControl.TabPages.Add(mdiTabPage);
-            mdiContainerForm.DockedControl.ActivateTab(0);
-            mdiContainerForm.DockedControl.EnsureActivated();
-        }
+        private MenuCaptionBarForm<MdiTabControl> DockedControl_RequestTear()
+            => Program.MainForm.CreateNewMdiContainerForm(setCenterWorkingScreenStartPosition: false);
 
         protected override void OnDragEnter(DragEventArgs e)
         {
