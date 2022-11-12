@@ -21,6 +21,7 @@
 
 using Eutherion.Win.Controls;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -40,11 +41,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
         /// <summary>
         /// Raised when a <see cref="MdiTabPage"/> is about to be undocked.
-        /// An event handler should reparent the <see cref="MdiTabPage"/> into a different control tree.
-        /// The expected behaviour is that a new <see cref="Form"/> is created which contains the previously docked control.
-        /// If the previously docked control is not reparented, the undocking operation fails and the resulting UI/UX is undefined.
+        /// An event handler should create a new window which can display the tab page.
         /// </summary>
-        public event Action<MdiTabPage> RequestUndock;
+        public event Func<MenuCaptionBarForm<MdiTabControl>> RequestTear;
 
         public MdiTabControl(string applicationTitle)
         {
@@ -146,7 +145,6 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             if (TabPages[e.TabPageIndex] is MdiTabPage mdiTabPage)
             {
-                // If it's the last tab page, close it.
                 bool cancel = e.Cancel;
                 mdiTabPage.DockedControl.CanClose(CloseReason.UserClosing, ref cancel);
                 e.Cancel = cancel;
@@ -160,7 +158,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public bool Undock(MdiTabPage mdiTabPage)
         {
-            if (RequestUndock != null)
+            if (RequestTear != null && FindForm() is Form form)
             {
                 // To be able to restore state.
                 int oldActiveTabPageIndex = ActiveTabPageIndex;
@@ -175,16 +173,21 @@ namespace Eutherion.Win.MdiAppTemplate
                     // Necessary because moving the Control to a different parent is going to force an update as well.
                     Update();
 
-                    // Call the handler and check if the previously docked Control has been properly reparented.
-                    RequestUndock(mdiTabPage);
+                    // Create a new MenuCaptionBarForm which contains mdiTabPage as its sole tab page.
+                    MenuCaptionBarForm<MdiTabControl> menuCaptionBarForm = RequestTear();
 
-                    if (mdiTabPage.ClientControl.Parent == null)
+                    if (menuCaptionBarForm == null)
                     {
                         // Restore original state.
                         TabPages.Insert(removedTabPageIndex, mdiTabPage);
                         if (oldActiveTabPageIndex == removedTabPageIndex) ActivateTab(oldActiveTabPageIndex);
                         return false;
                     }
+
+                    menuCaptionBarForm.Size = form.Size;
+                    menuCaptionBarForm.DockedControl.TabPages.Add(mdiTabPage);
+                    menuCaptionBarForm.DockedControl.ActivateTab(0);
+                    menuCaptionBarForm.DockedControl.EnsureActivated();
 
                     return true;
                 }

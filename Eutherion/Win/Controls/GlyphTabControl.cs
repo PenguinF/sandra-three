@@ -2,7 +2,7 @@
 /*********************************************************************************
  * GlyphTabControl.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2022 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ namespace Eutherion.Win.Controls
         public int TabWidth
         {
             get => tabWidth;
-            set { if (tabWidth != value) { tabWidth = Checked(value, 1, nameof(TabWidth)); HeaderPanel.UpdateMetrics(); } }
+            set { if (tabWidth != value) { tabWidth = Checked(value, 1, nameof(TabWidth)); UpdateMetrics(); } }
         }
 
         private int tabWidth = DefaultTabWidth;
@@ -83,7 +83,7 @@ namespace Eutherion.Win.Controls
         public int HorizontalTabTextMargin
         {
             get => horizontalTabTextMargin;
-            set { if (horizontalTabTextMargin != value) { horizontalTabTextMargin = Checked(value, 0, nameof(HorizontalTabTextMargin)); HeaderPanel.UpdateMetrics(); } }
+            set { if (horizontalTabTextMargin != value) { horizontalTabTextMargin = Checked(value, 0, nameof(HorizontalTabTextMargin)); UpdateMetrics(); } }
         }
 
         private int horizontalTabTextMargin = DefaultHorizontalTabTextMargin;
@@ -96,17 +96,17 @@ namespace Eutherion.Win.Controls
         /// <summary>
         /// Gets or sets the background color for the inactive header area of the control.
         /// </summary>
-        public override Color BackColor { get => base.BackColor; set { if (base.BackColor != value) { base.BackColor = value; HeaderPanel.UpdateNonMetrics(); } } }
+        public override Color BackColor { get => base.BackColor; set { if (base.BackColor != value) { base.BackColor = value; UpdateNonMetrics(); } } }
 
         /// <summary>
         /// Gets or sets the foreground color for the inactive header area of the control.
         /// </summary>
-        public override Color ForeColor { get => base.ForeColor; set { if (base.ForeColor != value) { base.ForeColor = value; HeaderPanel.UpdateNonMetrics(); } } }
+        public override Color ForeColor { get => base.ForeColor; set { if (base.ForeColor != value) { base.ForeColor = value; UpdateNonMetrics(); } } }
 
         /// <summary>
         /// Gets or sets the font of the text displayed in all header areas of the control.
         /// </summary>
-        public override Font Font { get => base.Font; set { if (base.Font != value) { base.Font = value; HeaderPanel.UpdateNonMetrics(); } } }
+        public override Font Font { get => base.Font; set { if (base.Font != value) { base.Font = value; UpdateNonMetrics(); } } }
 
         /// <summary>
         /// Gets or sets the background color to display when the mouse is hovering over an inactive tab header.
@@ -114,7 +114,7 @@ namespace Eutherion.Win.Controls
         public Color InactiveTabHeaderHoverColor
         {
             get => inactiveTabHeaderHoverColor;
-            set { if (inactiveTabHeaderHoverColor != value) { inactiveTabHeaderHoverColor = value; HeaderPanel.UpdateNonMetrics(); } }
+            set { if (inactiveTabHeaderHoverColor != value) { inactiveTabHeaderHoverColor = value; UpdateNonMetrics(); } }
         }
 
         private Color inactiveTabHeaderHoverColor;
@@ -125,7 +125,7 @@ namespace Eutherion.Win.Controls
         public Color InactiveTabHeaderHoverBorderColor
         {
             get => inactiveTabHeaderHoverBorderColor;
-            set { if (inactiveTabHeaderHoverBorderColor != value) { inactiveTabHeaderHoverBorderColor = value; HeaderPanel.UpdateNonMetrics(); } }
+            set { if (inactiveTabHeaderHoverBorderColor != value) { inactiveTabHeaderHoverBorderColor = value; UpdateNonMetrics(); } }
         }
 
         private Color inactiveTabHeaderHoverBorderColor;
@@ -137,7 +137,7 @@ namespace Eutherion.Win.Controls
         public Color InactiveTabHeaderGlyphForeColor
         {
             get => inactiveTabHeaderGlyphForeColor;
-            set { if (inactiveTabHeaderGlyphForeColor != value) { inactiveTabHeaderGlyphForeColor = value; HeaderPanel.UpdateNonMetrics(); } }
+            set { if (inactiveTabHeaderGlyphForeColor != value) { inactiveTabHeaderGlyphForeColor = value; UpdateNonMetrics(); } }
         }
 
         private Color inactiveTabHeaderGlyphForeColor;
@@ -149,7 +149,7 @@ namespace Eutherion.Win.Controls
         public Color InactiveTabHeaderGlyphHoverColor
         {
             get => inactiveTabHeaderGlyphHoverColor;
-            set { if (inactiveTabHeaderGlyphHoverColor != value) { inactiveTabHeaderGlyphHoverColor = value; HeaderPanel.UpdateNonMetrics(); } }
+            set { if (inactiveTabHeaderGlyphHoverColor != value) { inactiveTabHeaderGlyphHoverColor = value; UpdateNonMetrics(); } }
         }
 
         private Color inactiveTabHeaderGlyphHoverColor;
@@ -186,17 +186,22 @@ namespace Eutherion.Win.Controls
 
         #endregion Ignored properties
 
-        private readonly TabHeaderPanel HeaderPanel;
-
         /// <summary>
         /// Initializes a new instance of <see cref="GlyphTabControl"/>.
         /// </summary>
         public GlyphTabControl()
         {
-            HeaderPanel = new TabHeaderPanel(this);
-            TabPages = new TabPageCollection(this);
+            ToolTip = new ToolTip();
 
-            Controls.Add(HeaderPanel);
+            SetStyle(ControlStyles.AllPaintingInWmPaint
+                | ControlStyles.UserPaint
+                | ControlStyles.UserMouse
+                | ControlStyles.OptimizedDoubleBuffer
+                | ControlStyles.Opaque, true);
+
+            SetStyle(ControlStyles.Selectable, false);
+
+            TabPages = new TabPageCollection(this);
         }
 
         private void TabInserted(TabPage tabPage, int tabPageIndex)
@@ -206,7 +211,7 @@ namespace Eutherion.Win.Controls
 
             tabPage.ClientControl.Visible = false;
             Controls.Add(tabPage.ClientControl);
-            HeaderPanel.UpdateMetrics();
+            UpdateMetrics();
             tabPage.NotifyChange += Tab_NotifyChange;
 
             OnAfterTabInserted(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
@@ -222,7 +227,7 @@ namespace Eutherion.Win.Controls
             tabPage.NotifyChange -= Tab_NotifyChange;
             if (disposeClientControl) tabPage.ClientControl.Dispose();
             Controls.Remove(tabPage.ClientControl);
-            HeaderPanel.UpdateMetrics();
+            UpdateMetrics();
 
             var e = new GlyphTabControlEventArgs(tabPage, tabPageIndex);
             if (disposeClientControl) OnAfterTabClosed(e); else OnAfterTabRemoved(e);
@@ -233,7 +238,7 @@ namespace Eutherion.Win.Controls
             int tabPageIndex = TabPages.IndexOf(tabPage);
             if (tabPageIndex >= 0)
             {
-                HeaderPanel.UpdateNonMetrics();
+                UpdateNonMetrics();
                 OnTabNotifyChange(new GlyphTabControlEventArgs(tabPage, tabPageIndex));
             }
         }
@@ -289,7 +294,7 @@ namespace Eutherion.Win.Controls
                 newActiveControl.Visible = true;
                 if (oldActiveControl != null) oldActiveControl.Visible = false;
                 ActiveControl = newActiveControl;
-                HeaderPanel.UpdateNonMetrics();
+                UpdateNonMetrics();
 
                 OnAfterTabActivated(new GlyphTabControlEventArgs(newActiveTabPage, tabPageIndex));
             }
@@ -390,41 +395,15 @@ namespace Eutherion.Win.Controls
         /// </param>
         protected virtual void OnTabHeaderGlyphClick(GlyphTabControlCancelEventArgs e) => TabHeaderGlyphClick?.Invoke(this, e);
 
-        /// <summary>
-        /// Raises the <see cref="Control.Layout"/> event.
-        /// </summary>
-        /// <param name="e">
-        /// A <see cref="LayoutEventArgs"/> that contains the event data.
-        /// </param>
-        protected override void OnLayout(LayoutEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            var clientSize = ClientSize;
-            HeaderPanel.SetBounds(0, 0, clientSize.Width, TabHeaderHeight);
-
-            foreach (var tabPage in TabPages)
+            if (disposing)
             {
-                tabPage.ClientControl.SetBounds(0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight);
+                ToolTip.Dispose();
+                CurrentCloseButtonGlyphFont?.Dispose();
             }
 
-            base.OnLayout(e);
-        }
-
-        /// <summary>
-        /// Paints the background of the control.
-        /// </summary>
-        /// <param name="e">
-        /// A <see cref="PaintEventArgs"/> that contains the event data.
-        /// </param>
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            if (ActiveTabPageIndex < 0)
-            {
-                // Default behavior if there is no control to display in the tab client area.
-                var clientSize = ClientSize;
-
-                e.Graphics.FillRectangle(Brushes.Black, new Rectangle(
-                    0, TabHeaderHeight, clientSize.Width, clientSize.Height - TabHeaderHeight));
-            }
+            base.Dispose(disposing);
         }
     }
 
