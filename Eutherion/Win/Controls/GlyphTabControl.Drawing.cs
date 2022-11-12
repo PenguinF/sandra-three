@@ -245,6 +245,24 @@ namespace Eutherion.Win.Controls
             base.OnMouseUp(e);
         }
 
+        protected override void OnMouseCaptureChanged(EventArgs e)
+        {
+            if (!Capture)
+            {
+                // If an actual mouse-up happens, OnMouseUp is called before OnMouseCaptureChanged.
+                // Otherwise, something else captured the mouse while moving, which means mouse-down info should be reset.
+                if (GlyphPressedIndex >= 0)
+                {
+                    GlyphPressedIndex = -1;
+                    Invalidate();
+                }
+
+                ProcessHitTest(MousePosition);
+            }
+
+            base.OnMouseCaptureChanged(e);
+        }
+
         protected override void OnMouseLeave(EventArgs e)
         {
             // Hit test a position outside of the control to reset the hover tab index and raise proper events.
