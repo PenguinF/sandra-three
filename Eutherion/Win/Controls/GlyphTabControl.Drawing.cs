@@ -29,6 +29,28 @@ namespace Eutherion.Win.Controls
 {
     public partial class GlyphTabControl
     {
+        /// <summary>
+        /// Contains the result of a call to <see cref="HitTest(Point)"/>.
+        /// </summary>
+        public struct HitTestResult
+        {
+            /// <summary>
+            /// True if the client location is over the header area, otherwise false.
+            /// </summary>
+            public bool OverHeaderArea;
+
+            /// <summary>
+            /// If there's tab header under the client location, contains the index of that tab header. Is -1 otherwise.
+            /// </summary>
+            public int TabIndex;
+
+            /// <summary>
+            /// True if <see cref="TabIndex"/> is 0 or greater and the given client location is over the tab header's glyph
+            /// with that index, otherwise false.
+            /// </summary>
+            public bool OverGlyph;
+        }
+
         private static readonly string CloseButtonGlyph = "×";
 
         // This more or less puts the '×' in the center, with the used font family.
@@ -96,7 +118,7 @@ namespace Eutherion.Win.Controls
             }
 
             // Must hit test again after updating the metrics.
-            HitTest(MousePosition);
+            ProcessHitTest(MousePosition);
 
             Invalidate();
         }
@@ -110,36 +132,53 @@ namespace Eutherion.Win.Controls
             Invalidate();
         }
 
-        private void HitTest(Point clientLocation)
+        /// <summary>
+        /// Returns information about a location relative to the top left corner of this control.
+        /// </summary>
+        /// <param name="clientLocation">
+        /// The location to examine.
+        /// </param>
+        /// <returns>
+        /// The <see cref="HitTestResult"/> which contains information about whether the location is over the tab header area,
+        /// which tab header it is over, and whether or not it is over a tab header's glyph.
+        /// </returns>
+        public HitTestResult HitTest(Point clientLocation)
         {
-            int tabIndex = -1;
-            bool overGlyph = false;
+            HitTestResult result = new HitTestResult { TabIndex = -1 };
 
             if (clientLocation.Y >= 0 && clientLocation.Y < TabHeaderHeight && CurrentTabWidth > 0)
             {
-                tabIndex = (int)Math.Floor(clientLocation.X / CurrentTabWidth);
+                result.OverHeaderArea = true;
+                result.TabIndex = (int)Math.Floor(clientLocation.X / CurrentTabWidth);
 
-                if (tabIndex < TabPages.Count)
+                if (result.TabIndex < TabPages.Count)
                 {
-                    float relativeX = clientLocation.X - tabIndex * CurrentTabWidth;
+                    float relativeX = clientLocation.X - result.TabIndex * CurrentTabWidth;
 
                     // Between the right edge of the text and the edge of where the margin starts.
-                    overGlyph
-                        = CurrentTabWidth - CurrentHorizontalTabTextMargin - MeasuredGlyphSize.Width < relativeX
-                        && relativeX < CurrentTabWidth - CurrentHorizontalTabTextMargin;
+                    result.OverGlyph
+                       = CurrentTabWidth - CurrentHorizontalTabTextMargin - MeasuredGlyphSize.Width < relativeX
+                       && relativeX < CurrentTabWidth - CurrentHorizontalTabTextMargin;
                 }
                 else
                 {
-                    tabIndex = -1;
+                    result.TabIndex = -1;
                 }
             }
 
-            if (HoverTabIndex != tabIndex || HoverOverGlyph != overGlyph)
-            {
-                if (HoverTabIndex != tabIndex) ToolTip.SetToolTip(this, tabIndex >= 0 ? TabPages[tabIndex].Text : null);
+            return result;
+        }
 
-                HoverTabIndex = tabIndex;
-                HoverOverGlyph = overGlyph;
+        private void ProcessHitTest(Point clientLocation)
+        {
+            HitTestResult result = HitTest(clientLocation);
+
+            if (HoverTabIndex != result.TabIndex || HoverOverGlyph != result.OverGlyph)
+            {
+                if (HoverTabIndex != result.TabIndex) ToolTip.SetToolTip(this, result.TabIndex >= 0 ? TabPages[result.TabIndex].Text : null);
+
+                HoverTabIndex = result.TabIndex;
+                HoverOverGlyph = result.OverGlyph;
                 Invalidate();
             }
         }
@@ -148,7 +187,7 @@ namespace Eutherion.Win.Controls
         {
             if (LastKnownMouseMovePoint.X >= 0 && LastKnownMouseMovePoint.Y >= 0)
             {
-                HitTest(LastKnownMouseMovePoint);
+                ProcessHitTest(LastKnownMouseMovePoint);
             }
 
             base.OnMouseEnter(e);
@@ -156,7 +195,7 @@ namespace Eutherion.Win.Controls
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            HitTest(e.Location);
+            ProcessHitTest(e.Location);
 
             if (HoverTabIndex >= 0 && e.Button == MouseButtons.Left)
             {
@@ -179,7 +218,7 @@ namespace Eutherion.Win.Controls
         protected override void OnMouseMove(MouseEventArgs e)
         {
             // Do a hit test, which updates hover information.
-            HitTest(e.Location);
+            ProcessHitTest(e.Location);
 
             // Remember position for mouse-enters without mouse-leaves.
             LastKnownMouseMovePoint = e.Location;
@@ -189,7 +228,7 @@ namespace Eutherion.Win.Controls
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            HitTest(e.Location);
+            ProcessHitTest(e.Location);
 
             if (e.Button == MouseButtons.Left && GlyphPressedIndex >= 0)
             {
@@ -210,7 +249,7 @@ namespace Eutherion.Win.Controls
         {
             // Hit test a position outside of the control to reset the hover tab index and raise proper events.
             LastKnownMouseMovePoint = new Point(-1, -1);
-            HitTest(LastKnownMouseMovePoint);
+            ProcessHitTest(LastKnownMouseMovePoint);
 
             base.OnMouseLeave(e);
         }
