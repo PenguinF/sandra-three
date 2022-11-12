@@ -174,10 +174,11 @@ namespace Sandra.UI
 
         private void ShowNewMdiContainerForm(string[] commandLineArgs)
         {
-            CreateNewMdiContainerForm().OpenCommandLineArgs(commandLineArgs);
+            CreateNewMdiContainerForm(setCenterWorkingScreenStartPosition: true)
+                .OpenCommandLineArgs(commandLineArgs);
         }
 
-        internal MdiContainerForm CreateNewMdiContainerForm()
+        internal MdiContainerForm CreateNewMdiContainerForm(bool setCenterWorkingScreenStartPosition)
         {
             var mdiContainerForm = new MdiContainerForm();
             RegisterMdiContainerFormEvents(mdiContainerForm);
@@ -185,7 +186,7 @@ namespace Sandra.UI
             mdiContainers.Add(formWithDefaultState);
             mdiContainerForm.Load += (_, __) =>
             {
-                SetDefaultSizeAndPosition(mdiContainerForm);
+                if (setCenterWorkingScreenStartPosition) SetCenterWorkingScreenStartPosition(mdiContainerForm);
                 AttachFormStateAutoSaver(formWithDefaultState);
             };
             return mdiContainerForm;
@@ -246,7 +247,7 @@ namespace Sandra.UI
             // Determine a window state independently if no formState was applied successfully.
             if (!boundsInitialized)
             {
-                SetDefaultSizeAndPosition(mdiContainerForm);
+                SetCenterWorkingScreenStartPosition(mdiContainerForm);
             }
 
             // Restore maximized setting after setting the Bounds.
@@ -263,7 +264,7 @@ namespace Sandra.UI
             formState.Changed += (_, __) => AutoSaveMdiContainerList();
         }
 
-        private static void SetDefaultSizeAndPosition(MdiContainerForm mdiContainerForm)
+        private static void SetCenterWorkingScreenStartPosition(MdiContainerForm mdiContainerForm)
         {
             // Show in the center of the monitor where the mouse currently is.
             var activeScreen = Screen.FromPoint(MousePosition);

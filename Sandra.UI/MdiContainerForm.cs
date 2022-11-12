@@ -226,7 +226,7 @@ namespace Sandra.UI
         private void DockedControl_RequestUndock(MdiTabPage mdiTabPage)
         {
             // Create a new MdiContainerForm which contains mdiTabPage as its sole tab page.
-            var mdiContainerForm = Program.MainForm.CreateNewMdiContainerForm();
+            var mdiContainerForm = Program.MainForm.CreateNewMdiContainerForm(setCenterWorkingScreenStartPosition: false);
             mdiContainerForm.Size = Size;
             mdiContainerForm.DockedControl.TabPages.Add(mdiTabPage);
             mdiContainerForm.DockedControl.ActivateTab(0);
