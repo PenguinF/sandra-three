@@ -31,6 +31,11 @@ namespace Eutherion.Win.Native
     [SuppressUnmanagedCodeSecurity]
     public static class NativeMethods
     {
+        const string KernelApi = "kernel32.dll";
+
+        [DllImport(KernelApi, SetLastError = true)]
+        public static extern int RegisterApplicationRestart([MarshalAs(UnmanagedType.LPWStr)] string commandLineArgs, int flags);
+
         const string DwmApi = "dwmapi.dll";
 
         [DllImport(DwmApi, PreserveSig = false)]

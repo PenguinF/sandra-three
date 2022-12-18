@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Win.MdiAppTemplate;
+using Eutherion.Win.Native;
 using Eutherion.Win.Storage;
 using Sandra.Chess.Pgn;
 using System;
@@ -34,6 +35,8 @@ namespace Sandra.UI
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
+        private const string RestartFromRebootCommandLineArgs = "/restart";
+
         private readonly string[] commandLineArgs;
 
         /// <summary>
@@ -46,7 +49,18 @@ namespace Sandra.UI
 
         public SandraChessMainForm(string[] commandLineArgs)
         {
-            this.commandLineArgs = commandLineArgs;
+            // Register for auto-restart after reboot.
+            NativeMethods.RegisterApplicationRestart(RestartFromRebootCommandLineArgs, 3);
+
+            if (commandLineArgs.Length == 1 && commandLineArgs[0] == RestartFromRebootCommandLineArgs)
+            {
+                // Strip "/restart" argument.
+                this.commandLineArgs = Array.Empty<string>();
+            }
+            else
+            {
+                this.commandLineArgs = commandLineArgs;
+            }
 
             // This hides the window at startup.
             ShowInTaskbar = false;
