@@ -201,9 +201,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             ObservableStyle.NotifyChange += ObservableStyle_NotifyChange;
 
-            AllowTransparency = true;
-            TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
-
             mainMenuActionHandler = new UIActionHandler();
 
             this.BindActions(StandardUIActionBindings);
@@ -626,6 +623,13 @@ namespace Eutherion.Win.MdiAppTemplate
                     ObservableStyle.ForeColor,
                     ObservableStyle.BackColor,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+
+            // Only after the first paint allow window to be drawn in layered mode.
+            if (!AllowTransparency)
+            {
+                TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+                AllowTransparency = true;
             }
         }
 
