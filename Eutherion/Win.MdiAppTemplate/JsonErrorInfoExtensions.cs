@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,22 +61,10 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public static string Message(this JsonErrorInfo jsonErrorInfo, TextFormatter localizer)
         {
-            const string UnspecifiedMessage = "Unspecified error";
-
-            if (jsonErrorInfo is PTypeError typeError)
-            {
-                return typeError.GetLocalizedMessage(localizer);
-            }
-
-            if (Enum.IsDefined(typeof(JsonErrorCode), jsonErrorInfo.ErrorCode))
-            {
-                return localizer.Format(
-                    GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
-                    jsonErrorInfo.Parameters.Select(
-                        x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
-            }
-
-            return UnspecifiedMessage;
+            return localizer.Format(
+                GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
+                jsonErrorInfo.Parameters.Select(
+                    x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
         }
 
         public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>

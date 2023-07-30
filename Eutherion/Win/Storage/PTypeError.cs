@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeError.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,16 +28,37 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Represents a semantic type error caused by a failed typecheck in any of the <see cref="PType{T}"/> subclasses.
     /// </summary>
-    public abstract class PTypeError : JsonErrorInfo
+    public abstract class PTypeError : ISpan
     {
-        public PTypeError(int start, int length)
-            : base(JsonErrorCode.Custom, start, length)
-        {
-        }
+        /// <summary>
+        /// Gets the start position of the text span where the error occurred.
+        /// </summary>
+        public int Start { get; }
 
-        public PTypeError(int start, int length, JsonErrorLevel errorLevel)
-            : base(JsonErrorCode.Custom, errorLevel, start, length)
+        /// <summary>
+        /// Gets the length of the text span where the error occurred.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="PTypeError"/>.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the text span where the type error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the type error occurred.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
+        public PTypeError(int start, int length)
         {
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            Start = start;
+            Length = length;
         }
 
         /// <summary>
@@ -75,7 +96,7 @@ namespace Eutherion.Win.Storage
             => localizer.Format(PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, PropertyKey);
 
         private UnrecognizedPropertyKeyTypeError(string propertyKey, int start, int length)
-            : base(start, length, JsonErrorLevel.Warning)
+            : base(start, length)
         {
             PropertyKey = propertyKey;
         }
