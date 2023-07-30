@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Session.ToolForms.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ namespace Eutherion.Win.MdiAppTemplate
             settingsEditor.BindActions(settingsEditor.StandardSyntaxEditorUIActionBindings);
             UIMenu.AddTo(settingsEditor);
 
-            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsEditor);
+            JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.InitializeStyles(settingsEditor);
 
             if (autoSaver != null) settingsEditor.Disposed += (_, __) => autoSaver.Dispose();
 
