@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using System;
 using System.Collections.Generic;
@@ -80,12 +81,18 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public virtual PgnSyntax GetChild(int index) => throw new IndexOutOfRangeException();
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
+        public virtual PgnSyntax GetChild(int index) => throw ExceptionUtil.ThrowListIndexOutOfRangeException();
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public virtual int GetChildStartPosition(int index) => throw new IndexOutOfRangeException();
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
+        public virtual int GetChildStartPosition(int index) => throw ExceptionUtil.ThrowListIndexOutOfRangeException();
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>,
