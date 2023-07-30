@@ -59,7 +59,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             private readonly LocalizedString noErrorsString;
             private readonly LocalizedString errorLocationString;
-            private readonly LocalizedString titleString;
 
             public DockProperties DockProperties { get; } = new DockProperties();
 
@@ -91,11 +90,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
                 errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
-                titleString = new LocalizedString(SharedLocalizedStringKeys.ErrorPaneTitle);
 
                 noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
-                titleString.DisplayText.ValueChanged += _ => UpdateText();
 
                 errorsListBox.DoubleClick += (_, __) => OwnerEditor.ActivateSelectedError(errorsListBox.SelectedIndex);
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
@@ -116,7 +113,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void UpdateText()
             {
-                DockProperties.CaptionText = FormatUtilities.SoftFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
+                DockProperties.CaptionText = Session.Current.CurrentLocalizer.Format(
+                    SharedLocalizedStringKeys.ErrorPaneTitle,
+                    new[] { OwnerEditor.CodeFilePathDisplayString });
+
                 DockPropertiesChanged?.Invoke();
             }
 
@@ -132,6 +132,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void DisplayErrors(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor)
             {
+                // File name may have changed.
+                UpdateText();
+
                 errorsListBox.BeginUpdate();
 
                 try
@@ -204,7 +207,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     noErrorsString.Dispose();
                     errorLocationString.Dispose();
-                    titleString.Dispose();
                 }
 
                 base.Dispose(disposing);
