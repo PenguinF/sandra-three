@@ -2,7 +2,7 @@
 /*********************************************************************************
  * OwnedFormSnapHelper.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ namespace Eutherion.Win.Forms
                 m_rectangleBeforeSizeMove = Form.Bounds;
 
                 // Enumerate all siblings and the parent form in z-order.
-                Form[] snapTargetForms = parentForm.OwnedForms.Union(new SingleElementEnumerable<Form>(parentForm)).ToArray();
+                Form[] snapTargetForms = parentForm.OwnedForms.Concat(new SingleElementEnumerable<Form>(parentForm)).ToArray();
                 IntPtr[] handles = snapTargetForms.Where(x => x.IsHandleCreated).Select(x => x.Handle).ToArray();
                 int handleCount = handles.Length;
                 List<Form> formsInZOrder = new List<Form>(handleCount);

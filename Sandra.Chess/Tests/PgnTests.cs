@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -357,7 +357,7 @@ namespace Sandra.Chess.Tests
 
         public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
             => from x1 in _PgnTestSymbols
-               from x2 in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+               from x2 in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
                select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbols
-            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+            => from x in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
                select new object[] { x.Item1, x.Item2 };
 
         /// <summary>
@@ -486,7 +486,7 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
-            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+            => from x in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
                select new object[] { x.Item1 };
 
         /// <summary>
@@ -571,21 +571,21 @@ namespace Sandra.Chess.Tests
             // Test cases with 1 and 2 characters.
             var uppercaseTagNames = nonFileLetters.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
-                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Concat(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var uppercaseTagName in uppercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(uppercaseTagName);
 
             var lowercaseTagNames = fileLetters.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
-                .Union(nonRankDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Concat(nonRankDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var lowercaseTagName in lowercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(lowercaseTagName);
 
             var moveNumbers = allDigits.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnMoveNumberSyntax>(moveNumber);
 
@@ -603,14 +603,14 @@ namespace Sandra.Chess.Tests
             var capturePawnMoves = fileLetters.SelectMany(x => fileRanks.Select(xy => $"{x}x{xy}"));
 
             var pawnMoves = fileRanks
-                .Union(capturePawnMoves).SelectMany(m =>
+                .Concat(capturePawnMoves).SelectMany(m =>
                     new SingleElementEnumerable<string>($"{m}")
-                    .Union(new SingleElementEnumerable<string>($"P{m}")));
+                    .Concat(new SingleElementEnumerable<string>($"P{m}")));
 
             foreach (var pawnMove in pawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(pawnMove);
 
             // Allow promotion to king, then assume the other piece letters work too.
-            var promotionMoves = fileRanks.Union(capturePawnMoves).Select(m => $"{m}=K");
+            var promotionMoves = fileRanks.Concat(capturePawnMoves).Select(m => $"{m}=K");
 
             foreach (var promotionMove in promotionMoves) yield return SMTestCase<GreenPgnMoveSyntax>(promotionMove);
 
@@ -621,9 +621,9 @@ namespace Sandra.Chess.Tests
             var disambiguationMoves3 = fileRanks.Select(xy => $"Qa1{xy}");
 
             var nonPawnMoves = simpleNonPawnMoves
-                .Union(disambiguationMoves1)
-                .Union(disambiguationMoves2)
-                .Union(disambiguationMoves3);
+                .Concat(disambiguationMoves1)
+                .Concat(disambiguationMoves2)
+                .Concat(disambiguationMoves3);
 
             foreach (var nonPawnMove in nonPawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(nonPawnMove);
 
@@ -780,7 +780,7 @@ namespace Sandra.Chess.Tests
 
         public static IEnumerable<object[]> GetTestParseTrees()
             => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
-            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+            .Concat(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
 
         [Theory]
         [MemberData(nameof(GetTestParseTrees))]
