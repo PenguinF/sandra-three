@@ -160,7 +160,7 @@ namespace Eutherion.Win.Storage
             GreenJsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
             int mapSyntaxStartPosition,
-            List<PTypeError> errors)
+            ArrayBuilder<PTypeError> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
 

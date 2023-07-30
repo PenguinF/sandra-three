@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2) convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -94,7 +94,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3) convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -150,7 +150,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4) convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -209,7 +209,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4, T5) convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 

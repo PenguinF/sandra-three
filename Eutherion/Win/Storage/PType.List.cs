@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 int itemIndex,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors,
+                ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
@@ -74,7 +74,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is GreenJsonListSyntax jsonListSyntax)
                 {
@@ -92,7 +92,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out T convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors);
+                ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PList list ? TryConvertFromList(list) : Maybe<T>.Nothing;
@@ -116,7 +116,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 int itemIndex,
                 int errorReportingOffset,
-                List<PTypeError> errors,
+                ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out IEnumerable<T> convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
                 var validValues = new List<PValue>();

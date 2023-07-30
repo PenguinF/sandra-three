@@ -114,7 +114,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out TValue convertedValue,
                 int valueNodeStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
                 => converter.Visit(valueNode).IsJust(out convertedValue)
                 ? convertedValue
                 : Union<ITypeErrorBuilder, PValue>.Option1(typeError);
@@ -173,7 +173,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 T value = default;
 

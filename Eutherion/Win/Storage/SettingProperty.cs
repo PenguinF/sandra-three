@@ -93,7 +93,7 @@ namespace Eutherion.Win.Storage
             string json,
             GreenJsonValueSyntax valueNode,
             int valueNodeStartPosition,
-            List<PTypeError> errors);
+            ArrayBuilder<PTypeError> errors);
     }
 
     /// <summary>
@@ -152,7 +152,7 @@ namespace Eutherion.Win.Storage
             string json,
             GreenJsonValueSyntax valueNode,
             int valueNodeStartPosition,
-            List<PTypeError> errors)
+            ArrayBuilder<PTypeError> errors)
             => PType.TryCreateValue(json, valueNode, out _, valueNodeStartPosition, errors);
     }
 }

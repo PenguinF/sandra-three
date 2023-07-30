@@ -66,7 +66,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,
                 int listSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {{
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 

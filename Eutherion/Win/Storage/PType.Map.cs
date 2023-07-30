@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is GreenJsonMapSyntax jsonMapSyntax)
                 {
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<PTypeError> errors);
+                ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PMap map ? TryConvertFromMap(map) : Maybe<T>.Nothing;
@@ -82,7 +82,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
                 int mapSyntaxStartPosition,
-                List<PTypeError> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();

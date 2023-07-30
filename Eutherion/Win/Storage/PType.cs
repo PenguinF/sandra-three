@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
             GreenJsonValueSyntax valueNode,
             out T convertedValue,
             int valueNodeStartPosition,
-            List<PTypeError> errors);
+            ArrayBuilder<PTypeError> errors);
 
         /// <summary>
         /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
