@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingSyntaxDescriptor.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,28 +52,14 @@ namespace Eutherion.Win.MdiAppTemplate
             this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
         }
 
-        public override string FileExtension => JsonSyntaxDescriptor.JsonFileExtension;
+        public override string FileExtension
+            => JsonSyntaxDescriptor.JsonFileExtension;
 
-        public override StringKey<ForFormattedText> FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
+        public override StringKey<ForFormattedText> FileExtensionLocalizedKey
+            => SharedLocalizedStringKeys.JsonFiles;
 
         public override SettingSyntaxTree Parse(string code)
-        {
-            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
-
-            if (settingSyntaxTree.Errors.Count > 0)
-            {
-                settingSyntaxTree.Errors.Sort((x, y)
-                    => x.Start < y.Start ? -1
-                    : x.Start > y.Start ? 1
-                    : x.Length < y.Length ? -1
-                    : x.Length > y.Length ? 1
-                    : x.ErrorCode < y.ErrorCode ? -1
-                    : x.ErrorCode > y.ErrorCode ? 1
-                    : 0);
-            }
-
-            return settingSyntaxTree;
-        }
+            => SettingSyntaxTree.ParseSettings(code, schema);
 
         public override IEnumerable<IJsonSymbol> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
             => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
