@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Tuple.Generate.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                List<PTypeError> errors)
             {{
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -83,7 +83,7 @@ namespace Eutherion.Win.Storage
 
             public override Maybe<({CommaSeparatedList(size, TypeParameter)})> TryConvertFromList(PList list)
             {{
-                if (list.Count == ExpectedItemCount{ConcatList(size, i =>$@"
+                if (list.Count == ExpectedItemCount{ConcatList(size, i => $@"
                     && ItemTypes.Item{i}.TryConvert(list[{i - 1}]).IsJust(out {TypeParameter(i)} value{i})")})
                 {{
                     return ({CommaSeparatedList(size, i => $"value{i}")});
@@ -96,7 +96,7 @@ namespace Eutherion.Win.Storage
             {{
                 var ({CommaSeparatedList(size, i => $"value{i}")}) = value;
                 return new PList(new[]
-                {{{ConcatList(size, i =>$@"
+                {{{ConcatList(size, i => $@"
                     ItemTypes.Item{i}.GetPValue(value{i}),")}
                 }});
             }}

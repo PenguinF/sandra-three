@@ -25,13 +25,14 @@ using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
     /// Describes the interaction between json syntax used for setting objects and a syntax editor.
     /// </summary>
-    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>
+    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, IJsonSymbol, Union<JsonErrorInfo, PTypeError>>
     {
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
@@ -64,22 +65,29 @@ namespace Eutherion.Win.MdiAppTemplate
         public override IEnumerable<IJsonSymbol> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
             => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
-            => syntaxTree.Errors;
+        public override IEnumerable<Union<JsonErrorInfo, PTypeError>> GetErrors(SettingSyntaxTree syntaxTree)
+            => syntaxTree.Errors.Select(Union<JsonErrorInfo, PTypeError>.Option1)
+            .Concat(syntaxTree.TypeErrors.Select(Union<JsonErrorInfo, PTypeError>.Option2));
 
-        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
-            => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, Union<JsonErrorInfo, PTypeError>> syntaxEditor, IJsonSymbol terminalSymbol)
+            => JsonStyleSelector<SettingSyntaxTree, Union<JsonErrorInfo, PTypeError>>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
-        public override (int, int) GetErrorRange(JsonErrorInfo error)
-            => (error.Start, error.Length);
+        public override (int, int) GetErrorRange(Union<JsonErrorInfo, PTypeError> error)
+            => error.Match(
+                whenOption1: x => (x.Start, x.Length),
+                whenOption2: x => (x.Start, x.Length));
 
-        public override ErrorLevel GetErrorLevel(JsonErrorInfo error)
-            => (ErrorLevel)error.ErrorLevel;
+        public override ErrorLevel GetErrorLevel(Union<JsonErrorInfo, PTypeError> error)
+            => error.Match(
+                whenOption1: x => (ErrorLevel)x.ErrorLevel,
+                whenOption2: x => x is UnrecognizedPropertyKeyTypeError ? ErrorLevel.Warning : ErrorLevel.Error);
 
-        public override string GetErrorMessage(JsonErrorInfo error)
-            => error.Message(Session.Current.CurrentLocalizer);
+        public override string GetErrorMessage(Union<JsonErrorInfo, PTypeError> error)
+            => error.Match(
+                whenOption1: x => x.Message(Session.Current.CurrentLocalizer),
+                whenOption2: x => x.GetLocalizedMessage(Session.Current.CurrentLocalizer));
     }
 }

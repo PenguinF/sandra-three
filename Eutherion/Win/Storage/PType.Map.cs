@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Map.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<JsonErrorInfo> errors)
+                List<PTypeError> errors)
             {
                 if (valueNode is GreenJsonMapSyntax jsonMapSyntax)
                 {
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<JsonErrorInfo> errors);
+                List<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PMap map ? TryConvertFromMap(map) : Maybe<T>.Nothing;
@@ -82,7 +82,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
                 int mapSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                List<PTypeError> errors)
             {
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();

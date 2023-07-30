@@ -34,7 +34,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    using SettingsEditor = SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>;
+    using SettingsEditor = SyntaxEditor<SettingSyntaxTree, IJsonSymbol, Union<JsonErrorInfo, PTypeError>>;
 
     /// <summary>
     /// Contains all ambient state which is global to a single user session.
@@ -151,7 +151,7 @@ namespace Eutherion.Win.MdiAppTemplate
             settingsEditor.BindActions(settingsEditor.StandardSyntaxEditorUIActionBindings);
             UIMenu.AddTo(settingsEditor);
 
-            JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.InitializeStyles(settingsEditor);
+            JsonStyleSelector<SettingSyntaxTree, Union<JsonErrorInfo, PTypeError>>.InitializeStyles(settingsEditor);
 
             if (autoSaver != null) settingsEditor.Disposed += (_, __) => autoSaver.Dispose();
 

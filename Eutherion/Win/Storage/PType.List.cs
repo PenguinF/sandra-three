@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.List.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 int itemIndex,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors,
+                List<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
@@ -74,7 +74,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
-                List<JsonErrorInfo> errors)
+                List<PTypeError> errors)
             {
                 if (valueNode is GreenJsonListSyntax jsonListSyntax)
                 {
@@ -92,7 +92,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out T convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors);
+                List<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PList list ? TryConvertFromList(list) : Maybe<T>.Nothing;
@@ -116,7 +116,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 int itemIndex,
                 int errorReportingOffset,
-                List<JsonErrorInfo> errors,
+                List<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out IEnumerable<T> convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                List<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
                 var validValues = new List<PValue>();
