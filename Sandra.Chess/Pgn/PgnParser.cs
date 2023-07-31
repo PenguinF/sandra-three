@@ -48,20 +48,20 @@ namespace Sandra.Chess.Pgn
             public List<GreenWithTriviaSyntax> FloatItemListBuilder;
 
             // Builds list of NAGs of the current ply.
-            public List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
+            public ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
 
             // Builds list of variations after the current ply.
-            public List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> VariationListBuilder;
+            public ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> VariationListBuilder;
 
             // List of already built plies in this variation.
-            public List<GreenPgnPlySyntax> PlyListBuilder;
+            public ArrayBuilder<GreenPgnPlySyntax> PlyListBuilder;
 
             public VariationStackFrame()
             {
                 FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
-                NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
-                VariationListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
-                PlyListBuilder = new List<GreenPgnPlySyntax>();
+                NagListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
+                VariationListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
+                PlyListBuilder = new ArrayBuilder<GreenPgnPlySyntax>();
             }
         }
 
@@ -360,9 +360,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            var plyListSyntax = GreenPgnPlyListSyntax.Create(CurrentFrame.PlyListBuilder, trailingFloatItems);
-            CurrentFrame.PlyListBuilder.Clear();
-            return plyListSyntax;
+            return GreenPgnPlyListSyntax.Create(ReadOnlySpanList<GreenPgnPlySyntax>.FromBuilder(CurrentFrame.PlyListBuilder), trailingFloatItems);
         }
 
         private void YieldParenthesisOpen()
@@ -396,7 +394,11 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyUnchecked(int trailingFloatItemsLength)
         {
-            var plySyntax = new GreenPgnPlySyntax(CurrentFrame.MoveNumber, CurrentFrame.Move, CurrentFrame.NagListBuilder, CurrentFrame.VariationListBuilder);
+            var plySyntax = new GreenPgnPlySyntax(
+                CurrentFrame.MoveNumber,
+                CurrentFrame.Move,
+                ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.FromBuilder(CurrentFrame.NagListBuilder),
+                ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.FromBuilder(CurrentFrame.VariationListBuilder));
 
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
@@ -426,9 +428,6 @@ namespace Sandra.Chess.Pgn
 
             CurrentFrame.MoveNumber = null;
             CurrentFrame.Move = null;
-            CurrentFrame.NagListBuilder.Clear();
-            CurrentFrame.VariationListBuilder.Clear();
-
             CurrentFrame.HasPly = true;
             CurrentFrame.PlyListBuilder.Add(plySyntax);
         }

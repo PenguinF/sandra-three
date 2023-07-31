@@ -56,17 +56,16 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="plies"/> and/or <paramref name="trailingFloatItems"/> is null.
         /// </exception>
-        public static GreenPgnPlyListSyntax Create(IEnumerable<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
+        public static GreenPgnPlyListSyntax Create(ReadOnlySpanList<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
             if (trailingFloatItems == null) throw new ArgumentNullException(nameof(trailingFloatItems));
 
-            var plyList = ReadOnlySpanList<GreenPgnPlySyntax>.Create(plies);
             var trailingFloatItemList = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(trailingFloatItems);
 
-            return plyList.Count == 0 && trailingFloatItemList.Count == 0
+            return plies.Count == 0 && trailingFloatItemList.Count == 0
                 ? Empty
-                : new GreenPgnPlyListSyntax(plyList, trailingFloatItemList);
+                : new GreenPgnPlyListSyntax(plies, trailingFloatItemList);
         }
 
         /// <summary>

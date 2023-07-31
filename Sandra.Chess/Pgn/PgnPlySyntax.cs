@@ -22,7 +22,6 @@
 using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -90,18 +89,15 @@ namespace Sandra.Chess.Pgn
         public GreenPgnPlySyntax(
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> moveNumber,
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> move,
-            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
-            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
+            ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
+            ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
         {
-            if (nags == null) throw new ArgumentNullException(nameof(nags));
-            if (variations == null) throw new ArgumentNullException(nameof(variations));
-
             MoveNumber = moveNumber;
             Move = move;
-            Nags = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Create(nags);
-            Variations = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Create(variations);
+            Nags = nags ?? throw new ArgumentNullException(nameof(nags));
+            Variations = variations ?? throw new ArgumentNullException(nameof(variations));
 
-            int length = Nags.Length + Variations.Length;
+            int length = nags.Length + variations.Length;
             if (moveNumber != null) length += moveNumber.Length;
             if (move != null) length += move.Length;
 

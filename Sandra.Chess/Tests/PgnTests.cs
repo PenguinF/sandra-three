@@ -278,12 +278,12 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnMoveNumberSyntax(1)));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnTagNameSyntax(1, false)));
 
-            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
-            Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));
-            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
+            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Empty));
+            Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, null));
+            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Empty));
 
             Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
-            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(EmptyEnumerable<GreenPgnPlySyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(ReadOnlySpanList<GreenPgnPlySyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(null, GreenPgnPlyListSyntax.Empty, null));
             Assert.Throws<ArgumentNullException>("pliesWithFloatItems", () => new GreenPgnVariationSyntax(new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnPeriodSyntax.Value), null, null));
