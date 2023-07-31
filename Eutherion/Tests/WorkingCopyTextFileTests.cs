@@ -2,7 +2,7 @@
 /*********************************************************************************
  * WorkingCopyTextFileTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Testing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -90,17 +91,17 @@ namespace Eutherion.Win.Tests
         }
 
         // All variations on "test1.txt".
-        public static IEnumerable<object[]> AlternativePrimaryTextFilePaths()
+        public static IEnumerable<string> AlternativePrimaryTextFilePaths()
         {
-            yield return new object[] { "test1.txt" };
-            yield return new object[] { "TEST1.TXT" };
+            yield return "test1.txt";
+            yield return "TEST1.TXT";
 #if DEBUG
             // It's not very healthy to take dependencies on build paths but impact is low.
-            yield return new object[] { "../Debug/TEST1.TXT" };
-            yield return new object[] { "..\\DEBUG\\test1.TXT" };
+            yield return "../Debug/TEST1.TXT";
+            yield return "..\\DEBUG\\test1.TXT";
 #else
-            yield return new object[] { "../Release/TEST1.TXT" };
-            yield return new object[] { "..\\RELEASE\\test1.TXT" };
+            yield return "../Release/TEST1.TXT";
+            yield return "..\\RELEASE\\test1.TXT";
 #endif
         }
 
@@ -305,25 +306,27 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        public static IEnumerable<object[]> Texts()
+        public static IEnumerable<string> Texts()
         {
-            yield return new object[] { "" };
-            yield return new object[] { "0" };
+            yield return "";
+            yield return "0";
 
             // Null character only.
-            yield return new object[] { "\u0000" };
+            yield return "\u0000";
 
             // Whitespace and newlines.
-            yield return new object[] { "\n\r\n\n" };
-            yield return new object[] { "\t\v\u000c\u0085\u1680\u3000" };
+            yield return "\n\r\n\n";
+            yield return "\t\v\u000c\u0085\u1680\u3000";
 
             // Higher code points, see also JsonTokenizerTests.
-            yield return new object[] { "もの" };
+            yield return "もの";
         }
+
+        public static IEnumerable<object[]> WrappedTexts() => TestUtilities.Wrap(Texts());
 
         // Regular existing files. Make sure encoding or newline convention is not updated as a result of a load.
         [Theory]
-        [MemberData(nameof(Texts))]
+        [MemberData(nameof(WrappedTexts))]
         public void ExistingFileInitialState(string text)
         {
             string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
@@ -402,7 +405,7 @@ namespace Eutherion.Win.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Texts))]
+        [MemberData(nameof(WrappedTexts))]
         public void AutoSavedNewFileInitialState(string autoSaveFileText)
         {
             PrepareAutoSave(autoSaveFileText);
@@ -418,7 +421,7 @@ namespace Eutherion.Win.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Texts))]
+        [MemberData(nameof(WrappedTexts))]
         public void AutoSavedExistingFileInitialState(string autoSaveFileText)
         {
             string expectedLoadedText = "A";
@@ -810,7 +813,7 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        public static IEnumerable<object[]> PrimaryTextFilePaths() => FileFixture.AlternativePrimaryTextFilePaths();
+        public static IEnumerable<object[]> PrimaryTextFilePaths() => TestUtilities.Wrap(FileFixture.AlternativePrimaryTextFilePaths());
 
         [Theory]
         [MemberData(nameof(PrimaryTextFilePaths))]

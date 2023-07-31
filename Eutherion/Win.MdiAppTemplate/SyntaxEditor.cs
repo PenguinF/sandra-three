@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SyntaxEditor.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
             private readonly LocalizedString noErrorsString;
             private readonly LocalizedString errorLocationString;
-            private readonly LocalizedString titleString;
 
             public DockProperties DockProperties { get; } = new DockProperties();
 
@@ -91,11 +90,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
                 errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
-                titleString = new LocalizedString(SharedLocalizedStringKeys.ErrorPaneTitle);
 
                 noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors(OwnerEditor);
-                titleString.DisplayText.ValueChanged += _ => UpdateText();
 
                 errorsListBox.DoubleClick += (_, __) => OwnerEditor.ActivateSelectedError(errorsListBox.SelectedIndex);
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
@@ -116,7 +113,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void UpdateText()
             {
-                DockProperties.CaptionText = FormatUtilities.SoftFormat(titleString.DisplayText.Value, new[] { OwnerEditor.CodeFilePathDisplayString });
+                DockProperties.CaptionText = Session.Current.CurrentLocalizer.Format(
+                    SharedLocalizedStringKeys.ErrorPaneTitle,
+                    new[] { OwnerEditor.CodeFilePathDisplayString });
+
                 DockPropertiesChanged?.Invoke();
             }
 
@@ -132,6 +132,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
             public void DisplayErrors(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor)
             {
+                // File name may have changed.
+                UpdateText();
+
                 errorsListBox.BeginUpdate();
 
                 try
@@ -204,7 +207,6 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     noErrorsString.Dispose();
                     errorLocationString.Dispose();
-                    titleString.Dispose();
                 }
 
                 base.Dispose(disposing);
@@ -554,7 +556,24 @@ namespace Eutherion.Win.MdiAppTemplate
 
                 IndicatorClearRange(0, TextLength);
 
-                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(SyntaxTree));
+                CurrentErrors = new List<TError>(SyntaxDescriptor.GetErrors(SyntaxTree));
+                CurrentErrors.Sort((x, y) =>
+                {
+                    var (start1, length1) = SyntaxDescriptor.GetErrorRange(x);
+                    var (start2, length2) = SyntaxDescriptor.GetErrorRange(y);
+
+                    if (start1 < start2) return -1;
+                    if (start1 > start2) return 1;
+                    if (length1 < length2) return -1;
+                    if (length1 < length2) return 1;
+
+                    // TODO: maybe sort on error code as well?
+                    //return x.ErrorCode < y.ErrorCode ? -1
+                    //     : x.ErrorCode > y.ErrorCode ? 1
+                    //     : 0;
+
+                    return 0;
+                });
 
                 // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
                 int indicatorCurrent = 0;
@@ -623,7 +642,7 @@ namespace Eutherion.Win.MdiAppTemplate
             base.OnLayout(levent);
         }
 
-        public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
+        public List<TError> CurrentErrors { get; private set; } = new List<TError>();
 
         public void ActivateError(int errorIndex)
         {

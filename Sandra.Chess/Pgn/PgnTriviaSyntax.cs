@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnTriviaSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Collections;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -54,17 +54,14 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
-        public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
+        public static GreenPgnTriviaSyntax Create(ReadOnlySpanList<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
             if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
-            var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
-            var backgroundAfterSpanList = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
-
-            return commentNodeSpanList.Count == 0 && backgroundAfterSpanList.Count == 0
+            return commentNodes.Count == 0 && backgroundAfter.Count == 0
                 ? Empty
-                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfterSpanList);
+                : new GreenPgnTriviaSyntax(commentNodes, backgroundAfter);
         }
 
         /// <summary>
@@ -139,21 +136,27 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override PgnSyntax GetChild(int index)
         {
             if (index < CommentNodes.Count) return CommentNodes[index];
             if (index == CommentNodes.Count) return BackgroundAfter;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override int GetChildStartPosition(int index)
         {
             if (index < CommentNodes.Count) return Green.CommentNodes.GetElementOffset(index);
             if (index == CommentNodes.Count) return Green.CommentNodes.Length;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnTriviaSyntax(Union<WithTriviaSyntax, PgnGameListSyntax> parent, GreenPgnTriviaSyntax green)

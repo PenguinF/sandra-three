@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnVariationSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Threading;
 using System;
 
@@ -148,23 +149,29 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override PgnSyntax GetChild(int index)
         {
             if (index == 0) return ParenthesisOpen;
             if (index == 1) return PliesWithFloatItems;
             if (index == 2) return ParenthesisCloseOrEmpty;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public sealed override int GetChildStartPosition(int index)
         {
             if (index == 0) return 0;
             if (index == 1) return Green.ParenthesisOpen.Length;
             if (index == 2) return Green.ParenthesisOpen.Length + Green.PliesWithFloatItems.Length;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnVariationSyntax(PgnVariationWithFloatItemsSyntax parent, GreenPgnVariationSyntax green)

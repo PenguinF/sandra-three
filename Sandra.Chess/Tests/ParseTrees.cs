@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ParseTrees.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -416,16 +416,16 @@ namespace Sandra.Chess.Tests
         private static ParseTree<PgnGameListSyntax> TagSectionOnly(params ParseTree<PgnTagPairSyntax>[] tagPairs)
             => OneGame(TagSection(tagPairs), NoPlies);
 
-        internal static readonly List<(string, ParseTree)> TestParseTrees
+        internal static readonly List<(string pgn, ParseTree expectedParseTree)> TestParseTrees
             = TriviaParseTrees()
             .ToList();
 
-        internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors
+        internal static readonly List<(string pgn, ParseTree expectedParseTree, PgnErrorCode[] expectedErrors)> TestParseTreesWithErrors
             = TriviaParseTreesWithErrors()
-            .Union(TagSectionParseTreesWithErrors())
-            .Union(PlyParseTreesWithErrors())
-            .Union(MoveTreeParseTreesWithErrors())
-            .Union(MiscParseTrees())
+            .Concat(TagSectionParseTreesWithErrors())
+            .Concat(PlyParseTreesWithErrors())
+            .Concat(MoveTreeParseTreesWithErrors())
+            .Concat(MiscParseTrees())
             .ToList();
     }
 }

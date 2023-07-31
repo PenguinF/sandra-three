@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnSyntaxDescriptor.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,28 +41,14 @@ namespace Sandra.UI
 
         private PgnSyntaxDescriptor() { }
 
-        public override string FileExtension => PgnFileExtension;
+        public override string FileExtension
+            => PgnFileExtension;
 
-        public override StringKey<ForFormattedText> FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
+        public override StringKey<ForFormattedText> FileExtensionLocalizedKey
+            => LocalizedStringKeys.PgnFiles;
 
         public override RootPgnSyntax Parse(string code)
-        {
-            var rootNode = PgnParser.Parse(code);
-
-            if (rootNode.Errors.Count > 0)
-            {
-                rootNode.Errors.Sort((x, y)
-                    => x.Start < y.Start ? -1
-                    : x.Start > y.Start ? 1
-                    : x.Length < y.Length ? -1
-                    : x.Length > y.Length ? 1
-                    : x.ErrorCode < y.ErrorCode ? -1
-                    : x.ErrorCode > y.ErrorCode ? 1
-                    : 0);
-            }
-
-            return rootNode;
-        }
+            => PgnParser.Parse(code);
 
         public override IEnumerable<IPgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
             => syntaxTree.GameListSyntax.TerminalSymbolsInRange(start, length);

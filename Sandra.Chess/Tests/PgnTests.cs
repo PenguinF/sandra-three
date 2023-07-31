@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Testing;
+using Eutherion.Text;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
@@ -118,39 +120,36 @@ namespace Sandra.Chess.Tests
         }
 
         [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Private backing field of public counterpart")]
-        private static IEnumerable<(string, Type)> _PgnTestSymbols
+        private static IEnumerable<(string pgn, Type expectedType)> _PgnTestSymbols()
         {
-            get
-            {
-                yield return (" ", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("*", typeof(GreenPgnAsteriskSyntax));
-                yield return ("[", typeof(GreenPgnBracketOpenSyntax));
-                yield return ("]", typeof(GreenPgnBracketCloseSyntax));
-                yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
-                yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
-                yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
-                yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
-                yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
-                yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
-                yield return ("{}", typeof(GreenPgnCommentSyntax));
-                yield return ("$", typeof(GreenPgnEmptyNagSyntax));
-                yield return ("$1", typeof(GreenPgnNagSyntax));
-                yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
-                yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
-            }
+            yield return (" ", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
+            yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
+            yield return ("*", typeof(GreenPgnAsteriskSyntax));
+            yield return ("[", typeof(GreenPgnBracketOpenSyntax));
+            yield return ("]", typeof(GreenPgnBracketCloseSyntax));
+            yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
+            yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
+            yield return (".", typeof(GreenPgnPeriodSyntax));
+            yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
+            yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
+            yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("{}", typeof(GreenPgnCommentSyntax));
+            yield return ("$", typeof(GreenPgnEmptyNagSyntax));
+            yield return ("$1", typeof(GreenPgnNagSyntax));
+            yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
+            yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
         }
 
-        private static IEnumerable<(string, Type)> UnterminatedPgnTestSymbols()
+        private static IEnumerable<(string pgn, Type expectedType)> UnterminatedPgnTestSymbols()
         {
             yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
@@ -209,8 +208,8 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty), null));
+            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, ReadOnlyList<PgnErrorInfo>.Empty));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -255,34 +254,34 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnrecognizedMoveSyntax(0, false));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
-            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, null));
 
-            Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
-            Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("leadingTrivia", () => new GreenWithTriviaSyntax(null, GreenPgnBracketOpenSyntax.Value));
             Assert.Throws<ArgumentNullException>("contentNode", () => new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
-            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty));
 
             Assert.Throws<ArgumentNullException>("tagPairNodes", () => GreenPgnTagSectionSyntax.Create(null));
-            Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
+            Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(ReadOnlySpanList<GreenPgnTagPairSyntax>.Empty));
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
-            Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(null));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnUnterminatedCommentSyntax(1)));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnMoveNumberSyntax(1)));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnTagNameSyntax(1, false)));
 
-            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
-            Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, null));
-            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Instance, EmptyEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Instance));
+            Assert.Throws<ArgumentNullException>("nags", () => new GreenPgnPlySyntax(null, null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Empty));
+            Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, null));
+            Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Empty));
 
-            Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
-            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(EmptyEnumerable<GreenPgnPlySyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, ReadOnlySpanList<GreenWithTriviaSyntax>.Empty));
+            Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(ReadOnlySpanList<GreenPgnPlySyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(null, GreenPgnPlyListSyntax.Empty, null));
             Assert.Throws<ArgumentNullException>("pliesWithFloatItems", () => new GreenPgnVariationSyntax(new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnPeriodSyntax.Value), null, null));
@@ -291,7 +290,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("plyList", () => new GreenPgnGameSyntax(GreenPgnTagSectionSyntax.Empty, null, null));
 
             Assert.Throws<ArgumentNullException>("games", () => new GreenPgnGameListSyntax(null, GreenPgnTriviaSyntax.Empty));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, null));
         }
 
         [Theory]
@@ -356,9 +355,9 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
-            => from x1 in _PgnTestSymbols
-               from x2 in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
-               select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
+            => from x1 in _PgnTestSymbols()
+               from x2 in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
+               select new object[] { x1.pgn, x1.expectedType, x2.pgn, x2.expectedType };
 
         /// <summary>
         /// Tests all combinations of three tokens.
@@ -389,12 +388,12 @@ namespace Sandra.Chess.Tests
             // Here Assert.Collection is used so if such a test fails,
             // it gives the index of the third token that was tested.
             Assert.Collection(
-                _PgnTestSymbols,
-                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
+                _PgnTestSymbols(),
+                Enumerable.Repeat<Action<(string pgn, Type expectedType)>>(x0 =>
                 {
                     // Put the third symbol in front, because the last symbol may eat it.
-                    string pgn0 = x0.Item1;
-                    Type type0 = x0.Item2;
+                    string pgn0 = x0.pgn;
+                    Type type0 = x0.expectedType;
 
                     // Exceptions for when 2 or 3 PGN tokens go together and make 1.
                     if (WillCombine(type0, type1, out Type type01))
@@ -428,12 +427,11 @@ namespace Sandra.Chess.Tests
                             ExpectToken(type1, pgn1.Length),
                             ExpectToken(type2, pgn2.Length));
                     }
-                }, _PgnTestSymbols.Count()).ToArray());
+                }, _PgnTestSymbols().Count()).ToArray());
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbols
-            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
-               select new object[] { x.Item1, x.Item2 };
+            => TestUtilities.Wrap(_PgnTestSymbols().Concat(UnterminatedPgnTestSymbols()));
 
         /// <summary>
         /// Tests all combinations of a single line comment followed by another symbol.
@@ -486,8 +484,7 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
-            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
-               select new object[] { x.Item1 };
+            => TestUtilities.Wrap(_PgnTestSymbols().Concat(UnterminatedPgnTestSymbols()).Select(x => x.pgn));
 
         /// <summary>
         /// Tests that all symbols are eaten by a multi-line comment.
@@ -553,10 +550,10 @@ namespace Sandra.Chess.Tests
                 ExpectToken<GreenPgnErrorTagValueSyntax>(4));
         }
 
-        private static (string, Type) SMTestCase<T>(string pgn)
+        private static (string pgn, Type type) SMTestCase<T>(string pgn)
             => (pgn, typeof(T));
 
-        private static IEnumerable<(string, Type)> StateMachineSymbols()
+        private static IEnumerable<(string pgn, Type type)> StateMachineSymbols()
         {
             // Special case because if '%' is the first character on a line, it triggers the escape mechanism.
             yield return SMTestCase<GreenPgnEscapeSyntax>("%");
@@ -571,21 +568,21 @@ namespace Sandra.Chess.Tests
             // Test cases with 1 and 2 characters.
             var uppercaseTagNames = nonFileLetters.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
-                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Concat(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var uppercaseTagName in uppercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(uppercaseTagName);
 
             var lowercaseTagNames = fileLetters.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
-                .Union(nonRankDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Concat(nonRankDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var lowercaseTagName in lowercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(lowercaseTagName);
 
             var moveNumbers = allDigits.SelectMany(x =>
                 new SingleElementEnumerable<string>($"{x}")
-                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+                .Concat(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
             foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnMoveNumberSyntax>(moveNumber);
 
@@ -603,14 +600,14 @@ namespace Sandra.Chess.Tests
             var capturePawnMoves = fileLetters.SelectMany(x => fileRanks.Select(xy => $"{x}x{xy}"));
 
             var pawnMoves = fileRanks
-                .Union(capturePawnMoves).SelectMany(m =>
+                .Concat(capturePawnMoves).SelectMany(m =>
                     new SingleElementEnumerable<string>($"{m}")
-                    .Union(new SingleElementEnumerable<string>($"P{m}")));
+                    .Concat(new SingleElementEnumerable<string>($"P{m}")));
 
             foreach (var pawnMove in pawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(pawnMove);
 
             // Allow promotion to king, then assume the other piece letters work too.
-            var promotionMoves = fileRanks.Union(capturePawnMoves).Select(m => $"{m}=K");
+            var promotionMoves = fileRanks.Concat(capturePawnMoves).Select(m => $"{m}=K");
 
             foreach (var promotionMove in promotionMoves) yield return SMTestCase<GreenPgnMoveSyntax>(promotionMove);
 
@@ -621,9 +618,9 @@ namespace Sandra.Chess.Tests
             var disambiguationMoves3 = fileRanks.Select(xy => $"Qa1{xy}");
 
             var nonPawnMoves = simpleNonPawnMoves
-                .Union(disambiguationMoves1)
-                .Union(disambiguationMoves2)
-                .Union(disambiguationMoves3);
+                .Concat(disambiguationMoves1)
+                .Concat(disambiguationMoves2)
+                .Concat(disambiguationMoves3);
 
             foreach (var nonPawnMove in nonPawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(nonPawnMove);
 
@@ -662,9 +659,7 @@ namespace Sandra.Chess.Tests
             foreach (var movesWithAnnotation in movesWithAnnotations) yield return SMTestCase<GreenPgnMoveSyntax>(movesWithAnnotation);
         }
 
-        public static IEnumerable<object[]> StateMachineValidSymbols
-            => from x in StateMachineSymbols()
-               select new object[] { x.Item1, x.Item2 };
+        public static IEnumerable<object[]> StateMachineValidSymbols => TestUtilities.Wrap(StateMachineSymbols());
 
         [Theory]
         [MemberData(nameof(StateMachineValidSymbols))]
@@ -721,9 +716,7 @@ namespace Sandra.Chess.Tests
             "O-!", "O-O-!", "Pe!", "Qe!", "Q2!", "Q2e!", "ax!", "axb!", "Qx!", "Qdx!", "Qd2x!", "Qd2xe!",
         };
 
-        public static IEnumerable<object[]> StateMachineInvalidSymbols
-            => from x in InvalidSymbols
-               select new object[] { x };
+        public static IEnumerable<object[]> StateMachineInvalidSymbols => TestUtilities.Wrap(InvalidSymbols);
 
         [Theory]
         [MemberData(nameof(StateMachineInvalidSymbols))]
@@ -741,12 +734,12 @@ namespace Sandra.Chess.Tests
             int expectedChildCount = expectedParseTree.ChildNodes.Count;
             Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
 
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(-1));
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(expectedChildCount));
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(-1));
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(-1));
-            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(expectedChildCount + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChild(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChild(expectedChildCount));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChildStartPosition(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(expectedChildCount + 1));
 
             int length = 0;
 
@@ -779,15 +772,15 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> GetTestParseTrees()
-            => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
-            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+            => TestUtilities.Wrap(ParseTrees.TestParseTrees.Select(x => (x.pgn, x.expectedParseTree, Array.Empty<PgnErrorCode>())))
+            .Concat(TestUtilities.Wrap(ParseTrees.TestParseTreesWithErrors));
 
         [Theory]
         [MemberData(nameof(GetTestParseTrees))]
-        public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
+        public void ParseTreeTests(string pgn, ParseTrees.ParseTree expectedParseTree, PgnErrorCode[] expectedErrors)
         {
             RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
-            AssertParseTree(parseTree, null, 0, rootSyntax.GameListSyntax);
+            AssertParseTree(expectedParseTree, null, 0, rootSyntax.GameListSyntax);
 
             // Assert expected errors.
             Assert.Collection(

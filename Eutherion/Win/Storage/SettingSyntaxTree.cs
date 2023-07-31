@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingSyntaxTree.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ namespace Eutherion.Win.Storage
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
             RootJsonSyntax rootNode = JsonParser.Parse(json);
-            var errors = rootNode.Errors;
+            var errors = new ArrayBuilder<PTypeError>();
 
             // It is important to use green nodes here, so the schema doesn't need to create the entire parse tree to type-check its values.
             // Instead, schema.TryCreateValue accepts a rootNodeStart parameter to generate errors at the right locations.
             if (rootNode.Syntax.Green.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode, null);
+                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 
             int rootNodeStart = rootNode.Syntax.Green.ValueNode.BackgroundBefore.Length;
@@ -51,20 +51,22 @@ namespace Eutherion.Win.Storage
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
                 errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.Green.ValueNode.ContentNode, json, rootNodeStart));
-                return new SettingSyntaxTree(rootNode, null);
+                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 
-            return new SettingSyntaxTree(rootNode, settingObject);
+            return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), settingObject);
         }
 
         public RootJsonSyntax JsonSyntaxTree { get; }
-        public List<JsonErrorInfo> Errors => JsonSyntaxTree.Errors;
+        public IEnumerable<JsonErrorInfo> Errors => JsonSyntaxTree.Errors;
+        public ReadOnlyList<PTypeError> TypeErrors { get; }
         public SettingObject SettingObject { get; }
 
-        private SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, SettingObject settingObject)
+        private SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, ReadOnlyList<PTypeError> typeErrors, SettingObject settingObject)
         {
             JsonSyntaxTree = jsonSyntaxTree;
             SettingObject = settingObject;
+            TypeErrors = typeErrors;
         }
     }
 }

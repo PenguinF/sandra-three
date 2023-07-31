@@ -2,7 +2,7 @@
 /*********************************************************************************
  * LocalizedTextProvider.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using System;
 namespace Eutherion.Win.MdiAppTemplate
 {
     /// <summary>
-    /// <see cref="IFunc{TResult}"/> of <see cref="string"/> which provides a localized text to a UI element.
+    /// <see cref="IFunc{TResult}"/> of <see cref="string"/> which provides localized parameter-less text to a UI element.
     /// </summary>
     public class LocalizedTextProvider : IFunc<string>
     {

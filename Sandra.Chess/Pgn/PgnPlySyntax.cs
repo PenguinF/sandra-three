@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnPlySyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -90,18 +89,15 @@ namespace Sandra.Chess.Pgn
         public GreenPgnPlySyntax(
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> moveNumber,
             GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> move,
-            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
-            IEnumerable<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
+            ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> nags,
+            ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> variations)
         {
-            if (nags == null) throw new ArgumentNullException(nameof(nags));
-            if (variations == null) throw new ArgumentNullException(nameof(variations));
-
             MoveNumber = moveNumber;
             Move = move;
-            Nags = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Create(nags);
-            Variations = ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Create(variations);
+            Nags = nags ?? throw new ArgumentNullException(nameof(nags));
+            Variations = variations ?? throw new ArgumentNullException(nameof(variations));
 
-            int length = Nags.Length + Variations.Length;
+            int length = nags.Length + variations.Length;
             if (moveNumber != null) length += moveNumber.Length;
             if (move != null) length += move.Length;
 
@@ -191,6 +187,9 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override PgnSyntax GetChild(int index)
         {
             if (index == 0) return MoveNumberOrEmpty;
@@ -205,6 +204,9 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override int GetChildStartPosition(int index)
         {
             if (index == 0) return 0;

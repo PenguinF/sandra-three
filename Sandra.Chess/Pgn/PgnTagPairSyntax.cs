@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnTagPairSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -53,11 +52,10 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentException">
         /// <paramref name="tagElementNodes"/> is empty.
         /// </exception>
-        public GreenPgnTagPairSyntax(IEnumerable<GreenWithTriviaSyntax> tagElementNodes)
+        public GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> tagElementNodes)
         {
-            if (tagElementNodes == null) throw new ArgumentNullException(nameof(tagElementNodes));
-            TagElementNodes = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(tagElementNodes);
-            if (TagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
+            TagElementNodes = tagElementNodes ?? throw new ArgumentNullException(nameof(tagElementNodes));
+            if (tagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
         }
     }
 
@@ -109,11 +107,17 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override PgnSyntax GetChild(int index) => TagElementNodes[index];
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override int GetChildStartPosition(int index) => Green.TagElementNodes.GetElementOffset(index);
 
         internal PgnTagPairSyntax(PgnTagSectionSyntax parent, int parentIndex, GreenPgnTagPairSyntax green)

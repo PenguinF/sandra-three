@@ -2,7 +2,7 @@
 /*********************************************************************************
  * WithPlyFloatItemsSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -48,10 +48,9 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => LeadingFloatItems.Length + PlyContentNode.Length;
 
-        internal GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems)
+        internal GreenWithPlyFloatItemsSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            if (leadingFloatItems == null) throw new ArgumentNullException(nameof(leadingFloatItems));
-            LeadingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(leadingFloatItems);
+            LeadingFloatItems = leadingFloatItems ?? throw new ArgumentNullException(nameof(leadingFloatItems));
         }
     }
 
@@ -86,7 +85,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingFloatItems"/> and/or <paramref name="plyContentNode"/> are null.
         /// </exception>
-        public GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems, TGreenSyntaxNode plyContentNode)
+        public GreenWithPlyFloatItemsSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems, TGreenSyntaxNode plyContentNode)
             : base(leadingFloatItems)
         {
             if (plyContentNode == null) throw new ArgumentNullException(nameof(plyContentNode));
@@ -169,21 +168,27 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public sealed override PgnSyntax GetChild(int index)
         {
             if (index == 0) return LeadingFloatItems;
             if (index == 1) return PlyContentNode;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public sealed override int GetChildStartPosition(int index)
         {
             if (index == 0) return 0;
             if (index == 1) return Green.LeadingFloatItems.Length;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         internal abstract TSyntaxNode CreatePlyContentNode();

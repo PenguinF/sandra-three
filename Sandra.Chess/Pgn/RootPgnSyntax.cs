@@ -2,7 +2,7 @@
 /*********************************************************************************
  * RootPgnSyntax.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the collection of parse errors.
         /// </summary>
-        public List<PgnErrorInfo> Errors { get; }
+        public ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="RootPgnSyntax"/>.
@@ -51,7 +51,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="gameListSyntax"/> and/or <paramref name="errors"/> is null.
         /// </exception>
-        public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, ReadOnlyList<PgnErrorInfo> errors)
         {
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
             GameListSyntax = new PgnGameListSyntax(gameListSyntax);

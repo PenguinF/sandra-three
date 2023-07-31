@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingCopy.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -203,9 +203,16 @@ namespace Eutherion.Win.Storage
 
             // Log parse errors. Return true if no errors were found.
             var errors = settingSyntaxTree.Errors;
-            if (errors.Count > 0)
+            if (errors.Any())
             {
                 errors.ForEach(x => new SettingsParseException(x).Trace());
+                return false;
+            }
+
+            var typeErrors = settingSyntaxTree.TypeErrors;
+            if (typeErrors.Any())
+            {
+                typeErrors.ForEach(x => new SettingsParseException(x).Trace());
                 return false;
             }
 
@@ -223,7 +230,15 @@ namespace Eutherion.Win.Storage
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
+        public static string AutoSaveFileParseMessage(PTypeError typeError)
+        {
+            return $"{typeError.GetLocalizedMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
+        }
+
         public SettingsParseException(JsonErrorInfo jsonErrorInfo)
             : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
+
+        public SettingsParseException(PTypeError typeError)
+            : base(AutoSaveFileParseMessage(typeError)) { }
     }
 }

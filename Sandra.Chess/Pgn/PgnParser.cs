@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnParser.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        private struct VariationStackFrame
+        private class VariationStackFrame
         {
             // Saved parenthesis open of the current recursive variation, including leading trivia.
             public GreenWithTriviaSyntax SavedParenthesisOpenWithTrivia;
@@ -45,27 +45,23 @@ namespace Sandra.Chess.Pgn
             public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> Move;
 
             // Builds list of floating items within the current ply.
-            public List<GreenWithTriviaSyntax> FloatItemListBuilder;
+            public ArrayBuilder<GreenWithTriviaSyntax> FloatItemListBuilder;
 
             // Builds list of NAGs of the current ply.
-            public List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
+            public ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
 
             // Builds list of variations after the current ply.
-            public List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> VariationListBuilder;
+            public ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>> VariationListBuilder;
 
             // List of already built plies in this variation.
-            public List<GreenPgnPlySyntax> PlyListBuilder;
+            public ArrayBuilder<GreenPgnPlySyntax> PlyListBuilder;
 
-            public void Reset()
+            public VariationStackFrame()
             {
-                SavedParenthesisOpenWithTrivia = null;
-                HasPly = false;
-                MoveNumber = null;
-                Move = null;
-                FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
-                NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
-                VariationListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
-                PlyListBuilder = new List<GreenPgnPlySyntax>();
+                FloatItemListBuilder = new ArrayBuilder<GreenWithTriviaSyntax>();
+                NagListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
+                VariationListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
+                PlyListBuilder = new ArrayBuilder<GreenPgnPlySyntax>();
             }
         }
 
@@ -92,16 +88,16 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser(pgn);
             parser.ParsePgnText();
-            return new RootPgnSyntax(parser.YieldEof(), parser.Errors);
+            return new RootPgnSyntax(parser.YieldEof(), ReadOnlyList<PgnErrorInfo>.FromBuilder(parser.Errors));
         }
 
-        private readonly List<PgnErrorInfo> Errors;
-        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
-        private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
-        private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
+        private readonly ArrayBuilder<PgnErrorInfo> Errors;
+        private readonly ArrayBuilder<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly ArrayBuilder<GreenPgnTriviaElementSyntax> TriviaBuilder;
+        private readonly ArrayBuilder<GreenWithTriviaSyntax> TagPairBuilder;
+        private readonly ArrayBuilder<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
-        private readonly List<GreenPgnGameSyntax> GameListBuilder;
+        private readonly ArrayBuilder<GreenPgnGameSyntax> GameListBuilder;
 
         private readonly string pgnText;
 
@@ -144,17 +140,17 @@ namespace Sandra.Chess.Pgn
         {
             this.pgnText = pgnText;
 
-            Errors = new List<PgnErrorInfo>();
-            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
-            TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            TagPairBuilder = new List<GreenWithTriviaSyntax>();
-            TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
+            Errors = new ArrayBuilder<PgnErrorInfo>();
+            BackgroundBuilder = new ArrayBuilder<GreenPgnBackgroundSyntax>();
+            TriviaBuilder = new ArrayBuilder<GreenPgnTriviaElementSyntax>();
+            TagPairBuilder = new ArrayBuilder<GreenWithTriviaSyntax>();
+            TagSectionBuilder = new ArrayBuilder<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
-            GameListBuilder = new List<GreenPgnGameSyntax>();
+            GameListBuilder = new ArrayBuilder<GreenPgnGameSyntax>();
 
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
-            CurrentFrame.Reset();
+            CurrentFrame = new VariationStackFrame();
 
             YieldInTagSectionAction = YieldInTagSection;
             YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
@@ -364,9 +360,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnPlyListSyntax CapturePlyList(ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
-            var plyListSyntax = GreenPgnPlyListSyntax.Create(CurrentFrame.PlyListBuilder, trailingFloatItems);
-            CurrentFrame.PlyListBuilder.Clear();
-            return plyListSyntax;
+            return GreenPgnPlyListSyntax.Create(ReadOnlySpanList<GreenPgnPlySyntax>.FromBuilder(CurrentFrame.PlyListBuilder), trailingFloatItems);
         }
 
         private void YieldParenthesisOpen()
@@ -375,7 +369,7 @@ namespace Sandra.Chess.Pgn
             VariationBuilderStack.Push(CurrentFrame);
 
             // Initialize new frame.
-            CurrentFrame.Reset();
+            CurrentFrame = new VariationStackFrame();
         }
 
         private void YieldParenthesisClose()
@@ -400,7 +394,11 @@ namespace Sandra.Chess.Pgn
 
         private void CapturePlyUnchecked(int trailingFloatItemsLength)
         {
-            var plySyntax = new GreenPgnPlySyntax(CurrentFrame.MoveNumber, CurrentFrame.Move, CurrentFrame.NagListBuilder, CurrentFrame.VariationListBuilder);
+            var plySyntax = new GreenPgnPlySyntax(
+                CurrentFrame.MoveNumber,
+                CurrentFrame.Move,
+                ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.FromBuilder(CurrentFrame.NagListBuilder),
+                ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.FromBuilder(CurrentFrame.VariationListBuilder));
 
             if (!CurrentFrame.HasPly && CurrentFrame.MoveNumber == null || CurrentFrame.Move == null)
             {
@@ -430,9 +428,6 @@ namespace Sandra.Chess.Pgn
 
             CurrentFrame.MoveNumber = null;
             CurrentFrame.Move = null;
-            CurrentFrame.NagListBuilder.Clear();
-            CurrentFrame.VariationListBuilder.Clear();
-
             CurrentFrame.HasPly = true;
             CurrentFrame.PlyListBuilder.Add(plySyntax);
         }
@@ -454,9 +449,7 @@ namespace Sandra.Chess.Pgn
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
         {
-            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(CurrentFrame.FloatItemListBuilder);
-            CurrentFrame.FloatItemListBuilder.Clear();
-            return floatItems;
+            return ReadOnlySpanList<GreenWithTriviaSyntax>.FromBuilder(CurrentFrame.FloatItemListBuilder);
         }
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
@@ -532,7 +525,7 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureTagPair(bool hasTagPairBracketClose)
         {
-            var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
+            var tagPairSyntax = new GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax>.FromBuilder(TagPairBuilder));
 
             // Analyze for errors.
             // Expect '[', tag name. tag value, ']'.
@@ -595,7 +588,6 @@ namespace Sandra.Chess.Pgn
             HasTagPairBracketOpen = false;
             HasTagPairTagName = false;
             HasTagPairTagValue = false;
-            TagPairBuilder.Clear();
         }
 
         private void CaptureTagPairIfNecessary()
@@ -607,8 +599,7 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                LatestTagSection = GreenPgnTagSectionSyntax.Create(TagSectionBuilder);
-                TagSectionBuilder.Clear();
+                LatestTagSection = GreenPgnTagSectionSyntax.Create(ReadOnlySpanList<GreenPgnTagPairSyntax>.FromBuilder(TagSectionBuilder));
             }
         }
 
@@ -1033,18 +1024,25 @@ namespace Sandra.Chess.Pgn
 
         #region Yield tokens and EOF
 
+        private ReadOnlySpanList<GreenPgnTriviaElementSyntax> CaptureTrivia()
+        {
+            return ReadOnlySpanList<GreenPgnTriviaElementSyntax>.FromBuilder(TriviaBuilder);
+        }
+
+        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
+        {
+            return ReadOnlySpanList<GreenPgnBackgroundSyntax>.FromBuilder(BackgroundBuilder);
+        }
+
         private void Yield(IGreenPgnSymbol symbol)
         {
-            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol);
+            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(CaptureTrivia(), CaptureBackground()), symbol);
             YieldContentNode();
-            BackgroundBuilder.Clear();
-            TriviaBuilder.Clear();
         }
 
         private void YieldTrivia(GreenPgnCommentSyntax commentSyntax)
         {
-            TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, commentSyntax));
-            BackgroundBuilder.Clear();
+            TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(CaptureBackground(), commentSyntax));
         }
 
         private void YieldBackground(GreenPgnBackgroundSyntax backgroundSyntax)
@@ -1054,7 +1052,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnGameListSyntax YieldEof()
         {
-            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
+            trailingTrivia = GreenPgnTriviaSyntax.Create(CaptureTrivia(), CaptureBackground());
             symbolBeingYielded = null;
 
             if (YieldContentNode == YieldInTagSectionAction)
@@ -1082,7 +1080,7 @@ namespace Sandra.Chess.Pgn
                 CaptureMainLine(null);
             }
 
-            return new GreenPgnGameListSyntax(GameListBuilder, trailingTrivia);
+            return new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.FromBuilder(GameListBuilder), trailingTrivia);
         }
 
         #endregion Yield tokens and EOF

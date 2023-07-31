@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnPlyListSyntax.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Collections;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -55,17 +55,14 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="plies"/> and/or <paramref name="trailingFloatItems"/> is null.
         /// </exception>
-        public static GreenPgnPlyListSyntax Create(IEnumerable<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
+        public static GreenPgnPlyListSyntax Create(ReadOnlySpanList<GreenPgnPlySyntax> plies, ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
             if (trailingFloatItems == null) throw new ArgumentNullException(nameof(trailingFloatItems));
 
-            var plyList = ReadOnlySpanList<GreenPgnPlySyntax>.Create(plies);
-            var trailingFloatItemList = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(trailingFloatItems);
-
-            return plyList.Count == 0 && trailingFloatItemList.Count == 0
+            return plies.Count == 0 && trailingFloatItems.Count == 0
                 ? Empty
-                : new GreenPgnPlyListSyntax(plyList, trailingFloatItemList);
+                : new GreenPgnPlyListSyntax(plies, trailingFloatItems);
         }
 
         /// <summary>
@@ -141,21 +138,27 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override PgnSyntax GetChild(int index)
         {
             if (index < Plies.Count) return Plies[index];
             if (index == Plies.Count) return TrailingFloatItems;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
+        /// </exception>
         public override int GetChildStartPosition(int index)
         {
             if (index < Plies.Count) return Green.Plies.GetElementOffset(index);
             if (index == Plies.Count) return Green.Plies.Length;
-            throw new IndexOutOfRangeException();
+            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnPlyListSyntax(Union<PgnGameSyntax, PgnVariationSyntax> parent, GreenPgnPlyListSyntax green)

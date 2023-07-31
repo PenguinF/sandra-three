@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonSyntaxDescriptor.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,28 +37,14 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private JsonSyntaxDescriptor() { }
 
-        public override string FileExtension => JsonFileExtension;
+        public override string FileExtension
+            => JsonFileExtension;
 
-        public override StringKey<ForFormattedText> FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
+        public override StringKey<ForFormattedText> FileExtensionLocalizedKey
+            => SharedLocalizedStringKeys.JsonFiles;
 
         public override RootJsonSyntax Parse(string code)
-        {
-            var rootNode = JsonParser.Parse(code);
-
-            if (rootNode.Errors.Count > 0)
-            {
-                rootNode.Errors.Sort((x, y)
-                    => x.Start < y.Start ? -1
-                    : x.Start > y.Start ? 1
-                    : x.Length < y.Length ? -1
-                    : x.Length > y.Length ? 1
-                    : x.ErrorCode < y.ErrorCode ? -1
-                    : x.ErrorCode > y.ErrorCode ? 1
-                    : 0);
-            }
-
-            return rootNode;
-        }
+            => JsonParser.Parse(code);
 
         public override IEnumerable<IJsonSymbol> GetTerminalsInRange(RootJsonSyntax syntaxTree, int start, int length)
             => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
@@ -67,7 +53,7 @@ namespace Eutherion.Win.MdiAppTemplate
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
-            => JsonStyleSelector<RootJsonSyntax>.Instance.Visit(terminalSymbol, syntaxEditor);
+            => JsonStyleSelector<RootJsonSyntax, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);

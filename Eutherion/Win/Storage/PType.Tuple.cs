@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Tuple.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2) convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -94,7 +94,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3) convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -150,7 +150,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4) convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 
@@ -209,7 +209,7 @@ namespace Eutherion.Win.Storage
                 GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4, T5) convertedValue,
                 int listSyntaxStartPosition,
-                List<JsonErrorInfo> errors)
+                ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
 

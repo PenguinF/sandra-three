@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SubFolderNameType.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
         private SubFolderNameType() : base(PType.CLR.String)
         {
             // Wildcard characters '?' and '*' are not returned from Path.GetInvalidPathChars() but are still illegal.
-            InvalidRelativeFolderChars = Path.GetInvalidPathChars().Union(new[] { '?', '*' }).ToArray();
+            InvalidRelativeFolderChars = Path.GetInvalidPathChars().Concat(new[] { '?', '*' }).ToArray();
         }
 
         public override bool IsValid(string folderPath, out ITypeErrorBuilder typeError)
