@@ -23,7 +23,6 @@ using Eutherion;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -49,10 +48,9 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => LeadingFloatItems.Length + PlyContentNode.Length;
 
-        internal GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems)
+        internal GreenWithPlyFloatItemsSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)
         {
-            if (leadingFloatItems == null) throw new ArgumentNullException(nameof(leadingFloatItems));
-            LeadingFloatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(leadingFloatItems);
+            LeadingFloatItems = leadingFloatItems ?? throw new ArgumentNullException(nameof(leadingFloatItems));
         }
     }
 
@@ -87,7 +85,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="leadingFloatItems"/> and/or <paramref name="plyContentNode"/> are null.
         /// </exception>
-        public GreenWithPlyFloatItemsSyntax(IEnumerable<GreenWithTriviaSyntax> leadingFloatItems, TGreenSyntaxNode plyContentNode)
+        public GreenWithPlyFloatItemsSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems, TGreenSyntaxNode plyContentNode)
             : base(leadingFloatItems)
         {
             if (plyContentNode == null) throw new ArgumentNullException(nameof(plyContentNode));

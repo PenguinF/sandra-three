@@ -271,7 +271,7 @@ namespace Sandra.Chess.Tests
             Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(ReadOnlySpanList<GreenPgnTagPairSyntax>.Empty));
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
-            Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(null));
             Assert.Throws<ArgumentException>("tagElement", () => new GreenPgnTagElementInMoveTreeSyntax(new GreenPgnUnterminatedCommentSyntax(1)));
@@ -282,7 +282,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("variations", () => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, null));
             Assert.Throws<ArgumentException>(() => new GreenPgnPlySyntax(null, null, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>.Empty, ReadOnlySpanList<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>.Empty));
 
-            Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("plies", () => GreenPgnPlyListSyntax.Create(null, ReadOnlySpanList<GreenWithTriviaSyntax>.Empty));
             Assert.Throws<ArgumentNullException>("trailingFloatItems", () => GreenPgnPlyListSyntax.Create(ReadOnlySpanList<GreenPgnPlySyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("parenthesisOpen", () => new GreenPgnVariationSyntax(null, GreenPgnPlyListSyntax.Empty, null));

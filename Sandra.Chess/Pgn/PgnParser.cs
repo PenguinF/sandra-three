@@ -45,7 +45,7 @@ namespace Sandra.Chess.Pgn
             public GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax> Move;
 
             // Builds list of floating items within the current ply.
-            public List<GreenWithTriviaSyntax> FloatItemListBuilder;
+            public ArrayBuilder<GreenWithTriviaSyntax> FloatItemListBuilder;
 
             // Builds list of NAGs of the current ply.
             public ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>> NagListBuilder;
@@ -58,7 +58,7 @@ namespace Sandra.Chess.Pgn
 
             public VariationStackFrame()
             {
-                FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
+                FloatItemListBuilder = new ArrayBuilder<GreenWithTriviaSyntax>();
                 NagListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
                 VariationListBuilder = new ArrayBuilder<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
                 PlyListBuilder = new ArrayBuilder<GreenPgnPlySyntax>();
@@ -449,9 +449,7 @@ namespace Sandra.Chess.Pgn
 
         private ReadOnlySpanList<GreenWithTriviaSyntax> CaptureFloatItems()
         {
-            var floatItems = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(CurrentFrame.FloatItemListBuilder);
-            CurrentFrame.FloatItemListBuilder.Clear();
-            return floatItems;
+            return ReadOnlySpanList<GreenWithTriviaSyntax>.FromBuilder(CurrentFrame.FloatItemListBuilder);
         }
 
         private void YieldMoveNumber(ReadOnlySpanList<GreenWithTriviaSyntax> leadingFloatItems)

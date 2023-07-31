@@ -24,7 +24,6 @@ using Eutherion.Collections;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -56,16 +55,14 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="plies"/> and/or <paramref name="trailingFloatItems"/> is null.
         /// </exception>
-        public static GreenPgnPlyListSyntax Create(ReadOnlySpanList<GreenPgnPlySyntax> plies, IEnumerable<GreenWithTriviaSyntax> trailingFloatItems)
+        public static GreenPgnPlyListSyntax Create(ReadOnlySpanList<GreenPgnPlySyntax> plies, ReadOnlySpanList<GreenWithTriviaSyntax> trailingFloatItems)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
             if (trailingFloatItems == null) throw new ArgumentNullException(nameof(trailingFloatItems));
 
-            var trailingFloatItemList = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(trailingFloatItems);
-
-            return plies.Count == 0 && trailingFloatItemList.Count == 0
+            return plies.Count == 0 && trailingFloatItems.Count == 0
                 ? Empty
-                : new GreenPgnPlyListSyntax(plies, trailingFloatItemList);
+                : new GreenPgnPlyListSyntax(plies, trailingFloatItems);
         }
 
         /// <summary>
