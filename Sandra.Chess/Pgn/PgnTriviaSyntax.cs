@@ -55,17 +55,16 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
-        public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
+        public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
             if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
             var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
-            var backgroundAfterSpanList = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
 
-            return commentNodeSpanList.Count == 0 && backgroundAfterSpanList.Count == 0
+            return commentNodeSpanList.Count == 0 && backgroundAfter.Count == 0
                 ? Empty
-                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfterSpanList);
+                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfter);
         }
 
         /// <summary>

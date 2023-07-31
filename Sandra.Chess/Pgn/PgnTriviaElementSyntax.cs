@@ -23,7 +23,6 @@ using Eutherion;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -59,13 +58,11 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="backgroundBefore"/> and/or <paramref name="commentNode"/> are null.
         /// </exception>
-        public GreenPgnTriviaElementSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, GreenPgnCommentSyntax commentNode)
+        public GreenPgnTriviaElementSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundBefore, GreenPgnCommentSyntax commentNode)
         {
-            if (backgroundBefore == null) throw new ArgumentNullException(nameof(backgroundBefore));
-
-            BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
+            BackgroundBefore = backgroundBefore ?? throw new ArgumentNullException(nameof(backgroundBefore));
             CommentNode = commentNode ?? throw new ArgumentNullException(nameof(commentNode));
-            Length = BackgroundBefore.Length + CommentNode.Length;
+            Length = backgroundBefore.Length + commentNode.Length;
         }
     }
 

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnParser.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ namespace Sandra.Chess.Pgn
         }
 
         private readonly List<PgnErrorInfo> Errors;
-        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly ArrayBuilder<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
@@ -145,7 +145,7 @@ namespace Sandra.Chess.Pgn
             this.pgnText = pgnText;
 
             Errors = new List<PgnErrorInfo>();
-            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
+            BackgroundBuilder = new ArrayBuilder<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
@@ -1033,18 +1033,21 @@ namespace Sandra.Chess.Pgn
 
         #region Yield tokens and EOF
 
+        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
+        {
+            return ReadOnlySpanList<GreenPgnBackgroundSyntax>.FromBuilder(BackgroundBuilder);
+        }
+
         private void Yield(IGreenPgnSymbol symbol)
         {
-            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol);
+            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, CaptureBackground()), symbol);
             YieldContentNode();
-            BackgroundBuilder.Clear();
             TriviaBuilder.Clear();
         }
 
         private void YieldTrivia(GreenPgnCommentSyntax commentSyntax)
         {
-            TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, commentSyntax));
-            BackgroundBuilder.Clear();
+            TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(CaptureBackground(), commentSyntax));
         }
 
         private void YieldBackground(GreenPgnBackgroundSyntax backgroundSyntax)
@@ -1054,7 +1057,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnGameListSyntax YieldEof()
         {
-            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
+            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, CaptureBackground());
             symbolBeingYielded = null;
 
             if (YieldContentNode == YieldInTagSectionAction)
