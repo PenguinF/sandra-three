@@ -416,11 +416,11 @@ namespace Sandra.Chess.Tests
         private static ParseTree<PgnGameListSyntax> TagSectionOnly(params ParseTree<PgnTagPairSyntax>[] tagPairs)
             => OneGame(TagSection(tagPairs), NoPlies);
 
-        internal static readonly List<(string, ParseTree)> TestParseTrees
+        internal static readonly List<(string pgn, ParseTree expectedParseTree)> TestParseTrees
             = TriviaParseTrees()
             .ToList();
 
-        internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors
+        internal static readonly List<(string pgn, ParseTree expectedParseTree, PgnErrorCode[] expectedErrors)> TestParseTreesWithErrors
             = TriviaParseTreesWithErrors()
             .Concat(TagSectionParseTreesWithErrors())
             .Concat(PlyParseTreesWithErrors())

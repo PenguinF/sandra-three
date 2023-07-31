@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Testing;
 using Eutherion.Text;
 using Sandra.Chess.Pgn;
 using System;
@@ -430,8 +431,7 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbols
-            => from x in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
-               select new object[] { x.pgn, x.expectedType };
+            => TestUtilities.Wrap(_PgnTestSymbols().Concat(UnterminatedPgnTestSymbols()));
 
         /// <summary>
         /// Tests all combinations of a single line comment followed by another symbol.
@@ -484,8 +484,7 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
-            => from x in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
-               select new object[] { x.pgn };
+            => TestUtilities.Wrap(_PgnTestSymbols().Concat(UnterminatedPgnTestSymbols()).Select(x => x.pgn));
 
         /// <summary>
         /// Tests that all symbols are eaten by a multi-line comment.
@@ -551,10 +550,10 @@ namespace Sandra.Chess.Tests
                 ExpectToken<GreenPgnErrorTagValueSyntax>(4));
         }
 
-        private static (string, Type) SMTestCase<T>(string pgn)
+        private static (string pgn, Type type) SMTestCase<T>(string pgn)
             => (pgn, typeof(T));
 
-        private static IEnumerable<(string, Type)> StateMachineSymbols()
+        private static IEnumerable<(string pgn, Type type)> StateMachineSymbols()
         {
             // Special case because if '%' is the first character on a line, it triggers the escape mechanism.
             yield return SMTestCase<GreenPgnEscapeSyntax>("%");
@@ -660,9 +659,7 @@ namespace Sandra.Chess.Tests
             foreach (var movesWithAnnotation in movesWithAnnotations) yield return SMTestCase<GreenPgnMoveSyntax>(movesWithAnnotation);
         }
 
-        public static IEnumerable<object[]> StateMachineValidSymbols
-            => from x in StateMachineSymbols()
-               select new object[] { x.Item1, x.Item2 };
+        public static IEnumerable<object[]> StateMachineValidSymbols => TestUtilities.Wrap(StateMachineSymbols());
 
         [Theory]
         [MemberData(nameof(StateMachineValidSymbols))]
@@ -719,9 +716,7 @@ namespace Sandra.Chess.Tests
             "O-!", "O-O-!", "Pe!", "Qe!", "Q2!", "Q2e!", "ax!", "axb!", "Qx!", "Qdx!", "Qd2x!", "Qd2xe!",
         };
 
-        public static IEnumerable<object[]> StateMachineInvalidSymbols
-            => from x in InvalidSymbols
-               select new object[] { x };
+        public static IEnumerable<object[]> StateMachineInvalidSymbols => TestUtilities.Wrap(InvalidSymbols);
 
         [Theory]
         [MemberData(nameof(StateMachineInvalidSymbols))]
@@ -777,15 +772,15 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> GetTestParseTrees()
-            => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
-            .Concat(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+            => TestUtilities.Wrap(ParseTrees.TestParseTrees.Select(x => (x.pgn, x.expectedParseTree, Array.Empty<PgnErrorCode>())))
+            .Concat(TestUtilities.Wrap(ParseTrees.TestParseTreesWithErrors));
 
         [Theory]
         [MemberData(nameof(GetTestParseTrees))]
-        public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
+        public void ParseTreeTests(string pgn, ParseTrees.ParseTree expectedParseTree, PgnErrorCode[] expectedErrors)
         {
             RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
-            AssertParseTree(parseTree, null, 0, rootSyntax.GameListSyntax);
+            AssertParseTree(expectedParseTree, null, 0, rootSyntax.GameListSyntax);
 
             // Assert expected errors.
             Assert.Collection(
