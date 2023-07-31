@@ -259,7 +259,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty));
-            Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>("leadingTrivia", () => new GreenWithTriviaSyntax(null, GreenPgnBracketOpenSyntax.Value));
             Assert.Throws<ArgumentNullException>("contentNode", () => new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, null));

@@ -24,7 +24,6 @@ using Eutherion.Collections;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -55,16 +54,14 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
-        public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
+        public static GreenPgnTriviaSyntax Create(ReadOnlySpanList<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
             if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
-            var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
-
-            return commentNodeSpanList.Count == 0 && backgroundAfter.Count == 0
+            return commentNodes.Count == 0 && backgroundAfter.Count == 0
                 ? Empty
-                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfter);
+                : new GreenPgnTriviaSyntax(commentNodes, backgroundAfter);
         }
 
         /// <summary>

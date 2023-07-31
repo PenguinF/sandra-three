@@ -97,7 +97,7 @@ namespace Sandra.Chess.Pgn
 
         private readonly ArrayBuilder<PgnErrorInfo> Errors;
         private readonly ArrayBuilder<GreenPgnBackgroundSyntax> BackgroundBuilder;
-        private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
+        private readonly ArrayBuilder<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
         private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
@@ -146,7 +146,7 @@ namespace Sandra.Chess.Pgn
 
             Errors = new ArrayBuilder<PgnErrorInfo>();
             BackgroundBuilder = new ArrayBuilder<GreenPgnBackgroundSyntax>();
-            TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
+            TriviaBuilder = new ArrayBuilder<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
             TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
@@ -1033,6 +1033,11 @@ namespace Sandra.Chess.Pgn
 
         #region Yield tokens and EOF
 
+        private ReadOnlySpanList<GreenPgnTriviaElementSyntax> CaptureTrivia()
+        {
+            return ReadOnlySpanList<GreenPgnTriviaElementSyntax>.FromBuilder(TriviaBuilder);
+        }
+
         private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
         {
             return ReadOnlySpanList<GreenPgnBackgroundSyntax>.FromBuilder(BackgroundBuilder);
@@ -1040,9 +1045,8 @@ namespace Sandra.Chess.Pgn
 
         private void Yield(IGreenPgnSymbol symbol)
         {
-            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, CaptureBackground()), symbol);
+            symbolBeingYielded = new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Create(CaptureTrivia(), CaptureBackground()), symbol);
             YieldContentNode();
-            TriviaBuilder.Clear();
         }
 
         private void YieldTrivia(GreenPgnCommentSyntax commentSyntax)
@@ -1057,7 +1061,7 @@ namespace Sandra.Chess.Pgn
 
         private GreenPgnGameListSyntax YieldEof()
         {
-            trailingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, CaptureBackground());
+            trailingTrivia = GreenPgnTriviaSyntax.Create(CaptureTrivia(), CaptureBackground());
             symbolBeingYielded = null;
 
             if (YieldContentNode == YieldInTagSectionAction)
