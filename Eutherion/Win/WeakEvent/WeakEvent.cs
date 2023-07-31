@@ -2,7 +2,7 @@
 /*********************************************************************************
  * WeakEvent.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 
 namespace Eutherion
 {
@@ -176,7 +177,11 @@ namespace Eutherion
                         catch (TargetInvocationException exc)
                         {
                             // Preserve stack trace of the inner exception.
-                            if (exc.InnerException != null) throw new WeakEventInvocationException(exc.InnerException);
+                            if (exc.InnerException != null)
+                            {
+                                ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
+                            }
+
                             throw;
                         }
                     };
