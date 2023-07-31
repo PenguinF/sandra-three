@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MiscTests.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Testing;
 using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
@@ -56,65 +57,69 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        public static IEnumerable<object[]> ErrorParameterDisplayValuesTestData()
+        private static IEnumerable<(JsonErrorInfoParameter parameter, string expectedDisplayValue)> ErrorParameterDisplayValuesTestData()
         {
-            yield return new object[] { new JsonErrorInfoParameter<char>(' '), "' '" };
-            yield return new object[] { new JsonErrorInfoParameter<char>('\n'), "'\\n'" };
-            yield return new object[] { new JsonErrorInfoParameter<char>('\u0000'), "'\\u0000'" };
-            yield return new object[] { new JsonErrorInfoParameter<char>('√'), "'√'" };
+            yield return (new JsonErrorInfoParameter<char>(' '), "' '");
+            yield return (new JsonErrorInfoParameter<char>('\n'), "'\\n'");
+            yield return (new JsonErrorInfoParameter<char>('\u0000'), "'\\u0000'");
+            yield return (new JsonErrorInfoParameter<char>('√'), "'√'");
 
-            yield return new object[] { new JsonErrorInfoParameter<string>(null), TestLocalizer.TestNullString };
-            yield return new object[] { new JsonErrorInfoParameter<string>(""), "\"\"" };
-            yield return new object[] { new JsonErrorInfoParameter<string>("x"), "\"x\"" };
-            yield return new object[] { new JsonErrorInfoParameter<string>("      "), "\"      \"" };
+            yield return (new JsonErrorInfoParameter<string>(null), TestLocalizer.TestNullString);
+            yield return (new JsonErrorInfoParameter<string>(""), "\"\"");
+            yield return (new JsonErrorInfoParameter<string>("x"), "\"x\"");
+            yield return (new JsonErrorInfoParameter<string>("      "), "\"      \"");
 
-            yield return new object[] { new JsonErrorInfoParameter<bool?>(null), TestLocalizer.TestNullString };
-            yield return new object[] { new JsonErrorInfoParameter<bool?>(false), string.Format(TestLocalizer.TestUntypedObjectString, bool.FalseString) };
+            yield return (new JsonErrorInfoParameter<bool?>(null), TestLocalizer.TestNullString);
+            yield return (new JsonErrorInfoParameter<bool?>(false), string.Format(TestLocalizer.TestUntypedObjectString, bool.FalseString));
 
-            yield return new object[] { new JsonErrorInfoParameter<int?>(null), TestLocalizer.TestNullString };
-            yield return new object[] { new JsonErrorInfoParameter<int?>(0), string.Format(TestLocalizer.TestUntypedObjectString, 0) };
+            yield return (new JsonErrorInfoParameter<int?>(null), TestLocalizer.TestNullString);
+            yield return (new JsonErrorInfoParameter<int?>(0), string.Format(TestLocalizer.TestUntypedObjectString, 0));
         }
 
+        public static IEnumerable<object[]> WrappedErrorParameterDisplayValuesTestData() => TestUtilities.Wrap(ErrorParameterDisplayValuesTestData());
+
         [Theory]
-        [MemberData(nameof(ErrorParameterDisplayValuesTestData))]
+        [MemberData(nameof(WrappedErrorParameterDisplayValuesTestData))]
         public void ErrorParameterDisplayValues(JsonErrorInfoParameter parameter, string expectedDisplayValue)
         {
             Assert.Equal(expectedDisplayValue, JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(parameter, new TestLocalizer()));
         }
 
-        public static object[][] SoftFormatParameterCases() => new object[][]
+        private static IEnumerable<(string format, string[] parameters, string expectedResult)> SoftFormatParameterCases()
         {
             // Invalid format strings should revert to displaying the parameter list.
-            new object[] { "{a}", null, "{a}" },
-            new object[] { "{a}", new string[] { "x" }, "{a}(x)" },
-            new object[] { "{a}", new string[] { "x", "2" }, "{a}(x, 2)" },
-            new object[] { "{0:}}", null, "{0:}}" },
-            new object[] { "{0:}}", new string[] { "x" }, "{0:}}(x)" },
-            new object[] { "{0:}}", new string[] { "x", "2" }, "{0:}}(x, 2)" },
-            new object[] { "{-1}", null, "{-1}" },
+            yield return ("{a}", null, "{a}");
+            yield return ("{a}", new string[] { "x" }, "{a}(x)");
+            yield return ("{a}", new string[] { "x", "2" }, "{a}(x, 2)");
+            yield return ("{0:}}", null, "{0:}}");
+            yield return ("{0:}}", new string[] { "x" }, "{0:}}(x)");
+            yield return ("{0:}}", new string[] { "x", "2" }, "{0:}}(x, 2)");
+            yield return ("{-1}", null, "{-1}");
 
             // Edge cases when format string is empty.
-            new object[] { "", null, "" },
-            new object[] { "", new string[] { "x" }, "" },
-            new object[] { "", new string[] { "x", "2" }, "" },
+            yield return ("", null, "");
+            yield return ("", new string[] { "x" }, "");
+            yield return ("", new string[] { "x", "2" }, "");
 
             // Behave like string.Format for sufficient number of parameters.
-            new object[] { "z{0,10}z", new string[] { "abcdef" }, "z    abcdefz" },
-            new object[] { "z{0,-10}z", new string[] { "abcdef" }, "zabcdef    z" },
-            new object[] { "z{0,10:x2}z", new string[] { "abcdef" }, "z    abcdefz" },
-            new object[] { "z{0,-10:x2}z", new string[] { "abcdef" }, "zabcdef    z" },
+            yield return ("z{0,10}z", new string[] { "abcdef" }, "z    abcdefz");
+            yield return ("z{0,-10}z", new string[] { "abcdef" }, "zabcdef    z");
+            yield return ("z{0,10:x2}z", new string[] { "abcdef" }, "z    abcdefz");
+            yield return ("z{0,-10:x2}z", new string[] { "abcdef" }, "zabcdef    z");
 
             // Substitution points should be removed if null or insufficient parameters are provided.
-            new object[] { "z{0}z", null, "zz" },
-            new object[] { "z{10}z", null, "zz" },
-            new object[] { "z{0}z", Array.Empty<string>(), "zz" },
-            new object[] { "z{10}z", Array.Empty<string>(), "zz" },
-            new object[] { "z{10}z", new string[] { "a", "b", "c" }, "zz" },
-            new object[] { "z{1}z{3}z", new string[] { "a", "b", "c" }, "zbzz" },
-        };
+            yield return ("z{0}z", null, "zz");
+            yield return ("z{10}z", null, "zz");
+            yield return ("z{0}z", Array.Empty<string>(), "zz");
+            yield return ("z{10}z", Array.Empty<string>(), "zz");
+            yield return ("z{10}z", new string[] { "a", "b", "c" }, "zz");
+            yield return ("z{1}z{3}z", new string[] { "a", "b", "c" }, "zbzz");
+        }
+
+        public static IEnumerable<object[]> WrappedSoftFormatParameterCases() => TestUtilities.Wrap(SoftFormatParameterCases());
 
         [Theory]
-        [MemberData(nameof(SoftFormatParameterCases))]
+        [MemberData(nameof(WrappedSoftFormatParameterCases))]
         public void SoftFormats(string format, string[] parameters, string expectedResult)
         {
             Assert.Equal(expectedResult, FormatUtilities.SoftFormat(format, parameters));
