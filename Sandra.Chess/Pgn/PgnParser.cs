@@ -32,7 +32,7 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        private struct VariationStackFrame
+        private class VariationStackFrame
         {
             // Saved parenthesis open of the current recursive variation, including leading trivia.
             public GreenWithTriviaSyntax SavedParenthesisOpenWithTrivia;
@@ -56,12 +56,8 @@ namespace Sandra.Chess.Pgn
             // List of already built plies in this variation.
             public List<GreenPgnPlySyntax> PlyListBuilder;
 
-            public void Reset()
+            public VariationStackFrame()
             {
-                SavedParenthesisOpenWithTrivia = null;
-                HasPly = false;
-                MoveNumber = null;
-                Move = null;
                 FloatItemListBuilder = new List<GreenWithTriviaSyntax>();
                 NagListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>>();
                 VariationListBuilder = new List<GreenWithPlyFloatItemsSyntax<GreenPgnVariationSyntax>>();
@@ -154,7 +150,7 @@ namespace Sandra.Chess.Pgn
 
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
-            CurrentFrame.Reset();
+            CurrentFrame = new VariationStackFrame();
 
             YieldInTagSectionAction = YieldInTagSection;
             YieldInMoveTreeSectionAction = YieldInMoveTreeSection;
@@ -375,7 +371,7 @@ namespace Sandra.Chess.Pgn
             VariationBuilderStack.Push(CurrentFrame);
 
             // Initialize new frame.
-            CurrentFrame.Reset();
+            CurrentFrame = new VariationStackFrame();
         }
 
         private void YieldParenthesisClose()
