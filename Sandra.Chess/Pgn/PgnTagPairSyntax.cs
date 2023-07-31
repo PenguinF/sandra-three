@@ -22,7 +22,6 @@
 using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -53,11 +52,10 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentException">
         /// <paramref name="tagElementNodes"/> is empty.
         /// </exception>
-        public GreenPgnTagPairSyntax(IEnumerable<GreenWithTriviaSyntax> tagElementNodes)
+        public GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax> tagElementNodes)
         {
-            if (tagElementNodes == null) throw new ArgumentNullException(nameof(tagElementNodes));
-            TagElementNodes = ReadOnlySpanList<GreenWithTriviaSyntax>.Create(tagElementNodes);
-            if (TagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
+            TagElementNodes = tagElementNodes ?? throw new ArgumentNullException(nameof(tagElementNodes));
+            if (tagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
         }
     }
 

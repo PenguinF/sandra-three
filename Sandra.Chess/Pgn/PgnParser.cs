@@ -98,10 +98,10 @@ namespace Sandra.Chess.Pgn
         private readonly ArrayBuilder<PgnErrorInfo> Errors;
         private readonly ArrayBuilder<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly ArrayBuilder<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
-        private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
+        private readonly ArrayBuilder<GreenWithTriviaSyntax> TagPairBuilder;
+        private readonly ArrayBuilder<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly Stack<VariationStackFrame> VariationBuilderStack;
-        private readonly List<GreenPgnGameSyntax> GameListBuilder;
+        private readonly ArrayBuilder<GreenPgnGameSyntax> GameListBuilder;
 
         private readonly string pgnText;
 
@@ -147,10 +147,10 @@ namespace Sandra.Chess.Pgn
             Errors = new ArrayBuilder<PgnErrorInfo>();
             BackgroundBuilder = new ArrayBuilder<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new ArrayBuilder<GreenPgnTriviaElementSyntax>();
-            TagPairBuilder = new List<GreenWithTriviaSyntax>();
-            TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
+            TagPairBuilder = new ArrayBuilder<GreenWithTriviaSyntax>();
+            TagSectionBuilder = new ArrayBuilder<GreenPgnTagPairSyntax>();
             VariationBuilderStack = new Stack<VariationStackFrame>();
-            GameListBuilder = new List<GreenPgnGameSyntax>();
+            GameListBuilder = new ArrayBuilder<GreenPgnGameSyntax>();
 
             LatestTagSection = GreenPgnTagSectionSyntax.Empty;
 
@@ -532,7 +532,7 @@ namespace Sandra.Chess.Pgn
 
         private void CaptureTagPair(bool hasTagPairBracketClose)
         {
-            var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
+            var tagPairSyntax = new GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax>.FromBuilder(TagPairBuilder));
 
             // Analyze for errors.
             // Expect '[', tag name. tag value, ']'.
@@ -595,7 +595,6 @@ namespace Sandra.Chess.Pgn
             HasTagPairBracketOpen = false;
             HasTagPairTagName = false;
             HasTagPairTagValue = false;
-            TagPairBuilder.Clear();
         }
 
         private void CaptureTagPairIfNecessary()
@@ -607,8 +606,7 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                LatestTagSection = GreenPgnTagSectionSyntax.Create(TagSectionBuilder);
-                TagSectionBuilder.Clear();
+                LatestTagSection = GreenPgnTagSectionSyntax.Create(ReadOnlySpanList<GreenPgnTagPairSyntax>.FromBuilder(TagSectionBuilder));
             }
         }
 
@@ -1089,7 +1087,7 @@ namespace Sandra.Chess.Pgn
                 CaptureMainLine(null);
             }
 
-            return new GreenPgnGameListSyntax(GameListBuilder, trailingTrivia);
+            return new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.FromBuilder(GameListBuilder), trailingTrivia);
         }
 
         #endregion Yield tokens and EOF

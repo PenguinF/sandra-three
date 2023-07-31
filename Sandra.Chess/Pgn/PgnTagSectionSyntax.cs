@@ -22,7 +22,6 @@
 using Eutherion.Collections;
 using Eutherion.Text;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -48,15 +47,13 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="tagPairNodes"/> is null.
         /// </exception>
-        public static GreenPgnTagSectionSyntax Create(IEnumerable<GreenPgnTagPairSyntax> tagPairNodes)
+        public static GreenPgnTagSectionSyntax Create(ReadOnlySpanList<GreenPgnTagPairSyntax> tagPairNodes)
         {
             if (tagPairNodes == null) throw new ArgumentNullException(nameof(tagPairNodes));
 
-            var tagPairNodeSpanList = ReadOnlySpanList<GreenPgnTagPairSyntax>.Create(tagPairNodes);
-
-            return tagPairNodeSpanList.Count == 0
+            return tagPairNodes.Count == 0
                 ? Empty
-                : new GreenPgnTagSectionSyntax(tagPairNodeSpanList);
+                : new GreenPgnTagSectionSyntax(tagPairNodes);
         }
 
         /// <summary>

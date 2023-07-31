@@ -24,7 +24,6 @@ using Eutherion.Collections;
 using Eutherion.Text;
 using Eutherion.Threading;
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -60,10 +59,9 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentNullException">
         /// <paramref name="games"/> and/or <paramref name="trailingTrivia"/> is null.
         /// </exception>
-        public GreenPgnGameListSyntax(IEnumerable<GreenPgnGameSyntax> games, GreenPgnTriviaSyntax trailingTrivia)
+        public GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax> games, GreenPgnTriviaSyntax trailingTrivia)
         {
-            if (games == null) throw new ArgumentNullException(nameof(games));
-            Games = ReadOnlySpanList<GreenPgnGameSyntax>.Create(games);
+            Games = games ?? throw new ArgumentNullException(nameof(games));
             TrailingTrivia = trailingTrivia ?? throw new ArgumentNullException(nameof(trailingTrivia));
         }
     }

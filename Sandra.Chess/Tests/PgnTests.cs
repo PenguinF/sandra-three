@@ -211,7 +211,7 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, ReadOnlyList<PgnErrorInfo>.Empty));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty), null));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -265,10 +265,10 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("contentNode", () => new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
-            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenWithTriviaSyntax>.Instance));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(ReadOnlySpanList<GreenWithTriviaSyntax>.Empty));
 
             Assert.Throws<ArgumentNullException>("tagPairNodes", () => GreenPgnTagSectionSyntax.Create(null));
-            Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
+            Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(ReadOnlySpanList<GreenPgnTagPairSyntax>.Empty));
 
             Assert.Throws<ArgumentNullException>("leadingFloatItems", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(null, new GreenWithTriviaSyntax(GreenPgnTriviaSyntax.Empty, GreenPgnNagSyntax.Empty)));
             Assert.Throws<ArgumentNullException>("plyContentNode", () => new GreenWithPlyFloatItemsSyntax<GreenWithTriviaSyntax>(EmptyEnumerable<GreenWithTriviaSyntax>.Instance, null));
@@ -292,7 +292,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("plyList", () => new GreenPgnGameSyntax(GreenPgnTagSectionSyntax.Empty, null, null));
 
             Assert.Throws<ArgumentNullException>("games", () => new GreenPgnGameListSyntax(null, GreenPgnTriviaSyntax.Empty));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, null));
         }
 
         [Theory]
