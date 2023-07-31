@@ -210,7 +210,7 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, ReadOnlyList<PgnErrorInfo>.Empty));
             Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(EmptyEnumerable<GreenPgnGameSyntax>.Instance, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());

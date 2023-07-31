@@ -92,10 +92,10 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser(pgn);
             parser.ParsePgnText();
-            return new RootPgnSyntax(parser.YieldEof(), parser.Errors);
+            return new RootPgnSyntax(parser.YieldEof(), ReadOnlyList<PgnErrorInfo>.FromBuilder(parser.Errors));
         }
 
-        private readonly List<PgnErrorInfo> Errors;
+        private readonly ArrayBuilder<PgnErrorInfo> Errors;
         private readonly ArrayBuilder<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenWithTriviaSyntax> TagPairBuilder;
@@ -144,7 +144,7 @@ namespace Sandra.Chess.Pgn
         {
             this.pgnText = pgnText;
 
-            Errors = new List<PgnErrorInfo>();
+            Errors = new ArrayBuilder<PgnErrorInfo>();
             BackgroundBuilder = new ArrayBuilder<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenWithTriviaSyntax>();
