@@ -126,7 +126,6 @@
     <Compile Include="Utils\ThemeHelper.cs" />
     <Compile Include="WeakEvent\HandlerIsAnonymousException.cs" />
     <Compile Include="WeakEvent\WeakEvent.cs" />
-    <Compile Include="WeakEvent\WeakEventInvocationException.cs" />
     <Compile Include="WorkingCopyTextFile.cs" />
   </ItemGroup>
   <ItemGroup>
