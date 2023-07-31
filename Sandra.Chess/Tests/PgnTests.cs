@@ -119,39 +119,36 @@ namespace Sandra.Chess.Tests
         }
 
         [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Private backing field of public counterpart")]
-        private static IEnumerable<(string, Type)> _PgnTestSymbols
+        private static IEnumerable<(string pgn, Type expectedType)> _PgnTestSymbols()
         {
-            get
-            {
-                yield return (" ", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("*", typeof(GreenPgnAsteriskSyntax));
-                yield return ("[", typeof(GreenPgnBracketOpenSyntax));
-                yield return ("]", typeof(GreenPgnBracketCloseSyntax));
-                yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
-                yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
-                yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
-                yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
-                yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
-                yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
-                yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
-                yield return ("{}", typeof(GreenPgnCommentSyntax));
-                yield return ("$", typeof(GreenPgnEmptyNagSyntax));
-                yield return ("$1", typeof(GreenPgnNagSyntax));
-                yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
-                yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
-            }
+            yield return (" ", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
+            yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
+            yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
+            yield return ("*", typeof(GreenPgnAsteriskSyntax));
+            yield return ("[", typeof(GreenPgnBracketOpenSyntax));
+            yield return ("]", typeof(GreenPgnBracketCloseSyntax));
+            yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
+            yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
+            yield return (".", typeof(GreenPgnPeriodSyntax));
+            yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
+            yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
+            yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
+            yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("{}", typeof(GreenPgnCommentSyntax));
+            yield return ("$", typeof(GreenPgnEmptyNagSyntax));
+            yield return ("$1", typeof(GreenPgnNagSyntax));
+            yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
+            yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
         }
 
-        private static IEnumerable<(string, Type)> UnterminatedPgnTestSymbols()
+        private static IEnumerable<(string pgn, Type expectedType)> UnterminatedPgnTestSymbols()
         {
             yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
@@ -357,9 +354,9 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
-            => from x1 in _PgnTestSymbols
-               from x2 in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
-               select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
+            => from x1 in _PgnTestSymbols()
+               from x2 in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
+               select new object[] { x1.pgn, x1.expectedType, x2.pgn, x2.expectedType };
 
         /// <summary>
         /// Tests all combinations of three tokens.
@@ -390,12 +387,12 @@ namespace Sandra.Chess.Tests
             // Here Assert.Collection is used so if such a test fails,
             // it gives the index of the third token that was tested.
             Assert.Collection(
-                _PgnTestSymbols,
-                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
+                _PgnTestSymbols(),
+                Enumerable.Repeat<Action<(string pgn, Type expectedType)>>(x0 =>
                 {
                     // Put the third symbol in front, because the last symbol may eat it.
-                    string pgn0 = x0.Item1;
-                    Type type0 = x0.Item2;
+                    string pgn0 = x0.pgn;
+                    Type type0 = x0.expectedType;
 
                     // Exceptions for when 2 or 3 PGN tokens go together and make 1.
                     if (WillCombine(type0, type1, out Type type01))
@@ -429,12 +426,12 @@ namespace Sandra.Chess.Tests
                             ExpectToken(type1, pgn1.Length),
                             ExpectToken(type2, pgn2.Length));
                     }
-                }, _PgnTestSymbols.Count()).ToArray());
+                }, _PgnTestSymbols().Count()).ToArray());
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbols
-            => from x in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
-               select new object[] { x.Item1, x.Item2 };
+            => from x in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
+               select new object[] { x.pgn, x.expectedType };
 
         /// <summary>
         /// Tests all combinations of a single line comment followed by another symbol.
@@ -487,8 +484,8 @@ namespace Sandra.Chess.Tests
         }
 
         public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
-            => from x in _PgnTestSymbols.Concat(UnterminatedPgnTestSymbols())
-               select new object[] { x.Item1 };
+            => from x in _PgnTestSymbols().Concat(UnterminatedPgnTestSymbols())
+               select new object[] { x.pgn };
 
         /// <summary>
         /// Tests that all symbols are eaten by a multi-line comment.
