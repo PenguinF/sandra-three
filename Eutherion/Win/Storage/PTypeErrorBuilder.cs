@@ -117,22 +117,19 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="keyNode"/> is based.
         /// </param>
-        /// <param name="keyNodeStart">
-        /// The start position of the key node in the source json.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
+        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json)
         {
             if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
             // Do a Substring rather than keyNode.Value because the property key may contain escaped characters.
-            return json.Substring(keyNodeStart, keyNode.Length);
+            return json.Substring(keyNode.AbsoluteStart, keyNode.Length);
         }
 
         /// <summary>
@@ -144,19 +141,18 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="valueNode"/> is based.
         /// </param>
-        /// <param name="valueNodeStart">
-        /// The start position of the value node in the source json.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json, int valueNodeStart)
+        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
+
+            int valueNodeStart = valueNode.AbsoluteStart;
 
             const int maxLength = 31;
             const string ellipsis = "...";

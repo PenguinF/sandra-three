@@ -121,8 +121,8 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
             => new UnrecognizedPropertyKeyTypeError(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
-                keyNodeStart,
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                keyNode.AbsoluteStart,
                 keyNode.Length);
     }
 
@@ -189,8 +189,8 @@ namespace Eutherion.Win.Storage
 
             return new ValueTypeError(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
@@ -270,9 +270,9 @@ namespace Eutherion.Win.Storage
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
@@ -349,8 +349,8 @@ namespace Eutherion.Win.Storage
             return new ValueTypeErrorAtItemIndex(
                 typeErrorBuilder,
                 itemIndex,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
