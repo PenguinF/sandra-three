@@ -74,6 +74,56 @@ namespace Eutherion.Win.Storage
     }
 
     /// <summary>
+    /// Represents an error caused by a duplicate property key within a JSON object.
+    /// </summary>
+    public class DuplicatePropertyKeyTypeError : PTypeError
+    {
+        /// <summary>
+        /// Gets the property key for which this error occurred.
+        /// </summary>
+        public string PropertyKey { get; }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public override string GetLocalizedMessage(TextFormatter localizer)
+            => localizer.Format(PTypeErrorBuilder.DuplicatePropertyKeyTypeError, PropertyKey);
+
+        private DuplicatePropertyKeyTypeError(string propertyKey, int start, int length)
+            : base(start, length)
+        {
+            PropertyKey = propertyKey;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="DuplicatePropertyKeyTypeError"/>.
+        /// </summary>
+        /// <param name="keyNode">
+        /// The property key for which the error is generated.
+        /// </param>
+        /// <param name="json">
+        /// The source json which contains the type error.
+        /// </param>
+        /// <returns>
+        /// A <see cref="DuplicatePropertyKeyTypeError"/> instance which generates a localized error message.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static DuplicatePropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
+            => new DuplicatePropertyKeyTypeError(
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                keyNode.AbsoluteStart,
+                keyNode.Length);
+    }
+
+    /// <summary>
     /// Represents an error caused by an unknown property key within a schema.
     /// </summary>
     public class UnrecognizedPropertyKeyTypeError : PTypeError

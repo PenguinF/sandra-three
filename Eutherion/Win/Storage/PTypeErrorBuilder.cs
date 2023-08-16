@@ -36,6 +36,11 @@ namespace Eutherion.Win.Storage
         public static readonly StringKey<ForFormattedText> EnumerateWithOr = new StringKey<ForFormattedText>(nameof(EnumerateWithOr));
 
         /// <summary>
+        /// Gets the translation key for duplicate property keys.
+        /// </summary>
+        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyTypeError));
+
+        /// <summary>
         /// Gets the translation key for property keys that are not recognized.
         /// </summary>
         public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyTypeError));
