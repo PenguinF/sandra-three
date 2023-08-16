@@ -65,7 +65,7 @@ namespace Eutherion.Win.Storage
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
-                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json, itemNodeStart));
+                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json));
                 return false;
             }
 

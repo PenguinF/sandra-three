@@ -167,7 +167,6 @@ namespace Eutherion.Win.Storage
             // Analyze values with this schema while building the PMap.
             foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
             {
-                int keyNodeStart = keyNode.AbsoluteStart;
                 int valueNodeStart = valueNode.AbsoluteStart;
 
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
@@ -189,17 +188,12 @@ namespace Eutherion.Win.Storage
                             typeError,
                             keyNode,
                             valueNode,
-                            json,
-                            mapSyntaxStartPosition + keyNodeStart,
-                            mapSyntaxStartPosition + valueNodeStart));
+                            json));
                     }
                 }
                 else
                 {
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(
-                        keyNode,
-                        json,
-                        mapSyntaxStartPosition + keyNodeStart));
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode, json));
                 }
             }
 

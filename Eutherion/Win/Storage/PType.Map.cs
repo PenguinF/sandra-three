@@ -106,7 +106,6 @@ namespace Eutherion.Win.Storage
 
                 foreach (var (keyNode, valueNode) in ValidKeyValuePairs(jsonMapSyntax))
                 {
-                    int keyNodeStart = keyNode.AbsoluteStart;
                     int valueNodeStart = valueNode.AbsoluteStart;
 
                     // Error tolerance: ignore items of the wrong type.
@@ -129,9 +128,7 @@ namespace Eutherion.Win.Storage
                             typeError,
                             keyNode,
                             valueNode,
-                            json,
-                            mapSyntaxStartPosition + keyNodeStart,
-                            mapSyntaxStartPosition + valueNodeStart));
+                            json));
                     }
                 }
 

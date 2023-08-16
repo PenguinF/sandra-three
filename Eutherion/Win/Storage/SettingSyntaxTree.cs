@@ -48,7 +48,7 @@ namespace Eutherion.Win.Storage
                 rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json, rootNodeStart));
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json));
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 
