@@ -79,31 +79,31 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
 
-        private class ToBoolConverter : GreenJsonValueSyntaxVisitor<Maybe<PBoolean>>
+        private class ToBoolConverter : JsonValueSyntaxVisitor<Maybe<PBoolean>>
         {
-            public override Maybe<PBoolean> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PBoolean>.Nothing;
-            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax value, _void arg) => value.Value ? PConstantValue.True : PConstantValue.False;
+            public override Maybe<PBoolean> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PBoolean>.Nothing;
+            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value, _void arg) => value.Value ? PConstantValue.True : PConstantValue.False;
         }
 
-        private class ToIntConverter : GreenJsonValueSyntaxVisitor<Maybe<PInteger>>
+        private class ToIntConverter : JsonValueSyntaxVisitor<Maybe<PInteger>>
         {
-            public override Maybe<PInteger> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PInteger>.Nothing;
-            public override Maybe<PInteger> VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax value, _void arg) => new PInteger(value.Value);
+            public override Maybe<PInteger> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PInteger>.Nothing;
+            public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value, _void arg) => new PInteger(value.Value);
         }
 
-        private class ToStringConverter : GreenJsonValueSyntaxVisitor<Maybe<PString>>
+        private class ToStringConverter : JsonValueSyntaxVisitor<Maybe<PString>>
         {
-            public override Maybe<PString> DefaultVisit(GreenJsonValueSyntax node, _void arg) => Maybe<PString>.Nothing;
-            public override Maybe<PString> VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax value, _void arg) => new PString(value.Value);
+            public override Maybe<PString> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PString>.Nothing;
+            public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value, _void arg) => new PString(value.Value);
         }
 
         private sealed class BaseType<TValue> : PType<TValue>
             where TValue : PValue
         {
             private readonly PTypeErrorBuilder typeError;
-            private readonly GreenJsonValueSyntaxVisitor<Maybe<TValue>> converter;
+            private readonly JsonValueSyntaxVisitor<Maybe<TValue>> converter;
 
-            public BaseType(StringKey<ForFormattedText> expectedTypeDescriptionKey, GreenJsonValueSyntaxVisitor<Maybe<TValue>> converter)
+            public BaseType(StringKey<ForFormattedText> expectedTypeDescriptionKey, JsonValueSyntaxVisitor<Maybe<TValue>> converter)
             {
                 typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;
@@ -111,7 +111,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                GreenJsonValueSyntax valueNode,
+                JsonValueSyntax valueNode,
                 out TValue convertedValue,
                 int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
@@ -170,7 +170,7 @@ namespace Eutherion.Win.Storage
 
             internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                GreenJsonValueSyntax valueNode,
+                JsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)

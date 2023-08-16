@@ -91,7 +91,7 @@ namespace Eutherion.Win.Storage
         /// </returns>
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
-            GreenJsonValueSyntax valueNode,
+            JsonValueSyntax valueNode,
             int valueNodeStartPosition,
             ArrayBuilder<PTypeError> errors);
     }
@@ -150,7 +150,7 @@ namespace Eutherion.Win.Storage
 
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
-            GreenJsonValueSyntax valueNode,
+            JsonValueSyntax valueNode,
             int valueNodeStartPosition,
             ArrayBuilder<PTypeError> errors)
             => PType.TryCreateValue(json, valueNode, out _, valueNodeStartPosition, errors);

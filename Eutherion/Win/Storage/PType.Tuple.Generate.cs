@@ -63,7 +63,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
                 string json,
-                GreenJsonListSyntax jsonListSyntax,
+                JsonListSyntax jsonListSyntax,
                 out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,
                 int listSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors)

@@ -52,12 +52,12 @@ namespace Eutherion.Win.Storage
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                GreenJsonValueSyntax valueNode,
+                JsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
-                if (valueNode is GreenJsonMapSyntax jsonMapSyntax)
+                if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
                     return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, valueNodeStartPosition, errors);
                 }
@@ -68,7 +68,7 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                GreenJsonMapSyntax jsonMapSyntax,
+                JsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors);
@@ -96,7 +96,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                GreenJsonMapSyntax jsonMapSyntax,
+                JsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
                 int mapSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors)
@@ -104,8 +104,11 @@ namespace Eutherion.Win.Storage
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
+                foreach (var (keyNode, valueNode) in ValidKeyValuePairs(jsonMapSyntax))
                 {
+                    int keyNodeStart = keyNode.AbsoluteStart;
+                    int valueNodeStart = valueNode.AbsoluteStart;
+
                     // Error tolerance: ignore items of the wrong type.
                     var itemValueOrError = ItemType.TryCreateValue(
                         json,
