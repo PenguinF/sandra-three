@@ -163,9 +163,21 @@ namespace Eutherion.Win.Storage
         {
             var mapBuilder = new Dictionary<string, PValue>();
 
+            // Report errors on duplicate keys (case sensitive).
+            HashSet<string> foundKeys = new HashSet<string>();
+
             // Analyze values with this schema while building the PMap.
             foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
             {
+                if (foundKeys.Contains(keyNode.Value))
+                {
+                    errors.Add(DuplicatePropertyKeyTypeError.Create(keyNode, json));
+                }
+                else
+                {
+                    foundKeys.Add(keyNode.Value);
+                }
+
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
                     var valueOrError = property.TryCreateValue(json, valueNode, errors);

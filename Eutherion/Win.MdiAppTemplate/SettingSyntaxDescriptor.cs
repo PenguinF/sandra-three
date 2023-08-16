@@ -66,7 +66,7 @@ namespace Eutherion.Win.MdiAppTemplate
             => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<Union<JsonErrorInfo, PTypeError>> GetErrors(SettingSyntaxTree syntaxTree)
-            => syntaxTree.Errors.Select(Union<JsonErrorInfo, PTypeError>.Option1)
+            => syntaxTree.Errors.Where(x => x.ErrorCode != JsonErrorCode.PropertyKeyAlreadyExists).Select(Union<JsonErrorInfo, PTypeError>.Option1)
             .Concat(syntaxTree.TypeErrors.Select(Union<JsonErrorInfo, PTypeError>.Option2));
 
         public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, Union<JsonErrorInfo, PTypeError>> syntaxEditor, IJsonSymbol terminalSymbol)

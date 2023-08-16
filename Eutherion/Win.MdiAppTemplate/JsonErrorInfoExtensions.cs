@@ -83,7 +83,6 @@ namespace Eutherion.Win.MdiAppTemplate
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInObject), "'}' expected" },
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInArray), "']' expected" },
             { GetLocalizedStringKey(JsonErrorCode.InvalidPropertyKey), "invalid property key" },
-            { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "key {0} already exists in object" },
             { GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "missing property key" },
             { GetLocalizedStringKey(JsonErrorCode.MissingValue), "missing value" },
             { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "unrecognized value {0}" },
@@ -102,6 +101,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             { PTypeErrorBuilder.EnumerateWithOr, "{0} or {1}" },
 
+            { PTypeErrorBuilder.DuplicatePropertyKeyTypeError, "key {0} already exists in object" },
             { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "unrecognized key {0} in object" },
 
             { PTypeErrorBuilder.GenericJsonTypeError, "expected {0}, but found {1}" },
