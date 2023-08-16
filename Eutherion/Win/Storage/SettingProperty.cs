@@ -79,9 +79,6 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node to type-check.
         /// </param>
-        /// <param name="valueNodeStartPosition">
-        /// The current start position of the value node, to create errors with an absolute position.
-        /// </param>
         /// <param name="errors">
         /// The list of inner errors to which new type errors can be added.
         /// </param>
@@ -92,7 +89,6 @@ namespace Eutherion.Win.Storage
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
             JsonValueSyntax valueNode,
-            int valueNodeStartPosition,
             ArrayBuilder<PTypeError> errors);
     }
 
@@ -151,8 +147,7 @@ namespace Eutherion.Win.Storage
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
             JsonValueSyntax valueNode,
-            int valueNodeStartPosition,
             ArrayBuilder<PTypeError> errors)
-            => PType.TryCreateValue(json, valueNode, out _, valueNodeStartPosition, errors);
+            => PType.TryCreateValue(json, valueNode, out _, errors);
     }
 }

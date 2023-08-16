@@ -32,20 +32,18 @@ namespace Eutherion.Win.Storage
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
             RootJsonSyntax rootNode = JsonParser.Parse(json);
-            var errors = new ArrayBuilder<PTypeError>();
 
             if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
+                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.Empty, null);
             }
 
-            int rootNodeStart = rootNode.Syntax.ValueNode.BackgroundBefore.Length;
+            var errors = new ArrayBuilder<PTypeError>();
 
             if (schema.TryCreateValue(
                 json,
                 rootNode.Syntax.ValueNode.ContentNode,
                 out SettingObject settingObject,
-                rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
                 errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json));

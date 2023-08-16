@@ -40,22 +40,16 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
-                int listSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode.ContentNode;
 
-                int itemNodeStart = listSyntaxStartPosition
-                                  + jsonListSyntax.Green.GetElementNodeStart(itemIndex)
-                                  + jsonListSyntax.Green.ListItemNodes[itemIndex].ValueNode.BackgroundBefore.Length;
-
                 var itemValueOrError = itemType.TryCreateValue(
                     json,
                     itemNode,
                     out convertedTargetValue,
-                    itemNodeStart,
                     errors);
 
                 if (itemValueOrError.IsOption2(out value))
@@ -73,12 +67,11 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
-                int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors).Match(
+                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, errors).Match(
                         whenOption1: error => Union<ITypeErrorBuilder, PValue>.Option1(error),
                         whenOption2: list => list);
                 }
@@ -91,7 +84,6 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonListSyntax jsonListSyntax,
                 out T convertedValue,
-                int listSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
@@ -115,7 +107,6 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
-                int errorReportingOffset,
                 ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
@@ -127,7 +118,6 @@ namespace Eutherion.Win.Storage
                         json,
                         jsonListSyntax,
                         itemIndex,
-                        errorReportingOffset,
                         errors,
                         out convertedTargetValue,
                         out value);
@@ -153,7 +143,6 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonListSyntax jsonListSyntax,
                 out IEnumerable<T> convertedValue,
-                int listSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
@@ -168,7 +157,6 @@ namespace Eutherion.Win.Storage
                         json,
                         jsonListSyntax,
                         itemIndex,
-                        listSyntaxStartPosition,
                         errors,
                         out T convertedTargetValue,
                         out PValue value))

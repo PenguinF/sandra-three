@@ -159,7 +159,6 @@ namespace Eutherion.Win.Storage
             string json,
             JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
-            int mapSyntaxStartPosition,
             ArrayBuilder<PTypeError> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
@@ -167,15 +166,9 @@ namespace Eutherion.Win.Storage
             // Analyze values with this schema while building the PMap.
             foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
             {
-                int valueNodeStart = valueNode.AbsoluteStart;
-
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
-                    var valueOrError = property.TryCreateValue(
-                        json,
-                        valueNode,
-                        mapSyntaxStartPosition + valueNodeStart,
-                        errors);
+                    var valueOrError = property.TryCreateValue(json, valueNode, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {

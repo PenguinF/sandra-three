@@ -113,7 +113,6 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out TValue convertedValue,
-                int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
                 => converter.Visit(valueNode).IsJust(out convertedValue)
                 ? convertedValue
@@ -172,12 +171,11 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
-                int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
                 T value = default;
 
-                var result = BaseType.TryCreateValue(json, valueNode, out TBase convertedBaseValue, valueNodeStartPosition, errors).Match(
+                var result = BaseType.TryCreateValue(json, valueNode, out TBase convertedBaseValue, errors).Match(
                     whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
                     whenOption2: baseValue => TryGetTargetValue(convertedBaseValue).Match(
                         whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
