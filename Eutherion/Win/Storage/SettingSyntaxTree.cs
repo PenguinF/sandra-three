@@ -32,25 +32,21 @@ namespace Eutherion.Win.Storage
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
             RootJsonSyntax rootNode = JsonParser.Parse(json);
-            var errors = new ArrayBuilder<PTypeError>();
 
-            // It is important to use green nodes here, so the schema doesn't need to create the entire parse tree to type-check its values.
-            // Instead, schema.TryCreateValue accepts a rootNodeStart parameter to generate errors at the right locations.
-            if (rootNode.Syntax.Green.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
+            if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
+                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.Empty, null);
             }
 
-            int rootNodeStart = rootNode.Syntax.Green.ValueNode.BackgroundBefore.Length;
+            var errors = new ArrayBuilder<PTypeError>();
 
             if (schema.TryCreateValue(
                 json,
-                rootNode.Syntax.Green.ValueNode.ContentNode,
+                rootNode.Syntax.ValueNode.ContentNode,
                 out SettingObject settingObject,
-                rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.Green.ValueNode.ContentNode, json, rootNodeStart));
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json));
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 

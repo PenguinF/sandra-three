@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeErrorBuilder.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ namespace Eutherion.Win.Storage
         /// Gets the translation key for concatenating a list of values.
         /// </summary>
         public static readonly StringKey<ForFormattedText> EnumerateWithOr = new StringKey<ForFormattedText>(nameof(EnumerateWithOr));
+
+        /// <summary>
+        /// Gets the translation key for duplicate property keys.
+        /// </summary>
+        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyTypeError));
 
         /// <summary>
         /// Gets the translation key for property keys that are not recognized.
@@ -117,22 +122,74 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="keyNode"/> is based.
         /// </param>
-        /// <param name="keyNodeStart">
-        /// The start position of the key node in the source json.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetPropertyKeyDisplayString(GreenJsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
+        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json)
         {
             if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
             // Do a Substring rather than keyNode.Value because the property key may contain escaped characters.
-            return json.Substring(keyNodeStart, keyNode.Length);
+            return json.Substring(keyNode.AbsoluteStart, keyNode.Length);
+        }
+
+        private class ValueDisplayStringRenderer : JsonValueSyntaxVisitor<string, string>
+        {
+            const int maxLength = 31;
+            const string ellipsis = "...";
+            const int ellipsisLength = 3;
+            const int halfLength = (maxLength - ellipsisLength) / 2;
+
+            public static ValueDisplayStringRenderer Instance { get; } = new ValueDisplayStringRenderer();
+
+            private ValueDisplayStringRenderer() { }
+
+            public override string VisitMissingValueSyntax(JsonMissingValueSyntax valueNode, string json)
+            {
+                // Missing values.
+                return null;
+            }
+
+            public override string VisitStringLiteralSyntax(JsonStringLiteralSyntax valueNode, string json)
+            {
+                int valueNodeStart = valueNode.AbsoluteStart;
+
+                // 2 quote characters.
+                if (valueNode.Length <= maxLength)
+                {
+                    // QuoteStringValue not necessary, already quoted.
+                    return json.Substring(valueNodeStart, valueNode.Length);
+                }
+                else
+                {
+                    // Remove quotes, add ellipsis to inner string value, then quote again.
+                    return QuoteStringValue(
+                        json.Substring(valueNodeStart + 1, halfLength - 1)
+                        + ellipsis
+                        + json.Substring(valueNodeStart + valueNode.Length - halfLength + 1, halfLength - 1));
+                }
+            }
+
+            public override string DefaultVisit(JsonValueSyntax valueNode, string json)
+            {
+                int valueNodeStart = valueNode.AbsoluteStart;
+
+                if (valueNode.Length <= maxLength)
+                {
+                    return QuoteValue(json.Substring(valueNodeStart, valueNode.Length));
+                }
+                else
+                {
+                    return QuoteValue(
+                        json.Substring(valueNodeStart, halfLength)
+                        + ellipsis
+                        + json.Substring(valueNodeStart + valueNode.Length - halfLength, halfLength));
+                }
+            }
         }
 
         /// <summary>
@@ -144,58 +201,18 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="valueNode"/> is based.
         /// </param>
-        /// <param name="valueNodeStart">
-        /// The start position of the value node in the source json.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetValueDisplayString(GreenJsonValueSyntax valueNode, string json, int valueNodeStart)
+        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
-            const int maxLength = 31;
-            const string ellipsis = "...";
-            const int ellipsisLength = 3;
-            const int halfLength = (maxLength - ellipsisLength) / 2;
-
-            switch (valueNode)
-            {
-                case GreenJsonMissingValueSyntax _:
-                    // Missing values.
-                    return null;
-                case GreenJsonStringLiteralSyntax _:
-                    // 2 quote characters.
-                    if (valueNode.Length <= maxLength)
-                    {
-                        // QuoteStringValue not necessary, already quoted.
-                        return json.Substring(valueNodeStart, valueNode.Length);
-                    }
-                    else
-                    {
-                        // Remove quotes, add ellipsis to inner string value, then quote again.
-                        return QuoteStringValue(
-                            json.Substring(valueNodeStart + 1, halfLength - 1)
-                            + ellipsis
-                            + json.Substring(valueNodeStart + valueNode.Length - halfLength + 1, halfLength - 1));
-                    }
-                default:
-                    if (valueNode.Length <= maxLength)
-                    {
-                        return QuoteValue(json.Substring(valueNodeStart, valueNode.Length));
-                    }
-                    else
-                    {
-                        return QuoteValue(
-                            json.Substring(valueNodeStart, halfLength)
-                            + ellipsis
-                            + json.Substring(valueNodeStart + valueNode.Length - halfLength, halfLength));
-                    }
-            }
+            return ValueDisplayStringRenderer.Instance.Visit(valueNode, json);
         }
 
         /// <summary>

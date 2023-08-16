@@ -157,23 +157,30 @@ namespace Eutherion.Win.Storage
 
         internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
             string json,
-            GreenJsonMapSyntax jsonMapSyntax,
+            JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
-            int mapSyntaxStartPosition,
             ArrayBuilder<PTypeError> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
 
+            // Report errors on duplicate keys (case sensitive).
+            HashSet<string> foundKeys = new HashSet<string>();
+
             // Analyze values with this schema while building the PMap.
-            foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
+            foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
             {
+                if (foundKeys.Contains(keyNode.Value))
+                {
+                    errors.Add(DuplicatePropertyKeyTypeError.Create(keyNode, json));
+                }
+                else
+                {
+                    foundKeys.Add(keyNode.Value);
+                }
+
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
-                    var valueOrError = property.TryCreateValue(
-                        json,
-                        valueNode,
-                        mapSyntaxStartPosition + valueNodeStart,
-                        errors);
+                    var valueOrError = property.TryCreateValue(json, valueNode, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
@@ -186,17 +193,12 @@ namespace Eutherion.Win.Storage
                             typeError,
                             keyNode,
                             valueNode,
-                            json,
-                            mapSyntaxStartPosition + keyNodeStart,
-                            mapSyntaxStartPosition + valueNodeStart));
+                            json));
                     }
                 }
                 else
                 {
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(
-                        keyNode,
-                        json,
-                        mapSyntaxStartPosition + keyNodeStart));
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode, json));
                 }
             }
 

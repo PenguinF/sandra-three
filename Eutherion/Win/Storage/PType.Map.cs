@@ -27,6 +27,23 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
+        internal static IEnumerable<(JsonStringLiteralSyntax keyNode, JsonValueSyntax valueNode)> ValidKeyValuePairs(JsonMapSyntax jsonMapSyntax)
+        {
+            foreach (var keyValueNode in jsonMapSyntax.KeyValueNodes)
+            {
+                // Only the first value can be valid, even if it's undefined.
+                if (keyValueNode.ValueSectionNodes[0].ValueNode.ContentNode is JsonStringLiteralSyntax stringLiteral
+                    && keyValueNode.ValueSectionNodes.Count > 1)
+                {
+                    var firstValueNode = keyValueNode.ValueSectionNodes[1].ValueNode.ContentNode;
+                    if (!(firstValueNode is JsonMissingValueSyntax))
+                    {
+                        yield return (stringLiteral, firstValueNode);
+                    }
+                }
+            }
+        }
+
         public static readonly PTypeErrorBuilder MapTypeError = new PTypeErrorBuilder(JsonObject);
 
         public abstract class MapBase<T> : PType<T>
@@ -35,14 +52,13 @@ namespace Eutherion.Win.Storage
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                GreenJsonValueSyntax valueNode,
+                JsonValueSyntax valueNode,
                 out T convertedValue,
-                int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
-                if (valueNode is GreenJsonMapSyntax jsonMapSyntax)
+                if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, valueNodeStartPosition, errors);
+                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, errors);
                 }
 
                 convertedValue = default;
@@ -51,9 +67,8 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                GreenJsonMapSyntax jsonMapSyntax,
+                JsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
-                int valueNodeStartPosition,
                 ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
@@ -79,22 +94,20 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                GreenJsonMapSyntax jsonMapSyntax,
+                JsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
-                int mapSyntaxStartPosition,
                 ArrayBuilder<PTypeError> errors)
             {
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs())
+                foreach (var (keyNode, valueNode) in ValidKeyValuePairs(jsonMapSyntax))
                 {
                     // Error tolerance: ignore items of the wrong type.
                     var itemValueOrError = ItemType.TryCreateValue(
                         json,
                         valueNode,
                         out T value,
-                        mapSyntaxStartPosition + valueNodeStart,
                         errors);
 
                     if (itemValueOrError.IsOption2(out PValue itemValue))
@@ -109,9 +122,7 @@ namespace Eutherion.Win.Storage
                             typeError,
                             keyNode,
                             valueNode,
-                            json,
-                            mapSyntaxStartPosition + keyNodeStart,
-                            mapSyntaxStartPosition + valueNodeStart));
+                            json));
                     }
                 }
 

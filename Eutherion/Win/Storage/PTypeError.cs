@@ -74,6 +74,56 @@ namespace Eutherion.Win.Storage
     }
 
     /// <summary>
+    /// Represents an error caused by a duplicate property key within a JSON object.
+    /// </summary>
+    public class DuplicatePropertyKeyTypeError : PTypeError
+    {
+        /// <summary>
+        /// Gets the property key for which this error occurred.
+        /// </summary>
+        public string PropertyKey { get; }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public override string GetLocalizedMessage(TextFormatter localizer)
+            => localizer.Format(PTypeErrorBuilder.DuplicatePropertyKeyTypeError, PropertyKey);
+
+        private DuplicatePropertyKeyTypeError(string propertyKey, int start, int length)
+            : base(start, length)
+        {
+            PropertyKey = propertyKey;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="DuplicatePropertyKeyTypeError"/>.
+        /// </summary>
+        /// <param name="keyNode">
+        /// The property key for which the error is generated.
+        /// </param>
+        /// <param name="json">
+        /// The source json which contains the type error.
+        /// </param>
+        /// <returns>
+        /// A <see cref="DuplicatePropertyKeyTypeError"/> instance which generates a localized error message.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static DuplicatePropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
+            => new DuplicatePropertyKeyTypeError(
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                keyNode.AbsoluteStart,
+                keyNode.Length);
+    }
+
+    /// <summary>
     /// Represents an error caused by an unknown property key within a schema.
     /// </summary>
     public class UnrecognizedPropertyKeyTypeError : PTypeError
@@ -110,19 +160,16 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json which contains the type error.
         /// </param>
-        /// <param name="keyNodeStart">
-        /// The start position of the key node in the source json.
-        /// </param>
         /// <returns>
         /// A <see cref="UnrecognizedPropertyKeyTypeError"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static UnrecognizedPropertyKeyTypeError Create(GreenJsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
+        public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
             => new UnrecognizedPropertyKeyTypeError(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
-                keyNodeStart,
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                keyNode.AbsoluteStart,
                 keyNode.Length);
     }
 
@@ -174,23 +221,20 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json which contains the type error.
         /// </param>
-        /// <param name="valueNodeStart">
-        /// The start position of the value node in the source json.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeError"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, GreenJsonValueSyntax valueNode, string json, int valueNodeStart)
+        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeError(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
@@ -246,12 +290,6 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json which contains the type error.
         /// </param>
-        /// <param name="keyNodeStart">
-        /// The start position of the key node in the source json.
-        /// </param>
-        /// <param name="valueNodeStart">
-        /// The start position of the value node in the source json.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeErrorAtPropertyKey"/> instance which generates a localized error message.
         /// </returns>
@@ -260,19 +298,17 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public static ValueTypeErrorAtPropertyKey Create(
             ITypeErrorBuilder typeErrorBuilder,
-            GreenJsonStringLiteralSyntax keyNode,
-            GreenJsonValueSyntax valueNode,
-            string json,
-            int keyNodeStart,
-            int valueNodeStart)
+            JsonStringLiteralSyntax keyNode,
+            JsonValueSyntax valueNode,
+            string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
@@ -328,9 +364,6 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json which contains the type error.
         /// </param>
-        /// <param name="valueNodeStart">
-        /// The start position of the value node in the source json.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeErrorAtItemIndex"/> instance which generates a localized error message.
         /// </returns>
@@ -340,17 +373,16 @@ namespace Eutherion.Win.Storage
         public static ValueTypeErrorAtItemIndex Create(
             ITypeErrorBuilder typeErrorBuilder,
             int itemIndex,
-            GreenJsonValueSyntax valueNode,
-            string json,
-            int valueNodeStart)
+            JsonValueSyntax valueNode,
+            string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeErrorAtItemIndex(
                 typeErrorBuilder,
                 itemIndex,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json, valueNodeStart),
-                valueNodeStart,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.AbsoluteStart,
                 valueNode.Length);
         }
     }
