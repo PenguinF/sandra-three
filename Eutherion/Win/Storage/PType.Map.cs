@@ -27,6 +27,23 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
+        internal static IEnumerable<(JsonStringLiteralSyntax keyNode, JsonValueSyntax valueNode)> ValidKeyValuePairs(JsonMapSyntax jsonMapSyntax)
+        {
+            foreach (var keyValueNode in jsonMapSyntax.KeyValueNodes)
+            {
+                // Only the first value can be valid, even if it's undefined.
+                if (keyValueNode.ValueSectionNodes[0].ValueNode.ContentNode is JsonStringLiteralSyntax stringLiteral
+                    && keyValueNode.ValueSectionNodes.Count > 1)
+                {
+                    var firstValueNode = keyValueNode.ValueSectionNodes[1].ValueNode.ContentNode;
+                    if (!(firstValueNode is JsonMissingValueSyntax))
+                    {
+                        yield return (stringLiteral, firstValueNode);
+                    }
+                }
+            }
+        }
+
         public static readonly PTypeErrorBuilder MapTypeError = new PTypeErrorBuilder(JsonObject);
 
         public abstract class MapBase<T> : PType<T>
