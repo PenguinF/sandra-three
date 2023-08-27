@@ -29,14 +29,20 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class SettingsAutoSave
     {
-        private class SettingsRemoteState : AutoSaveTextFile<SettingCopy>.RemoteState
+        private class SettingsRemoteState : AutoSaveTextFile<PMap>.RemoteState
         {
             /// <summary>
             /// Settings representing how they were stored in the auto-save file at the time it was loaded.
             /// </summary>
             public SettingObject InitialRemoteSettings { get; private set; }
 
-            public SettingsRemoteState(SettingObject defaultSettings) => InitialRemoteSettings = defaultSettings;
+            private PMap RemoteSettings;
+
+            public SettingsRemoteState(SettingObject defaultSettings)
+            {
+                InitialRemoteSettings = defaultSettings;
+                RemoteSettings = defaultSettings.Map;
+            }
 
             protected internal override void Initialize(string loadedText)
             {
@@ -49,18 +55,20 @@ namespace Eutherion.Win.Storage
                     if (workingCopy.TryLoadFromText(loadedText))
                     {
                         InitialRemoteSettings = workingCopy.Commit();
+                        RemoteSettings = InitialRemoteSettings.Map;
                     }
                 }
             }
 
-            protected internal override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            protected internal override bool ShouldSave(IReadOnlyList<PMap> updates, out string textToSave)
             {
-                SettingCopy latestUpdate = updates[updates.Count - 1];
+                // Only take the latest update.
+                PMap latestUpdate = updates[updates.Count - 1];
 
-                if (!latestUpdate.EqualTo(InitialRemoteSettings))
+                if (!latestUpdate.EqualTo(RemoteSettings))
                 {
-                    InitialRemoteSettings = latestUpdate.Commit();
-                    textToSave = CompactSettingWriter.ConvertToJson(InitialRemoteSettings.Map);
+                    RemoteSettings = latestUpdate;
+                    textToSave = CompactSettingWriter.ConvertToJson(latestUpdate);
                     return true;
                 }
 
@@ -72,7 +80,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Contains both auto-save files.
         /// </summary>
-        private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
+        private readonly AutoSaveTextFile<PMap> autoSaveFile;
 
         /// <summary>
         /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
@@ -112,7 +120,7 @@ namespace Eutherion.Win.Storage
             if (autoSaveFiles != null)
             {
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
+                autoSaveFile = new AutoSaveTextFile<PMap>(remoteState, autoSaveFiles);
 
                 // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
@@ -130,7 +138,7 @@ namespace Eutherion.Win.Storage
                 if (autoSaveFile != null)
                 {
                     // Persist a copy so its values are not shared with other threads.
-                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy());
+                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().Map);
                 }
             }
         }
