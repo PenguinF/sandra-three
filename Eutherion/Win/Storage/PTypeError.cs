@@ -67,6 +67,9 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public abstract string GetLocalizedMessage(TextFormatter localizer);
     }
 
@@ -91,8 +94,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public override string GetLocalizedMessage(TextFormatter localizer)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 PTypeErrorBuilder.DuplicatePropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
 
@@ -134,8 +140,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public override string GetLocalizedMessage(TextFormatter localizer)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 PTypeErrorBuilder.UnrecognizedPropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
 

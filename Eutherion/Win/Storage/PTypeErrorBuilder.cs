@@ -224,11 +224,14 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocalizedTypeErrorMessage(
             TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 GenericJsonTypeError,
                 localizedExpectedTypeDescription,
                 actualValueString);
@@ -245,8 +248,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocatedAtPropertyKeyMessage(TextFormatter localizer, string propertyKey)
-            => localizer.Format(KeyErrorLocation, propertyKey);
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(KeyErrorLocation, propertyKey);
 
         /// <summary>
         /// Gets the localized description of an error for a value which is an element of an array.
@@ -260,8 +266,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocatedAtItemIndexMessage(TextFormatter localizer, int itemIndex)
-            => localizer.Format(IndexErrorLocation, itemIndex.ToStringInvariant());
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
         /// Gets the localized error message for a generic json value type error. 
@@ -281,12 +290,15 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocalizedTypeErrorSomewhereMessage(
             TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString,
             string somewhere)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 GenericJsonTypeErrorSomewhere,
                 localizedExpectedTypeDescription,
                 actualValueString,
@@ -320,10 +332,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
             => GetLocalizedTypeErrorMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString);
 
         /// <summary>
@@ -341,10 +356,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
@@ -363,10 +381,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtItemIndexMessage(localizer, itemIndex));
     }
