@@ -22,20 +22,11 @@
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
     public class SettingSchema : PType.MapBase<SettingObject>
     {
-        // Prevent repeated allocations of empty dictionaries.
-        private static readonly Dictionary<string, SettingProperty> emptyProperties = new Dictionary<string, SettingProperty>();
-
-        /// <summary>
-        /// Represents the empty <see cref="SettingSchema"/>, which contains no properties.
-        /// </summary>
-        public static readonly SettingSchema Empty = new SettingSchema((SettingComment)null);
-
         private readonly Dictionary<string, SettingProperty> properties;
 
         /// <summary>
@@ -88,9 +79,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
-            this.properties = properties != null && properties.Any()
-                ? new Dictionary<string, SettingProperty>()
-                : emptyProperties;
+            this.properties = new Dictionary<string, SettingProperty>();
 
             if (properties != null)
             {
