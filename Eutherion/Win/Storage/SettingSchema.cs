@@ -155,7 +155,7 @@ namespace Eutherion.Win.Storage
             HashSet<string> foundKeys = new HashSet<string>();
 
             // Analyze values with this schema while building the PMap.
-            foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
+            foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
             {
                 if (foundKeys.Contains(keyNode.Value))
                 {

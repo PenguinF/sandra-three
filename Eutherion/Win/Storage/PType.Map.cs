@@ -27,23 +27,6 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
-        internal static IEnumerable<(JsonStringLiteralSyntax keyNode, JsonValueSyntax valueNode)> ValidKeyValuePairs(JsonMapSyntax jsonMapSyntax)
-        {
-            foreach (var keyValueNode in jsonMapSyntax.KeyValueNodes)
-            {
-                // Only the first value can be valid, even if it's undefined.
-                if (keyValueNode.ValueSectionNodes[0].ValueNode is JsonStringLiteralSyntax stringLiteral
-                    && keyValueNode.ValueSectionNodes.Count > 1)
-                {
-                    var firstValueNode = keyValueNode.ValueSectionNodes[1].ValueNode;
-                    if (!(firstValueNode is JsonMissingValueSyntax))
-                    {
-                        yield return (stringLiteral, firstValueNode);
-                    }
-                }
-            }
-        }
-
         public static readonly PTypeErrorBuilder MapTypeError = new PTypeErrorBuilder(JsonObject);
 
         public abstract class MapBase<T> : PType<T>
@@ -98,7 +81,7 @@ namespace Eutherion.Win.Storage
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var (keyNode, valueNode) in ValidKeyValuePairs(jsonMapSyntax))
+                foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
                 {
                     // Error tolerance: ignore items of the wrong type.
                     var itemValueOrError = ItemType.TryCreateValue(
