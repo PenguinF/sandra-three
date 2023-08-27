@@ -62,14 +62,13 @@ namespace Eutherion.Win.Storage
                 => ItemTypes = itemTypes;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {{
-                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+                int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if ({SeparatedList("                    && ", size, i => $@"TryCreateTupleValue(ItemTypes.Item{i}, json, jsonListSyntax, {i - 1}, errors, out {TypeParameter(i)} value{i}, out PValue itemValue{i})
+                if ({SeparatedList("                    && ", size, i => $@"TryCreateTupleValue(ItemTypes.Item{i}, jsonListSyntax, {i - 1}, errors, out {TypeParameter(i)} value{i}, out PValue itemValue{i})
 ")}                    && actualItemCount == ExpectedItemCount)
                 {{
                     convertedValue = ({CommaSeparatedList(size, i => $"value{i}")});

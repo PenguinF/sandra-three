@@ -157,7 +157,7 @@ namespace Sandra.Chess.Pgn
             if (index == 0) return ParenthesisOpen;
             if (index == 1) return PliesWithFloatItems;
             if (index == 2) return ParenthesisCloseOrEmpty;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Sandra.Chess.Pgn
             if (index == 0) return 0;
             if (index == 1) return Green.ParenthesisOpen.Length;
             if (index == 2) return Green.ParenthesisOpen.Length + Green.PliesWithFloatItems.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnVariationSyntax(PgnVariationWithFloatItemsSyntax parent, GreenPgnVariationSyntax green)

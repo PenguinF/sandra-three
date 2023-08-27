@@ -37,20 +37,14 @@ namespace Eutherion.Win.Storage
         {
             internal static bool TryCreateItemValue<ItemT>(
                 PType<ItemT> itemType,
-                string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
-                JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode.ContentNode;
-
-                var itemValueOrError = itemType.TryCreateValue(
-                    json,
-                    itemNode,
-                    out convertedTargetValue,
-                    errors);
+                JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
+                var itemValueOrError = itemType.TryCreateValue(itemNode, out convertedTargetValue, errors);
 
                 if (itemValueOrError.IsOption2(out value))
                 {
@@ -59,19 +53,18 @@ namespace Eutherion.Win.Storage
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
-                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json));
+                errors.Add(new ValueTypeErrorAtItemIndex(itemTypeError, itemIndex, itemNode));
                 return false;
             }
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, errors).Match(
+                    return TryCreateFromList(jsonListSyntax, out convertedValue, errors).Match(
                         whenOption1: error => Union<ITypeErrorBuilder, PValue>.Option1(error),
                         whenOption2: list => list);
                 }
@@ -81,7 +74,6 @@ namespace Eutherion.Win.Storage
             }
 
             internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors);
@@ -104,18 +96,16 @@ namespace Eutherion.Win.Storage
         {
             internal static bool TryCreateTupleValue<ItemT>(
                 PType<ItemT> itemType,
-                string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
-                if (itemIndex < jsonListSyntax.FilteredListItemNodeCount)
+                if (itemIndex < jsonListSyntax.ListItemNodes.Count)
                 {
                     return TryCreateItemValue(
                         itemType,
-                        json,
                         jsonListSyntax,
                         itemIndex,
                         errors,
@@ -140,21 +130,19 @@ namespace Eutherion.Win.Storage
                 => ItemType = itemType;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out IEnumerable<T> convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
                 var validValues = new List<PValue>();
-                int itemNodeCount = jsonListSyntax.FilteredListItemNodeCount;
+                int itemNodeCount = jsonListSyntax.ListItemNodes.Count;
 
                 for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
                 {
                     // Error tolerance: ignore items of the wrong type.
                     if (TryCreateItemValue(
                         ItemType,
-                        json,
                         jsonListSyntax,
                         itemIndex,
                         errors,

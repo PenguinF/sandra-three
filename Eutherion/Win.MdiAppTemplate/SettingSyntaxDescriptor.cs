@@ -66,7 +66,7 @@ namespace Eutherion.Win.MdiAppTemplate
             => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<Union<JsonErrorInfo, PTypeError>> GetErrors(SettingSyntaxTree syntaxTree)
-            => syntaxTree.Errors.Where(x => x.ErrorCode != JsonErrorCode.PropertyKeyAlreadyExists).Select(Union<JsonErrorInfo, PTypeError>.Option1)
+            => syntaxTree.Errors.Select(Union<JsonErrorInfo, PTypeError>.Option1)
             .Concat(syntaxTree.TypeErrors.Select(Union<JsonErrorInfo, PTypeError>.Option2));
 
         public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, Union<JsonErrorInfo, PTypeError>> syntaxEditor, IJsonSymbol terminalSymbol)
@@ -83,7 +83,8 @@ namespace Eutherion.Win.MdiAppTemplate
         public override ErrorLevel GetErrorLevel(Union<JsonErrorInfo, PTypeError> error)
             => error.Match(
                 whenOption1: x => (ErrorLevel)x.ErrorLevel,
-                whenOption2: x => x is UnrecognizedPropertyKeyTypeError ? ErrorLevel.Warning : ErrorLevel.Error);
+                whenOption2: x => x is UnrecognizedPropertyKeyWarning || x is DuplicatePropertyKeyWarning
+                ? ErrorLevel.Warning : ErrorLevel.Error);
 
         public override string GetErrorMessage(Union<JsonErrorInfo, PTypeError> error)
             => error.Match(

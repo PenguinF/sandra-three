@@ -22,20 +22,11 @@
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
     public class SettingSchema : PType.MapBase<SettingObject>
     {
-        // Prevent repeated allocations of empty dictionaries.
-        private static readonly Dictionary<string, SettingProperty> emptyProperties = new Dictionary<string, SettingProperty>();
-
-        /// <summary>
-        /// Represents the empty <see cref="SettingSchema"/>, which contains no properties.
-        /// </summary>
-        public static readonly SettingSchema Empty = new SettingSchema((SettingComment)null);
-
         private readonly Dictionary<string, SettingProperty> properties;
 
         /// <summary>
@@ -88,9 +79,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
-            this.properties = properties != null && properties.Any()
-                ? new Dictionary<string, SettingProperty>()
-                : emptyProperties;
+            this.properties = new Dictionary<string, SettingProperty>();
 
             if (properties != null)
             {
@@ -156,7 +145,6 @@ namespace Eutherion.Win.Storage
         public IEnumerable<SettingProperty> AllProperties => properties.Values;
 
         internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-            string json,
             JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
             ArrayBuilder<PTypeError> errors)
@@ -167,11 +155,11 @@ namespace Eutherion.Win.Storage
             HashSet<string> foundKeys = new HashSet<string>();
 
             // Analyze values with this schema while building the PMap.
-            foreach (var (keyNode, valueNode) in PType.ValidKeyValuePairs(jsonMapSyntax))
+            foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
             {
                 if (foundKeys.Contains(keyNode.Value))
                 {
-                    errors.Add(DuplicatePropertyKeyTypeError.Create(keyNode, json));
+                    errors.Add(new DuplicatePropertyKeyWarning(keyNode));
                 }
                 else
                 {
@@ -180,7 +168,7 @@ namespace Eutherion.Win.Storage
 
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
-                    var valueOrError = property.TryCreateValue(json, valueNode, errors);
+                    var valueOrError = property.TryCreateValue(valueNode, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
@@ -189,16 +177,12 @@ namespace Eutherion.Win.Storage
                     else
                     {
                         ITypeErrorBuilder typeError = valueOrError.ToOption1();
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
-                            typeError,
-                            keyNode,
-                            valueNode,
-                            json));
+                        errors.Add(new ValueTypeErrorAtPropertyKey(typeError, keyNode, valueNode));
                     }
                 }
                 else
                 {
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode, json));
+                    errors.Add(new UnrecognizedPropertyKeyWarning(keyNode));
                 }
             }
 

@@ -110,7 +110,6 @@ namespace Eutherion.Win.Storage
             }
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                string json,
                 JsonValueSyntax valueNode,
                 out TValue convertedValue,
                 ArrayBuilder<PTypeError> errors)
@@ -168,14 +167,13 @@ namespace Eutherion.Win.Storage
                 => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
             internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 T value = default;
 
-                var result = BaseType.TryCreateValue(json, valueNode, out TBase convertedBaseValue, errors).Match(
+                var result = BaseType.TryCreateValue(valueNode, out TBase convertedBaseValue, errors).Match(
                     whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
                     whenOption2: baseValue => TryGetTargetValue(convertedBaseValue).Match(
                         whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),

@@ -84,7 +84,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
         /// </exception>
-        public virtual PgnSyntax GetChild(int index) => throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+        public virtual PgnSyntax GetChild(int index) => throw ExceptionUtility.ThrowListIndexOutOfRangeException();
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
@@ -92,7 +92,7 @@ namespace Sandra.Chess.Pgn
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="index"/> is less than 0 or greater than or equal to <see cref="ChildCount"/>.
         /// </exception>
-        public virtual int GetChildStartPosition(int index) => throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+        public virtual int GetChildStartPosition(int index) => throw ExceptionUtility.ThrowListIndexOutOfRangeException();
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>,

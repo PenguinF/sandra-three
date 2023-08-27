@@ -38,12 +38,12 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for duplicate property keys.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyTypeError));
+        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyWarning = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyWarning));
 
         /// <summary>
         /// Gets the translation key for property keys that are not recognized.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyTypeError));
+        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyWarning = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyWarning));
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
@@ -119,25 +119,21 @@ namespace Eutherion.Win.Storage
         /// <param name="keyNode">
         /// The key node that contains the property key for which the error is generated.
         /// </param>
-        /// <param name="json">
-        /// The source json on which the <paramref name="keyNode"/> is based.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="keyNode"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json)
+        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode)
         {
             if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
-            if (json == null) throw new ArgumentNullException(nameof(json));
 
             // Do a Substring rather than keyNode.Value because the property key may contain escaped characters.
-            return json.Substring(keyNode.AbsoluteStart, keyNode.Length);
+            return keyNode.Root.Json.Substring(keyNode.AbsoluteStart, keyNode.Length);
         }
 
-        private class ValueDisplayStringRenderer : JsonValueSyntaxVisitor<string, string>
+        private class ValueDisplayStringRenderer : JsonValueSyntaxVisitor<string>
         {
             const int maxLength = 31;
             const string ellipsis = "...";
@@ -148,15 +144,16 @@ namespace Eutherion.Win.Storage
 
             private ValueDisplayStringRenderer() { }
 
-            public override string VisitMissingValueSyntax(JsonMissingValueSyntax valueNode, string json)
+            public override string VisitMissingValueSyntax(JsonMissingValueSyntax valueNode, _void _)
             {
                 // Missing values.
                 return null;
             }
 
-            public override string VisitStringLiteralSyntax(JsonStringLiteralSyntax valueNode, string json)
+            public override string VisitStringLiteralSyntax(JsonStringLiteralSyntax valueNode, _void _)
             {
                 int valueNodeStart = valueNode.AbsoluteStart;
+                string json = valueNode.Root.Json;
 
                 // 2 quote characters.
                 if (valueNode.Length <= maxLength)
@@ -174,9 +171,10 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            public override string DefaultVisit(JsonValueSyntax valueNode, string json)
+            public override string DefaultVisit(JsonValueSyntax valueNode, _void _)
             {
                 int valueNodeStart = valueNode.AbsoluteStart;
+                string json = valueNode.Root.Json;
 
                 if (valueNode.Length <= maxLength)
                 {
@@ -198,21 +196,17 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node.
         /// </param>
-        /// <param name="json">
-        /// The source json on which the <paramref name="valueNode"/> is based.
-        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="valueNode"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json)
+        public static string GetValueDisplayString(JsonValueSyntax valueNode)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
-            if (json == null) throw new ArgumentNullException(nameof(json));
 
-            return ValueDisplayStringRenderer.Instance.Visit(valueNode, json);
+            return ValueDisplayStringRenderer.Instance.Visit(valueNode);
         }
 
         /// <summary>
@@ -230,11 +224,14 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocalizedTypeErrorMessage(
             TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 GenericJsonTypeError,
                 localizedExpectedTypeDescription,
                 actualValueString);
@@ -251,8 +248,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocatedAtPropertyKeyMessage(TextFormatter localizer, string propertyKey)
-            => localizer.Format(KeyErrorLocation, propertyKey);
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(KeyErrorLocation, propertyKey);
 
         /// <summary>
         /// Gets the localized description of an error for a value which is an element of an array.
@@ -266,8 +266,11 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized description of the location of the error.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocatedAtItemIndexMessage(TextFormatter localizer, int itemIndex)
-            => localizer.Format(IndexErrorLocation, itemIndex.ToStringInvariant());
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
         /// Gets the localized error message for a generic json value type error. 
@@ -287,12 +290,15 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public static string GetLocalizedTypeErrorSomewhereMessage(
             TextFormatter localizer,
             string localizedExpectedTypeDescription,
             string actualValueString,
             string somewhere)
-            => localizer.Format(
+            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
                 GenericJsonTypeErrorSomewhere,
                 localizedExpectedTypeDescription,
                 actualValueString,
@@ -326,10 +332,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
             => GetLocalizedTypeErrorMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString);
 
         /// <summary>
@@ -347,10 +356,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
@@ -369,10 +381,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
             => GetLocalizedTypeErrorSomewhereMessage(
                 localizer,
-                localizer.Format(ExpectedTypeDescriptionKey),
+                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
                 GetLocatedAtItemIndexMessage(localizer, itemIndex));
     }
