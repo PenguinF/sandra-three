@@ -145,7 +145,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < Plies.Count) return Plies[index];
             if (index == Plies.Count) return TrailingFloatItems;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < Plies.Count) return Green.Plies.GetElementOffset(index);
             if (index == Plies.Count) return Green.Plies.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnPlyListSyntax(Union<PgnGameSyntax, PgnVariationSyntax> parent, GreenPgnPlyListSyntax green)

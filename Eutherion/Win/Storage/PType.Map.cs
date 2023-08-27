@@ -32,10 +32,10 @@ namespace Eutherion.Win.Storage
             foreach (var keyValueNode in jsonMapSyntax.KeyValueNodes)
             {
                 // Only the first value can be valid, even if it's undefined.
-                if (keyValueNode.ValueSectionNodes[0].ValueNode.ContentNode is JsonStringLiteralSyntax stringLiteral
+                if (keyValueNode.ValueSectionNodes[0].ValueNode is JsonStringLiteralSyntax stringLiteral
                     && keyValueNode.ValueSectionNodes.Count > 1)
                 {
-                    var firstValueNode = keyValueNode.ValueSectionNodes[1].ValueNode.ContentNode;
+                    var firstValueNode = keyValueNode.ValueSectionNodes[1].ValueNode;
                     if (!(firstValueNode is JsonMissingValueSyntax))
                     {
                         yield return (stringLiteral, firstValueNode);

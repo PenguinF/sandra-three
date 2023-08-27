@@ -163,7 +163,7 @@ namespace Sandra.Chess.Pgn
             if (index == 0) return TagSection;
             if (index == 1) return PlyList;
             if (index == 2) return GameResultOrEmpty;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Sandra.Chess.Pgn
             if (index == 0) return 0;
             if (index == 1) return Green.TagSection.Length;
             if (index == 2) return Green.TagSection.Length + Green.PlyList.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnGameSyntax(PgnGameListSyntax parent, int parentIndex, GreenPgnGameSyntax green)

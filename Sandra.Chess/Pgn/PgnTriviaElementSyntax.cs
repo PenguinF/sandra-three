@@ -130,7 +130,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return BackgroundBefore;
             if (index == 1) return CommentNode;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return 0;
             if (index == 1) return Green.BackgroundBefore.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnTriviaElementSyntax(PgnTriviaSyntax parent, int commentNodeIndex, GreenPgnTriviaElementSyntax green)

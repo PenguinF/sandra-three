@@ -44,7 +44,7 @@ namespace Eutherion.Win.Storage
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
-                JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode.ContentNode;
+                JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
 
                 var itemValueOrError = itemType.TryCreateValue(
                     json,
@@ -111,7 +111,7 @@ namespace Eutherion.Win.Storage
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
-                if (itemIndex < jsonListSyntax.FilteredListItemNodeCount)
+                if (itemIndex < jsonListSyntax.ListItemNodes.Count)
                 {
                     return TryCreateItemValue(
                         itemType,
@@ -147,7 +147,7 @@ namespace Eutherion.Win.Storage
             {
                 var validTargetValues = new List<T>();
                 var validValues = new List<PValue>();
-                int itemNodeCount = jsonListSyntax.FilteredListItemNodeCount;
+                int itemNodeCount = jsonListSyntax.ListItemNodes.Count;
 
                 for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
                 {

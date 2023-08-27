@@ -175,7 +175,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return LeadingFloatItems;
             if (index == 1) return PlyContentNode;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return 0;
             if (index == 1) return Green.LeadingFloatItems.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal abstract TSyntaxNode CreatePlyContentNode();

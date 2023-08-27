@@ -42,7 +42,7 @@ namespace Eutherion.Win.Storage
                 out (T1, T2) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
-                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+                int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
                 if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
@@ -94,7 +94,7 @@ namespace Eutherion.Win.Storage
                 out (T1, T2, T3) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
-                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+                int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
                 if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
@@ -149,7 +149,7 @@ namespace Eutherion.Win.Storage
                 out (T1, T2, T3, T4) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
-                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+                int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
                 if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
@@ -207,7 +207,7 @@ namespace Eutherion.Win.Storage
                 out (T1, T2, T3, T4, T5) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
-                int actualItemCount = jsonListSyntax.FilteredListItemNodeCount;
+                int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
                 if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)

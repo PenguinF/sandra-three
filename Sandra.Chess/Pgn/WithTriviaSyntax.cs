@@ -137,7 +137,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return LeadingTrivia;
             if (index == 1) return ContentNode;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index == 0) return 0;
             if (index == 1) return Green.LeadingTrivia.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal abstract TSyntaxNode CreateContentNode();

@@ -143,7 +143,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < CommentNodes.Count) return CommentNodes[index];
             if (index == CommentNodes.Count) return BackgroundAfter;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < CommentNodes.Count) return Green.CommentNodes.GetElementOffset(index);
             if (index == CommentNodes.Count) return Green.CommentNodes.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnTriviaSyntax(Union<WithTriviaSyntax, PgnGameListSyntax> parent, GreenPgnTriviaSyntax green)

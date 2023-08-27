@@ -33,7 +33,7 @@ namespace Eutherion.Win.Storage
         {
             RootJsonSyntax rootNode = JsonParser.Parse(json);
 
-            if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
+            if (rootNode.Syntax.ValueNode is JsonMissingValueSyntax)
             {
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.Empty, null);
             }
@@ -42,11 +42,11 @@ namespace Eutherion.Win.Storage
 
             if (schema.TryCreateValue(
                 json,
-                rootNode.Syntax.ValueNode.ContentNode,
+                rootNode.Syntax.ValueNode,
                 out SettingObject settingObject,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json));
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode, json));
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 

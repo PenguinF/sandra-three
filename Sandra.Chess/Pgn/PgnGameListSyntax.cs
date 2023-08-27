@@ -123,7 +123,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < Games.Count) return Games[index];
             if (index == Games.Count) return TrailingTrivia;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Sandra.Chess.Pgn
         {
             if (index < Games.Count) return Green.Games.GetElementOffset(index);
             if (index == Games.Count) return Green.Games.Length;
-            throw ExceptionUtil.ThrowListIndexOutOfRangeException();
+            throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
         internal PgnGameListSyntax(GreenPgnGameListSyntax green)
