@@ -34,7 +34,6 @@ namespace Eutherion.Win.Storage
     public abstract class PType<T>
     {
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            string json,
             JsonValueSyntax valueNode,
             out T convertedValue,
             ArrayBuilder<PTypeError> errors);

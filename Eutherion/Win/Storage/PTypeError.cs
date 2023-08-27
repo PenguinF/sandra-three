@@ -114,11 +114,11 @@ namespace Eutherion.Win.Storage
         /// A <see cref="DuplicatePropertyKeyTypeError"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="keyNode"/> is <see langword="null"/>.
         /// </exception>
-        public static DuplicatePropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
+        public static DuplicatePropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode)
             => new DuplicatePropertyKeyTypeError(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
                 keyNode.AbsoluteStart,
                 keyNode.Length);
     }
@@ -157,18 +157,15 @@ namespace Eutherion.Win.Storage
         /// <param name="keyNode">
         /// The property key for which the error is generated.
         /// </param>
-        /// <param name="json">
-        /// The source json which contains the type error.
-        /// </param>
         /// <returns>
         /// A <see cref="UnrecognizedPropertyKeyTypeError"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="keyNode"/> is <see langword="null"/>.
         /// </exception>
-        public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
+        public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode)
             => new UnrecognizedPropertyKeyTypeError(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
                 keyNode.AbsoluteStart,
                 keyNode.Length);
     }
@@ -218,22 +215,19 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <param name="json">
-        /// The source json which contains the type error.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeError"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
-        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode, string json)
+        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeError(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }
@@ -287,27 +281,23 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <param name="json">
-        /// The source json which contains the type error.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeErrorAtPropertyKey"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="keyNode"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="keyNode"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
         public static ValueTypeErrorAtPropertyKey Create(
             ITypeErrorBuilder typeErrorBuilder,
             JsonStringLiteralSyntax keyNode,
-            JsonValueSyntax valueNode,
-            string json)
+            JsonValueSyntax valueNode)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }
@@ -361,27 +351,23 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <param name="json">
-        /// The source json which contains the type error.
-        /// </param>
         /// <returns>
         /// A <see cref="ValueTypeErrorAtItemIndex"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
         public static ValueTypeErrorAtItemIndex Create(
             ITypeErrorBuilder typeErrorBuilder,
             int itemIndex,
-            JsonValueSyntax valueNode,
-            string json)
+            JsonValueSyntax valueNode)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
             return new ValueTypeErrorAtItemIndex(
                 typeErrorBuilder,
                 itemIndex,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }

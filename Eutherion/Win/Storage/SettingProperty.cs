@@ -73,9 +73,6 @@ namespace Eutherion.Win.Storage
         /// Type-checks a context free value syntax while parsing json.
         /// Parameters other than <paramref name="valueNode"/> are given for type error construction.
         /// </summary>
-        /// <param name="json">
-        /// The parsed json.
-        /// </param>
         /// <param name="valueNode">
         /// The value node to type-check.
         /// </param>
@@ -87,7 +84,6 @@ namespace Eutherion.Win.Storage
         /// or the converted <see cref="PValue"/> if the type check succeeded.
         /// </returns>
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            string json,
             JsonValueSyntax valueNode,
             ArrayBuilder<PTypeError> errors);
     }
@@ -145,9 +141,8 @@ namespace Eutherion.Win.Storage
             => !PType.TryConvert(value).IsNothing;
 
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            string json,
             JsonValueSyntax valueNode,
             ArrayBuilder<PTypeError> errors)
-            => PType.TryCreateValue(json, valueNode, out _, errors);
+            => PType.TryCreateValue(valueNode, out _, errors);
     }
 }

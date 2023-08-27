@@ -51,14 +51,13 @@ namespace Eutherion.Win.Storage
             internal MapBase() { }
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, errors);
+                    return TryCreateFromMap(jsonMapSyntax, out convertedValue, errors);
                 }
 
                 convertedValue = default;
@@ -66,7 +65,6 @@ namespace Eutherion.Win.Storage
             }
 
             internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-                string json,
                 JsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors);
@@ -93,7 +91,6 @@ namespace Eutherion.Win.Storage
                 => ItemType = itemType;
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-                string json,
                 JsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
                 ArrayBuilder<PTypeError> errors)
@@ -105,7 +102,6 @@ namespace Eutherion.Win.Storage
                 {
                     // Error tolerance: ignore items of the wrong type.
                     var itemValueOrError = ItemType.TryCreateValue(
-                        json,
                         valueNode,
                         out T value,
                         errors);
@@ -121,8 +117,7 @@ namespace Eutherion.Win.Storage
                         errors.Add(ValueTypeErrorAtPropertyKey.Create(
                             typeError,
                             keyNode,
-                            valueNode,
-                            json));
+                            valueNode));
                     }
                 }
 

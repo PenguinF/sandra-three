@@ -145,7 +145,6 @@ namespace Eutherion.Win.Storage
         public IEnumerable<SettingProperty> AllProperties => properties.Values;
 
         internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-            string json,
             JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
             ArrayBuilder<PTypeError> errors)
@@ -160,7 +159,7 @@ namespace Eutherion.Win.Storage
             {
                 if (foundKeys.Contains(keyNode.Value))
                 {
-                    errors.Add(DuplicatePropertyKeyTypeError.Create(keyNode, json));
+                    errors.Add(DuplicatePropertyKeyTypeError.Create(keyNode));
                 }
                 else
                 {
@@ -169,7 +168,7 @@ namespace Eutherion.Win.Storage
 
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
-                    var valueOrError = property.TryCreateValue(json, valueNode, errors);
+                    var valueOrError = property.TryCreateValue(valueNode, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
@@ -181,13 +180,12 @@ namespace Eutherion.Win.Storage
                         errors.Add(ValueTypeErrorAtPropertyKey.Create(
                             typeError,
                             keyNode,
-                            valueNode,
-                            json));
+                            valueNode));
                     }
                 }
                 else
                 {
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode, json));
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode));
                 }
             }
 

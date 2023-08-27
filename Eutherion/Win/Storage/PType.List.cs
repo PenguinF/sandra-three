@@ -37,7 +37,6 @@ namespace Eutherion.Win.Storage
         {
             internal static bool TryCreateItemValue<ItemT>(
                 PType<ItemT> itemType,
-                string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
@@ -47,7 +46,6 @@ namespace Eutherion.Win.Storage
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
 
                 var itemValueOrError = itemType.TryCreateValue(
-                    json,
                     itemNode,
                     out convertedTargetValue,
                     errors);
@@ -59,19 +57,18 @@ namespace Eutherion.Win.Storage
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
-                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode, json));
+                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode));
                 return false;
             }
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(json, jsonListSyntax, out convertedValue, errors).Match(
+                    return TryCreateFromList(jsonListSyntax, out convertedValue, errors).Match(
                         whenOption1: error => Union<ITypeErrorBuilder, PValue>.Option1(error),
                         whenOption2: list => list);
                 }
@@ -81,7 +78,6 @@ namespace Eutherion.Win.Storage
             }
 
             internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out T convertedValue,
                 ArrayBuilder<PTypeError> errors);
@@ -104,7 +100,6 @@ namespace Eutherion.Win.Storage
         {
             internal static bool TryCreateTupleValue<ItemT>(
                 PType<ItemT> itemType,
-                string json,
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
@@ -115,7 +110,6 @@ namespace Eutherion.Win.Storage
                 {
                     return TryCreateItemValue(
                         itemType,
-                        json,
                         jsonListSyntax,
                         itemIndex,
                         errors,
@@ -140,7 +134,6 @@ namespace Eutherion.Win.Storage
                 => ItemType = itemType;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out IEnumerable<T> convertedValue,
                 ArrayBuilder<PTypeError> errors)
@@ -154,7 +147,6 @@ namespace Eutherion.Win.Storage
                     // Error tolerance: ignore items of the wrong type.
                     if (TryCreateItemValue(
                         ItemType,
-                        json,
                         jsonListSyntax,
                         itemIndex,
                         errors,

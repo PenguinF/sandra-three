@@ -41,12 +41,11 @@ namespace Eutherion.Win.Storage
             var errors = new ArrayBuilder<PTypeError>();
 
             if (schema.TryCreateValue(
-                json,
                 rootNode.Syntax.ValueNode,
                 out SettingObject settingObject,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode, json));
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode));
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 

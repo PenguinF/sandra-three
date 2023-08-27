@@ -37,15 +37,14 @@ namespace Eutherion.Win.Storage
                 => ItemTypes = itemTypes;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out (T1, T2) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
                     && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2);
@@ -89,16 +88,15 @@ namespace Eutherion.Win.Storage
                 => ItemTypes = itemTypes;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out (T1, T2, T3) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, json, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
                     && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2, value3);
@@ -144,17 +142,16 @@ namespace Eutherion.Win.Storage
                 => ItemTypes = itemTypes;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, json, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
-                    && TryCreateTupleValue(ItemTypes.Item4, json, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
+                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
                     && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2, value3, value4);
@@ -202,18 +199,17 @@ namespace Eutherion.Win.Storage
                 => ItemTypes = itemTypes;
 
             internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                string json,
                 JsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4, T5) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, json, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, json, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, json, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
-                    && TryCreateTupleValue(ItemTypes.Item4, json, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
-                    && TryCreateTupleValue(ItemTypes.Item5, json, jsonListSyntax, 4, errors, out T5 value5, out PValue itemValue5)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
+                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
+                    && TryCreateTupleValue(ItemTypes.Item5, jsonListSyntax, 4, errors, out T5 value5, out PValue itemValue5)
                     && actualItemCount == ExpectedItemCount)
                 {
                     convertedValue = (value1, value2, value3, value4, value5);
