@@ -2,7 +2,7 @@
 /*********************************************************************************
  * CombinedUIActionInterface.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -139,12 +139,12 @@ namespace Eutherion.Win.MdiAppTemplate
     public static class CombinedUIActionInterfaceExtensions
     {
         public static IFunc<string> ToTextProvider(this string displayText)
-            => new ConstantTextProvider(displayText);
+            => displayText == null ? null : new ConstantValue<string>(displayText);
 
         public static IFunc<string> ToTextProvider(this StringKey<ForFormattedText> key)
             => key == null ? null : new LocalizedTextProvider(key);
 
         public static IFunc<Image> ToImageProvider(this Image image)
-            => image == null ? null : new ConstantImageProvider(image);
+            => image == null ? null : new ConstantValue<Image>(image);
     }
 }
