@@ -64,7 +64,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return localizer.Format(
                 GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
                 jsonErrorInfo.Parameters.Select(
-                    x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, localizer)).ToArrayEx());
+                    x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, localizer)).ToArrayEx());
         }
 
         public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>

@@ -324,31 +324,31 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            private string LocalizedExpectedTypeDescription(TextFormatter localizer)
-                => localizer.Format(
+            private string FormatExpectedTypeDescription(TextFormatter formatter)
+                => formatter.Format(
                     RangedJsonInteger,
                     MinValue.ToStringInvariant(),
                     MaxValue.ToStringInvariant());
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => PTypeErrorBuilder.FormatTypeErrorMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter),
                     actualValueString);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter),
                     actualValueString,
-                    PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+                    PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter),
                     actualValueString,
-                    PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+                    PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

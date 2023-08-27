@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Common.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -117,55 +117,55 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
-            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToEnum.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Format(
+                        whenNothing: () => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Format(
+                        whenJust: somewhere => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
                 }
 
-                string localizedValueList;
+                string formattedValueList;
                 if (stringToEnum.Count == 1)
                 {
-                    localizedValueList = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.First());
+                    formattedValueList = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.First());
                 }
                 else
                 {
                     IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
-                    localizedValueList = localizer.Format(
+                    formattedValueList = formatter.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", enumValues),
                         lastEnumValue);
                 }
 
                 return maybeSomewhere.Match(
-                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                        localizer,
-                        localizedValueList,
+                    whenNothing: () => PTypeErrorBuilder.FormatTypeErrorMessage(
+                        formatter,
+                        formattedValueList,
                         actualValueString),
-                    whenJust: somewhere => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                        localizer,
-                        localizedValueList,
+                    whenJust: somewhere => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                        formatter,
+                        formattedValueList,
                         actualValueString,
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
@@ -202,56 +202,56 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToTarget.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Format(
+                        whenNothing: () => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Format(
+                        whenJust: somewhere => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
                 }
 
-                string localizedKeysList;
+                string formattedKeysList;
                 if (stringToTarget.Count == 1)
                 {
-                    localizedKeysList = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.First());
+                    formattedKeysList = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.First());
                 }
                 else
                 {
                     // TODO: escape characters in KeyedSet keys.
                     IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
-                    localizedKeysList = localizer.Format(
+                    formattedKeysList = formatter.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", keys),
                         lastKey);
                 }
 
                 return maybeSomewhere.Match(
-                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                        localizer,
-                        localizedKeysList,
+                    whenNothing: () => PTypeErrorBuilder.FormatTypeErrorMessage(
+                        formatter,
+                        formattedKeysList,
                         actualValueString),
-                    whenJust: somewhere => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                        localizer,
-                        localizedKeysList,
+                    whenJust: somewhere => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                        formatter,
+                        formattedKeysList,
                         actualValueString,
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
     }
 }

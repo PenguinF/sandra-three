@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ITypeErrorBuilder.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,29 +38,29 @@ namespace Eutherion.Win.Storage
     //    interface to transform an error into a meaningful message in various stages.
     //
     // The ITypeErrorBuilder is generated from a typecheck of a single value, regardless of where it occurs in
-    // the source. The builder is then used to generate a proper (unlocalized) PTypeError in the context of the source.
+    // the source. The builder is then used to generate a proper (unformatted) PTypeError in the context of the source.
 
     public interface ITypeErrorBuilder
     {
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
-        string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString);
+        string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString);
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
@@ -69,15 +69,15 @@ namespace Eutherion.Win.Storage
         /// The property key for which the error occurred.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
-        string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey);
+        string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey);
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
@@ -86,8 +86,8 @@ namespace Eutherion.Win.Storage
         /// The index of the array where the error occurred.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
-        string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex);
+        string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex);
     }
 }

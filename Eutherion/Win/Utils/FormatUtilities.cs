@@ -2,7 +2,7 @@
 /*********************************************************************************
  * FormatUtilities.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ namespace Eutherion
 
             if (wouldThrowException)
             {
-                // The provided localized format string is in an incorrect format.
+                // The provided format string is in an incorrect format.
                 // Example:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
                 return $"{format}{StringUtilities.ToDefaultParameterListDisplayString(args)}";

@@ -225,14 +225,14 @@ namespace Eutherion.Win.Storage
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
             string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(
-                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, TextFormatter.Default)));
+                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, TextFormatter.Default)));
 
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
         public static string AutoSaveFileParseMessage(PTypeError typeError)
         {
-            return $"{typeError.GetLocalizedMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
+            return $"{typeError.FormatMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
         }
 
         public SettingsParseException(JsonErrorInfo jsonErrorInfo)

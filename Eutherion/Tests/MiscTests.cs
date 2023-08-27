@@ -33,23 +33,23 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(null, TextFormatter.Default));
-            Assert.Throws<ArgumentNullException>("localizer", () => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
+            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(null, TextFormatter.Default));
+            Assert.Throws<ArgumentNullException>("localizer", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
 
             Assert.Throws<ArgumentNullException>(() => FormatUtilities.SoftFormat(null));
         }
 
-        private sealed class TestLocalizer : TextFormatter
+        private sealed class TestFormatter : TextFormatter
         {
             public static readonly string TestNullString = "NULL";
             public static readonly string TestUntypedObjectString = "UNTYPED({0})";
 
-            public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
+            public override string Format(StringKey<ForFormattedText> key, string[] parameters)
             {
-                if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.NullString)
+                if (key == JsonErrorInfoParameterDisplayHelper.NullString)
                     return TestNullString;
 
-                if (localizedStringKey == JsonErrorInfoParameterDisplayHelper.UntypedObjectString)
+                if (key == JsonErrorInfoParameterDisplayHelper.UntypedObjectString)
                     return FormatUtilities.SoftFormat(TestUntypedObjectString, parameters);
 
                 // Throw an exception here, no other keys should be used than above 2.
@@ -64,16 +64,16 @@ namespace Eutherion.Win.Tests
             yield return (new JsonErrorInfoParameter<char>('\u0000'), "'\\u0000'");
             yield return (new JsonErrorInfoParameter<char>('√'), "'√'");
 
-            yield return (new JsonErrorInfoParameter<string>(null), TestLocalizer.TestNullString);
+            yield return (new JsonErrorInfoParameter<string>(null), TestFormatter.TestNullString);
             yield return (new JsonErrorInfoParameter<string>(""), "\"\"");
             yield return (new JsonErrorInfoParameter<string>("x"), "\"x\"");
             yield return (new JsonErrorInfoParameter<string>("      "), "\"      \"");
 
-            yield return (new JsonErrorInfoParameter<bool?>(null), TestLocalizer.TestNullString);
-            yield return (new JsonErrorInfoParameter<bool?>(false), string.Format(TestLocalizer.TestUntypedObjectString, bool.FalseString));
+            yield return (new JsonErrorInfoParameter<bool?>(null), TestFormatter.TestNullString);
+            yield return (new JsonErrorInfoParameter<bool?>(false), string.Format(TestFormatter.TestUntypedObjectString, bool.FalseString));
 
-            yield return (new JsonErrorInfoParameter<int?>(null), TestLocalizer.TestNullString);
-            yield return (new JsonErrorInfoParameter<int?>(0), string.Format(TestLocalizer.TestUntypedObjectString, 0));
+            yield return (new JsonErrorInfoParameter<int?>(null), TestFormatter.TestNullString);
+            yield return (new JsonErrorInfoParameter<int?>(0), string.Format(TestFormatter.TestUntypedObjectString, 0));
         }
 
         public static IEnumerable<object[]> WrappedErrorParameterDisplayValuesTestData() => TestUtilities.Wrap(ErrorParameterDisplayValuesTestData());
@@ -82,7 +82,7 @@ namespace Eutherion.Win.Tests
         [MemberData(nameof(WrappedErrorParameterDisplayValuesTestData))]
         public void ErrorParameterDisplayValues(JsonErrorInfoParameter parameter, string expectedDisplayValue)
         {
-            Assert.Equal(expectedDisplayValue, JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(parameter, new TestLocalizer()));
+            Assert.Equal(expectedDisplayValue, JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(parameter, new TestFormatter()));
         }
 
         private static IEnumerable<(string format, string[] parameters, string expectedResult)> SoftFormatParameterCases()
