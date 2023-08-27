@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Eutherion.Text.Json;
+using Eutherion.Threading;
 using System;
 
 namespace Eutherion.Win.Storage
@@ -62,6 +63,23 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="PTypeError"/>.
+        /// </summary>
+        /// <param name="syntaxNode">
+        /// The syntax node where the type error occurred.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Either <paramref name="syntaxNode"/> is <see langword="null"/>.
+        /// </exception>
+        public PTypeError(JsonSyntax syntaxNode)
+        {
+            if (syntaxNode == null) throw new ArgumentNullException(nameof(syntaxNode));
+
+            Start = syntaxNode.AbsoluteStart;
+            Length = syntaxNode.Length;
+        }
+
+        /// <summary>
         /// Gets the localized, context sensitive message for this error.
         /// </summary>
         /// <param name="localizer">
@@ -81,7 +99,9 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the property key for which this error occurred.
         /// </summary>
-        public string PropertyKey { get; }
+        public JsonStringLiteralSyntax KeyNode { get; }
+
+        private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -93,13 +113,9 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public override string GetLocalizedMessage(TextFormatter localizer)
-            => localizer.Format(PTypeErrorBuilder.DuplicatePropertyKeyWarning, PropertyKey);
-
-        private DuplicatePropertyKeyWarning(string propertyKey, int start, int length)
-            : base(start, length)
-        {
-            PropertyKey = propertyKey;
-        }
+            => localizer.Format(
+                PTypeErrorBuilder.DuplicatePropertyKeyWarning,
+                PropertyKeyDisplayString.Value);
 
         /// <summary>
         /// Initializes a new instance of <see cref="DuplicatePropertyKeyWarning"/>.
@@ -107,17 +123,15 @@ namespace Eutherion.Win.Storage
         /// <param name="keyNode">
         /// The property key for which the error is generated.
         /// </param>
-        /// <returns>
-        /// A <see cref="DuplicatePropertyKeyWarning"/> instance which generates a localized error message.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> is <see langword="null"/>.
         /// </exception>
-        public static DuplicatePropertyKeyWarning Create(JsonStringLiteralSyntax keyNode)
-            => new DuplicatePropertyKeyWarning(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
-                keyNode.AbsoluteStart,
-                keyNode.Length);
+        public DuplicatePropertyKeyWarning(JsonStringLiteralSyntax keyNode)
+            : base(keyNode)
+        {
+            KeyNode = keyNode;
+            PropertyKeyDisplayString = new SafeLazy<string>(() => PTypeErrorBuilder.GetPropertyKeyDisplayString(KeyNode));
+        }
     }
 
     /// <summary>
@@ -126,9 +140,11 @@ namespace Eutherion.Win.Storage
     public class UnrecognizedPropertyKeyWarning : PTypeError
     {
         /// <summary>
-        /// Gets the property key for which this error occurred.
+        /// Gets the property key syntax node for which this error occurred.
         /// </summary>
-        public string PropertyKey { get; }
+        public JsonStringLiteralSyntax KeyNode { get; }
+
+        private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -140,13 +156,9 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public override string GetLocalizedMessage(TextFormatter localizer)
-            => localizer.Format(PTypeErrorBuilder.UnrecognizedPropertyKeyWarning, PropertyKey);
-
-        private UnrecognizedPropertyKeyWarning(string propertyKey, int start, int length)
-            : base(start, length)
-        {
-            PropertyKey = propertyKey;
-        }
+            => localizer.Format(
+                PTypeErrorBuilder.UnrecognizedPropertyKeyWarning,
+                PropertyKeyDisplayString.Value);
 
         /// <summary>
         /// Initializes a new instance of <see cref="UnrecognizedPropertyKeyWarning"/>.
@@ -154,17 +166,15 @@ namespace Eutherion.Win.Storage
         /// <param name="keyNode">
         /// The property key for which the error is generated.
         /// </param>
-        /// <returns>
-        /// A <see cref="UnrecognizedPropertyKeyWarning"/> instance which generates a localized error message.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> is <see langword="null"/>.
         /// </exception>
-        public static UnrecognizedPropertyKeyWarning Create(JsonStringLiteralSyntax keyNode)
-            => new UnrecognizedPropertyKeyWarning(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
-                keyNode.AbsoluteStart,
-                keyNode.Length);
+        public UnrecognizedPropertyKeyWarning(JsonStringLiteralSyntax keyNode)
+            : base(keyNode)
+        {
+            KeyNode = keyNode;
+            PropertyKeyDisplayString = new SafeLazy<string>(() => PTypeErrorBuilder.GetPropertyKeyDisplayString(KeyNode));
+        }
     }
 
     /// <summary>

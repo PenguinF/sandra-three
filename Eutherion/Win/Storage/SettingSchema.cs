@@ -159,7 +159,7 @@ namespace Eutherion.Win.Storage
             {
                 if (foundKeys.Contains(keyNode.Value))
                 {
-                    errors.Add(DuplicatePropertyKeyWarning.Create(keyNode));
+                    errors.Add(new DuplicatePropertyKeyWarning(keyNode));
                 }
                 else
                 {
@@ -185,7 +185,7 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    errors.Add(UnrecognizedPropertyKeyWarning.Create(keyNode));
+                    errors.Add(new UnrecognizedPropertyKeyWarning(keyNode));
                 }
             }
 
