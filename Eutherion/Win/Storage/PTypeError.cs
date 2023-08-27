@@ -188,9 +188,24 @@ namespace Eutherion.Win.Storage
         public ITypeErrorBuilder TypeErrorBuilder { get; }
 
         /// <summary>
+        /// Gets the value syntax node for which this error occurred.
+        /// </summary>
+        public JsonValueSyntax ValueNode { get; }
+
+        private readonly SafeLazy<string> ActualValueString;
+
+        /// <summary>
         /// Gets the string representation of the value for which this error occurred.
         /// </summary>
-        public string ActualValueString { get; }
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
+        public string GenerateValueString(TextFormatter localizer)
+            => ActualValueString.Value
+            ?? (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(PType.JsonUndefinedValue);
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -201,17 +216,13 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
                 localizer,
-                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue));
-
-        internal ValueTypeError(ITypeErrorBuilder typeErrorBuilder, string actualValueString, int start, int length)
-            : base(start, length)
-        {
-            TypeErrorBuilder = typeErrorBuilder;
-            ActualValueString = actualValueString;
-        }
+                GenerateValueString(localizer));
 
         /// <summary>
         /// Initializes a new instance of <see cref="ValueTypeError"/>.
@@ -222,21 +233,15 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <returns>
-        /// A <see cref="ValueTypeError"/> instance which generates a localized error message.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
-        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode)
+        public ValueTypeError(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode)
+            : base(valueNode)
         {
-            if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
-
-            return new ValueTypeError(
-                typeErrorBuilder,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode),
-                valueNode.AbsoluteStart,
-                valueNode.Length);
+            TypeErrorBuilder = typeErrorBuilder ?? throw new ArgumentNullException(nameof(typeErrorBuilder));
+            ValueNode = valueNode;
+            ActualValueString = new SafeLazy<string>(() => PTypeErrorBuilder.GetValueDisplayString(ValueNode));
         }
     }
 
@@ -246,9 +251,11 @@ namespace Eutherion.Win.Storage
     public class ValueTypeErrorAtPropertyKey : ValueTypeError
     {
         /// <summary>
-        /// Gets the property key for which this error occurred.
+        /// Gets the property key syntax node for which this error occurred.
         /// </summary>
-        public string PropertyKey { get; }
+        public JsonStringLiteralSyntax KeyNode { get; }
+
+        private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -259,22 +266,14 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorAtPropertyKeyMessage(
                 localizer,
-                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue),
-                PropertyKey);
-
-        private ValueTypeErrorAtPropertyKey(
-            ITypeErrorBuilder typeErrorBuilder,
-            string propertyKey,
-            string actualValueString,
-            int start,
-            int length)
-            : base(typeErrorBuilder, actualValueString, start, length)
-        {
-            PropertyKey = propertyKey;
-        }
+                GenerateValueString(localizer),
+                PropertyKeyDisplayString.Value);
 
         /// <summary>
         /// Initializes a new instance of <see cref="ValueTypeErrorAtPropertyKey"/>.
@@ -288,25 +287,14 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <returns>
-        /// A <see cref="ValueTypeErrorAtPropertyKey"/> instance which generates a localized error message.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="keyNode"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
-        public static ValueTypeErrorAtPropertyKey Create(
-            ITypeErrorBuilder typeErrorBuilder,
-            JsonStringLiteralSyntax keyNode,
-            JsonValueSyntax valueNode)
+        public ValueTypeErrorAtPropertyKey(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonValueSyntax valueNode)
+            : base(typeErrorBuilder, valueNode)
         {
-            if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
-
-            return new ValueTypeErrorAtPropertyKey(
-                typeErrorBuilder,
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
-                PTypeErrorBuilder.GetValueDisplayString(valueNode),
-                valueNode.AbsoluteStart,
-                valueNode.Length);
+            KeyNode = keyNode ?? throw new ArgumentNullException(nameof(keyNode));
+            PropertyKeyDisplayString = new SafeLazy<string>(() => PTypeErrorBuilder.GetPropertyKeyDisplayString(KeyNode));
         }
     }
 
@@ -329,22 +317,14 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// </exception>
         public override string GetLocalizedMessage(TextFormatter localizer)
             => TypeErrorBuilder.GetLocalizedTypeErrorAtItemIndexMessage(
                 localizer,
-                ActualValueString ?? localizer.Format(PType.JsonUndefinedValue),
+                GenerateValueString(localizer),
                 ItemIndex);
-
-        private ValueTypeErrorAtItemIndex(
-            ITypeErrorBuilder typeErrorBuilder,
-            int itemIndex,
-            string actualValueString,
-            int start,
-            int length)
-            : base(typeErrorBuilder, actualValueString, start, length)
-        {
-            ItemIndex = itemIndex;
-        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="ValueTypeErrorAtItemIndex"/>.
@@ -358,25 +338,13 @@ namespace Eutherion.Win.Storage
         /// <param name="valueNode">
         /// The value node corresponding to the value that was typechecked.
         /// </param>
-        /// <returns>
-        /// A <see cref="ValueTypeErrorAtItemIndex"/> instance which generates a localized error message.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> are <see langword="null"/>.
         /// </exception>
-        public static ValueTypeErrorAtItemIndex Create(
-            ITypeErrorBuilder typeErrorBuilder,
-            int itemIndex,
-            JsonValueSyntax valueNode)
+        public ValueTypeErrorAtItemIndex(ITypeErrorBuilder typeErrorBuilder, int itemIndex, JsonValueSyntax valueNode)
+            : base(typeErrorBuilder, valueNode)
         {
-            if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
-
-            return new ValueTypeErrorAtItemIndex(
-                typeErrorBuilder,
-                itemIndex,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode),
-                valueNode.AbsoluteStart,
-                valueNode.Length);
+            ItemIndex = itemIndex;
         }
     }
 }

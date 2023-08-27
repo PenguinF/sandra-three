@@ -177,10 +177,7 @@ namespace Eutherion.Win.Storage
                     else
                     {
                         ITypeErrorBuilder typeError = valueOrError.ToOption1();
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
-                            typeError,
-                            keyNode,
-                            valueNode));
+                        errors.Add(new ValueTypeErrorAtPropertyKey(typeError, keyNode, valueNode));
                     }
                 }
                 else

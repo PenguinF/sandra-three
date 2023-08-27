@@ -84,10 +84,7 @@ namespace Eutherion.Win.Storage
                 foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
                 {
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(
-                        valueNode,
-                        out T value,
-                        errors);
+                    var itemValueOrError = ItemType.TryCreateValue(valueNode, out T value, errors);
 
                     if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
@@ -97,10 +94,7 @@ namespace Eutherion.Win.Storage
                     else
                     {
                         ITypeErrorBuilder typeError = itemValueOrError.ToOption1();
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
-                            typeError,
-                            keyNode,
-                            valueNode));
+                        errors.Add(new ValueTypeErrorAtPropertyKey(typeError, keyNode, valueNode));
                     }
                 }
 

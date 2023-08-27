@@ -45,7 +45,7 @@ namespace Eutherion.Win.Storage
                 out SettingObject settingObject,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode));
+                errors.Add(new ValueTypeError(typeError, rootNode.Syntax.ValueNode));
                 return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
             }
 

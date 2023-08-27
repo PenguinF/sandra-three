@@ -44,11 +44,7 @@ namespace Eutherion.Win.Storage
                 out PValue value)
             {
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
-
-                var itemValueOrError = itemType.TryCreateValue(
-                    itemNode,
-                    out convertedTargetValue,
-                    errors);
+                var itemValueOrError = itemType.TryCreateValue(itemNode, out convertedTargetValue, errors);
 
                 if (itemValueOrError.IsOption2(out value))
                 {
@@ -57,7 +53,7 @@ namespace Eutherion.Win.Storage
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
-                errors.Add(ValueTypeErrorAtItemIndex.Create(itemTypeError, itemIndex, itemNode));
+                errors.Add(new ValueTypeErrorAtItemIndex(itemTypeError, itemIndex, itemNode));
                 return false;
             }
 
