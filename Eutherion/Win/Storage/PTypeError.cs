@@ -32,35 +32,19 @@ namespace Eutherion.Win.Storage
     public abstract class PTypeError : ISpan
     {
         /// <summary>
+        /// Gets the syntax node where the error occurred.
+        /// </summary>
+        public JsonSyntax SyntaxNode { get; }
+
+        /// <summary>
         /// Gets the start position of the text span where the error occurred.
         /// </summary>
-        public int Start { get; }
+        public int Start => SyntaxNode.AbsoluteStart;
 
         /// <summary>
         /// Gets the length of the text span where the error occurred.
         /// </summary>
-        public int Length { get; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="PTypeError"/>.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the text span where the type error occurred.
-        /// </param>
-        /// <param name="length">
-        /// The length of the text span where the type error occurred.
-        /// </param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
-        /// </exception>
-        public PTypeError(int start, int length)
-        {
-            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-
-            Start = start;
-            Length = length;
-        }
+        public int Length => SyntaxNode.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="PTypeError"/>.
@@ -72,12 +56,7 @@ namespace Eutherion.Win.Storage
         /// Either <paramref name="syntaxNode"/> is <see langword="null"/>.
         /// </exception>
         public PTypeError(JsonSyntax syntaxNode)
-        {
-            if (syntaxNode == null) throw new ArgumentNullException(nameof(syntaxNode));
-
-            Start = syntaxNode.AbsoluteStart;
-            Length = syntaxNode.Length;
-        }
+            => SyntaxNode = syntaxNode ?? throw new ArgumentNullException(nameof(syntaxNode));
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
