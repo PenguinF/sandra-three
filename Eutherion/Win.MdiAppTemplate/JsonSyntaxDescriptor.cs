@@ -23,7 +23,6 @@ using Eutherion.Text;
 using Eutherion.Text.Json;
 using ScintillaNET;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
@@ -51,7 +50,7 @@ namespace Eutherion.Win.MdiAppTemplate
             => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
-            => syntaxTree.Errors.Where(x => x.ErrorCode != JsonErrorCode.PropertyKeyAlreadyExists);
+            => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
             => JsonStyleSelector<RootJsonSyntax, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
