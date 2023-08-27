@@ -38,12 +38,12 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for duplicate property keys.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyTypeError));
+        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyWarning = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyWarning));
 
         /// <summary>
         /// Gets the translation key for property keys that are not recognized.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyTypeError = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyTypeError));
+        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyWarning = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyWarning));
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.

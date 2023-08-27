@@ -83,7 +83,8 @@ namespace Eutherion.Win.MdiAppTemplate
         public override ErrorLevel GetErrorLevel(Union<JsonErrorInfo, PTypeError> error)
             => error.Match(
                 whenOption1: x => (ErrorLevel)x.ErrorLevel,
-                whenOption2: x => x is UnrecognizedPropertyKeyTypeError ? ErrorLevel.Warning : ErrorLevel.Error);
+                whenOption2: x => x is UnrecognizedPropertyKeyWarning || x is DuplicatePropertyKeyWarning
+                ? ErrorLevel.Warning : ErrorLevel.Error);
 
         public override string GetErrorMessage(Union<JsonErrorInfo, PTypeError> error)
             => error.Match(
