@@ -107,9 +107,6 @@ namespace Eutherion.Win.Storage
         /// <param name="keyNode">
         /// The property key for which the error is generated.
         /// </param>
-        /// <param name="json">
-        /// The source json which contains the type error.
-        /// </param>
         /// <returns>
         /// A <see cref="DuplicatePropertyKeyWarning"/> instance which generates a localized error message.
         /// </returns>
@@ -118,7 +115,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public static DuplicatePropertyKeyWarning Create(JsonStringLiteralSyntax keyNode)
             => new DuplicatePropertyKeyWarning(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
                 keyNode.AbsoluteStart,
                 keyNode.Length);
     }
@@ -165,7 +162,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public static UnrecognizedPropertyKeyWarning Create(JsonStringLiteralSyntax keyNode)
             => new UnrecognizedPropertyKeyWarning(
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
                 keyNode.AbsoluteStart,
                 keyNode.Length);
     }
@@ -227,7 +224,7 @@ namespace Eutherion.Win.Storage
 
             return new ValueTypeError(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }
@@ -296,8 +293,8 @@ namespace Eutherion.Win.Storage
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
-                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, keyNode.Root.Json),
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }
@@ -367,7 +364,7 @@ namespace Eutherion.Win.Storage
             return new ValueTypeErrorAtItemIndex(
                 typeErrorBuilder,
                 itemIndex,
-                PTypeErrorBuilder.GetValueDisplayString(valueNode, valueNode.Root.Json),
+                PTypeErrorBuilder.GetValueDisplayString(valueNode),
                 valueNode.AbsoluteStart,
                 valueNode.Length);
         }
