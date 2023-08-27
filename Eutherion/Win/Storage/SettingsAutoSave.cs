@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingsAutoSave.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,23 +32,23 @@ namespace Eutherion.Win.Storage
         private class SettingsRemoteState : AutoSaveTextFile<SettingCopy>.RemoteState
         {
             /// <summary>
-            /// Settings representing how they are currently stored in the auto-save file.
+            /// Settings representing how they were stored in the auto-save file at the time it was loaded.
             /// </summary>
-            public SettingObject RemoteSettings { get; private set; }
+            public SettingObject InitialRemoteSettings { get; private set; }
 
-            public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
+            public SettingsRemoteState(SettingObject defaultSettings) => InitialRemoteSettings = defaultSettings;
 
             protected internal override void Initialize(string loadedText)
             {
                 if (loadedText != null)
                 {
                     // Load into a copy of RemoteSettings, preserving defaults.
-                    var workingCopy = RemoteSettings.CreateWorkingCopy();
+                    var workingCopy = InitialRemoteSettings.CreateWorkingCopy();
 
                     // Leave RemoteSettings unchanged if the loaded text contained any errors.
                     if (workingCopy.TryLoadFromText(loadedText))
                     {
-                        RemoteSettings = workingCopy.Commit();
+                        InitialRemoteSettings = workingCopy.Commit();
                     }
                 }
             }
@@ -57,10 +57,10 @@ namespace Eutherion.Win.Storage
             {
                 SettingCopy latestUpdate = updates[updates.Count - 1];
 
-                if (!latestUpdate.EqualTo(RemoteSettings))
+                if (!latestUpdate.EqualTo(InitialRemoteSettings))
                 {
-                    RemoteSettings = latestUpdate.Commit();
-                    textToSave = CompactSettingWriter.ConvertToJson(RemoteSettings.Map);
+                    InitialRemoteSettings = latestUpdate.Commit();
+                    textToSave = CompactSettingWriter.ConvertToJson(InitialRemoteSettings.Map);
                     return true;
                 }
 
@@ -116,7 +116,7 @@ namespace Eutherion.Win.Storage
 
                 // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
-                CurrentSettings = remoteState.RemoteSettings;
+                CurrentSettings = remoteState.InitialRemoteSettings;
             }
         }
 
