@@ -33,24 +33,17 @@ namespace Eutherion.Win.Storage
         {
             internal MapBase() { }
 
-            internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal sealed override Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    return TryCreateFromMap(jsonMapSyntax, out convertedValue, errors);
+                    return TryCreateFromMap(jsonMapSyntax, errors);
                 }
 
-                convertedValue = default;
                 return MapTypeError;
             }
 
-            internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-                JsonMapSyntax jsonMapSyntax,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors);
+            internal abstract Union<ITypeErrorBuilder, T> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PMap map ? TryConvertFromMap(map) : Maybe<T>.Nothing;
@@ -72,23 +65,18 @@ namespace Eutherion.Win.Storage
             public ValueMap(PType<T> itemType)
                 => ItemType = itemType;
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-                JsonMapSyntax jsonMapSyntax,
-                out Dictionary<string, T> convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal override Union<ITypeErrorBuilder, Dictionary<string, T>> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
             {
                 var dictionary = new Dictionary<string, T>();
-                var mapBuilder = new Dictionary<string, PValue>();
 
                 foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
                 {
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(valueNode, out T value, errors);
+                    var itemValueOrError = ItemType.TryCreateValue(valueNode, errors);
 
-                    if (itemValueOrError.IsOption2(out PValue itemValue))
+                    if (itemValueOrError.IsOption2(out T value))
                     {
                         dictionary.Add(keyNode.Value, value);
-                        mapBuilder.Add(keyNode.Value, itemValue);
                     }
                     else
                     {
@@ -97,8 +85,7 @@ namespace Eutherion.Win.Storage
                     }
                 }
 
-                convertedValue = dictionary;
-                return new PMap(mapBuilder);
+                return dictionary;
             }
 
             public override Maybe<Dictionary<string, T>> TryConvertFromMap(PMap map)

@@ -61,21 +61,18 @@ namespace Eutherion.Win.Storage
             public TupleType(({CommaSeparatedList(size, ValuePType)}) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, ({CommaSeparatedList(size, TypeParameter)})> TryCreateFromList(
                 JsonListSyntax jsonListSyntax,
-                out ({CommaSeparatedList(size, TypeParameter)}) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {{
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if ({SeparatedList("                    && ", size, i => $@"TryCreateTupleValue(ItemTypes.Item{i}, jsonListSyntax, {i - 1}, errors, out {TypeParameter(i)} value{i}, out PValue itemValue{i})
+                if ({SeparatedList("                    && ", size, i => $@"TryCreateTupleValue(ItemTypes.Item{i}, jsonListSyntax, {i - 1}, errors, out {TypeParameter(i)} value{i})
 ")}                    && actualItemCount == ExpectedItemCount)
                 {{
-                    convertedValue = ({CommaSeparatedList(size, i => $"value{i}")});
-                    return new PList(new[] {{ {CommaSeparatedList(size, i => $"itemValue{i}")} }});
+                    return ({CommaSeparatedList(size, i => $"value{i}")});
                 }}
 
-                convertedValue = default;
                 return TupleItemTypeMismatchError;
             }}
 

@@ -111,13 +111,10 @@ namespace Eutherion.Win.Storage
                 this.converter = converter;
             }
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out TValue convertedValue,
-                ArrayBuilder<PTypeError> errors)
-                => converter.Visit(valueNode).IsJust(out convertedValue)
+            internal override Union<ITypeErrorBuilder, TValue> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => converter.Visit(valueNode).IsJust(out TValue convertedValue)
                 ? convertedValue
-                : Union<ITypeErrorBuilder, PValue>.Option1(typeError);
+                : Union<ITypeErrorBuilder, TValue>.Option1(typeError);
 
             public override Maybe<TValue> TryConvert(PValue value)
                 => value is TValue targetValue
@@ -168,22 +165,10 @@ namespace Eutherion.Win.Storage
             protected Union<ITypeErrorBuilder, T> InvalidValue(ITypeErrorBuilder typeError)
                 => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
-            internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors)
-            {
-                T value = default;
-
-                var result = BaseType.TryCreateValue(valueNode, out TBase convertedBaseValue, errors).Match(
-                    whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
-                    whenOption2: baseValue => TryGetTargetValue(convertedBaseValue).Match(
-                        whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
-                        whenOption2: targetValue => { value = targetValue; return Union<ITypeErrorBuilder, PValue>.Option2(baseValue); }));
-
-                convertedValue = value;
-                return result;
-            }
+            internal override sealed Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => BaseType.TryCreateValue(valueNode, errors).Match(
+                    whenOption1: Union<ITypeErrorBuilder, T>.Option1,
+                    whenOption2: TryGetTargetValue);
 
             public override sealed Maybe<T> TryConvert(PValue value)
                 => BaseType.TryConvert(value).Bind(

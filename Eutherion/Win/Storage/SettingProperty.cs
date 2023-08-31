@@ -140,9 +140,9 @@ namespace Eutherion.Win.Storage
         public sealed override bool IsValidValue(PValue value)
             => !PType.TryConvert(value).IsNothing;
 
-        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            ArrayBuilder<PTypeError> errors)
-            => PType.TryCreateValue(valueNode, out _, errors);
+        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+            => PType.TryCreateValue(valueNode, errors).Match(
+                whenOption1: Union<ITypeErrorBuilder, PValue>.Option1,
+                whenOption2: convertedValue => Union<ITypeErrorBuilder, PValue>.Option2(PType.ConvertToPValue(convertedValue)));
     }
 }

@@ -33,10 +33,7 @@ namespace Eutherion.Win.Storage
     /// </typeparam>
     public abstract class PType<T>
     {
-        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            out T convertedValue,
-            ArrayBuilder<PTypeError> errors);
+        internal abstract Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
 
         /// <summary>
         /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.

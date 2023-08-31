@@ -40,16 +40,12 @@ namespace Eutherion.Win.Storage
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
-                out ItemT convertedTargetValue,
-                out PValue value)
+                out ItemT value)
             {
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
-                var itemValueOrError = itemType.TryCreateValue(itemNode, out convertedTargetValue, errors);
+                var itemValueOrError = itemType.TryCreateValue(itemNode, errors);
 
-                if (itemValueOrError.IsOption2(out value))
-                {
-                    return true;
-                }
+                if (itemValueOrError.IsOption2(out value)) return true;
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
@@ -57,26 +53,17 @@ namespace Eutherion.Win.Storage
                 return false;
             }
 
-            internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal sealed override Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(jsonListSyntax, out convertedValue, errors).Match(
-                        whenOption1: error => Union<ITypeErrorBuilder, PValue>.Option1(error),
-                        whenOption2: list => list);
+                    return TryCreateFromList(jsonListSyntax, errors);
                 }
 
-                convertedValue = default;
                 return ListTypeError;
             }
 
-            internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                JsonListSyntax jsonListSyntax,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors);
+            internal abstract Union<ITypeErrorBuilder, T> TryCreateFromList(JsonListSyntax jsonListSyntax, ArrayBuilder<PTypeError> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
                 => value is PList list ? TryConvertFromList(list) : Maybe<T>.Nothing;
@@ -98,8 +85,7 @@ namespace Eutherion.Win.Storage
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
-                out ItemT convertedTargetValue,
-                out PValue value)
+                out ItemT value)
             {
                 if (itemIndex < jsonListSyntax.ListItemNodes.Count)
                 {
@@ -108,11 +94,9 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out convertedTargetValue,
                         out value);
                 }
 
-                convertedTargetValue = default;
                 value = default;
                 return false;
             }
@@ -125,16 +109,11 @@ namespace Eutherion.Win.Storage
         {
             public PType<T> ItemType { get; }
 
-            public ValueList(PType<T> itemType)
-                => ItemType = itemType;
+            public ValueList(PType<T> itemType) => ItemType = itemType;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                JsonListSyntax jsonListSyntax,
-                out IEnumerable<T> convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal override Union<ITypeErrorBuilder, IEnumerable<T>> TryCreateFromList(JsonListSyntax jsonListSyntax, ArrayBuilder<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
-                var validValues = new List<PValue>();
                 int itemNodeCount = jsonListSyntax.ListItemNodes.Count;
 
                 for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
@@ -145,16 +124,13 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out T convertedTargetValue,
-                        out PValue value))
+                        out T value))
                     {
-                        validTargetValues.Add(convertedTargetValue);
-                        validValues.Add(value);
+                        validTargetValues.Add(value);
                     }
                 }
 
-                convertedValue = validTargetValues;
-                return new PList(validValues);
+                return validTargetValues;
             }
 
             public override Maybe<IEnumerable<T>> TryConvertFromList(PList list)

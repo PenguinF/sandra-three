@@ -173,10 +173,7 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public IEnumerable<SettingProperty> AllProperties => properties.Values;
 
-        internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-            JsonMapSyntax jsonMapSyntax,
-            out SettingObject convertedValue,
-            ArrayBuilder<PTypeError> errors)
+        internal override Union<ITypeErrorBuilder, SettingObject> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
 
@@ -215,9 +212,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            var map = new PMap(mapBuilder);
-            convertedValue = new SettingObject(this, map);
-            return map;
+            return new SettingObject(this, new PMap(mapBuilder));
         }
 
         public override Maybe<SettingObject> TryConvertFromMap(PMap map)

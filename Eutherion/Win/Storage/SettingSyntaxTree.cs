@@ -40,16 +40,13 @@ namespace Eutherion.Win.Storage
 
             var errors = new ArrayBuilder<PTypeError>();
 
-            if (schema.TryCreateValue(
-                rootNode.Syntax.ValueNode,
-                out SettingObject settingObject,
-                errors).IsOption1(out ITypeErrorBuilder typeError))
-            {
-                errors.Add(new ValueTypeError(typeError, rootNode.Syntax.ValueNode));
-                return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
-            }
-
-            return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), settingObject);
+            return schema.TryCreateValue(rootNode.Syntax.ValueNode, errors).Match(
+                whenOption1: typeError =>
+                {
+                    errors.Add(new ValueTypeError(typeError, rootNode.Syntax.ValueNode));
+                    return new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), null);
+                },
+                whenOption2: settingObject => new SettingSyntaxTree(rootNode, ReadOnlyList<PTypeError>.FromBuilder(errors), settingObject));
         }
 
         public RootJsonSyntax JsonSyntaxTree { get; }

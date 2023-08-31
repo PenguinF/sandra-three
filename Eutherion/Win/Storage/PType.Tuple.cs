@@ -36,22 +36,19 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, (T1, T2)> TryCreateFromList(
                 JsonListSyntax jsonListSyntax,
-                out (T1, T2) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2)
                     && actualItemCount == ExpectedItemCount)
                 {
-                    convertedValue = (value1, value2);
-                    return new PList(new[] { itemValue1, itemValue2 });
+                    return (value1, value2);
                 }
 
-                convertedValue = default;
                 return TupleItemTypeMismatchError;
             }
 
@@ -87,23 +84,20 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, (T1, T2, T3)> TryCreateFromList(
                 JsonListSyntax jsonListSyntax,
-                out (T1, T2, T3) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3)
                     && actualItemCount == ExpectedItemCount)
                 {
-                    convertedValue = (value1, value2, value3);
-                    return new PList(new[] { itemValue1, itemValue2, itemValue3 });
+                    return (value1, value2, value3);
                 }
 
-                convertedValue = default;
                 return TupleItemTypeMismatchError;
             }
 
@@ -141,24 +135,21 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4)> TryCreateFromList(
                 JsonListSyntax jsonListSyntax,
-                out (T1, T2, T3, T4) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
-                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3)
+                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4)
                     && actualItemCount == ExpectedItemCount)
                 {
-                    convertedValue = (value1, value2, value3, value4);
-                    return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4 });
+                    return (value1, value2, value3, value4);
                 }
 
-                convertedValue = default;
                 return TupleItemTypeMismatchError;
             }
 
@@ -198,25 +189,22 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
+            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryCreateFromList(
                 JsonListSyntax jsonListSyntax,
-                out (T1, T2, T3, T4, T5) convertedValue,
                 ArrayBuilder<PTypeError> errors)
             {
                 int actualItemCount = jsonListSyntax.ListItemNodes.Count;
 
-                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1, out PValue itemValue1)
-                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2, out PValue itemValue2)
-                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3, out PValue itemValue3)
-                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4, out PValue itemValue4)
-                    && TryCreateTupleValue(ItemTypes.Item5, jsonListSyntax, 4, errors, out T5 value5, out PValue itemValue5)
+                if (TryCreateTupleValue(ItemTypes.Item1, jsonListSyntax, 0, errors, out T1 value1)
+                    && TryCreateTupleValue(ItemTypes.Item2, jsonListSyntax, 1, errors, out T2 value2)
+                    && TryCreateTupleValue(ItemTypes.Item3, jsonListSyntax, 2, errors, out T3 value3)
+                    && TryCreateTupleValue(ItemTypes.Item4, jsonListSyntax, 3, errors, out T4 value4)
+                    && TryCreateTupleValue(ItemTypes.Item5, jsonListSyntax, 4, errors, out T5 value5)
                     && actualItemCount == ExpectedItemCount)
                 {
-                    convertedValue = (value1, value2, value3, value4, value5);
-                    return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
+                    return (value1, value2, value3, value4, value5);
                 }
 
-                convertedValue = default;
                 return TupleItemTypeMismatchError;
             }
 
