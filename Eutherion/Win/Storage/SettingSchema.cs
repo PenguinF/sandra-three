@@ -27,6 +27,71 @@ namespace Eutherion.Win.Storage
 {
     public class SettingSchema : PType.MapBase<SettingObject>
     {
+        /// <summary>
+        /// Contains the declaration of a setting property, but doesn't specify its type.
+        /// </summary>
+        public abstract class Member
+        {
+            /// <summary>
+            /// Gets the schema that owns this member.
+            /// </summary>
+            public SettingSchema OwnerSchema { get; }
+
+            /// <summary>
+            /// Gets the name of this member.
+            /// </summary>
+            public StringKey<SettingProperty> Name { get; }
+
+            internal Member(SettingSchema ownerSchema, StringKey<SettingProperty> name)
+            {
+                OwnerSchema = ownerSchema;
+                Name = name;
+            }
+
+            /// <summary>
+            /// Type-checks a JSON value syntax node.
+            /// </summary>
+            /// <param name="valueNode">
+            /// The value node to type-check.
+            /// </param>
+            /// <param name="errors">
+            /// The list of inner errors to which new type errors can be added.
+            /// </param>
+            /// <returns>
+            /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
+            /// or the converted <see cref="PValue"/> if the type check succeeded.
+            /// </returns>
+            internal abstract Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
+
+            internal abstract PValue ConvertToPValue(object untypedValue);
+        }
+
+        /// <summary>
+        /// Describes a key-value pair in a JSON object.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to convert to and from.
+        /// </typeparam>
+        public sealed class Member<T> : Member
+        {
+            /// <summary>
+            /// Gets the type of value that it contains.
+            /// </summary>
+            public PType<T> PType { get; }
+
+            internal Member(SettingSchema ownerSchema, StringKey<SettingProperty> name, PType<T> pType)
+                : base(ownerSchema, name)
+                => PType = pType;
+
+            internal sealed override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => PType.TryCreateValue(valueNode, errors).Match(
+                    whenOption1: Union<ITypeErrorBuilder, object>.Option1,
+                    whenOption2: value => value);
+
+            internal override PValue ConvertToPValue(object untypedValue)
+                => PType.ConvertToPValue((T)untypedValue);
+        }
+
         private readonly Dictionary<string, SettingProperty> Members;
 
         private readonly Dictionary<string, SettingComment> MemberDescriptions;
@@ -194,7 +259,7 @@ namespace Eutherion.Win.Storage
 
                 if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
                 {
-                    var valueOrError = property.TryCreateValue(valueNode, errors);
+                    var valueOrError = property.CreateSchemaMember(this).TryCreateValue(valueNode, errors);
 
                     if (valueOrError.IsOption2(out object convertedItemValue))
                     {
@@ -226,7 +291,7 @@ namespace Eutherion.Win.Storage
             {
                 if (value.KeyValueMapping.TryGetValue(property.Name.Key, out object untypedValue))
                 {
-                    mapBuilder.Add(property.Name.Key, property.ConvertToPValue(untypedValue));
+                    mapBuilder.Add(property.Name.Key, property.CreateSchemaMember(this).ConvertToPValue(untypedValue));
                 }
             }
 

@@ -19,9 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text.Json;
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
 {
@@ -58,23 +56,7 @@ namespace Eutherion.Win.Storage
             Description = description;
         }
 
-        /// <summary>
-        /// Type-checks a context free value syntax while parsing json.
-        /// Parameters other than <paramref name="valueNode"/> are given for type error construction.
-        /// </summary>
-        /// <param name="valueNode">
-        /// The value node to type-check.
-        /// </param>
-        /// <param name="errors">
-        /// The list of inner errors to which new type errors can be added.
-        /// </param>
-        /// <returns>
-        /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
-        /// or the converted <see cref="PValue"/> if the type check succeeded.
-        /// </returns>
-        internal abstract Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
-
-        internal abstract PValue ConvertToPValue(object untypedValue);
+        internal abstract SettingSchema.Member CreateSchemaMember(SettingSchema ownerSchema);
     }
 
     /// <summary>
@@ -126,12 +108,7 @@ namespace Eutherion.Win.Storage
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
 
-        internal sealed override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
-            => PType.TryCreateValue(valueNode, errors).Match(
-                whenOption1: Union<ITypeErrorBuilder, object>.Option1,
-                whenOption2: value => Union<ITypeErrorBuilder, object>.Option2(value));
-
-        internal override PValue ConvertToPValue(object untypedValue)
-            => PType.ConvertToPValue((T)untypedValue);
+        internal override SettingSchema.Member CreateSchemaMember(SettingSchema ownerSchema)
+            => new SettingSchema.Member<T>(ownerSchema, Name, PType);
     }
 }
