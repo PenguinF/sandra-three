@@ -53,7 +53,7 @@ namespace Eutherion.Win.Storage
         /// or is a relative path and its absolute path could not be resolved.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are null.
+        /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are <see langword="null"/>.
         /// </exception>
         /// <exception cref="IOException">
         /// <paramref name="absoluteFilePath"/> is longer than its maximum length (this is OS specific).
@@ -109,7 +109,7 @@ namespace Eutherion.Win.Storage
         /// For best performance, the class in which the event handler method is defined should implement <see cref="IWeakEventTarget"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are <see langword="null"/>.
         /// </exception>
         public void RegisterSettingsChangedHandler(SettingProperty property, Action<object, EventArgs> eventHandler)
         {
@@ -170,7 +170,7 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Generates the text to save to the setting file from the current values in <paramref name="settings"/>.
+        /// Attempts to overwrite the setting file with the current values in <paramref name="settings"/>.
         /// </summary>
         /// <param name="settings">
         /// The settings to write.
@@ -178,16 +178,13 @@ namespace Eutherion.Win.Storage
         /// <param name="options">
         /// Specifies options for writing the settings.
         /// </param>
-        /// <returns>
-        /// The text to save.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> is null.
+        /// <paramref name="settings"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="settings"/> has an unexpected schema.
         /// </exception>
-        public string GenerateJson(SettingObject settings, SettingWriterOptions options)
+        public void WriteToFile(SettingObject settings, SettingWriterOptions options)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
@@ -198,25 +195,7 @@ namespace Eutherion.Win.Storage
                     nameof(settings));
             }
 
-            return SettingWriter.ConvertToJson(settings, options);
+            Save(SettingWriter.ConvertToJson(settings, options));
         }
-
-        /// <summary>
-        /// Attempts to overwrite the setting file with the current values in <paramref name="settings"/>.
-        /// </summary>
-        /// <param name="settings">
-        /// The settings to write.
-        /// </param>
-        /// <param name="options">
-        /// Specifies options for writing the settings.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="settings"/> has an unexpected schema.
-        /// </exception>
-        public void WriteToFile(SettingObject settings, SettingWriterOptions options)
-            => Save(GenerateJson(settings, options));
     }
 }

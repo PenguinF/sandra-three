@@ -183,7 +183,7 @@ namespace Eutherion.Win.MdiAppTemplate
                                 }
                             }
 
-                            return LocalSettings.GenerateJson(
+                            return SettingWriter.ConvertToJson(
                                 localSettingsExample.Commit(),
                                 SettingWriterOptions.CommentOutProperties);
                         }
@@ -219,7 +219,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     () => CreateSettingsEditor(
                         GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
-                        () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
+                        () => SettingWriter.ConvertToJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsAutoSave));
             }
 
@@ -394,7 +394,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
-                            return fileLocalizer.LanguageFile.GenerateJson(
+                            return SettingWriter.ConvertToJson(
                                 settingCopy.Commit(),
                                 SettingWriterOptions.SuppressSettingComments);
                         }
