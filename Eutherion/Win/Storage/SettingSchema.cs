@@ -92,7 +92,7 @@ namespace Eutherion.Win.Storage
                 => PType.ConvertToPValue((T)untypedValue);
         }
 
-        private readonly Dictionary<string, SettingProperty> Members;
+        private readonly Dictionary<string, Member> Members;
 
         private readonly Dictionary<string, SettingComment> MemberDescriptions;
 
@@ -146,15 +146,16 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
-            this.Members = new Dictionary<string, SettingProperty>();
+            Members = new Dictionary<string, Member>();
             MemberDescriptions = new Dictionary<string, SettingComment>();
 
             if (properties != null)
             {
                 foreach (var property in properties)
                 {
-                    if (property == null) throw new ArgumentException("One of the properties is null.", nameof(properties));
-                    this.Members.Add(property.Name.Key, property);
+                    if (property == null) throw new ArgumentException($"One or more elements in {nameof(properties)} is null.", nameof(properties));
+                    Member member = property.CreateSchemaMember(this);
+                    Members.Add(member.Name.Key, member);
                     if (property.Description != null) MemberDescriptions.Add(property.Name.Key, property.Description);
                 }
             }
@@ -163,29 +164,34 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the <see cref="SettingProperty"/> that is associated with the specified key.
+        /// Enumerates all members in this schema.
+        /// </summary>
+        public IEnumerable<Member> AllMembers => Members.Values;
+
+        /// <summary>
+        /// Gets the <see cref="Member"/> that is associated with the specified key.
         /// </summary>
         /// <param name="key">
         /// The key to locate.
         /// </param>
-        /// <param name="property">
-        /// When this method returns, contains the <see cref="SettingProperty"/> associated with the specified key, if the key is found;
-        /// otherwise, the default <see cref="SettingProperty"/> value.
+        /// <param name="member">
+        /// When this method returns, contains the <see cref="Member"/> associated with the specified key, if the key is found;
+        /// otherwise, the default <see cref="Member"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// <see langword="true"/> if this <see cref="SettingSchema"/> contains a <see cref="SettingProperty"/> with the specified key;
+        /// <see langword="true"/> if this <see cref="SettingSchema"/> contains a <see cref="Member"/> with the specified key;
         /// otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetProperty(StringKey<Member> key, out SettingProperty property)
+        public bool TryGetMember(StringKey<Member> key, out Member member)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
-            if (Members.TryGetValue(key.Key, out property)) return true;
-            property = default;
+            if (Members.TryGetValue(key.Key, out member)) return true;
+            member = default;
             return false;
         }
 
@@ -205,8 +211,7 @@ namespace Eutherion.Win.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            return Members.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
-                && property == propertyInDictionary;
+            return Members.TryGetValue(property.Name.Key, out _);
         }
 
         /// <summary>
@@ -233,11 +238,6 @@ namespace Eutherion.Win.Storage
             return Maybe<SettingComment>.Nothing;
         }
 
-        /// <summary>
-        /// Enumerates all properties in this schema.
-        /// </summary>
-        public IEnumerable<SettingProperty> AllProperties => Members.Values;
-
         internal override Union<ITypeErrorBuilder, SettingObject> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
         {
             var mapBuilder = new Dictionary<string, object>();
@@ -257,13 +257,13 @@ namespace Eutherion.Win.Storage
                     foundKeys.Add(keyNode.Value);
                 }
 
-                if (TryGetProperty(new StringKey<Member>(keyNode.Value), out SettingProperty property))
+                if (TryGetMember(new StringKey<Member>(keyNode.Value), out Member member))
                 {
-                    var valueOrError = property.CreateSchemaMember(this).TryCreateValue(valueNode, errors);
+                    var valueOrError = member.TryCreateValue(valueNode, errors);
 
-                    if (valueOrError.IsOption2(out object convertedItemValue))
+                    if (valueOrError.IsOption2(out object untypedValue))
                     {
-                        mapBuilder.Add(keyNode.Value, convertedItemValue);
+                        mapBuilder.Add(keyNode.Value, untypedValue);
                     }
                     else
                     {
@@ -287,11 +287,11 @@ namespace Eutherion.Win.Storage
         {
             var mapBuilder = new Dictionary<string, PValue>();
 
-            foreach (var property in value.Schema.AllProperties)
+            foreach (var member in value.Schema.AllMembers)
             {
-                if (value.KeyValueMapping.TryGetValue(property.Name.Key, out object untypedValue))
+                if (value.KeyValueMapping.TryGetValue(member.Name.Key, out object untypedValue))
                 {
-                    mapBuilder.Add(property.Name.Key, property.CreateSchemaMember(this).ConvertToPValue(untypedValue));
+                    mapBuilder.Add(member.Name.Key, member.ConvertToPValue(untypedValue));
                 }
             }
 

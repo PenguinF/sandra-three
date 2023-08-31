@@ -174,12 +174,11 @@ namespace Eutherion.Win.MdiAppTemplate
                             SettingCopy localSettingsExample = new SettingCopy(LocalSettings.Settings.Schema);
 
                             var defaultSettingsObject = DefaultSettings.Settings;
-                            foreach (var property in localSettingsExample.Schema.AllProperties)
+                            foreach (var member in localSettingsExample.Schema.AllMembers)
                             {
-                                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
-                                    && defaultSettingsObject.IsSet(defaultSettingProperty))
+                                if (defaultSettingsObject.Schema.TryGetMember(member.Name, out SettingSchema.Member defaultSettingMember))
                                 {
-                                    localSettingsExample.AssignFrom(property, defaultSettingsObject, defaultSettingProperty);
+                                    localSettingsExample.AssignFrom(member, defaultSettingsObject, defaultSettingMember);
                                 }
                             }
 

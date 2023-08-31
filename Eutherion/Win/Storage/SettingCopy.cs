@@ -140,31 +140,31 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Adds, replaces, or removes a value from another <see cref="SettingObject"/> with a potentially different schema.
         /// </summary>
-        /// <param name="property">
-        /// The property for which to add or replace the value.
+        /// <param name="member">
+        /// The member for which to add or replace the value.
         /// </param>
         /// <param name="otherObject">
         /// The other <see cref="SettingObject"/> to copy the source value from.
         /// </param>
-        /// <param name="otherProperty">
-        /// The <see cref="SettingProperty"/> of <paramref name="otherObject"/> that holds the source value.
+        /// <param name="otherMember">
+        /// The <see cref="SettingSchema.Member"/> of <paramref name="otherObject"/> that holds the source value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="otherObject"/> and/or <paramref name="otherProperty"/> are <see langword="null"/>.
+        /// <paramref name="member"/> and/or <paramref name="otherObject"/> and/or <paramref name="otherMember"/> are <see langword="null"/>.
         /// </exception>
-        public void AssignFrom(SettingProperty property, SettingObject otherObject, SettingProperty otherProperty)
+        public void AssignFrom(SettingSchema.Member member, SettingObject otherObject, SettingSchema.Member otherMember)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (member == null) throw new ArgumentNullException(nameof(member));
             if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
-            if (otherProperty == null) throw new ArgumentNullException(nameof(otherProperty));
+            if (otherMember == null) throw new ArgumentNullException(nameof(otherMember));
 
-            if (otherObject.TryGetRawValue(otherProperty, out object sourceValue))
+            if (otherObject.TryGetUntypedValue(otherMember, out object sourceValue))
             {
-                AddOrReplaceRaw(property, sourceValue);
+                KeyValueMapping[member.Name.Key] = sourceValue;
             }
             else
             {
-                KeyValueMapping.Remove(property.Name.Key);
+                KeyValueMapping.Remove(member.Name.Key);
             }
         }
 
@@ -185,13 +185,13 @@ namespace Eutherion.Win.Storage
                 // Error tolerance:
                 // 1) Even if there are errors, still load the object.
                 // 2) Don't clear the existing settings, only overwrite them.
-                //    The other object might not contain all expected properties.
-                foreach (var property in Schema.AllProperties)
+                //    The other object might not contain all expected members.
+                foreach (var member in Schema.AllMembers)
                 {
-                    if (settingSyntaxTree.SettingObject.Schema.TryGetProperty(property.Name, out var otherProperty)
-                        && settingSyntaxTree.SettingObject.IsSet(otherProperty))
+                    if (settingSyntaxTree.SettingObject.Schema.TryGetMember(member.Name, out var otherMember)
+                        && settingSyntaxTree.SettingObject.IsSet(otherMember))
                     {
-                        AssignFrom(property, settingSyntaxTree.SettingObject, otherProperty);
+                        AssignFrom(member, settingSyntaxTree.SettingObject, otherMember);
                     }
                 }
             }

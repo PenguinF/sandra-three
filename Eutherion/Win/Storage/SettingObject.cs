@@ -63,29 +63,40 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Returns if this <see cref="SettingObject"/> contains a defined value for a given <see cref="SettingProperty"/>.
         /// </summary>
-        /// <param name="property">
-        /// The <see cref="SettingProperty"/> to check.
+        /// <param name="member">
+        /// The <see cref="SettingSchema.Member"/> to check.
         /// </param>
         /// <returns>
         /// <see langword="true"/> if this <see cref="SettingObject"/> contains a defined value for the given member;
         /// otherwise <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is <see langword="null"/>.
+        /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
-        public bool IsSet(SettingProperty property)
+        public bool IsSet(SettingSchema.Member member)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (member == null) throw new ArgumentNullException(nameof(member));
 
-            return KeyValueMapping.ContainsKey(property.Name.Key);
+            return KeyValueMapping.ContainsKey(member.Name.Key);
         }
 
-        internal bool TryGetRawValue(SettingProperty property, out object value)
+        internal bool TryGetUntypedValue(SettingSchema.Member member, out object value)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (KeyValueMapping.TryGetValue(member.Name.Key, out value))
+            {
+                return true;
+            }
 
-            if (Schema.ContainsProperty(property)
-                && KeyValueMapping.TryGetValue(property.Name.Key, out value))
+            value = default;
+            return false;
+        }
+
+        internal bool TryGetRawValue(SettingProperty member, out object value)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+
+            if (Schema.ContainsProperty(member)
+                && KeyValueMapping.TryGetValue(member.Name.Key, out value))
             {
                 return true;
             }

@@ -121,7 +121,7 @@ namespace Eutherion.Win.Storage
             keyedEvent.AddListener(eventHandler);
         }
 
-        private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
+        private IEnumerable<SettingSchema.Member> ChangedMembers(SettingObject newSettings)
         {
             PValueEqualityComparer eq = PValueEqualityComparer.Instance;
 
@@ -129,31 +129,31 @@ namespace Eutherion.Win.Storage
             PMap convertedOldSettings = Settings.ConvertToMap();
             PMap convertedNewSettings = newSettings.ConvertToMap();
 
-            foreach (var property in Settings.Schema.AllProperties)
+            foreach (var member in Settings.Schema.AllMembers)
             {
-                string propertyName = property.Name.Key;
+                string memberName = member.Name.Key;
 
                 // Change if added, updated or deleted.
-                if (convertedOldSettings.TryGetValue(propertyName, out PValue oldValue))
+                if (convertedOldSettings.TryGetValue(memberName, out PValue oldValue))
                 {
-                    if (convertedNewSettings.TryGetValue(propertyName, out PValue newValue))
+                    if (convertedNewSettings.TryGetValue(memberName, out PValue newValue))
                     {
                         if (!eq.AreEqual(oldValue, newValue))
                         {
                             // Updated.
-                            yield return property;
+                            yield return member;
                         }
                     }
                     else
                     {
                         // Deleted.
-                        yield return property;
+                        yield return member;
                     }
                 }
-                else if (convertedNewSettings.TryGetValue(propertyName, out _))
+                else if (convertedNewSettings.TryGetValue(memberName, out _))
                 {
                     // Added.
-                    yield return property;
+                    yield return member;
                 }
             }
         }
@@ -164,12 +164,12 @@ namespace Eutherion.Win.Storage
 
             SettingObject newSettings = ReadSettingObject(LoadedText);
 
-            foreach (var property in ChangedProperties(newSettings))
+            foreach (var member in ChangedMembers(newSettings))
             {
                 // Update settings if at least one property changed.
                 Settings = newSettings;
 
-                if (settingsChangedEvents.TryGetValue(property.Name, out WeakEvent<object, EventArgs> keyedEvent))
+                if (settingsChangedEvents.TryGetValue(member.Name, out WeakEvent<object, EventArgs> keyedEvent))
                 {
                     keyedEvent.Raise(this, EventArgs.Empty);
                 }
