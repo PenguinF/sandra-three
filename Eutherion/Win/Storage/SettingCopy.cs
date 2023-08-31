@@ -185,12 +185,16 @@ namespace Eutherion.Win.Storage
             if (settingSyntaxTree.SettingObject != null)
             {
                 // Error tolerance:
-                // 1) Even if there are errors, still load the map.
+                // 1) Even if there are errors, still load the object.
                 // 2) Don't clear the existing settings, only overwrite them.
-                //    The map might not contain all expected properties.
-                foreach (var kv in settingSyntaxTree.SettingObject.Map)
+                //    The other object might not contain all expected properties.
+                foreach (var property in Schema.AllProperties)
                 {
-                    KeyValueMapping[kv.Key] = kv.Value;
+                    if (settingSyntaxTree.SettingObject.Schema.TryGetProperty(property.Name, out var otherProperty)
+                        && settingSyntaxTree.SettingObject.IsSet(otherProperty))
+                    {
+                        AssignFrom(property, settingSyntaxTree.SettingObject, otherProperty);
+                    }
                 }
             }
 
