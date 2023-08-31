@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingObject.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -121,41 +121,6 @@ namespace Eutherion.Win.Storage
             }
             value = default;
             return false;
-        }
-
-        /// <summary>
-        /// Gets the value that is associated with the specified property.
-        /// </summary>
-        /// <param name="property">
-        /// The property to locate.
-        /// </param>
-        /// <returns>
-        /// The value associated with the specified property.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The value associated with the specified property is not of the target type.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        /// The property does not exist.
-        /// </exception>
-        public TValue GetValue<TValue>(SettingProperty<TValue> property)
-        {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-
-            if (!Map.ContainsKey(property.Name.Key))
-            {
-                throw new KeyNotFoundException($"Key {property.Name} does not exist in the {nameof(SettingObject)}.");
-            }
-
-            if (!TryGetValue(property, out TValue value))
-            {
-                throw new ArgumentException($"The value of {property.Name} is not of the target type {typeof(TValue).FullName}.");
-            }
-
-            return value;
         }
 
         /// <summary>

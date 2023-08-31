@@ -358,7 +358,13 @@ namespace Eutherion.Win.MdiAppTemplate
             + "settings serve as a template.");
 
         public TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
-            => DefaultSettings.Settings.GetValue(property);
+        {
+            // If a property is not present in DefaultSettings.Settings, then expect TemplateSettings to have it.
+            if (DefaultSettings.Settings.TryGetValue(property, out TValue result)) return result;
+            if (DefaultSettings.TemplateSettings.TryGetValue(property, out result)) return result;
+
+            throw new ArgumentException($"Cannot find value for {property.Name.Key} in default settings.");
+        }
 
         public TValue GetSetting<TValue>(SettingProperty<TValue> property)
         {
