@@ -27,7 +27,7 @@ namespace Eutherion.Win.Storage
 {
     public class SettingSchema : PType.MapBase<SettingObject>
     {
-        private readonly Dictionary<string, SettingProperty> properties;
+        private readonly Dictionary<string, SettingProperty> Members;
 
         private readonly Dictionary<string, SettingComment> MemberDescriptions;
 
@@ -81,7 +81,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
-            this.properties = new Dictionary<string, SettingProperty>();
+            this.Members = new Dictionary<string, SettingProperty>();
             MemberDescriptions = new Dictionary<string, SettingComment>();
 
             if (properties != null)
@@ -89,7 +89,7 @@ namespace Eutherion.Win.Storage
                 foreach (var property in properties)
                 {
                     if (property == null) throw new ArgumentException("One of the properties is null.", nameof(properties));
-                    this.properties.Add(property.Name.Key, property);
+                    this.Members.Add(property.Name.Key, property);
                     if (property.Description != null) MemberDescriptions.Add(property.Name.Key, property.Description);
                 }
             }
@@ -119,7 +119,7 @@ namespace Eutherion.Win.Storage
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
-            if (properties.TryGetValue(key.Key, out property)) return true;
+            if (Members.TryGetValue(key.Key, out property)) return true;
             property = default;
             return false;
         }
@@ -140,7 +140,7 @@ namespace Eutherion.Win.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            return properties.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
+            return Members.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
                 && property == propertyInDictionary;
         }
 
@@ -171,7 +171,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Enumerates all properties in this schema.
         /// </summary>
-        public IEnumerable<SettingProperty> AllProperties => properties.Values;
+        public IEnumerable<SettingProperty> AllProperties => Members.Values;
 
         internal override Union<ITypeErrorBuilder, SettingObject> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
         {
