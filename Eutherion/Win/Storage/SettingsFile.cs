@@ -125,12 +125,18 @@ namespace Eutherion.Win.Storage
         {
             PValueEqualityComparer eq = PValueEqualityComparer.Instance;
 
+            // Perform equality checks on PValue instances rather than the actual target values.
+            PMap convertedOldSettings = Settings.ConvertToMap();
+            PMap convertedNewSettings = newSettings.ConvertToMap();
+
             foreach (var property in Settings.Schema.AllProperties)
             {
+                string propertyName = property.Name.Key;
+
                 // Change if added, updated or deleted.
-                if (Settings.TryGetRawValue(property, out PValue oldValue))
+                if (convertedOldSettings.TryGetValue(propertyName, out PValue oldValue))
                 {
-                    if (newSettings.TryGetRawValue(property, out PValue newValue))
+                    if (convertedNewSettings.TryGetValue(propertyName, out PValue newValue))
                     {
                         if (!eq.AreEqual(oldValue, newValue))
                         {
@@ -144,7 +150,7 @@ namespace Eutherion.Win.Storage
                         yield return property;
                     }
                 }
-                else if (newSettings.TryGetRawValue(property, out _))
+                else if (convertedNewSettings.TryGetValue(propertyName, out _))
                 {
                     // Added.
                     yield return property;
