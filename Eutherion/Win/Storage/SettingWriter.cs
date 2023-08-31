@@ -36,10 +36,27 @@ namespace Eutherion.Win.Storage
 
         private const int maxLineLength = 80;
 
-        public static string ConvertToJson(PMap map, SettingSchema schema, SettingWriterOptions options)
+        /// <summary>
+        /// Serializes a <see cref="SettingObject"/> to JSON.
+        /// </summary>
+        /// <param name="settingObject">
+        /// The <see cref="SettingObject"/> to serialize.
+        /// </param>
+        /// <param name="options">
+        /// The options to use.
+        /// </param>
+        /// <returns>
+        /// The serialized JSON.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settingObject"/> is <see langword="null"/>.
+        /// </exception>
+        public static string ConvertToJson(SettingObject settingObject, SettingWriterOptions options)
         {
-            SettingWriter writer = new SettingWriter(schema, options);
-            writer.Visit(map);
+            if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
+
+            SettingWriter writer = new SettingWriter(settingObject.Schema, options);
+            writer.Visit(settingObject.ConvertToMap());
 
             // End files with a newline character.
             writer.outputBuilder.AppendLine();

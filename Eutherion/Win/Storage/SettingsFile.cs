@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingsFile.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -198,10 +198,7 @@ namespace Eutherion.Win.Storage
                     nameof(settings));
             }
 
-            return SettingWriter.ConvertToJson(
-                settings.Map,
-                schema: settings.Schema,
-                options: options);
+            return SettingWriter.ConvertToJson(settings, options);
         }
 
         /// <summary>
