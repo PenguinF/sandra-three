@@ -178,17 +178,17 @@ namespace Sandra.UI
         {
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
-            defaultSettings.AddOrReplace(SettingKeys.Version, 1);
-            defaultSettings.AddOrReplace(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
-            defaultSettings.AddOrReplace(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
-            defaultSettings.AddOrReplace(session.DeveloperMode, false);
-            defaultSettings.AddOrReplace(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
-            defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
-            defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
-            defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);
-            defaultSettings.AddOrReplace(SettingKeys.DisplayLegalTargetSquares, true);
-            defaultSettings.AddOrReplace(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
-            defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
+            defaultSettings.Set(SettingKeys.Version, 1);
+            defaultSettings.Set(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.Set(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
+            defaultSettings.Set(session.DeveloperMode, false);
+            defaultSettings.Set(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
+            defaultSettings.Set(SettingKeys.DarkSquareColor, Color.LightBlue);
+            defaultSettings.Set(SettingKeys.LightSquareColor, Color.Azure);
+            defaultSettings.Set(SettingKeys.LastMoveArrowColor, Color.DimGray);
+            defaultSettings.Set(SettingKeys.DisplayLegalTargetSquares, true);
+            defaultSettings.Set(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
+            defaultSettings.Set(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings.Commit();
         }

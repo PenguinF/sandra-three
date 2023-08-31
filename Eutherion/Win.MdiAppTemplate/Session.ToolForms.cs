@@ -388,7 +388,7 @@ namespace Eutherion.Win.MdiAppTemplate
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
                             // Fill with built-in default dictionary, or if not provided, an empty dictionary.
-                            settingCopy.AddOrReplace(
+                            settingCopy.Set(
                                 Localizers.Translations,
                                 defaultLocalizerDictionary ?? new Dictionary<StringKey<ForFormattedText>, string>());
 

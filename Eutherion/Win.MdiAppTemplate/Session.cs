@@ -494,9 +494,9 @@ namespace Eutherion.Win.MdiAppTemplate
                 SettingObject.CreateEmpty(Localizers.CreateLanguageFileSchema())))
             {
                 var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
-                settingCopy.AddOrReplace(Localizers.NativeName, "English");
-                settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
-                settingCopy.AddOrReplace(Localizers.Translations, defaultLocalizerDictionary);
+                settingCopy.Set(Localizers.NativeName, "English");
+                settingCopy.Set(Localizers.FlagIconFile, "flag-uk.png");
+                settingCopy.Set(Localizers.Translations, defaultLocalizerDictionary);
 
                 englishFileFromBuiltIn.WriteToFile(
                     settingCopy.Commit(),

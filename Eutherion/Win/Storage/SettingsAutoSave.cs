@@ -149,7 +149,7 @@ namespace Eutherion.Win.Storage
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
             SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.AddOrReplace(property, value);
+            workingCopy.Set(property, value);
             Persist(workingCopy);
         }
 
@@ -159,7 +159,7 @@ namespace Eutherion.Win.Storage
         public void Remove<TValue>(SettingProperty<TValue> property)
         {
             SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.Remove(property);
+            workingCopy.Unset(property);
             Persist(workingCopy);
         }
 

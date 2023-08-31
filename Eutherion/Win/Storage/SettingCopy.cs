@@ -69,7 +69,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
-        public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
+        public void Set<TValue>(SettingProperty<TValue> property, TValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -112,7 +112,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
-        public void Remove<TValue>(SettingProperty<TValue> property)
+        public void Unset<TValue>(SettingProperty<TValue> property)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
