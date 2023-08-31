@@ -63,6 +63,26 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Returns if this <see cref="SettingObject"/> contains a defined value for a given <see cref="SettingProperty"/>.
+        /// </summary>
+        /// <param name="property">
+        /// The <see cref="SettingProperty"/> to check.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a defined value for the given member;
+        /// otherwise <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is <see langword="null"/>.
+        /// </exception>
+        public bool IsSet(SettingProperty property)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            return Map.ContainsKey(property.Name.Key);
+        }
+
+        /// <summary>
         /// Gets the value that is associated with the specified property.
         /// </summary>
         /// <param name="property">
