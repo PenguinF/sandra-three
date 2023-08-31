@@ -65,7 +65,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// A dictionary with an arbitrary number of string keys, and values are all of the same subtype.
         /// </summary>
-        public class ValueMap<T> : MapBase<Dictionary<string, T>>
+        public sealed class ValueMap<T> : MapBase<Dictionary<string, T>>
         {
             public PType<T> ItemType { get; }
 

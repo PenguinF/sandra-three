@@ -94,7 +94,7 @@ namespace Eutherion.Win.Storage
     /// <typeparam name="T">
     /// The .NET target <see cref="Type"/> to convert to and from.
     /// </typeparam>
-    public class SettingProperty<T> : SettingProperty
+    public sealed class SettingProperty<T> : SettingProperty
     {
         /// <summary>
         /// Gets the type of value that it contains.

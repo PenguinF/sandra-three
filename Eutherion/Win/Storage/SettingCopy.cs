@@ -30,7 +30,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Represents a mutable working copy of a <see cref="SettingObject"/>.
     /// </summary>
-    public class SettingCopy
+    public sealed class SettingCopy
     {
         /// <summary>
         /// Gets the schema for this <see cref="SettingCopy"/>.
