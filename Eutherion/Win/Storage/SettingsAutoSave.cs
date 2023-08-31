@@ -114,7 +114,7 @@ namespace Eutherion.Win.Storage
         {
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            CurrentSettings = new SettingCopy(schema).Commit();
+            CurrentSettings = SettingObject.CreateEmpty(schema);
 
             // If autoSaveFiles is null, just initialize from CurrentSettings so auto-saves within the session are still enabled.
             if (autoSaveFiles != null)

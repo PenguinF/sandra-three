@@ -31,6 +31,20 @@ namespace Eutherion.Win.Storage
     public sealed class SettingObject
     {
         /// <summary>
+        /// Creates an empty <see cref="SettingObject"/> with a given schema.
+        /// </summary>
+        /// <param name="schema">
+        /// The <see cref="SettingSchema"/> to use.
+        /// </param>
+        /// <returns>
+        /// A <see cref="SettingObject"/> with undefined values for each of the members of the schema.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> is <see langword="null"/>.
+        /// </exception>
+        public static SettingObject CreateEmpty(SettingSchema schema) => new SettingCopy(schema).Commit();
+
+        /// <summary>
         /// Gets the schema for this <see cref="SettingObject"/>.
         /// </summary>
         public readonly SettingSchema Schema;
@@ -153,10 +167,10 @@ namespace Eutherion.Win.Storage
             copy.Revert(this);
             return copy;
         }
-        
+
         /// <summary>
         /// Converts this <see cref="SettingObject"/> into a <see cref="PMap"/> suitable for serialization to JSON.
         /// </summary>
-        public PMap ConvertToMap() => Schema.ConvertToPMap(this);        
+        public PMap ConvertToMap() => Schema.ConvertToPMap(this);
     }
 }

@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
 using System;
@@ -175,7 +174,7 @@ namespace Sandra.UI
                 session.DeveloperMode);
         }
 
-        public SettingCopy CreateBuiltIn(Session session)
+        public SettingObject CreateBuiltIn(Session session)
         {
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
@@ -191,7 +190,7 @@ namespace Sandra.UI
             defaultSettings.AddOrReplace(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
             defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
-            return defaultSettings;
+            return defaultSettings.Commit();
         }
     }
 }

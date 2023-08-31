@@ -156,7 +156,7 @@ namespace Eutherion.Win.MdiAppTemplate
             // Attempt to load default settings.
             DefaultSettings = SettingsFile.Create(
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
-                settingsProvider.CreateBuiltIn(this).Commit());
+                settingsProvider.CreateBuiltIn(this));
 
             // Save name of LOCALAPPDATA subfolder for persistent files.
             AppDataSubFolder = Path.Combine(
@@ -296,13 +296,13 @@ namespace Eutherion.Win.MdiAppTemplate
                 AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
 
                 // After creating the auto-save file, look for a local preferences file.
-                // Create a working copy with correct schema first.
-                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
+                // Create an empty template with correct schema first.
+                SettingObject localSettingsTemplate = SettingObject.CreateEmpty(settingsProvider.CreateLocalSettingsSchema(this));
 
                 // And then create the local settings file which can overwrite values in default settings.
                 LocalSettings = SettingsFile.Create(
                     Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
-                    localSettingsCopy.Commit());
+                    localSettingsTemplate);
 
                 if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
                 {
@@ -491,7 +491,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
                 Path.Combine(ExecutableFolder, "Languages", "en.json"),
-                new SettingCopy(Localizers.CreateLanguageFileSchema()).Commit()))
+                SettingObject.CreateEmpty(Localizers.CreateLanguageFileSchema())))
             {
                 var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
                 settingCopy.AddOrReplace(Localizers.NativeName, "English");
@@ -524,7 +524,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the built-in default settings. Its schema is used for the default settings file.
         /// </summary>
-        SettingCopy CreateBuiltIn(Session session);
+        SettingObject CreateBuiltIn(Session session);
 
         /// <summary>
         /// Gets the schema to use for the local preferences file.

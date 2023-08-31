@@ -106,7 +106,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     {
                         try
                         {
-                            var languageFile = SettingsFile.Create(fileInfo.FullName, new SettingCopy(languageFileSchema).Commit());
+                            var languageFile = SettingsFile.Create(fileInfo.FullName, SettingObject.CreateEmpty(languageFileSchema));
                             languageFile.Settings.TryGetValue(FlagIconFile, out string flagIconFileName);
 
                             foundLocalizers.Add(
