@@ -59,17 +59,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Returns if a raw <see cref="PValue"/> can be converted to the target .NET type of this property.
-        /// </summary>
-        /// <param name="value">
-        /// The value to convert from.
-        /// </param>
-        /// <returns>
-        /// Whether or not conversion will succeed.
-        /// </returns>
-        public abstract bool IsValidValue(PValue value);
-
-        /// <summary>
         /// Type-checks a context free value syntax while parsing json.
         /// Parameters other than <paramref name="valueNode"/> are given for type error construction.
         /// </summary>
@@ -136,9 +125,6 @@ namespace Eutherion.Win.Storage
         {
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
-
-        public sealed override bool IsValidValue(PValue value)
-            => !PType.TryConvert(value).IsNothing;
 
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
             => PType.TryCreateValue(valueNode, errors).Match(
