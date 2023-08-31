@@ -205,8 +205,11 @@ namespace Eutherion.Win.Storage
             var typeErrors = settingSyntaxTree.TypeErrors;
             if (typeErrors.Any())
             {
+                // Allow loading from auto-save files with type errors, e.g. when a previously known auto-save property
+                // has disappeared, such values should be ignored.
+                // This is not the appropriate place to check if the parsed json is complete, since a length check
+                // on the stored file has already been performed when it was loaded.
                 typeErrors.ForEach(x => new SettingsParseException(x).Trace());
-                return false;
             }
 
             return true;
