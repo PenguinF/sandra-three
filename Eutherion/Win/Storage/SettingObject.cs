@@ -25,7 +25,8 @@ using System.Collections.Generic;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
+    /// Represents a read-only collection of type checked JSON values indexed by property key
+    /// (<see cref="StringKey{T}"/> of <see cref="SettingProperty"/>).
     /// </summary>
     public sealed class SettingObject
     {
@@ -48,22 +49,22 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the <see cref="PValue"/> that is associated with the specified property.
+        /// Gets the value that is associated with the specified property.
         /// </summary>
         /// <param name="property">
         /// The property to locate.
         /// </param>
         /// <param name="value">
         /// When this method returns, contains the value associated with the specified property,
-        /// if the property is found; otherwise, the default <see cref="PValue"/> value.
+        /// if the property is found; otherwise, the default value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value for the specified property;
-        /// otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a value for the specified property;
+        /// otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
         public bool TryGetRawValue(SettingProperty property, out PValue value)
         {
@@ -91,11 +92,11 @@ namespace Eutherion.Win.Storage
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
-        /// for the specified property; otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
+        /// for the specified property; otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
@@ -144,7 +145,7 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
+        /// Creates a mutable <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
         /// </summary>
         public SettingCopy CreateWorkingCopy()
         {

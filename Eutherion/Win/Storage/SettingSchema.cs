@@ -75,7 +75,7 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the schema in a settings file.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Two or more properties have the same key; or one of the properties is null.
+        /// Two or more properties have the same key; or one of the properties is <see langword="null"/>.
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
@@ -96,7 +96,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the <see cref="SettingProperty"/> that is associated with the specified key.
         /// </summary>
-        /// <param name="settingKey">
+        /// <param name="key">
         /// The key to locate.
         /// </param>
         /// <param name="property">
@@ -105,16 +105,17 @@ namespace Eutherion.Win.Storage
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingSchema"/> contains a <see cref="SettingProperty"/> with the specified key; otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingSchema"/> contains a <see cref="SettingProperty"/> with the specified key;
+        /// otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settingKey"/> is null.
+        /// <paramref name="key"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetProperty(StringKey<SettingProperty> settingKey, out SettingProperty property)
+        public bool TryGetProperty(StringKey<SettingProperty> key, out SettingProperty property)
         {
-            if (settingKey == null) throw new ArgumentNullException(nameof(settingKey));
+            if (key == null) throw new ArgumentNullException(nameof(key));
 
-            if (properties.TryGetValue(settingKey.Key, out property)) return true;
+            if (properties.TryGetValue(key.Key, out property)) return true;
             property = default;
             return false;
         }
@@ -129,7 +130,7 @@ namespace Eutherion.Win.Storage
         /// Whether or not the property is contained in this schema.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
         public bool ContainsProperty(SettingProperty property)
         {

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a type of <see cref="PValue"/>, which controls the range of values that are possible.
+    /// Represents the type of a value which can be deserialized from and serialized to JSON.
     /// </summary>
     /// <typeparam name="T">
     /// The .NET target <see cref="Type"/> to convert to and from.

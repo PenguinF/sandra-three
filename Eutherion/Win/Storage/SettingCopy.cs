@@ -28,7 +28,7 @@ using System.Linq;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents the mutable working copy of a <see cref="SettingObject"/>.
+    /// Represents a mutable working copy of a <see cref="SettingObject"/>.
     /// </summary>
     public class SettingCopy
     {
@@ -49,7 +49,7 @@ namespace Eutherion.Win.Storage
         /// The schema to use.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="schema"/> is null.
+        /// <paramref name="schema"/> is <see langword="null"/>.
         /// </exception>
         public SettingCopy(SettingSchema schema)
         {
@@ -67,7 +67,7 @@ namespace Eutherion.Win.Storage
         /// The new value to associate with the property.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
@@ -87,7 +87,7 @@ namespace Eutherion.Win.Storage
         /// The new value to associate with the property.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
         public void AddOrReplaceRaw(SettingProperty property, PValue value)
         {
@@ -103,11 +103,14 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Removes a value associated with a property.
         /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
         /// <param name="property">
         /// The property for which to remove the value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
         public void Remove<TValue>(SettingProperty<TValue> property)
         {

@@ -89,7 +89,7 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// A tuple with a fixed number of items greater than one, each item having a defined type.
+        /// A tuple with a fixed number of items, each item having a defined type.
         /// </summary>
         public abstract class TupleTypeBase<T> : ListBase<T>
         {

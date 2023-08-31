@@ -50,7 +50,7 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the property in a settings file.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> is null.
+        /// <paramref name="name"/> is <see langword="null"/>.
         /// </exception>
         public SettingProperty(StringKey<SettingProperty> name, SettingComment description)
         {
@@ -111,7 +111,7 @@ namespace Eutherion.Win.Storage
         /// The type of value that it contains.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
+        /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
         public SettingProperty(StringKey<SettingProperty> name, PType<T> pType) : this(name, pType, null)
         {
@@ -130,7 +130,7 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the property in a settings file.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
+        /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
         public SettingProperty(StringKey<SettingProperty> name, PType<T> pType, SettingComment description) : base(name, description)
         {

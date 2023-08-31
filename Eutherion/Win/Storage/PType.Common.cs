@@ -95,7 +95,7 @@ namespace Eutherion.Win.Storage
             /// The list of distinct enumeration values.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="enumValues"/> is null.
+            /// <paramref name="enumValues"/> is <see langword="null"/>.
             /// </exception>
             public Enumeration(IEnumerable<TEnum> enumValues) : base(CLR.String)
             {
@@ -179,7 +179,7 @@ namespace Eutherion.Win.Storage
             /// The mapping which maps distinct keys to values of type <typeparamref name="T"/>.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="keyedValues"/> is null.
+            /// <paramref name="keyedValues"/> is <see langword="null"/>.
             /// </exception>
             public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
             {

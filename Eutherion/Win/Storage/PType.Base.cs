@@ -149,7 +149,7 @@ namespace Eutherion.Win.Storage
             /// The base <see cref="PType{TBase}"/> to depend on.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="baseType"/> is null.
+            /// <paramref name="baseType"/> is <see langword="null"/>.
             /// </exception>
             protected Derived(PType<TBase> baseType)
                 => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
@@ -233,7 +233,7 @@ namespace Eutherion.Win.Storage
             /// Always returns <paramref name="convertTypeError"/>.
             /// </param>
             /// <returns>
-            /// Always returns false.
+            /// Always returns <see langword="false"/>.
             /// </returns>
             protected bool InvalidValue(ITypeErrorBuilder convertTypeError, out ITypeErrorBuilder typeError)
             {
@@ -245,10 +245,10 @@ namespace Eutherion.Win.Storage
             /// Helper method to indicate a successful conversion in <see cref="IsValid(T, out ITypeErrorBuilder)"/>.
             /// </summary>
             /// <param name="typeError">
-            /// Always returns null.
+            /// Always returns <see langword="null"/>.
             /// </param>
             /// <returns>
-            /// Always returns true.
+            /// Always returns <see langword="true"/>.
             /// </returns>
             protected bool ValidValue(out ITypeErrorBuilder typeError)
             {
@@ -268,7 +268,7 @@ namespace Eutherion.Win.Storage
             /// A type error, if the candidate value is invalid.
             /// </param>
             /// <returns>
-            /// True if the candidate value is valid; otherwise false.
+            /// <see langword="true"/> if the candidate value is valid; otherwise <see langword="false"/>.
             /// </returns>
             public abstract bool IsValid(T candidateValue, out ITypeErrorBuilder typeError);
 
