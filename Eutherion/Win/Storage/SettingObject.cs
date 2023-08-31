@@ -153,5 +153,10 @@ namespace Eutherion.Win.Storage
             copy.Revert(this);
             return copy;
         }
+        
+        /// <summary>
+        /// Converts this <see cref="SettingObject"/> into a <see cref="PMap"/> suitable for serialization to JSON.
+        /// </summary>
+        public PMap ConvertToMap() => Schema.ConvertToPMap(this);        
     }
 }

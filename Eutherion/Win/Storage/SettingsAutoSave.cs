@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
             public SettingsRemoteState(SettingObject defaultSettings)
             {
                 InitialRemoteSettings = defaultSettings;
-                RemoteSettings = defaultSettings.Map;
+                RemoteSettings = defaultSettings.ConvertToMap();
             }
 
             protected internal override void Initialize(string loadedText)
@@ -55,7 +55,7 @@ namespace Eutherion.Win.Storage
                     if (workingCopy.TryLoadFromText(loadedText))
                     {
                         InitialRemoteSettings = workingCopy.Commit();
-                        RemoteSettings = InitialRemoteSettings.Map;
+                        RemoteSettings = InitialRemoteSettings.ConvertToMap();
                     }
                 }
             }
@@ -138,7 +138,7 @@ namespace Eutherion.Win.Storage
                 if (autoSaveFile != null)
                 {
                     // Persist a copy so its values are not shared with other threads.
-                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().Map);
+                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().ConvertToMap());
                 }
             }
         }
