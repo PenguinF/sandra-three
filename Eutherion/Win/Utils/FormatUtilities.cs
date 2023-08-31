@@ -44,8 +44,12 @@ namespace Eutherion
         /// <remarks>
         /// This implementation differs from <seealso cref="string.Format(string, object[])"/> in the sense
         /// that if a substitution point indexes outside of the args array, it does not throw, but rather replaces with an empty string.
-        /// If <paramref name="format"/> is in an incorrect format, it returns a default representation using <see cref="ToDefaultParameterListDisplayString(string[])"/>.
+        /// If <paramref name="format"/> is in an incorrect format, it returns a default representation
+        /// using <see cref="StringUtilities.ToDefaultParameterListDisplayString(string[])"/>.
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="format"/> is <see langword="null"/>
+        /// </exception>
         public static string SoftFormat(string format, params string[] args)
         {
             int requiredParameterCount = StringUtilities.FormatStringRequiredArgumentCount(format, out bool wouldThrowException);
