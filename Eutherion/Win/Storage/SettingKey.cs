@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingKey.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ namespace Eutherion.Win.Storage
     public static class SettingKey
     {
         /// <summary>
-        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
+        /// Converts a Pascal case identifier to snake case.
         /// </summary>
         public static string ToSnakeCase(string pascalCaseIdentifier)
         {
@@ -49,5 +49,11 @@ namespace Eutherion.Win.Storage
 
             return snakeCase.ToString();
         }
+
+        /// <summary>
+        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
+        /// </summary>
+        public static StringKey<SettingProperty> ToSnakeCaseKey(string pascalCaseIdentifier)
+            => new StringKey<SettingProperty>(ToSnakeCase(pascalCaseIdentifier));
     }
 }

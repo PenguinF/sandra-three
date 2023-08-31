@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Session.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
-                new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
+                SettingKey.ToSnakeCaseKey(nameof(DeveloperMode)),
                 PType.CLR.Boolean,
                 new SettingComment($"Enables tools which assist with {ExecutableFileNameWithoutExtension} development and debugging."));
 

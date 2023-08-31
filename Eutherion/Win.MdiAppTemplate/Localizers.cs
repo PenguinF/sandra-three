@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Localizers.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "Name of the language in the language itself. This property is mandatory.";
 
         public static readonly SettingProperty<string> NativeName = new SettingProperty<string>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(NativeName))),
+            SettingKey.ToSnakeCaseKey(nameof(NativeName)),
             TrimmedStringType.Instance,
             new SettingComment(NativeNameDescription));
 
@@ -43,7 +43,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "File name of the flag icon to display in the menu.";
 
         public static readonly SettingProperty<string> FlagIconFile = new SettingProperty<string>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(FlagIconFile))),
+            SettingKey.ToSnakeCaseKey(nameof(FlagIconFile)),
             FileNameType.Instance,
             new SettingComment(FlagIconFileDescription));
 
@@ -51,7 +51,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "List of translations.";
 
         public static readonly SettingProperty<Dictionary<StringKey<ForFormattedText>, string>> Translations = new SettingProperty<Dictionary<StringKey<ForFormattedText>, string>>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Translations))),
+            SettingKey.ToSnakeCaseKey(nameof(Translations)),
             TranslationDictionaryType.Instance,
             new SettingComment(TranslationsDescription));
 
