@@ -104,7 +104,7 @@ namespace Sandra.UI
 
         public static readonly SettingProperty<bool> DisplayLegalTargetSquares = new SettingProperty<bool>(
             SettingKey.ToSnakeCaseKey(nameof(DisplayLegalTargetSquares)),
-            PType.CLR.Boolean,
+            PType.Boolean,
             new SettingComment(DisplayLegalTargetSquaresDescription));
 
         private static readonly string LegalTargetSquaresColorDescription

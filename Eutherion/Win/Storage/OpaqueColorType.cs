@@ -37,7 +37,7 @@ namespace Eutherion.Win.Storage
 
         public static readonly OpaqueColorType Instance = new OpaqueColorType();
 
-        private OpaqueColorType() : base(PType.CLR.String) { }
+        private OpaqueColorType() : base(PType.String) { }
 
         public override Union<ITypeErrorBuilder, Color> TryGetTargetValue(string value)
         {

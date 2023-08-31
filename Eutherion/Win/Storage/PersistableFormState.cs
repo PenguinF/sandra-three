@@ -40,7 +40,7 @@ namespace Eutherion.Win.Storage
         {
             public FormStatePType()
                 : base(new PType.TupleType<bool, int, int, int, int>(
-                                          (PType.CLR.Boolean, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32)))
+                                          (PType.Boolean, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32)))
             {
             }
 

@@ -155,7 +155,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static readonly TrimmedStringType Instance = new TrimmedStringType();
 
-        private TrimmedStringType() : base(PType.CLR.String) { }
+        private TrimmedStringType() : base(PType.String) { }
 
         public override string ConvertToBaseValue(string value) => value;
 
@@ -170,7 +170,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
         private TranslationDictionaryType()
-            : base(new PType.ValueMap<string>(PType.CLR.String))
+            : base(new PType.ValueMap<string>(PType.String))
         {
         }
 

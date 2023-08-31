@@ -23,6 +23,7 @@ using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Eutherion.Win.Storage
 {
@@ -33,53 +34,25 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static class CLR
         {
-            public static readonly PType<bool> Boolean = new _BooleanCLRType();
-            public static readonly PType<int> Int32 = new _Int32CLRType();
-            public static readonly PType<uint> UInt32 = new _UInt32CLRType();
-            public static readonly PType<string> String = new _StringCLRType();
+            public static readonly PType<int> Int32 = new Int32CLRType();
+            public static readonly PType<uint> UInt32 = new UInt32CLRType();
 
-            private sealed class _BooleanCLRType : Derived<PBoolean, bool>
+            private sealed class Int32CLRType : Derived<BigInteger, int>
             {
-                public _BooleanCLRType() : base(PType.Boolean) { }
+                public Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
 
-                public override Union<ITypeErrorBuilder, bool> TryGetTargetValue(PBoolean boolean)
-                    => boolean.Value;
+                public override Union<ITypeErrorBuilder, int> TryGetTargetValue(BigInteger integer) => (int)integer;
 
-                public override PBoolean ConvertToBaseValue(bool value)
-                    => new PBoolean(value);
+                public override BigInteger ConvertToBaseValue(int value) => value;
             }
 
-            private sealed class _Int32CLRType : Derived<PInteger, int>
+            private sealed class UInt32CLRType : Derived<BigInteger, uint>
             {
-                public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
+                public UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
 
-                public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                    => (int)integer.Value;
+                public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(BigInteger integer) => (uint)integer;
 
-                public override PInteger ConvertToBaseValue(int value)
-                    => new PInteger(value);
-            }
-
-            private sealed class _UInt32CLRType : Derived<PInteger, uint>
-            {
-                public _UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
-
-                public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(PInteger integer)
-                    => (uint)integer.Value;
-
-                public override PInteger ConvertToBaseValue(uint value)
-                    => new PInteger(value);
-            }
-
-            private sealed class _StringCLRType : Derived<PString, string>
-            {
-                public _StringCLRType() : base(PType.String) { }
-
-                public override Union<ITypeErrorBuilder, string> TryGetTargetValue(PString stringValue)
-                    => stringValue.Value;
-
-                public override PString ConvertToBaseValue(string value)
-                    => new PString(value);
+                public override BigInteger ConvertToBaseValue(uint value) => value;
             }
 
             /// <summary>
@@ -146,7 +119,7 @@ namespace Eutherion.Win.Storage
             /// <exception cref="ArgumentNullException">
             /// <paramref name="enumValues"/> is <see langword="null"/>.
             /// </exception>
-            public Enumeration(IEnumerable<TEnum> enumValues) : base(CLR.String)
+            public Enumeration(IEnumerable<TEnum> enumValues) : base(String)
             {
                 if (enumValues == null) throw new ArgumentNullException(nameof(enumValues));
 
@@ -230,7 +203,7 @@ namespace Eutherion.Win.Storage
             /// <exception cref="ArgumentNullException">
             /// <paramref name="keyedValues"/> is <see langword="null"/>.
             /// </exception>
-            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
+            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(String)
             {
                 if (keyedValues == null) throw new ArgumentNullException(nameof(keyedValues));
                 keyedValues.ForEach(stringToTarget.Add);

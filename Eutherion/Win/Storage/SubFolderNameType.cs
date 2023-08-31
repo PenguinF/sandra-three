@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
 
         private readonly char[] InvalidRelativeFolderChars;
 
-        private SubFolderNameType() : base(PType.CLR.String)
+        private SubFolderNameType() : base(PType.String)
         {
             // Wildcard characters '?' and '*' are not returned from Path.GetInvalidPathChars() but are still illegal.
             InvalidRelativeFolderChars = Path.GetInvalidPathChars().Concat(new[] { '?', '*' }).ToArray();
