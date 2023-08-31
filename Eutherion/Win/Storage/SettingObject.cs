@@ -26,7 +26,7 @@ namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Represents a read-only collection of type checked JSON values indexed by property key
-    /// (<see cref="StringKey{T}"/> of <see cref="SettingProperty"/>).
+    /// (<see cref="StringKey{T}"/> of <see cref="SettingSchema.Member"/>).
     /// </summary>
     public sealed class SettingObject
     {

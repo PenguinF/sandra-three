@@ -173,7 +173,7 @@ namespace Eutherion.Win.MdiAppTemplate
             registeredLocalizers = Localizers.ScanLocalizers(this, Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
-                new StringKey<SettingProperty>(LangSettingKey),
+                new StringKey<SettingSchema.Member>(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
             // Now attempt to get exclusive write access to the .lock file so it becomes a safe mutex.

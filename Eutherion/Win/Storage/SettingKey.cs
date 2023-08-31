@@ -53,7 +53,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
         /// </summary>
-        public static StringKey<SettingProperty> ToSnakeCaseKey(string pascalCaseIdentifier)
-            => new StringKey<SettingProperty>(ToSnakeCase(pascalCaseIdentifier));
+        public static StringKey<SettingSchema.Member> ToSnakeCaseKey(string pascalCaseIdentifier)
+            => new StringKey<SettingSchema.Member>(ToSnakeCase(pascalCaseIdentifier));
     }
 }

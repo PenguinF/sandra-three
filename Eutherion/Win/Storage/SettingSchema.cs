@@ -40,9 +40,9 @@ namespace Eutherion.Win.Storage
             /// <summary>
             /// Gets the name of this member.
             /// </summary>
-            public StringKey<SettingProperty> Name { get; }
+            public StringKey<Member> Name { get; }
 
-            internal Member(SettingSchema ownerSchema, StringKey<SettingProperty> name)
+            internal Member(SettingSchema ownerSchema, StringKey<Member> name)
             {
                 OwnerSchema = ownerSchema;
                 Name = name;
@@ -79,7 +79,7 @@ namespace Eutherion.Win.Storage
             /// </summary>
             public PType<T> PType { get; }
 
-            internal Member(SettingSchema ownerSchema, StringKey<SettingProperty> name, PType<T> pType)
+            internal Member(SettingSchema ownerSchema, StringKey<Member> name, PType<T> pType)
                 : base(ownerSchema, name)
                 => PType = pType;
 
@@ -180,7 +180,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetProperty(StringKey<SettingProperty> key, out SettingProperty property)
+        public bool TryGetProperty(StringKey<Member> key, out SettingProperty property)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
@@ -221,7 +221,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public Maybe<SettingComment> TryGetDescription(StringKey<SettingProperty> key)
+        public Maybe<SettingComment> TryGetDescription(StringKey<Member> key)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
@@ -257,7 +257,7 @@ namespace Eutherion.Win.Storage
                     foundKeys.Add(keyNode.Value);
                 }
 
-                if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
+                if (TryGetProperty(new StringKey<Member>(keyNode.Value), out SettingProperty property))
                 {
                     var valueOrError = property.CreateSchemaMember(this).TryCreateValue(valueNode, errors);
 

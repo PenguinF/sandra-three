@@ -31,7 +31,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
-        public StringKey<SettingProperty> Name { get; }
+        public StringKey<SettingSchema.Member> Name { get; }
 
         /// <summary>
         /// Gets the built-in description of the property in a settings file.
@@ -50,7 +50,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> is <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, SettingComment description)
+        public SettingProperty(StringKey<SettingSchema.Member> name, SettingComment description)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Description = description;
@@ -84,7 +84,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType) : this(name, pType, null)
+        public SettingProperty(StringKey<SettingSchema.Member> name, PType<T> pType) : this(name, pType, null)
         {
         }
 
@@ -103,7 +103,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType, SettingComment description) : base(name, description)
+        public SettingProperty(StringKey<SettingSchema.Member> name, PType<T> pType, SettingComment description) : base(name, description)
         {
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
