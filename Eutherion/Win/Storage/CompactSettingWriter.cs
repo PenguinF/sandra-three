@@ -2,7 +2,7 @@
 /*********************************************************************************
  * CompactSettingWriter.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Used by <see cref="SettingsAutoSave"/> to convert a <see cref="PMap"/> to its compact representation in JSON.
     /// </summary>
-    internal class CompactSettingWriter : PValueVisitor
+    public class CompactSettingWriter : PValueVisitor
     {
         public static string ConvertToJson(PMap map)
         {

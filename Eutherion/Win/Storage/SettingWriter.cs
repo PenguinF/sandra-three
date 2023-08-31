@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingWriter.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ using System.Text;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a single iteration of writing settings to a file.
+    /// Represents a single iteration of writing settings to a string.
     /// </summary>
-    internal class SettingWriter : CompactSettingWriter
+    public class SettingWriter : CompactSettingWriter
     {
         public const int Indentation = 2;
         public const char SpaceChar = ' ';
@@ -114,7 +114,7 @@ namespace Eutherion.Win.Storage
 
         private readonly SettingWriterOptions options;
 
-        public SettingWriter(SettingSchema schema, SettingWriterOptions options)
+        private SettingWriter(SettingSchema schema, SettingWriterOptions options)
         {
             this.schema = schema;
             this.options = options;
