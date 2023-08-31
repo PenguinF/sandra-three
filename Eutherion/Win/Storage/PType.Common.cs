@@ -81,6 +81,55 @@ namespace Eutherion.Win.Storage
                 public override PString ConvertToBaseValue(string value)
                     => new PString(value);
             }
+
+            /// <summary>
+            /// Converts to and from <see cref="int"/> values within a specified valid range.
+            /// </summary>
+            public sealed class RangedInt32 : Filter<int>, ITypeErrorBuilder
+            {
+                /// <summary>
+                /// Gets the minimum value which is allowed for values of this type.
+                /// </summary>
+                public int MinValue { get; }
+
+                /// <summary>
+                /// Gets the maximum value which is allowed for values of this type.
+                /// </summary>
+                public int MaxValue { get; }
+
+                /// <summary>
+                /// Initializes a new instance of the <see cref="RangedInt32"/> type.
+                /// </summary>
+                /// <param name="minValue">
+                /// The minimum allowed value.
+                /// </param>
+                /// <param name="maxValue">
+                /// The maximum allowed value.
+                /// </param>
+                public RangedInt32(int minValue, int maxValue) : base(Int32)
+                {
+                    MinValue = minValue;
+                    MaxValue = maxValue;
+                }
+
+                public override bool IsValid(int candidateValue, out ITypeErrorBuilder typeError)
+                    => MinValue <= candidateValue
+                    && candidateValue <= MaxValue
+                    ? ValidValue(out typeError)
+                    : InvalidValue(this, out typeError);
+
+                public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                    => RangedInteger.FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
+
+                public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                    => RangedInteger.FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
+
+                public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                    => RangedInteger.FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
+
+                public override string ToString()
+                    => $"{nameof(RangedInt32)}[{MinValue}..{MaxValue}]";
+            }
         }
 
         public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
