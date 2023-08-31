@@ -191,6 +191,9 @@ namespace Eutherion.Win.Storage
         /// <exception cref="SchemaMismatchException">
         /// <paramref name="member"/> and/or <paramref name="otherMember"/> has different schemas than expected.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> and <paramref name="otherMember"/> have incompatible types.
+        /// </exception>
         /// <remarks>
         /// If a member exists in the source object but its value is undefined, the value becomes undefined in this object as well.
         /// </remarks>
@@ -200,14 +203,19 @@ namespace Eutherion.Win.Storage
             if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
             if (otherMember == null) throw new ArgumentNullException(nameof(otherMember));
 
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+            otherObject.Schema.ThrowIfNonMatchingSchema(otherMember.OwnerSchema);
+
+            // With schemas being correct, we can now test if the types are compatible.
+            member.ThrowIfNonMatchingType(otherMember);
+
             if (otherObject.TryGetUntypedValue(otherMember, out object otherValue))
             {
-                Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
                 KeyValueMapping[member.Name.Key] = otherValue;
             }
             else
             {
-                Unset(member);
+                KeyValueMapping.Remove(member.Name.Key);
             }
         }
 

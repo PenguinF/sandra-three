@@ -48,6 +48,8 @@ namespace Eutherion.Win.Storage
                 Name = name;
             }
 
+            internal abstract void ThrowIfNonMatchingType(Member otherMember);
+
             /// <summary>
             /// Type-checks a JSON value syntax node.
             /// </summary>
@@ -82,6 +84,16 @@ namespace Eutherion.Win.Storage
             internal Member(SettingSchema ownerSchema, StringKey<Member> name, PType<T> pType)
                 : base(ownerSchema, name)
                 => PType = pType;
+
+            internal override void ThrowIfNonMatchingType(Member otherMember)
+            {
+                // Conceptually it would be better to use structural equality between types,
+                // so that if e.g. one constructs TupleType<int, string, bool> twice, they'd accept each other's values.
+                if (!(otherMember is Member<T> otherTypedMember) || PType != otherTypedMember.PType)
+                {
+                    throw new ArgumentException($"Attempt to assign a value of a non-matching type to '{Name.Key}'", nameof(otherMember));
+                }
+            }
 
             internal override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
                 => PType.TryCreateValue(valueNode, errors).Match(
