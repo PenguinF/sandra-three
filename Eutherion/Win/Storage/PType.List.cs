@@ -40,9 +40,18 @@ namespace Eutherion.Win.Storage
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
-                out ItemT value)
+                out ItemT value,
+                bool allowMissingValues)
             {
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
+
+                if (allowMissingValues && itemNode is JsonMissingValueSyntax)
+                {
+                    // Don't report anything. But no conversion either.
+                    value = default;
+                    return false;
+                }
+
                 var itemValueOrError = itemType.TryCreateValue(itemNode, errors);
 
                 if (itemValueOrError.IsOption2(out value)) return true;
@@ -89,7 +98,8 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out value);
+                        out value,
+                        allowMissingValues: false);
                 }
 
                 value = default;
@@ -119,7 +129,8 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out T value))
+                        out T value,
+                        allowMissingValues: true))
                     {
                         validTargetValues.Add(value);
                     }
