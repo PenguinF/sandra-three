@@ -238,10 +238,10 @@ namespace Eutherion.Win.Storage
 
                 string name = kv.Key;
                 if ((options & SettingWriterOptions.SuppressSettingComments) == 0
-                    && schema.TryGetProperty(new StringKey<SettingProperty>(name), out SettingProperty property))
+                    && schema.TryGetDescription(new StringKey<SettingProperty>(name)).IsJust(out SettingComment description))
                 {
                     if (extraNewLineBeforeComment) outputBuilder.AppendLine();
-                    AppendCommentLines(property.Description);
+                    AppendCommentLines(description);
                 }
 
                 // This assumes that all default setting values fit on one line.

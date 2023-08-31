@@ -29,6 +29,8 @@ namespace Eutherion.Win.Storage
     {
         private readonly Dictionary<string, SettingProperty> properties;
 
+        private readonly Dictionary<string, SettingComment> MemberDescriptions;
+
         /// <summary>
         /// Gets the built-in description of the schema in a settings file.
         /// </summary>
@@ -80,6 +82,7 @@ namespace Eutherion.Win.Storage
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
             this.properties = new Dictionary<string, SettingProperty>();
+            MemberDescriptions = new Dictionary<string, SettingComment>();
 
             if (properties != null)
             {
@@ -87,6 +90,7 @@ namespace Eutherion.Win.Storage
                 {
                     if (property == null) throw new ArgumentException("One of the properties is null.", nameof(properties));
                     this.properties.Add(property.Name.Key, property);
+                    if (property.Description != null) MemberDescriptions.Add(property.Name.Key, property.Description);
                 }
             }
 
@@ -138,6 +142,30 @@ namespace Eutherion.Win.Storage
 
             return properties.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
                 && property == propertyInDictionary;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="SettingComment"/> that is associated with the specified key.
+        /// </summary>
+        /// <param name="key">
+        /// The key to locate.
+        /// </param>
+        /// <returns>
+        /// A <see cref="SettingComment"/> that describes a member, or <see cref="Maybe{T}.Nothing"/> is none was found.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public Maybe<SettingComment> TryGetDescription(StringKey<SettingProperty> key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            if (MemberDescriptions.TryGetValue(key.Key, out SettingComment description))
+            {
+                return description;
+            }
+
+            return Maybe<SettingComment>.Nothing;
         }
 
         /// <summary>
