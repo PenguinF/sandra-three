@@ -91,13 +91,29 @@ namespace Eutherion.Win.Storage
             return false;
         }
 
-        internal bool TryGetRawValue(SettingProperty member, out object value)
+        /// <summary>
+        /// Gets the value that is associated with the specified member.
+        /// </summary>
+        /// <param name="member">
+        /// The member to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified member,
+        /// if it is defined for the given member; otherwise, the default value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a defined value for the given member;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> is <see langword="null"/>.
+        /// </exception>
+        public bool TryGetValue<TValue>(SettingSchema.Member<TValue> member, out TValue value)
         {
-            if (member == null) throw new ArgumentNullException(nameof(member));
-
-            if (Schema.ContainsProperty(member)
-                && KeyValueMapping.TryGetValue(member.Name.Key, out value))
+            if (TryGetUntypedValue(member, out object untypedValue))
             {
+                value = (TValue)untypedValue;
                 return true;
             }
 
@@ -126,9 +142,11 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            if (TryGetRawValue(property, out object untypedValue))
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType
+                && TryGetValue(typedMember, out value))
             {
-                value = (TValue)untypedValue;
                 return true;
             }
 

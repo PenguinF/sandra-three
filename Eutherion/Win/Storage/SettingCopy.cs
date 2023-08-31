@@ -68,13 +68,38 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingCopy(SettingSchema schema, IDictionary<string, object> keyValueMapping)
         {
-            Schema = schema;
+            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             KeyValueMapping = new Dictionary<string, object>(keyValueMapping);
+        }
+
+        /// <summary>
+        /// Adds or replaces a value associated with a member.
+        /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the member.
+        /// </typeparam>
+        /// <param name="member">
+        /// The member for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the member.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> is <see langword="null"/>.
+        /// </exception>
+        public void Set<TValue>(SettingSchema.Member<TValue> member, TValue value)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+
+            KeyValueMapping[member.Name.Key] = value;
         }
 
         /// <summary>
         /// Adds or replaces a value associated with a property.
         /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
         /// <param name="property">
         /// The property for which to add or replace the value.
         /// </param>
@@ -89,30 +114,28 @@ namespace Eutherion.Win.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            AddOrReplaceRaw(property, value);
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType)
+            {
+                Set(typedMember, value);
+            }
         }
 
         /// <summary>
-        /// Adds or replaces a value from a source <see cref="SettingObject"/> with a different schema.
+        /// Removes a value associated with a member.
         /// </summary>
-        /// <param name="property">
-        /// The property for which to add or replace the value.
-        /// </param>
-        /// <param name="value">
-        /// The new value to associate with the property.
+        /// <param name="member">
+        /// The member for which to remove the value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
+        /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
-        private void AddOrReplaceRaw(SettingProperty property, object value)
+        public void Unset(SettingSchema.Member member)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (member == null) throw new ArgumentNullException(nameof(member));
 
-            if (Schema.ContainsProperty(property))
-            {
-                KeyValueMapping[property.Name.Key] = value;
-            }
+            KeyValueMapping.Remove(member.Name.Key);
         }
 
         /// <summary>
@@ -131,9 +154,11 @@ namespace Eutherion.Win.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            if (Schema.ContainsProperty(property))
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType)
             {
-                KeyValueMapping.Remove(property.Name.Key);
+                Unset(typedMember);
             }
         }
 
@@ -158,13 +183,13 @@ namespace Eutherion.Win.Storage
             if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
             if (otherMember == null) throw new ArgumentNullException(nameof(otherMember));
 
-            if (otherObject.TryGetUntypedValue(otherMember, out object sourceValue))
+            if (otherObject.TryGetUntypedValue(otherMember, out object otherValue))
             {
-                KeyValueMapping[member.Name.Key] = sourceValue;
+                KeyValueMapping[member.Name.Key] = otherValue;
             }
             else
             {
-                KeyValueMapping.Remove(member.Name.Key);
+                Unset(member);
             }
         }
 

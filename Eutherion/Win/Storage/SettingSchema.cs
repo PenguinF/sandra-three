@@ -28,7 +28,7 @@ namespace Eutherion.Win.Storage
     public class SettingSchema : PType.MapBase<SettingObject>
     {
         /// <summary>
-        /// Contains the declaration of a setting property, but doesn't specify its type.
+        /// Describes a key-value pair in a JSON object.
         /// </summary>
         public abstract class Member
         {
@@ -83,7 +83,7 @@ namespace Eutherion.Win.Storage
                 : base(ownerSchema, name)
                 => PType = pType;
 
-            internal sealed override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+            internal override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
                 => PType.TryCreateValue(valueNode, errors).Match(
                     whenOption1: Union<ITypeErrorBuilder, object>.Option1,
                     whenOption2: value => value);
@@ -193,25 +193,6 @@ namespace Eutherion.Win.Storage
             if (Members.TryGetValue(key.Key, out member)) return true;
             member = default;
             return false;
-        }
-
-        /// <summary>
-        /// Gets if a <see cref="SettingProperty"/> is contained in this schema.
-        /// </summary>
-        /// <param name="property">
-        /// The <see cref="SettingProperty"/> to locate.
-        /// </param>
-        /// <returns>
-        /// Whether or not the property is contained in this schema.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is <see langword="null"/>.
-        /// </exception>
-        public bool ContainsProperty(SettingProperty property)
-        {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-
-            return Members.TryGetValue(property.Name.Key, out _);
         }
 
         /// <summary>
