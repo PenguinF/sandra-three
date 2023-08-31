@@ -162,6 +162,10 @@ namespace Eutherion.Win.Storage
             {
                 AddOrReplaceRaw(property, sourceValue);
             }
+            else
+            {
+                KeyValueMapping.Remove(property.Name.Key);
+            }
         }
 
         /// <summary>
