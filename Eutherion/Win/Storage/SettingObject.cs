@@ -80,7 +80,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetRawValue(SettingProperty property, out PValue value)
+        internal bool TryGetRawValue(SettingProperty property, out PValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 

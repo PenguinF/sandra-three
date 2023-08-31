@@ -104,7 +104,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
-        public void AddOrReplaceRaw(SettingProperty property, PValue value)
+        private void AddOrReplaceRaw(SettingProperty property, PValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -134,6 +134,33 @@ namespace Eutherion.Win.Storage
             if (Schema.ContainsProperty(property))
             {
                 KeyValueMapping.Remove(property.Name.Key);
+            }
+        }
+
+        /// <summary>
+        /// Adds, replaces, or removes a value from another <see cref="SettingObject"/> with a potentially different schema.
+        /// </summary>
+        /// <param name="property">
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="otherObject">
+        /// The other <see cref="SettingObject"/> to copy the source value from.
+        /// </param>
+        /// <param name="otherProperty">
+        /// The <see cref="SettingProperty"/> of <paramref name="otherObject"/> that holds the source value.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="otherObject"/> and/or <paramref name="otherProperty"/> are <see langword="null"/>.
+        /// </exception>
+        public void AssignFrom(SettingProperty property, SettingObject otherObject, SettingProperty otherProperty)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
+            if (otherProperty == null) throw new ArgumentNullException(nameof(otherProperty));
+
+            if (otherObject.TryGetRawValue(otherProperty, out PValue sourceValue))
+            {
+                AddOrReplaceRaw(property, sourceValue);
             }
         }
 

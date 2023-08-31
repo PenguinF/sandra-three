@@ -176,10 +176,9 @@ namespace Eutherion.Win.MdiAppTemplate
                             var defaultSettingsObject = DefaultSettings.Settings;
                             foreach (var property in localSettingsExample.Schema.AllProperties)
                             {
-                                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
-                                    && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out PValue sourceValue))
+                                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty))
                                 {
-                                    localSettingsExample.AddOrReplaceRaw(property, sourceValue);
+                                    localSettingsExample.AssignFrom(property, defaultSettingsObject, defaultSettingProperty);
                                 }
                             }
 
