@@ -79,21 +79,23 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
 
-        private class ToBoolConverter : JsonValueSyntaxVisitor<Maybe<PBoolean>>
+        private class JsonConverter<T> : JsonValueSyntaxVisitor<Maybe<T>>
         {
-            public override Maybe<PBoolean> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PBoolean>.Nothing;
+            public override Maybe<T> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<T>.Nothing;
+        }
+
+        private class ToBoolConverter : JsonConverter<PBoolean>
+        {
             public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value, _void arg) => value.Value ? PConstantValue.True : PConstantValue.False;
         }
 
-        private class ToIntConverter : JsonValueSyntaxVisitor<Maybe<PInteger>>
+        private class ToIntConverter : JsonConverter<PInteger>
         {
-            public override Maybe<PInteger> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PInteger>.Nothing;
             public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value, _void arg) => new PInteger(value.Value);
         }
 
-        private class ToStringConverter : JsonValueSyntaxVisitor<Maybe<PString>>
+        private class ToStringConverter : JsonConverter<PString>
         {
-            public override Maybe<PString> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PString>.Nothing;
             public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value, _void arg) => new PString(value.Value);
         }
 
