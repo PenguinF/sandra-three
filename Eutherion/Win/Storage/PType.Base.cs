@@ -267,6 +267,19 @@ namespace Eutherion.Win.Storage
             }
         }
 
+        /// <summary>
+        /// Aliases a base type.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to alias.
+        /// </typeparam>
+        public abstract class Alias<T> : Filter<T>
+        {
+            protected Alias(PType<T> baseType) : base(baseType) { }
+
+            public sealed override bool IsValid(T candidateValue, out ITypeErrorBuilder typeError) { typeError = default; return true; }
+        }
+
         public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
