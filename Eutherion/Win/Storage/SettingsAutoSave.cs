@@ -132,8 +132,7 @@ namespace Eutherion.Win.Storage
         {
             if (autoSaveFile != null)
             {
-                // Persist a copy so its values are not shared with other threads.
-                autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().ConvertToMap());
+                autoSaveFile.Persist(CurrentSettings.ConvertToMap());
             }
         }
 
