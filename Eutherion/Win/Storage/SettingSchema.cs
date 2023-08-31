@@ -163,6 +163,14 @@ namespace Eutherion.Win.Storage
             Description = description;
         }
 
+        internal void ThrowIfNonMatchingSchema(SettingSchema shouldBeThisSchema)
+        {
+            if (this != shouldBeThisSchema)
+            {
+                throw new SchemaMismatchException();
+            }
+        }
+
         /// <summary>
         /// Enumerates all members in this schema.
         /// </summary>
@@ -275,5 +283,15 @@ namespace Eutherion.Win.Storage
 
             return new PMap(mapBuilder);
         }
+    }
+
+    /// <summary>
+    /// Occurs when a <see cref="SettingObject"/> or <see cref="SettingCopy"/> ia accessed with members
+    /// of a <see cref="SettingSchema"/> that is not their own.
+    /// </summary>
+    public class SchemaMismatchException : Exception
+    {
+        internal SchemaMismatchException()
+            : base("Attempt to use property or object with a different owner schema") { }
     }
 }

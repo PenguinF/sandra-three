@@ -87,9 +87,16 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
         public void Set<TValue>(SettingSchema.Member<TValue> member, TValue value)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
+
+            // Passed in member must have the same schema.
+            // Passed in value is guaranteed to have the correct type if this check succeeds.
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
 
             KeyValueMapping[member.Name.Key] = value;
         }
@@ -131,10 +138,14 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
         public void Unset(SettingSchema.Member member)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
 
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
             KeyValueMapping.Remove(member.Name.Key);
         }
 
@@ -177,6 +188,12 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="member"/> and/or <paramref name="otherObject"/> and/or <paramref name="otherMember"/> are <see langword="null"/>.
         /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> and/or <paramref name="otherMember"/> has different schemas than expected.
+        /// </exception>
+        /// <remarks>
+        /// If a member exists in the source object but its value is undefined, the value becomes undefined in this object as well.
+        /// </remarks>
         public void AssignFrom(SettingSchema.Member member, SettingObject otherObject, SettingSchema.Member otherMember)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
@@ -185,6 +202,7 @@ namespace Eutherion.Win.Storage
 
             if (otherObject.TryGetUntypedValue(otherMember, out object otherValue))
             {
+                Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
                 KeyValueMapping[member.Name.Key] = otherValue;
             }
             else

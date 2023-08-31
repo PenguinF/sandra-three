@@ -73,15 +73,22 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
         public bool IsSet(SettingSchema.Member member)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
 
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
             return KeyValueMapping.ContainsKey(member.Name.Key);
         }
 
         internal bool TryGetUntypedValue(SettingSchema.Member member, out object value)
         {
+            // This ensures basic security that the passed in property also performed the type-check.
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+
             if (KeyValueMapping.TryGetValue(member.Name.Key, out value))
             {
                 return true;
@@ -108,6 +115,9 @@ namespace Eutherion.Win.Storage
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="member"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
         /// </exception>
         public bool TryGetValue<TValue>(SettingSchema.Member<TValue> member, out TValue value)
         {
