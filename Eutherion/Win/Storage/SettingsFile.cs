@@ -41,8 +41,9 @@ namespace Eutherion.Win.Storage
         /// or if the settings file is corrupt, an empty <see cref="SettingsFile"/>
         /// object is returned.
         /// </param>
-        /// <param name="workingCopy">
-        /// The <see cref="SettingCopy"/> in which the values are stored.
+        /// <param name="templateSettings">
+        /// The <see cref="SettingObject"/> in which the initial values are stored.
+        /// If the file is loaded, its JSON must match the schema in these template settings.
         /// </param>
         /// <returns>
         /// The created <see cref="SettingsFile"/>.
@@ -53,7 +54,7 @@ namespace Eutherion.Win.Storage
         /// or is a relative path and its absolute path could not be resolved.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are <see langword="null"/>.
+        /// <paramref name="absoluteFilePath"/> and/or <paramref name="templateSettings"/> are <see langword="null"/>.
         /// </exception>
         /// <exception cref="IOException">
         /// <paramref name="absoluteFilePath"/> is longer than its maximum length (this is OS specific).
@@ -64,11 +65,11 @@ namespace Eutherion.Win.Storage
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
-        public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
+        public static SettingsFile Create(string absoluteFilePath, SettingObject templateSettings)
         {
-            if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
+            if (templateSettings == null) throw new ArgumentNullException(nameof(templateSettings));
 
-            var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
+            var settingsFile = new SettingsFile(absoluteFilePath, templateSettings);
             settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.LoadedText);
             return settingsFile;
         }
