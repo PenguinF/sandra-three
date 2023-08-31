@@ -300,31 +300,54 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            private string FormatExpectedTypeDescription(TextFormatter formatter)
+            private static string FormatExpectedTypeDescription(TextFormatter formatter, BigInteger minValue, BigInteger maxValue)
                 => formatter.Format(
                     RangedJsonInteger,
-                    MinValue.ToStringInvariant(),
-                    MaxValue.ToStringInvariant());
+                    minValue.ToStringInvariant(),
+                    maxValue.ToStringInvariant());
 
-            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+            public static string FormatTypeErrorMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                BigInteger minValue,
+                BigInteger maxValue)
                 => PTypeErrorBuilder.FormatTypeErrorMessage(
                     formatter,
-                    FormatExpectedTypeDescription(formatter),
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString);
 
-            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+            public static string FormatTypeErrorAtPropertyKeyMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                string propertyKey,
+                BigInteger minValue,
+                BigInteger maxValue)
                 => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
                     formatter,
-                    FormatExpectedTypeDescription(formatter),
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString,
                     PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+            public static string FormatTypeErrorAtItemIndexMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                int itemIndex,
+                BigInteger minValue,
+                BigInteger maxValue)
                 => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
                     formatter,
-                    FormatExpectedTypeDescription(formatter),
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString,
                     PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
+
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
+
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
+
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";
