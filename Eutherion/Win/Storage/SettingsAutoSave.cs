@@ -130,16 +130,13 @@ namespace Eutherion.Win.Storage
 
         private void Persist(SettingCopy workingCopy)
         {
-            if (!workingCopy.EqualTo(CurrentSettings))
-            {
-                // Commit to CurrentSettings.
-                CurrentSettings = workingCopy.Commit();
+            // Commit to CurrentSettings.
+            CurrentSettings = workingCopy.Commit();
 
-                if (autoSaveFile != null)
-                {
-                    // Persist a copy so its values are not shared with other threads.
-                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().ConvertToMap());
-                }
+            if (autoSaveFile != null)
+            {
+                // Persist a copy so its values are not shared with other threads.
+                autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy().Commit().ConvertToMap());
             }
         }
 

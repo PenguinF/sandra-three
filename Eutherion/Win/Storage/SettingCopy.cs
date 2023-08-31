@@ -154,35 +154,6 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public SettingObject Commit() => new SettingObject(this);
 
-        /// <summary>
-        /// Compares this <see cref="SettingCopy"/> with a <see cref="SettingObject"/> and returns if they are equal.
-        /// </summary>
-        /// <param name="other">
-        /// The <see cref="SettingObject"/> to compare with.
-        /// </param>
-        /// <returns>
-        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
-        /// <remarks>
-        /// This is not the same as complete equality, in particular this method returns true from the following expression:
-        /// <code>
-        /// workingCopy.Commit().EqualTo(workingCopy)
-        /// </code>
-        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
-        /// <code>
-        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
-        /// </code>
-        /// </remarks>
-        public bool EqualTo(SettingObject other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            return ToPMap().EqualTo(other.Map);
-        }
-
         internal PMap ToPMap() => new PMap(KeyValueMapping);
 
         /// <summary>
