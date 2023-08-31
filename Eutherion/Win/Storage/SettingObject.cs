@@ -47,7 +47,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the schema for this <see cref="SettingObject"/>.
         /// </summary>
-        public readonly SettingSchema Schema;
+        public SettingSchema Schema { get; }
 
         internal readonly PMap Map;
 

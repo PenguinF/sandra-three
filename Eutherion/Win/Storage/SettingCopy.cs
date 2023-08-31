@@ -35,7 +35,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the schema for this <see cref="SettingCopy"/>.
         /// </summary>
-        public readonly SettingSchema Schema;
+        public SettingSchema Schema { get; }
 
         /// <summary>
         /// Gets the mutable mapping between keys and values.
