@@ -21,7 +21,6 @@
 
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -39,17 +38,11 @@ namespace Sandra.UI
             VersionRange.Instance,
             new SettingComment(VersionDescription));
 
-        private sealed class VersionRange : PType.Derived<PInteger, int>
+        private sealed class VersionRange : PType.Alias<int>
         {
             public static readonly VersionRange Instance = new VersionRange();
 
-            private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
-
-            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => (int)integer.Value;
-
-            public override PInteger ConvertToBaseValue(int value)
-                => new PInteger(value);
+            private VersionRange() : base(new PType.CLR.RangedInt32(1, 1)) { }
         }
 
         public static readonly SettingProperty<IEnumerable<PersistableFormState>> Windows = new SettingProperty<IEnumerable<PersistableFormState>>(
@@ -69,20 +62,14 @@ namespace Sandra.UI
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
 
-        private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
+        private sealed class FastNavigationPlyCountRange : PType.Alias<int>
         {
             public static readonly int MinPlyCount = 2;
             public static readonly int MaxPlyCount = 40;
 
             public static readonly FastNavigationPlyCountRange Instance = new FastNavigationPlyCountRange();
 
-            private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
-
-            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => (int)integer.Value;
-
-            public override PInteger ConvertToBaseValue(int value)
-                => new PInteger(value);
+            private FastNavigationPlyCountRange() : base(new PType.CLR.RangedInt32(MinPlyCount, MaxPlyCount)) { }
         }
 
         private static readonly string DarkSquareColorDescription
