@@ -141,7 +141,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Determines equality of two <see cref="PValue"/>s.
     /// </summary>
-    public sealed class PValueEqualityComparer : PValueVisitor<bool>
+    public sealed class PValueEqualityComparer : PValueVisitor<PValue, bool>
     {
         public static readonly PValueEqualityComparer Instance = new PValueEqualityComparer();
 
@@ -168,25 +168,22 @@ namespace Eutherion.Win.Storage
             if (y == null || x.GetType() != y.GetType()) return false;
 
             // Only call visit after knowing that both types are exactly the same.
-            compareValue = y;
-            return Visit(x);
+            return Visit(x, y);
         }
 
-        private PValue compareValue;
-
-        public override bool VisitBoolean(PBoolean value)
+        public override bool VisitBoolean(PBoolean value, PValue compareValue)
             => value.Value == ((PBoolean)compareValue).Value;
 
-        public override bool VisitInteger(PInteger value)
+        public override bool VisitInteger(PInteger value, PValue compareValue)
             => value.Value == ((PInteger)compareValue).Value;
 
-        public override bool VisitList(PList value)
+        public override bool VisitList(PList value, PValue compareValue)
             => value.EqualTo((PList)compareValue);
 
-        public override bool VisitMap(PMap value)
+        public override bool VisitMap(PMap value, PValue compareValue)
             => value.EqualTo((PMap)compareValue);
 
-        public override bool VisitString(PString value)
+        public override bool VisitString(PString value, PValue compareValue)
             => value.Value == ((PString)compareValue).Value;
     }
 }
