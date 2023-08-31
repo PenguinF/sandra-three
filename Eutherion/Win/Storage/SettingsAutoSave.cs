@@ -128,11 +128,8 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private void Persist(SettingCopy workingCopy)
+        private void Persist()
         {
-            // Commit to CurrentSettings.
-            CurrentSettings = workingCopy.Commit();
-
             if (autoSaveFile != null)
             {
                 // Persist a copy so its values are not shared with other threads.
@@ -143,21 +140,25 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Persists a value to the auto-save file.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
+        /// </exception>
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.Set(property, value);
-            Persist(workingCopy);
+            CurrentSettings = CurrentSettings.Set(property, value);
+            Persist();
         }
 
         /// <summary>
         /// Removes a value from the auto-save file.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is <see langword="null"/>.
+        /// </exception>
         public void Remove<TValue>(SettingProperty<TValue> property)
         {
-            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.Unset(property);
-            Persist(workingCopy);
+            CurrentSettings = CurrentSettings.Unset(property);
+            Persist();
         }
 
         /// <summary>

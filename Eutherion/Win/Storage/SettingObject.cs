@@ -159,6 +159,53 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Creates a copy of this <see cref="SettingObject"/> with an added or replaced value associated with a property.
+        /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
+        /// <param name="property">
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the property.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="SettingObject"/> with the requested change.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
+        /// </exception>
+        public SettingObject Set<TValue>(SettingProperty<TValue> property, TValue value)
+        {
+            SettingCopy workingCopy = CreateWorkingCopy();
+            workingCopy.Set(property, value);
+            return workingCopy.Commit();
+        }
+
+        /// <summary>
+        /// Creates a copy of this <see cref="SettingObject"/> with a removed value associated with a property.
+        /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
+        /// <param name="property">
+        /// The property for which to remove the value.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="SettingObject"/> with the requested change.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is <see langword="null"/>.
+        /// </exception>
+        public SettingObject Unset<TValue>(SettingProperty<TValue> property)
+        {
+            SettingCopy workingCopy = CreateWorkingCopy();
+            workingCopy.Unset(property);
+            return workingCopy.Commit();
+        }
+
+        /// <summary>
         /// Creates a mutable <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
         /// </summary>
         public SettingCopy CreateWorkingCopy()
