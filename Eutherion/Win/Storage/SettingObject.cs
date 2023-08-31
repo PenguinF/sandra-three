@@ -210,9 +210,15 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public SettingCopy CreateWorkingCopy()
         {
-            var copy = new SettingCopy(Schema);
-            copy.Revert(this);
-            return copy;
+            Dictionary<string, PValue> keyValueMapping = new Dictionary<string, PValue>();
+
+            // No need to copy values if they can be assumed read-only or are structs.
+            foreach (var kv in Map)
+            {
+                keyValueMapping.Add(kv.Key, kv.Value);
+            }
+
+            return new SettingCopy(Schema, keyValueMapping);
         }
 
         /// <summary>

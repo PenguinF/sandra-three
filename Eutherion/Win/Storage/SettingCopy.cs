@@ -58,6 +58,21 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="SettingCopy"/>.
+        /// </summary>
+        /// <param name="schema">
+        /// The schema to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> and/or <paramref name="keyValueMapping"/> are <see langword="null"/>.
+        /// </exception>
+        public SettingCopy(SettingSchema schema, IDictionary<string, PValue> keyValueMapping)
+        {
+            Schema = schema;
+            KeyValueMapping = new Dictionary<string, PValue>(keyValueMapping);
+        }
+
+        /// <summary>
         /// Adds or replaces a value associated with a property.
         /// </summary>
         /// <param name="property">
@@ -119,33 +134,6 @@ namespace Eutherion.Win.Storage
             if (Schema.ContainsProperty(property))
             {
                 KeyValueMapping.Remove(property.Name.Key);
-            }
-        }
-
-        /// <summary>
-        /// Reverts to the state of a <see cref="SettingObject"/>.
-        /// </summary>
-        /// <param name="settingObject">
-        /// The <see cref="SettingObject"/> to revert to.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settingObject"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="settingObject"/> does not have the same schema.
-        /// </exception>
-        public void Revert(SettingObject settingObject)
-        {
-            if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
-            if (settingObject.Schema != Schema) throw new ArgumentException($"Cannot revert to a {nameof(SettingObject)} with a different schema.");
-
-            // Clear out the mapping before copying key-value pairs.
-            KeyValueMapping.Clear();
-
-            // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in settingObject.Map)
-            {
-                KeyValueMapping.Add(kv.Key, kv.Value);
             }
         }
 
