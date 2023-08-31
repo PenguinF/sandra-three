@@ -83,10 +83,9 @@ namespace Eutherion.Win.Storage
 
             public abstract Maybe<T> TryConvertFromList(PList list);
 
-            public sealed override PValue GetPValue(T value)
-                => GetBaseValue(value);
+            public sealed override PValue ConvertToPValue(T value) => ConvertToPList(value);
 
-            public abstract PList GetBaseValue(T value);
+            public abstract PList ConvertToPList(T value);
         }
 
         /// <summary>
@@ -174,8 +173,7 @@ namespace Eutherion.Win.Storage
                 return validValues;
             }
 
-            public override PList GetBaseValue(IEnumerable<T> value)
-                => new PList(value.Select(ItemType.GetPValue));
+            public override PList ConvertToPList(IEnumerable<T> value) => new PList(value.Select(ItemType.ConvertToPValue));
         }
     }
 }

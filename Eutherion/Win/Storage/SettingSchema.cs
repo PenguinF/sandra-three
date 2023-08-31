@@ -194,7 +194,7 @@ namespace Eutherion.Win.Storage
         public override Maybe<SettingObject> TryConvertFromMap(PMap map)
             => new SettingObject(this, map);
 
-        public override PMap GetBaseValue(SettingObject value)
+        public override PMap ConvertToPMap(SettingObject value)
             => value.Map;
     }
 }

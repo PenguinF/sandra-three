@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ScintillaEx.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -274,7 +274,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
             => (int)integer.Value;
 
-        public override PInteger GetBaseValue(int value)
+        public override PInteger ConvertToBaseValue(int value)
             => new PInteger(value);
     }
 }

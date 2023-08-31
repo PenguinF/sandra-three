@@ -90,7 +90,7 @@ namespace Eutherion.Win.Storage
                 return Maybe<({CommaSeparatedList(size, TypeParameter)})>.Nothing;
             }}
 
-            public override PList GetBaseValue(({CommaSeparatedList(size, TypeParameter)}) value)
+            public override PList ConvertToPList(({CommaSeparatedList(size, TypeParameter)}) value)
             {{
                 var ({CommaSeparatedList(size, i => $"value{i}")}) = value;
                 return new PList(new[]

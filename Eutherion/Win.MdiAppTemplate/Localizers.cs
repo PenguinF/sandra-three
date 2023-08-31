@@ -157,7 +157,7 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private TrimmedStringType() : base(PType.CLR.String) { }
 
-        public override string GetBaseValue(string value) => value;
+        public override string ConvertToBaseValue(string value) => value;
 
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
@@ -186,7 +186,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return dictionary;
         }
 
-        public override Dictionary<string, string> GetBaseValue(Dictionary<StringKey<ForFormattedText>, string> value)
+        public override Dictionary<string, string> ConvertToBaseValue(Dictionary<StringKey<ForFormattedText>, string> value)
         {
             var dictionary = new Dictionary<string, string>();
 

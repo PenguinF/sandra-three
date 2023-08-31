@@ -67,6 +67,6 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The converted target value.
         /// </returns>
-        public abstract PValue GetPValue(T value);
+        public abstract PValue ConvertToPValue(T value);
     }
 }

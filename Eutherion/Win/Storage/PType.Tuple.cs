@@ -67,13 +67,13 @@ namespace Eutherion.Win.Storage
                 return Maybe<(T1, T2)>.Nothing;
             }
 
-            public override PList GetBaseValue((T1, T2) value)
+            public override PList ConvertToPList((T1, T2) value)
             {
                 var (value1, value2) = value;
                 return new PList(new[]
                 {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
+                    ItemTypes.Item1.ConvertToPValue(value1),
+                    ItemTypes.Item2.ConvertToPValue(value2),
                 });
             }
         }
@@ -120,14 +120,14 @@ namespace Eutherion.Win.Storage
                 return Maybe<(T1, T2, T3)>.Nothing;
             }
 
-            public override PList GetBaseValue((T1, T2, T3) value)
+            public override PList ConvertToPList((T1, T2, T3) value)
             {
                 var (value1, value2, value3) = value;
                 return new PList(new[]
                 {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
-                    ItemTypes.Item3.GetPValue(value3),
+                    ItemTypes.Item1.ConvertToPValue(value1),
+                    ItemTypes.Item2.ConvertToPValue(value2),
+                    ItemTypes.Item3.ConvertToPValue(value3),
                 });
             }
         }
@@ -176,15 +176,15 @@ namespace Eutherion.Win.Storage
                 return Maybe<(T1, T2, T3, T4)>.Nothing;
             }
 
-            public override PList GetBaseValue((T1, T2, T3, T4) value)
+            public override PList ConvertToPList((T1, T2, T3, T4) value)
             {
                 var (value1, value2, value3, value4) = value;
                 return new PList(new[]
                 {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
-                    ItemTypes.Item3.GetPValue(value3),
-                    ItemTypes.Item4.GetPValue(value4),
+                    ItemTypes.Item1.ConvertToPValue(value1),
+                    ItemTypes.Item2.ConvertToPValue(value2),
+                    ItemTypes.Item3.ConvertToPValue(value3),
+                    ItemTypes.Item4.ConvertToPValue(value4),
                 });
             }
         }
@@ -235,16 +235,16 @@ namespace Eutherion.Win.Storage
                 return Maybe<(T1, T2, T3, T4, T5)>.Nothing;
             }
 
-            public override PList GetBaseValue((T1, T2, T3, T4, T5) value)
+            public override PList ConvertToPList((T1, T2, T3, T4, T5) value)
             {
                 var (value1, value2, value3, value4, value5) = value;
                 return new PList(new[]
                 {
-                    ItemTypes.Item1.GetPValue(value1),
-                    ItemTypes.Item2.GetPValue(value2),
-                    ItemTypes.Item3.GetPValue(value3),
-                    ItemTypes.Item4.GetPValue(value4),
-                    ItemTypes.Item5.GetPValue(value5),
+                    ItemTypes.Item1.ConvertToPValue(value1),
+                    ItemTypes.Item2.ConvertToPValue(value2),
+                    ItemTypes.Item3.ConvertToPValue(value3),
+                    ItemTypes.Item4.ConvertToPValue(value4),
+                    ItemTypes.Item5.ConvertToPValue(value5),
                 });
             }
         }

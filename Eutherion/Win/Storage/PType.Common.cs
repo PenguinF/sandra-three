@@ -45,7 +45,7 @@ namespace Eutherion.Win.Storage
                 public override Union<ITypeErrorBuilder, bool> TryGetTargetValue(PBoolean boolean)
                     => boolean.Value;
 
-                public override PBoolean GetBaseValue(bool value)
+                public override PBoolean ConvertToBaseValue(bool value)
                     => new PBoolean(value);
             }
 
@@ -56,7 +56,7 @@ namespace Eutherion.Win.Storage
                 public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
                     => (int)integer.Value;
 
-                public override PInteger GetBaseValue(int value)
+                public override PInteger ConvertToBaseValue(int value)
                     => new PInteger(value);
             }
 
@@ -67,7 +67,7 @@ namespace Eutherion.Win.Storage
                 public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(PInteger integer)
                     => (uint)integer.Value;
 
-                public override PInteger GetBaseValue(uint value)
+                public override PInteger ConvertToBaseValue(uint value)
                     => new PInteger(value);
             }
 
@@ -78,7 +78,7 @@ namespace Eutherion.Win.Storage
                 public override Union<ITypeErrorBuilder, string> TryGetTargetValue(PString stringValue)
                     => stringValue.Value;
 
-                public override PString GetBaseValue(string value)
+                public override PString ConvertToBaseValue(string value)
                     => new PString(value);
             }
         }
@@ -115,7 +115,7 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : InvalidValue(this);
 
-            public override string GetBaseValue(TEnum value) => enumToString[value];
+            public override string ConvertToBaseValue(TEnum value) => enumToString[value];
 
             private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
@@ -192,7 +192,7 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : InvalidValue(this);
 
-            public override string GetBaseValue(T value)
+            public override string ConvertToBaseValue(T value)
             {
                 foreach (var kv in stringToTarget)
                 {

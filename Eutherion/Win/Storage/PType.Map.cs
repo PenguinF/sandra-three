@@ -57,10 +57,9 @@ namespace Eutherion.Win.Storage
 
             public abstract Maybe<T> TryConvertFromMap(PMap map);
 
-            public sealed override PValue GetPValue(T value)
-                => GetBaseValue(value);
+            public sealed override PValue ConvertToPValue(T value) => ConvertToPMap(value);
 
-            public abstract PMap GetBaseValue(T value);
+            public abstract PMap ConvertToPMap(T value);
         }
 
         /// <summary>
@@ -118,13 +117,13 @@ namespace Eutherion.Win.Storage
                 return dictionary;
             }
 
-            public override PMap GetBaseValue(Dictionary<string, T> value)
+            public override PMap ConvertToPMap(Dictionary<string, T> value)
             {
                 var dictionary = new Dictionary<string, PValue>();
 
                 foreach (var kv in value)
                 {
-                    dictionary.Add(kv.Key, ItemType.GetPValue(kv.Value));
+                    dictionary.Add(kv.Key, ItemType.ConvertToPValue(kv.Value));
                 }
 
                 return new PMap(dictionary);

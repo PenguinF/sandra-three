@@ -74,7 +74,7 @@ namespace Eutherion.Win.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            AddOrReplaceRaw(property, property.PType.GetPValue(value));
+            AddOrReplaceRaw(property, property.PType.ConvertToPValue(value));
         }
 
         /// <summary>

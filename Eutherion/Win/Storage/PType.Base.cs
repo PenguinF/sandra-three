@@ -122,7 +122,7 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : Maybe<TValue>.Nothing;
 
-            public override PValue GetPValue(TValue value) => value;
+            public override PValue ConvertToPValue(TValue value) => value;
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Eutherion.Win.Storage
                         whenOption1: _ => Maybe<T>.Nothing,
                         whenOption2: convertedValue => convertedValue));
 
-            public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
+            public override sealed PValue ConvertToPValue(T value) => BaseType.ConvertToPValue(ConvertToBaseValue(value));
 
             /// <summary>
             /// Attempts to convert a <see cref="TBase"/> value to the target .NET type <typeparamref name="T"/>.
@@ -212,7 +212,7 @@ namespace Eutherion.Win.Storage
             /// <returns>
             /// The converted base value.
             /// </returns>
-            public abstract TBase GetBaseValue(T value);
+            public abstract TBase ConvertToBaseValue(T value);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Eutherion.Win.Storage
                 ? candidateValue
                 : InvalidValue(typeError);
 
-            public override sealed T GetBaseValue(T value)
+            public override sealed T ConvertToBaseValue(T value)
             {
                 if (!IsValid(value, out _))
                 {

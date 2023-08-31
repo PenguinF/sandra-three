@@ -49,7 +49,7 @@ namespace Sandra.UI
             public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
                 => (int)integer.Value;
 
-            public override PInteger GetBaseValue(int value)
+            public override PInteger ConvertToBaseValue(int value)
                 => new PInteger(value);
         }
 
@@ -82,7 +82,7 @@ namespace Sandra.UI
             public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
                 => (int)integer.Value;
 
-            public override PInteger GetBaseValue(int value)
+            public override PInteger ConvertToBaseValue(int value)
                 => new PInteger(value);
         }
 

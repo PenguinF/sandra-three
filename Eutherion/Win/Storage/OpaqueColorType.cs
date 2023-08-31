@@ -2,7 +2,7 @@
 /*********************************************************************************
  * OpaqueColorType.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ namespace Eutherion.Win.Storage
             return InvalidValue(OpaqueColorTypeError);
         }
 
-        public override string GetBaseValue(Color value)
+        public override string ConvertToBaseValue(Color value)
             => $"#{value.R:X2}{value.G:X2}{value.B:X2}";
     }
 }
