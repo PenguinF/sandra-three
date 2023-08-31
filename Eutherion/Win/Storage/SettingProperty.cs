@@ -72,9 +72,9 @@ namespace Eutherion.Win.Storage
         /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
         /// or the converted <see cref="PValue"/> if the type check succeeded.
         /// </returns>
-        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            ArrayBuilder<PTypeError> errors);
+        internal abstract Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
+
+        internal abstract PValue ConvertToPValue(object untypedValue);
     }
 
     /// <summary>
@@ -126,9 +126,12 @@ namespace Eutherion.Win.Storage
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
 
-        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+        internal sealed override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
             => PType.TryCreateValue(valueNode, errors).Match(
-                whenOption1: Union<ITypeErrorBuilder, PValue>.Option1,
-                whenOption2: convertedValue => Union<ITypeErrorBuilder, PValue>.Option2(PType.ConvertToPValue(convertedValue)));
+                whenOption1: Union<ITypeErrorBuilder, object>.Option1,
+                whenOption2: value => Union<ITypeErrorBuilder, object>.Option2(value));
+
+        internal override PValue ConvertToPValue(object untypedValue)
+            => PType.ConvertToPValue((T)untypedValue);
     }
 }

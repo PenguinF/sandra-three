@@ -40,7 +40,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        private readonly Dictionary<string, PValue> KeyValueMapping;
+        private readonly Dictionary<string, object> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
         public SettingCopy(SettingSchema schema)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            KeyValueMapping = new Dictionary<string, PValue>();
+            KeyValueMapping = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -66,10 +66,10 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="schema"/> and/or <paramref name="keyValueMapping"/> are <see langword="null"/>.
         /// </exception>
-        public SettingCopy(SettingSchema schema, IDictionary<string, PValue> keyValueMapping)
+        public SettingCopy(SettingSchema schema, IDictionary<string, object> keyValueMapping)
         {
             Schema = schema;
-            KeyValueMapping = new Dictionary<string, PValue>(keyValueMapping);
+            KeyValueMapping = new Dictionary<string, object>(keyValueMapping);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Eutherion.Win.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            AddOrReplaceRaw(property, property.PType.ConvertToPValue(value));
+            AddOrReplaceRaw(property, value);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
-        private void AddOrReplaceRaw(SettingProperty property, PValue value)
+        private void AddOrReplaceRaw(SettingProperty property, object value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -158,7 +158,7 @@ namespace Eutherion.Win.Storage
             if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
             if (otherProperty == null) throw new ArgumentNullException(nameof(otherProperty));
 
-            if (otherObject.TryGetRawValue(otherProperty, out PValue sourceValue))
+            if (otherObject.TryGetRawValue(otherProperty, out object sourceValue))
             {
                 AddOrReplaceRaw(property, sourceValue);
             }
@@ -171,9 +171,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Commits this working <see cref="SettingCopy"/> to a new <see cref="SettingObject"/>.
         /// </summary>
-        public SettingObject Commit() => new SettingObject(this);
-
-        internal PMap ToPMap() => new PMap(KeyValueMapping);
+        public SettingObject Commit() => new SettingObject(Schema, new Dictionary<string, object>(KeyValueMapping));
 
         /// <summary>
         /// Loads settings from text.

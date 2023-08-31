@@ -49,17 +49,15 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public SettingSchema Schema { get; }
 
-        internal readonly PMap Map;
+        /// <summary>
+        /// Gets the mapping between keys and values.
+        /// </summary>
+        internal readonly Dictionary<string, object> KeyValueMapping;
 
-        internal SettingObject(SettingSchema schema, PMap map)
+        internal SettingObject(SettingSchema schema, Dictionary<string, object> keyValueMapping)
         {
             Schema = schema;
-            Map = map;
-        }
-
-        internal SettingObject(SettingCopy workingCopy)
-            : this(workingCopy.Schema, workingCopy.ToPMap())
-        {
+            KeyValueMapping = keyValueMapping;
         }
 
         /// <summary>
@@ -79,36 +77,19 @@ namespace Eutherion.Win.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            return Map.ContainsKey(property.Name.Key);
+            return KeyValueMapping.ContainsKey(property.Name.Key);
         }
 
-        /// <summary>
-        /// Gets the value that is associated with the specified property.
-        /// </summary>
-        /// <param name="property">
-        /// The property to locate.
-        /// </param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified property,
-        /// if the property is found; otherwise, the default value.
-        /// This parameter is passed uninitialized.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a value for the specified property;
-        /// otherwise, <see langword="false"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is <see langword="null"/>.
-        /// </exception>
-        internal bool TryGetRawValue(SettingProperty property, out PValue value)
+        internal bool TryGetRawValue(SettingProperty property, out object value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
             if (Schema.ContainsProperty(property)
-                && Map.TryGetValue(property.Name.Key, out value))
+                && KeyValueMapping.TryGetValue(property.Name.Key, out value))
             {
                 return true;
             }
+
             value = default;
             return false;
         }
@@ -122,7 +103,7 @@ namespace Eutherion.Win.Storage
         /// <param name="value">
         /// When this method returns, contains the value associated with the specified property,
         /// if the property is found and its value is of the correct <see cref="PType"/>;
-        /// otherwise, the default <see cref="PValue"/> value.
+        /// otherwise, the default value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
@@ -134,11 +115,12 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            if (TryGetRawValue(property, out PValue pValue)
-                && property.PType.TryConvert(pValue).IsJust(out value))
+            if (TryGetRawValue(property, out object untypedValue))
             {
+                value = (TValue)untypedValue;
                 return true;
             }
+
             value = default;
             return false;
         }
@@ -193,18 +175,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Creates a mutable <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
         /// </summary>
-        public SettingCopy CreateWorkingCopy()
-        {
-            Dictionary<string, PValue> keyValueMapping = new Dictionary<string, PValue>();
-
-            // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in Map)
-            {
-                keyValueMapping.Add(kv.Key, kv.Value);
-            }
-
-            return new SettingCopy(Schema, keyValueMapping);
-        }
+        public SettingCopy CreateWorkingCopy() => new SettingCopy(Schema, new Dictionary<string, object>(KeyValueMapping));
 
         /// <summary>
         /// Converts this <see cref="SettingObject"/> into a <see cref="PMap"/> suitable for serialization to JSON.

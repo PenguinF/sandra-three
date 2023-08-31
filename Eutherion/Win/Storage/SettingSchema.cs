@@ -175,7 +175,7 @@ namespace Eutherion.Win.Storage
 
         internal override Union<ITypeErrorBuilder, SettingObject> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
         {
-            var mapBuilder = new Dictionary<string, PValue>();
+            var mapBuilder = new Dictionary<string, object>();
 
             // Report errors on duplicate keys (case sensitive).
             HashSet<string> foundKeys = new HashSet<string>();
@@ -196,7 +196,7 @@ namespace Eutherion.Win.Storage
                 {
                     var valueOrError = property.TryCreateValue(valueNode, errors);
 
-                    if (valueOrError.IsOption2(out PValue convertedItemValue))
+                    if (valueOrError.IsOption2(out object convertedItemValue))
                     {
                         mapBuilder.Add(keyNode.Value, convertedItemValue);
                     }
@@ -212,13 +212,25 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            return new SettingObject(this, new PMap(mapBuilder));
+            return new SettingObject(this, mapBuilder);
         }
 
         public override Maybe<SettingObject> TryConvertFromMap(PMap map)
-            => new SettingObject(this, map);
+            => throw new Exception();
 
         public override PMap ConvertToPMap(SettingObject value)
-            => value.Map;
+        {
+            var mapBuilder = new Dictionary<string, PValue>();
+
+            foreach (var property in value.Schema.AllProperties)
+            {
+                if (value.KeyValueMapping.TryGetValue(property.Name.Key, out object untypedValue))
+                {
+                    mapBuilder.Add(property.Name.Key, property.ConvertToPValue(untypedValue));
+                }
+            }
+
+            return new PMap(mapBuilder);
+        }
     }
 }
