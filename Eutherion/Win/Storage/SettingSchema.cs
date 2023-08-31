@@ -280,9 +280,6 @@ namespace Eutherion.Win.Storage
             return new SettingObject(this, mapBuilder);
         }
 
-        public override Maybe<SettingObject> TryConvertFromMap(PMap map)
-            => throw new Exception();
-
         public override PMap ConvertToPMap(SettingObject value)
         {
             var mapBuilder = new Dictionary<string, PValue>();

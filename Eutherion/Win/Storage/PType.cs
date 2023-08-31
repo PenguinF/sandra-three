@@ -36,27 +36,7 @@ namespace Eutherion.Win.Storage
         internal abstract Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
 
         /// <summary>
-        /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="value">
-        /// The value to convert from.
-        /// </param>
-        /// <returns>
-        /// The converted value, if conversion succeeds, otherwise <see cref="Maybe{T}.Nothing"/>.
-        /// </returns>
-        public abstract Maybe<T> TryConvert(PValue value);
-
-        /// <summary>
         /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="PValue"/>.
-        /// Assumed is that this is the reverse operation of <see cref="TryConvert(PValue)"/>, i.e.:
-        /// <code>
-        /// if (TryConvert(value).IsJust(out targetValue))
-        /// {
-        ///     PValue convertedValue = GetPValue(targetValue);
-        ///     Debug.Assert(PValueEqualityComparer.Instance.AreEqual(value, convertedValue), "This should always succeed.");
-        /// }
-        /// </code>
-        /// And vice versa.
         /// </summary>
         /// <param name="value">
         /// The value to convert from.

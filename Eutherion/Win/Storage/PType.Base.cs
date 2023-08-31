@@ -116,11 +116,6 @@ namespace Eutherion.Win.Storage
                 ? convertedValue
                 : Union<ITypeErrorBuilder, TValue>.Option1(typeError);
 
-            public override Maybe<TValue> TryConvert(PValue value)
-                => value is TValue targetValue
-                ? targetValue
-                : Maybe<TValue>.Nothing;
-
             public override PValue ConvertToPValue(TValue value) => value;
         }
 
@@ -169,12 +164,6 @@ namespace Eutherion.Win.Storage
                 => BaseType.TryCreateValue(valueNode, errors).Match(
                     whenOption1: Union<ITypeErrorBuilder, T>.Option1,
                     whenOption2: TryGetTargetValue);
-
-            public override sealed Maybe<T> TryConvert(PValue value)
-                => BaseType.TryConvert(value).Bind(
-                    convertedBaseValue => TryGetTargetValue(convertedBaseValue).Match(
-                        whenOption1: _ => Maybe<T>.Nothing,
-                        whenOption2: convertedValue => convertedValue));
 
             public override sealed PValue ConvertToPValue(T value) => BaseType.ConvertToPValue(ConvertToBaseValue(value));
 

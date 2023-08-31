@@ -76,17 +76,6 @@ namespace Eutherion.Win.Storage
                 return TupleItemTypeMismatchError;
             }}
 
-            public override Maybe<({CommaSeparatedList(size, TypeParameter)})> TryConvertFromList(PList list)
-            {{
-                if (list.Count == ExpectedItemCount{ConcatList(size, i => $@"
-                    && ItemTypes.Item{i}.TryConvert(list[{i - 1}]).IsJust(out {TypeParameter(i)} value{i})")})
-                {{
-                    return ({CommaSeparatedList(size, i => $"value{i}")});
-                }}
-
-                return Maybe<({CommaSeparatedList(size, TypeParameter)})>.Nothing;
-            }}
-
             public override PList ConvertToPList(({CommaSeparatedList(size, TypeParameter)}) value)
             {{
                 var ({CommaSeparatedList(size, i => $"value{i}")}) = value;

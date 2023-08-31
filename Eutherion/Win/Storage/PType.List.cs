@@ -65,11 +65,6 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, T> TryCreateFromList(JsonListSyntax jsonListSyntax, ArrayBuilder<PTypeError> errors);
 
-            public sealed override Maybe<T> TryConvert(PValue value)
-                => value is PList list ? TryConvertFromList(list) : Maybe<T>.Nothing;
-
-            public abstract Maybe<T> TryConvertFromList(PList list);
-
             public sealed override PValue ConvertToPValue(T value) => ConvertToPList(value);
 
             public abstract PList ConvertToPList(T value);
@@ -131,22 +126,6 @@ namespace Eutherion.Win.Storage
                 }
 
                 return validTargetValues;
-            }
-
-            public override Maybe<IEnumerable<T>> TryConvertFromList(PList list)
-            {
-                var validValues = new List<T>();
-
-                for (int i = 0; i < list.Count; i++)
-                {
-                    // Error tolerance: ignore items of the wrong type.
-                    if (ItemType.TryConvert(list[i]).IsJust(out T value))
-                    {
-                        validValues.Add(value);
-                    }
-                }
-
-                return validValues;
             }
 
             public override PList ConvertToPList(IEnumerable<T> value) => new PList(value.Select(ItemType.ConvertToPValue));

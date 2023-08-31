@@ -45,11 +45,6 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, T> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors);
 
-            public sealed override Maybe<T> TryConvert(PValue value)
-                => value is PMap map ? TryConvertFromMap(map) : Maybe<T>.Nothing;
-
-            public abstract Maybe<T> TryConvertFromMap(PMap map);
-
             public sealed override PValue ConvertToPValue(T value) => ConvertToPMap(value);
 
             public abstract PMap ConvertToPMap(T value);
@@ -82,22 +77,6 @@ namespace Eutherion.Win.Storage
                     {
                         ITypeErrorBuilder typeError = itemValueOrError.ToOption1();
                         errors.Add(new ValueTypeErrorAtPropertyKey(typeError, keyNode, valueNode));
-                    }
-                }
-
-                return dictionary;
-            }
-
-            public override Maybe<Dictionary<string, T>> TryConvertFromMap(PMap map)
-            {
-                var dictionary = new Dictionary<string, T>();
-
-                foreach (var kv in map)
-                {
-                    // Error tolerance: ignore items of the wrong type.
-                    if (ItemType.TryConvert(kv.Value).IsJust(out T itemValue))
-                    {
-                        dictionary.Add(kv.Key, itemValue);
                     }
                 }
 

@@ -52,18 +52,6 @@ namespace Eutherion.Win.Storage
                 return TupleItemTypeMismatchError;
             }
 
-            public override Maybe<(T1, T2)> TryConvertFromList(PList list)
-            {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2))
-                {
-                    return (value1, value2);
-                }
-
-                return Maybe<(T1, T2)>.Nothing;
-            }
-
             public override PList ConvertToPList((T1, T2) value)
             {
                 var (value1, value2) = value;
@@ -99,19 +87,6 @@ namespace Eutherion.Win.Storage
                 }
 
                 return TupleItemTypeMismatchError;
-            }
-
-            public override Maybe<(T1, T2, T3)> TryConvertFromList(PList list)
-            {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
-                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3))
-                {
-                    return (value1, value2, value3);
-                }
-
-                return Maybe<(T1, T2, T3)>.Nothing;
             }
 
             public override PList ConvertToPList((T1, T2, T3) value)
@@ -153,20 +128,6 @@ namespace Eutherion.Win.Storage
                 return TupleItemTypeMismatchError;
             }
 
-            public override Maybe<(T1, T2, T3, T4)> TryConvertFromList(PList list)
-            {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
-                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3)
-                    && ItemTypes.Item4.TryConvert(list[3]).IsJust(out T4 value4))
-                {
-                    return (value1, value2, value3, value4);
-                }
-
-                return Maybe<(T1, T2, T3, T4)>.Nothing;
-            }
-
             public override PList ConvertToPList((T1, T2, T3, T4) value)
             {
                 var (value1, value2, value3, value4) = value;
@@ -206,21 +167,6 @@ namespace Eutherion.Win.Storage
                 }
 
                 return TupleItemTypeMismatchError;
-            }
-
-            public override Maybe<(T1, T2, T3, T4, T5)> TryConvertFromList(PList list)
-            {
-                if (list.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
-                    && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2)
-                    && ItemTypes.Item3.TryConvert(list[2]).IsJust(out T3 value3)
-                    && ItemTypes.Item4.TryConvert(list[3]).IsJust(out T4 value4)
-                    && ItemTypes.Item5.TryConvert(list[4]).IsJust(out T5 value5))
-                {
-                    return (value1, value2, value3, value4, value5);
-                }
-
-                return Maybe<(T1, T2, T3, T4, T5)>.Nothing;
             }
 
             public override PList ConvertToPList((T1, T2, T3, T4, T5) value)
