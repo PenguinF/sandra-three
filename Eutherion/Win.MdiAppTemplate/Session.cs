@@ -150,7 +150,7 @@ namespace Eutherion.Win.MdiAppTemplate
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
                 SettingKey.ToSnakeCaseKey(nameof(DeveloperMode)),
-                PType.CLR.Boolean,
+                PType.Boolean,
                 new SettingComment($"Enables tools which assist with {ExecutableFileNameWithoutExtension} development and debugging."));
 
             // Attempt to load default settings.
