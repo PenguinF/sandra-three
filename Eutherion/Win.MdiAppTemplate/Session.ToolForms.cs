@@ -174,16 +174,15 @@ namespace Eutherion.Win.MdiAppTemplate
                             SettingCopy localSettingsExample = new SettingCopy(LocalSettings.Settings.Schema);
 
                             var defaultSettingsObject = DefaultSettings.Settings;
-                            foreach (var property in localSettingsExample.Schema.AllProperties)
+                            foreach (var member in localSettingsExample.Schema.AllMembers)
                             {
-                                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
-                                    && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out PValue sourceValue))
+                                if (defaultSettingsObject.Schema.TryGetMember(member.Name, out SettingSchema.Member defaultSettingMember))
                                 {
-                                    localSettingsExample.AddOrReplaceRaw(property, sourceValue);
+                                    localSettingsExample.AssignFrom(member, defaultSettingsObject, defaultSettingMember);
                                 }
                             }
 
-                            return LocalSettings.GenerateJson(
+                            return SettingWriter.ConvertToJson(
                                 localSettingsExample.Commit(),
                                 SettingWriterOptions.CommentOutProperties);
                         }
@@ -219,7 +218,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     () => CreateSettingsEditor(
                         GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
-                        () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
+                        () => SettingWriter.ConvertToJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsAutoSave));
             }
 
@@ -388,13 +387,13 @@ namespace Eutherion.Win.MdiAppTemplate
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
                             // Fill with built-in default dictionary, or if not provided, an empty dictionary.
-                            settingCopy.AddOrReplace(
+                            settingCopy.Set(
                                 Localizers.Translations,
                                 defaultLocalizerDictionary ?? new Dictionary<StringKey<ForFormattedText>, string>());
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
-                            return fileLocalizer.LanguageFile.GenerateJson(
+                            return SettingWriter.ConvertToJson(
                                 settingCopy.Commit(),
                                 SettingWriterOptions.SuppressSettingComments);
                         }

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * FormatUtilities.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,15 +44,19 @@ namespace Eutherion
         /// <remarks>
         /// This implementation differs from <seealso cref="string.Format(string, object[])"/> in the sense
         /// that if a substitution point indexes outside of the args array, it does not throw, but rather replaces with an empty string.
-        /// If <paramref name="format"/> is in an incorrect format, it returns a default representation using <see cref="ToDefaultParameterListDisplayString(string[])"/>.
+        /// If <paramref name="format"/> is in an incorrect format, it returns a default representation
+        /// using <see cref="StringUtilities.ToDefaultParameterListDisplayString(string[])"/>.
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="format"/> is <see langword="null"/>
+        /// </exception>
         public static string SoftFormat(string format, params string[] args)
         {
             int requiredParameterCount = StringUtilities.FormatStringRequiredArgumentCount(format, out bool wouldThrowException);
 
             if (wouldThrowException)
             {
-                // The provided localized format string is in an incorrect format.
+                // The provided format string is in an incorrect format.
                 // Example:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
                 return $"{format}{StringUtilities.ToDefaultParameterListDisplayString(args)}";

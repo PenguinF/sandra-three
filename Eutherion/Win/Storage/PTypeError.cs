@@ -59,18 +59,18 @@ namespace Eutherion.Win.Storage
             => SyntaxNode = syntaxNode ?? throw new ArgumentNullException(nameof(syntaxNode));
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public abstract string GetLocalizedMessage(TextFormatter localizer);
+        public abstract string FormatMessage(TextFormatter formatter);
     }
 
     /// <summary>
@@ -86,19 +86,19 @@ namespace Eutherion.Win.Storage
         private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string GetLocalizedMessage(TextFormatter localizer)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
+        public override string FormatMessage(TextFormatter formatter)
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 PTypeErrorBuilder.DuplicatePropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
 
@@ -132,19 +132,19 @@ namespace Eutherion.Win.Storage
         private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string GetLocalizedMessage(TextFormatter localizer)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
+        public override string FormatMessage(TextFormatter formatter)
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 PTypeErrorBuilder.UnrecognizedPropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
 
@@ -185,32 +185,32 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the string representation of the value for which this error occurred.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string GenerateValueString(TextFormatter localizer)
+        public string GenerateValueString(TextFormatter formatter)
             => ActualValueString.Value
-            ?? (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(PType.JsonUndefinedValue);
+            ?? (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(PType.JsonUndefinedValue);
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string GetLocalizedMessage(TextFormatter localizer)
-            => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                localizer,
-                GenerateValueString(localizer));
+        public override string FormatMessage(TextFormatter formatter)
+            => TypeErrorBuilder.FormatTypeErrorMessage(
+                formatter,
+                GenerateValueString(formatter));
 
         /// <summary>
         /// Initializes a new instance of <see cref="ValueTypeError"/>.
@@ -246,21 +246,21 @@ namespace Eutherion.Win.Storage
         private readonly SafeLazy<string> PropertyKeyDisplayString;
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string GetLocalizedMessage(TextFormatter localizer)
-            => TypeErrorBuilder.GetLocalizedTypeErrorAtPropertyKeyMessage(
-                localizer,
-                GenerateValueString(localizer),
+        public override string FormatMessage(TextFormatter formatter)
+            => TypeErrorBuilder.FormatTypeErrorAtPropertyKeyMessage(
+                formatter,
+                GenerateValueString(formatter),
                 PropertyKeyDisplayString.Value);
 
         /// <summary>
@@ -297,21 +297,21 @@ namespace Eutherion.Win.Storage
         public int ItemIndex { get; }
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string GetLocalizedMessage(TextFormatter localizer)
-            => TypeErrorBuilder.GetLocalizedTypeErrorAtItemIndexMessage(
-                localizer,
-                GenerateValueString(localizer),
+        public override string FormatMessage(TextFormatter formatter)
+            => TypeErrorBuilder.FormatTypeErrorAtItemIndexMessage(
+                formatter,
+                GenerateValueString(formatter),
                 ItemIndex);
 
         /// <summary>

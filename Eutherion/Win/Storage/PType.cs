@@ -26,40 +26,17 @@ using System.Collections.Generic;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a type of <see cref="PValue"/>, which controls the range of values that are possible.
+    /// Represents the type of a value which can be deserialized from and serialized to JSON.
     /// </summary>
     /// <typeparam name="T">
     /// The .NET target <see cref="Type"/> to convert to and from.
     /// </typeparam>
     public abstract class PType<T>
     {
-        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            out T convertedValue,
-            ArrayBuilder<PTypeError> errors);
-
-        /// <summary>
-        /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="value">
-        /// The value to convert from.
-        /// </param>
-        /// <returns>
-        /// The converted value, if conversion succeeds, otherwise <see cref="Maybe{T}.Nothing"/>.
-        /// </returns>
-        public abstract Maybe<T> TryConvert(PValue value);
+        internal abstract Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
 
         /// <summary>
         /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="PValue"/>.
-        /// Assumed is that this is the reverse operation of <see cref="TryConvert(PValue)"/>, i.e.:
-        /// <code>
-        /// if (TryConvert(value).IsJust(out targetValue))
-        /// {
-        ///     PValue convertedValue = GetPValue(targetValue);
-        ///     Debug.Assert(PValueEqualityComparer.Instance.AreEqual(value, convertedValue), "This should always succeed.");
-        /// }
-        /// </code>
-        /// And vice versa.
         /// </summary>
         /// <param name="value">
         /// The value to convert from.
@@ -67,6 +44,6 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The converted target value.
         /// </returns>
-        public abstract PValue GetPValue(T value);
+        public abstract PValue ConvertToPValue(T value);
     }
 }

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * AutoSaveFileNamePair.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetTargetValue((string, string) value)
             => new AutoSaveFileNamePair(value);
 
-        public override (string, string) GetBaseValue(AutoSaveFileNamePair value)
+        public override (string, string) ConvertToBaseValue(AutoSaveFileNamePair value)
             => (value.FileName1, value.FileName2);
     }
 }

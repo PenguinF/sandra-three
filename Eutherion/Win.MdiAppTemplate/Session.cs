@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Session.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -149,8 +149,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
-                new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
-                PType.CLR.Boolean,
+                SettingKey.ToSnakeCaseKey(nameof(DeveloperMode)),
+                PType.Boolean,
                 new SettingComment($"Enables tools which assist with {ExecutableFileNameWithoutExtension} development and debugging."));
 
             // Attempt to load default settings.
@@ -173,7 +173,7 @@ namespace Eutherion.Win.MdiAppTemplate
             registeredLocalizers = Localizers.ScanLocalizers(this, Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
-                new StringKey<SettingProperty>(LangSettingKey),
+                new StringKey<SettingSchema.Member>(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
             // Now attempt to get exclusive write access to the .lock file so it becomes a safe mutex.
@@ -296,13 +296,13 @@ namespace Eutherion.Win.MdiAppTemplate
                 AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
 
                 // After creating the auto-save file, look for a local preferences file.
-                // Create a working copy with correct schema first.
-                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
+                // Create an empty template with correct schema first.
+                SettingObject localSettingsTemplate = SettingObject.CreateEmpty(settingsProvider.CreateLocalSettingsSchema(this));
 
                 // And then create the local settings file which can overwrite values in default settings.
                 LocalSettings = SettingsFile.Create(
                     Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
-                    localSettingsCopy);
+                    localSettingsTemplate);
 
                 if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
                 {
@@ -358,7 +358,13 @@ namespace Eutherion.Win.MdiAppTemplate
             + "settings serve as a template.");
 
         public TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
-            => DefaultSettings.Settings.GetValue(property);
+        {
+            // If a property is not present in DefaultSettings.Settings, then expect TemplateSettings to have it.
+            if (DefaultSettings.Settings.TryGetValue(property, out TValue result)) return result;
+            if (DefaultSettings.TemplateSettings.TryGetValue(property, out result)) return result;
+
+            throw new ArgumentException($"Cannot find value for {property.Name.Key} in default settings.");
+        }
 
         public TValue GetSetting<TValue>(SettingProperty<TValue> property)
         {
@@ -491,12 +497,12 @@ namespace Eutherion.Win.MdiAppTemplate
 
             using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
                 Path.Combine(ExecutableFolder, "Languages", "en.json"),
-                new SettingCopy(Localizers.CreateLanguageFileSchema())))
+                SettingObject.CreateEmpty(Localizers.CreateLanguageFileSchema())))
             {
                 var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
-                settingCopy.AddOrReplace(Localizers.NativeName, "English");
-                settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
-                settingCopy.AddOrReplace(Localizers.Translations, defaultLocalizerDictionary);
+                settingCopy.Set(Localizers.NativeName, "English");
+                settingCopy.Set(Localizers.FlagIconFile, "flag-uk.png");
+                settingCopy.Set(Localizers.Translations, defaultLocalizerDictionary);
 
                 englishFileFromBuiltIn.WriteToFile(
                     settingCopy.Commit(),
@@ -524,7 +530,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the built-in default settings. Its schema is used for the default settings file.
         /// </summary>
-        SettingCopy CreateBuiltIn(Session session);
+        SettingObject CreateBuiltIn(Session session);
 
         /// <summary>
         /// Gets the schema to use for the local preferences file.

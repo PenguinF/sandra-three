@@ -31,26 +31,26 @@ namespace Eutherion.Win.Storage
     public class PTypeErrorBuilder : ITypeErrorBuilder
     {
         /// <summary>
-        /// Gets the translation key for concatenating a list of values.
+        /// Gets the key for concatenating a list of values.
         /// </summary>
         public static readonly StringKey<ForFormattedText> EnumerateWithOr = new StringKey<ForFormattedText>(nameof(EnumerateWithOr));
 
         /// <summary>
-        /// Gets the translation key for duplicate property keys.
+        /// Gets the key for duplicate property keys.
         /// </summary>
         public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyWarning = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyWarning));
 
         /// <summary>
-        /// Gets the translation key for property keys that are not recognized.
+        /// Gets the key for property keys that are not recognized.
         /// </summary>
         public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyWarning = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyWarning));
 
         /// <summary>
-        /// Gets the translation key for a generic json value type error.
+        /// Gets the key for a generic json value type error.
         /// Parameters: 0 = description of expected type, 1 = actual value
         /// Example: "expected an integer value, but found 'false'"
         ///          "expected _______{0}______, but found __{1}__"
-        /// See also: <seealso cref="GetLocalizedTypeErrorMessage"/>.
+        /// See also: <seealso cref="FormatTypeErrorMessage"/>.
         /// </summary>
         public static readonly StringKey<ForFormattedText> GenericJsonTypeError = new StringKey<ForFormattedText>(nameof(GenericJsonTypeError));
 
@@ -62,12 +62,12 @@ namespace Eutherion.Win.Storage
         /// The location could be:
         /// - a key error location (KeyErrorLocation)
         /// - an index error location (IndexErrorLocation)
-        /// See also: <seealso cref="GetLocalizedTypeErrorSomewhereMessage"/>.
+        /// See also: <seealso cref="FormatTypeErrorSomewhereMessage"/>.
         /// </summary>
         public static readonly StringKey<ForFormattedText> GenericJsonTypeErrorSomewhere = new StringKey<ForFormattedText>(nameof(GenericJsonTypeErrorSomewhere));
 
         /// <summary>
-        /// Gets the translation key for displaying an error in the context of a property key.
+        /// Gets the key for displaying an error in the context of a property key.
         /// </summary>
         public static readonly StringKey<ForFormattedText> KeyErrorLocation = new StringKey<ForFormattedText>(nameof(KeyErrorLocation));
 
@@ -77,17 +77,17 @@ namespace Eutherion.Win.Storage
         public static readonly StringKey<ForFormattedText> IndexErrorLocation = new StringKey<ForFormattedText>(nameof(IndexErrorLocation));
 
         /// <summary>
-        /// Gets the translation key for when there are no legal values.
+        /// Gets the key for when there are no legal values.
         /// </summary>
         public static readonly StringKey<ForFormattedText> NoLegalValuesError = new StringKey<ForFormattedText>(nameof(NoLegalValuesError));
 
         /// <summary>
-        /// Gets the translation key for when there are no legal values.
+        /// Gets the key for when there are no legal values.
         /// </summary>
         public static readonly StringKey<ForFormattedText> NoLegalValuesErrorSomewhere = new StringKey<ForFormattedText>(nameof(NoLegalValuesErrorSomewhere));
 
         /// <summary>
-        /// Gets the translation key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.
+        /// Gets the key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.
         /// </summary>
         public static readonly StringKey<ForFormattedText> TupleItemTypeMismatchError = new StringKey<ForFormattedText>(nameof(TupleItemTypeMismatchError));
 
@@ -210,76 +210,76 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the localized error message for a generic json value type error. 
+        /// Gets the formatted error message for a generic json value type error. 
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
-        /// <param name="localizedExpectedTypeDescription">
-        /// A localized description of the type of value that is expected.
+        /// <param name="formattedExpectedTypeDescription">
+        /// A formatted description of the type of value that is expected.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetLocalizedTypeErrorMessage(
-            TextFormatter localizer,
-            string localizedExpectedTypeDescription,
+        public static string FormatTypeErrorMessage(
+            TextFormatter formatter,
+            string formattedExpectedTypeDescription,
             string actualValueString)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 GenericJsonTypeError,
-                localizedExpectedTypeDescription,
+                formattedExpectedTypeDescription,
                 actualValueString);
 
         /// <summary>
-        /// Gets the localized description of an error for a value located at a property key.
+        /// Gets the formatted description of an error for a value located at a property key.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="propertyKey">
         /// The property key for which the error occurred.
         /// </param>
         /// <returns>
-        /// The localized description of the location of the error.
+        /// The formatted description of the location of the error.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetLocatedAtPropertyKeyMessage(TextFormatter localizer, string propertyKey)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(KeyErrorLocation, propertyKey);
+        public static string FormatLocatedAtPropertyKeyMessage(TextFormatter formatter, string propertyKey)
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(KeyErrorLocation, propertyKey);
 
         /// <summary>
-        /// Gets the localized description of an error for a value which is an element of an array.
+        /// Gets the formatted description of an error for a value which is an element of an array.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="itemIndex">
         /// The index of the array where the error occurred.
         /// </param>
         /// <returns>
-        /// The localized description of the location of the error.
+        /// The formatted description of the location of the error.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetLocatedAtItemIndexMessage(TextFormatter localizer, int itemIndex)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(IndexErrorLocation, itemIndex.ToStringInvariant());
+        public static string FormatLocatedAtItemIndexMessage(TextFormatter formatter, int itemIndex)
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
-        /// Gets the localized error message for a generic json value type error. 
+        /// Gets the formatted error message for a generic json value type error. 
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
-        /// <param name="localizedExpectedTypeDescription">
-        /// A localized description of the type of value that is expected.
+        /// <param name="formattedExpectedTypeDescription">
+        /// A formatted description of the type of value that is expected.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
@@ -288,64 +288,62 @@ namespace Eutherion.Win.Storage
         /// The location where the error occurred.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string GetLocalizedTypeErrorSomewhereMessage(
-            TextFormatter localizer,
-            string localizedExpectedTypeDescription,
+        public static string FormatTypeErrorSomewhereMessage(
+            TextFormatter formatter,
+            string formattedExpectedTypeDescription,
             string actualValueString,
             string somewhere)
-            => (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(
+            => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 GenericJsonTypeErrorSomewhere,
-                localizedExpectedTypeDescription,
+                formattedExpectedTypeDescription,
                 actualValueString,
                 somewhere);
 
         /// <summary>
-        /// Gets the translation key which describes the type of expected value.
+        /// Gets the key which describes the type of expected value.
         /// </summary>
-        // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
-        // Instead, GetLocalizedTypeErrorMessage() handles the localization.
         public StringKey<ForFormattedText> ExpectedTypeDescriptionKey { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
         /// </summary>
         /// <param name="expectedTypeDescriptionKey">
-        /// The translation key which describes the type of expected value.
+        /// The key which describes the type of expected value.
         /// </param>
         public PTypeErrorBuilder(StringKey<ForFormattedText> expectedTypeDescriptionKey)
             => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-            => GetLocalizedTypeErrorMessage(
-                localizer,
-                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
+        public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+            => FormatTypeErrorMessage(
+                formatter,
+                (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),
                 actualValueString);
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
@@ -354,23 +352,23 @@ namespace Eutherion.Win.Storage
         /// The property key for which the error occurred.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-            => GetLocalizedTypeErrorSomewhereMessage(
-                localizer,
-                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
+        public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+            => FormatTypeErrorSomewhereMessage(
+                formatter,
+                (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
-                GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+                FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
         /// <summary>
-        /// Gets the localized, context sensitive message for this error.
+        /// Gets the formatted, context sensitive message for this error.
         /// </summary>
-        /// <param name="localizer">
-        /// The localizer to use.
+        /// <param name="formatter">
+        /// The formatter to use.
         /// </param>
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
@@ -379,16 +377,16 @@ namespace Eutherion.Win.Storage
         /// The index of the array where the error occurred.
         /// </param>
         /// <returns>
-        /// The localized error message.
+        /// The formatted error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="localizer"/> is <see langword="null"/>.
+        /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-            => GetLocalizedTypeErrorSomewhereMessage(
-                localizer,
-                (localizer ?? throw new ArgumentNullException(nameof(localizer))).Format(ExpectedTypeDescriptionKey),
+        public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+            => FormatTypeErrorSomewhereMessage(
+                formatter,
+                (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),
                 actualValueString,
-                GetLocatedAtItemIndexMessage(localizer, itemIndex));
+                FormatLocatedAtItemIndexMessage(formatter, itemIndex));
     }
 }

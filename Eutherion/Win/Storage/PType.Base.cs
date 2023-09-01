@@ -65,64 +65,71 @@ namespace Eutherion.Win.Storage
         public static readonly StringKey<ForFormattedText> JsonUndefinedValue = new StringKey<ForFormattedText>(nameof(JsonUndefinedValue));
 
         /// <summary>
-        /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
+        /// Gets the standard <see cref="PType"/> for <see langword="bool"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(JsonBoolean, new ToBoolConverter());
+        public static readonly PType<bool> Boolean = new BaseType<bool>(
+            JsonBoolean,
+            new ToBoolConverter(),
+            value => value ? PConstantValue.True : PConstantValue.False);
 
         /// <summary>
-        /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
+        /// Gets the standard <see cref="PType"/> for <see cref="BigInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(JsonInteger, new ToIntConverter());
+        public static readonly PType<BigInteger> Integer = new BaseType<BigInteger>(
+            JsonInteger,
+            new ToIntConverter(),
+            value => new PInteger(value));
 
         /// <summary>
-        /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
+        /// Gets the standard <see cref="PType"/> for <see cref="string"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
+        public static readonly PType<string> String = new BaseType<string>(
+            JsonString,
+            new ToStringConverter(),
+            value => new PString(value));
 
-        private class ToBoolConverter : JsonValueSyntaxVisitor<Maybe<PBoolean>>
+        private class JsonConverter<T> : JsonValueSyntaxVisitor<Maybe<T>>
         {
-            public override Maybe<PBoolean> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PBoolean>.Nothing;
-            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value, _void arg) => value.Value ? PConstantValue.True : PConstantValue.False;
+            public override Maybe<T> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<T>.Nothing;
         }
 
-        private class ToIntConverter : JsonValueSyntaxVisitor<Maybe<PInteger>>
+        private class ToBoolConverter : JsonConverter<bool>
         {
-            public override Maybe<PInteger> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PInteger>.Nothing;
-            public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value, _void arg) => new PInteger(value.Value);
+            public override Maybe<bool> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value, _void arg) => value.Value;
         }
 
-        private class ToStringConverter : JsonValueSyntaxVisitor<Maybe<PString>>
+        private class ToIntConverter : JsonConverter<BigInteger>
         {
-            public override Maybe<PString> DefaultVisit(JsonValueSyntax node, _void arg) => Maybe<PString>.Nothing;
-            public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value, _void arg) => new PString(value.Value);
+            public override Maybe<BigInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value, _void arg) => value.Value;
+        }
+
+        private class ToStringConverter : JsonConverter<string>
+        {
+            public override Maybe<string> VisitStringLiteralSyntax(JsonStringLiteralSyntax value, _void arg) => value.Value;
         }
 
         private sealed class BaseType<TValue> : PType<TValue>
-            where TValue : PValue
         {
             private readonly PTypeErrorBuilder typeError;
             private readonly JsonValueSyntaxVisitor<Maybe<TValue>> converter;
+            private readonly Func<TValue, PValue> ToPValueConverter;
 
-            public BaseType(StringKey<ForFormattedText> expectedTypeDescriptionKey, JsonValueSyntaxVisitor<Maybe<TValue>> converter)
+            public BaseType(
+                StringKey<ForFormattedText> expectedTypeDescriptionKey,
+                JsonValueSyntaxVisitor<Maybe<TValue>> converter,
+                Func<TValue, PValue> toPValueConverter)
             {
                 typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;
+                ToPValueConverter = toPValueConverter;
             }
 
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out TValue convertedValue,
-                ArrayBuilder<PTypeError> errors)
-                => converter.Visit(valueNode).IsJust(out convertedValue)
+            internal override Union<ITypeErrorBuilder, TValue> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => converter.Visit(valueNode).IsJust(out TValue convertedValue)
                 ? convertedValue
-                : Union<ITypeErrorBuilder, PValue>.Option1(typeError);
+                : Union<ITypeErrorBuilder, TValue>.Option1(typeError);
 
-            public override Maybe<TValue> TryConvert(PValue value)
-                => value is TValue targetValue
-                ? targetValue
-                : Maybe<TValue>.Nothing;
-
-            public override PValue GetPValue(TValue value) => value;
+            public override PValue ConvertToPValue(TValue value) => ToPValueConverter(value);
         }
 
         /// <summary>
@@ -149,7 +156,7 @@ namespace Eutherion.Win.Storage
             /// The base <see cref="PType{TBase}"/> to depend on.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="baseType"/> is null.
+            /// <paramref name="baseType"/> is <see langword="null"/>.
             /// </exception>
             protected Derived(PType<TBase> baseType)
                 => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
@@ -166,30 +173,12 @@ namespace Eutherion.Win.Storage
             protected Union<ITypeErrorBuilder, T> InvalidValue(ITypeErrorBuilder typeError)
                 => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
-            internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors)
-            {
-                T value = default;
+            internal override sealed Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => BaseType.TryCreateValue(valueNode, errors).Match(
+                    whenOption1: Union<ITypeErrorBuilder, T>.Option1,
+                    whenOption2: TryGetTargetValue);
 
-                var result = BaseType.TryCreateValue(valueNode, out TBase convertedBaseValue, errors).Match(
-                    whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
-                    whenOption2: baseValue => TryGetTargetValue(convertedBaseValue).Match(
-                        whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
-                        whenOption2: targetValue => { value = targetValue; return Union<ITypeErrorBuilder, PValue>.Option2(baseValue); }));
-
-                convertedValue = value;
-                return result;
-            }
-
-            public override sealed Maybe<T> TryConvert(PValue value)
-                => BaseType.TryConvert(value).Bind(
-                    convertedBaseValue => TryGetTargetValue(convertedBaseValue).Match(
-                        whenOption1: _ => Maybe<T>.Nothing,
-                        whenOption2: convertedValue => convertedValue));
-
-            public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
+            public override sealed PValue ConvertToPValue(T value) => BaseType.ConvertToPValue(ConvertToBaseValue(value));
 
             /// <summary>
             /// Attempts to convert a <see cref="TBase"/> value to the target .NET type <typeparamref name="T"/>.
@@ -212,7 +201,7 @@ namespace Eutherion.Win.Storage
             /// <returns>
             /// The converted base value.
             /// </returns>
-            public abstract TBase GetBaseValue(T value);
+            public abstract TBase ConvertToBaseValue(T value);
         }
 
         /// <summary>
@@ -233,7 +222,7 @@ namespace Eutherion.Win.Storage
             /// Always returns <paramref name="convertTypeError"/>.
             /// </param>
             /// <returns>
-            /// Always returns false.
+            /// Always returns <see langword="false"/>.
             /// </returns>
             protected bool InvalidValue(ITypeErrorBuilder convertTypeError, out ITypeErrorBuilder typeError)
             {
@@ -245,10 +234,10 @@ namespace Eutherion.Win.Storage
             /// Helper method to indicate a successful conversion in <see cref="IsValid(T, out ITypeErrorBuilder)"/>.
             /// </summary>
             /// <param name="typeError">
-            /// Always returns null.
+            /// Always returns <see langword="null"/>.
             /// </param>
             /// <returns>
-            /// Always returns true.
+            /// Always returns <see langword="true"/>.
             /// </returns>
             protected bool ValidValue(out ITypeErrorBuilder typeError)
             {
@@ -268,7 +257,7 @@ namespace Eutherion.Win.Storage
             /// A type error, if the candidate value is invalid.
             /// </param>
             /// <returns>
-            /// True if the candidate value is valid; otherwise false.
+            /// <see langword="true"/> if the candidate value is valid; otherwise <see langword="false"/>.
             /// </returns>
             public abstract bool IsValid(T candidateValue, out ITypeErrorBuilder typeError);
 
@@ -277,7 +266,7 @@ namespace Eutherion.Win.Storage
                 ? candidateValue
                 : InvalidValue(typeError);
 
-            public override sealed T GetBaseValue(T value)
+            public override sealed T ConvertToBaseValue(T value)
             {
                 if (!IsValid(value, out _))
                 {
@@ -291,7 +280,20 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
+        /// <summary>
+        /// Aliases a base type.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to alias.
+        /// </typeparam>
+        public abstract class Alias<T> : Filter<T>
+        {
+            protected Alias(PType<T> baseType) : base(baseType) { }
+
+            public sealed override bool IsValid(T candidateValue, out ITypeErrorBuilder typeError) { typeError = default; return true; }
+        }
+
+        public sealed class RangedInteger : Filter<BigInteger>, ITypeErrorBuilder
         {
             /// <summary>
             /// Gets the minimum value which is allowed for values of this type.
@@ -318,37 +320,60 @@ namespace Eutherion.Win.Storage
                 MaxValue = maxValue;
             }
 
-            public override bool IsValid(PInteger candidateValue, out ITypeErrorBuilder typeError)
-                => MinValue <= candidateValue.Value
-                && candidateValue.Value <= MaxValue
+            public override bool IsValid(BigInteger candidateValue, out ITypeErrorBuilder typeError)
+                => MinValue <= candidateValue
+                && candidateValue <= MaxValue
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            private string LocalizedExpectedTypeDescription(TextFormatter localizer)
-                => localizer.Format(
+            private static string FormatExpectedTypeDescription(TextFormatter formatter, BigInteger minValue, BigInteger maxValue)
+                => formatter.Format(
                     RangedJsonInteger,
-                    MinValue.ToStringInvariant(),
-                    MaxValue.ToStringInvariant());
+                    minValue.ToStringInvariant(),
+                    maxValue.ToStringInvariant());
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public static string FormatTypeErrorMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                BigInteger minValue,
+                BigInteger maxValue)
+                => PTypeErrorBuilder.FormatTypeErrorMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public static string FormatTypeErrorAtPropertyKeyMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                string propertyKey,
+                BigInteger minValue,
+                BigInteger maxValue)
+                => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString,
-                    PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+                    PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                    localizer,
-                    LocalizedExpectedTypeDescription(localizer),
+            public static string FormatTypeErrorAtItemIndexMessage(
+                TextFormatter formatter,
+                string actualValueString,
+                int itemIndex,
+                BigInteger minValue,
+                BigInteger maxValue)
+                => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                    formatter,
+                    FormatExpectedTypeDescription(formatter, minValue, maxValue),
                     actualValueString,
-                    PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+                    PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
+
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
+
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
+
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

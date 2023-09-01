@@ -89,6 +89,6 @@ namespace Eutherion.Win.MdiAppTemplate
         public override string GetErrorMessage(Union<JsonErrorInfo, PTypeError> error)
             => error.Match(
                 whenOption1: x => x.Message(Session.Current.CurrentLocalizer),
-                whenOption2: x => x.GetLocalizedMessage(Session.Current.CurrentLocalizer));
+                whenOption2: x => x.FormatMessage(Session.Current.CurrentLocalizer));
     }
 }

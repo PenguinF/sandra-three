@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PValue.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ namespace Eutherion.Win.Storage
         public virtual void VisitList(PList value) => DefaultVisit(value);
         public virtual void VisitMap(PMap value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
-        public virtual void VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -64,7 +63,6 @@ namespace Eutherion.Win.Storage
         public virtual TResult VisitList(PList value) => DefaultVisit(value);
         public virtual TResult VisitMap(PMap value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
-        public virtual TResult VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -80,7 +78,6 @@ namespace Eutherion.Win.Storage
         public virtual TResult VisitList(PList value, T arg) => DefaultVisit(value, arg);
         public virtual TResult VisitMap(PMap value, T arg) => DefaultVisit(value, arg);
         public virtual TResult VisitString(PString value, T arg) => DefaultVisit(value, arg);
-        public virtual TResult VisitUndefined(PUndefined value, T arg) => DefaultVisit(value, arg);
     }
 
     /// <summary>
@@ -126,27 +123,10 @@ namespace Eutherion.Win.Storage
     }
 
     /// <summary>
-    /// Represents an invalid or undefined <see cref="PValue"/>.
-    /// </summary>
-    public sealed class PUndefined : PValue
-    {
-        internal PUndefined() { }
-
-        void PValue.Accept(PValueVisitor visitor) => visitor.VisitUndefined(this);
-        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitUndefined(this);
-        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefined(this, arg);
-    }
-
-    /// <summary>
     /// Contains constant a number of useful <see cref="PValue"/>s.
     /// </summary>
     public static class PConstantValue
     {
-        /// <summary>
-        /// Gets the undefined <see cref="PValue"/>.
-        /// </summary>
-        public static readonly PUndefined Undefined = new PUndefined();
-
         /// <summary>
         /// Gets the false <see cref="PValue"/>.
         /// </summary>
@@ -161,7 +141,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Determines equality of two <see cref="PValue"/>s.
     /// </summary>
-    public sealed class PValueEqualityComparer : PValueVisitor<bool>
+    public sealed class PValueEqualityComparer : PValueVisitor<PValue, bool>
     {
         public static readonly PValueEqualityComparer Instance = new PValueEqualityComparer();
 
@@ -188,28 +168,22 @@ namespace Eutherion.Win.Storage
             if (y == null || x.GetType() != y.GetType()) return false;
 
             // Only call visit after knowing that both types are exactly the same.
-            compareValue = y;
-            return Visit(x);
+            return Visit(x, y);
         }
 
-        private PValue compareValue;
-
-        public override bool VisitBoolean(PBoolean value)
+        public override bool VisitBoolean(PBoolean value, PValue compareValue)
             => value.Value == ((PBoolean)compareValue).Value;
 
-        public override bool VisitInteger(PInteger value)
+        public override bool VisitInteger(PInteger value, PValue compareValue)
             => value.Value == ((PInteger)compareValue).Value;
 
-        public override bool VisitList(PList value)
+        public override bool VisitList(PList value, PValue compareValue)
             => value.EqualTo((PList)compareValue);
 
-        public override bool VisitMap(PMap value)
+        public override bool VisitMap(PMap value, PValue compareValue)
             => value.EqualTo((PMap)compareValue);
 
-        public override bool VisitString(PString value)
+        public override bool VisitString(PString value, PValue compareValue)
             => value.Value == ((PString)compareValue).Value;
-
-        // Return true for all undefined values, so change detection code ignores them.
-        public override bool VisitUndefined(PUndefined value) => true;
     }
 }

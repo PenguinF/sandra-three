@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingWriter.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,19 +27,36 @@ using System.Text;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a single iteration of writing settings to a file.
+    /// Represents a single iteration of writing settings to a string.
     /// </summary>
-    internal class SettingWriter : CompactSettingWriter
+    public class SettingWriter : CompactSettingWriter
     {
         public const int Indentation = 2;
         public const char SpaceChar = ' ';
 
         private const int maxLineLength = 80;
 
-        public static string ConvertToJson(PMap map, SettingSchema schema, SettingWriterOptions options)
+        /// <summary>
+        /// Serializes a <see cref="SettingObject"/> to JSON.
+        /// </summary>
+        /// <param name="settingObject">
+        /// The <see cref="SettingObject"/> to serialize.
+        /// </param>
+        /// <param name="options">
+        /// The options to use.
+        /// </param>
+        /// <returns>
+        /// The serialized JSON.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settingObject"/> is <see langword="null"/>.
+        /// </exception>
+        public static string ConvertToJson(SettingObject settingObject, SettingWriterOptions options)
         {
-            SettingWriter writer = new SettingWriter(schema, options);
-            writer.Visit(map);
+            if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
+
+            SettingWriter writer = new SettingWriter(settingObject.Schema, options);
+            writer.Visit(settingObject.ConvertToMap());
 
             // End files with a newline character.
             writer.outputBuilder.AppendLine();
@@ -114,7 +131,7 @@ namespace Eutherion.Win.Storage
 
         private readonly SettingWriterOptions options;
 
-        public SettingWriter(SettingSchema schema, SettingWriterOptions options)
+        private SettingWriter(SettingSchema schema, SettingWriterOptions options)
         {
             this.schema = schema;
             this.options = options;
@@ -221,10 +238,10 @@ namespace Eutherion.Win.Storage
 
                 string name = kv.Key;
                 if ((options & SettingWriterOptions.SuppressSettingComments) == 0
-                    && schema.TryGetProperty(new StringKey<SettingProperty>(name), out SettingProperty property))
+                    && schema.TryGetDescription(new StringKey<SettingSchema.Member>(name)).IsJust(out SettingComment description))
                 {
                     if (extraNewLineBeforeComment) outputBuilder.AppendLine();
-                    AppendCommentLines(property.Description);
+                    AppendCommentLines(description);
                 }
 
                 // This assumes that all default setting values fit on one line.

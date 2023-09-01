@@ -40,16 +40,21 @@ namespace Eutherion.Win.Storage
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
-                out ItemT convertedTargetValue,
-                out PValue value)
+                out ItemT value,
+                bool allowMissingValues)
             {
                 JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode;
-                var itemValueOrError = itemType.TryCreateValue(itemNode, out convertedTargetValue, errors);
 
-                if (itemValueOrError.IsOption2(out value))
+                if (allowMissingValues && itemNode is JsonMissingValueSyntax)
                 {
-                    return true;
+                    // Don't report anything. But no conversion either.
+                    value = default;
+                    return false;
                 }
+
+                var itemValueOrError = itemType.TryCreateValue(itemNode, errors);
+
+                if (itemValueOrError.IsOption2(out value)) return true;
 
                 // Report type error at this index.
                 itemValueOrError.IsOption1(out ITypeErrorBuilder itemTypeError);
@@ -57,40 +62,25 @@ namespace Eutherion.Win.Storage
                 return false;
             }
 
-            internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-                JsonValueSyntax valueNode,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal sealed override Union<ITypeErrorBuilder, T> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax)
                 {
-                    return TryCreateFromList(jsonListSyntax, out convertedValue, errors).Match(
-                        whenOption1: error => Union<ITypeErrorBuilder, PValue>.Option1(error),
-                        whenOption2: list => list);
+                    return TryCreateFromList(jsonListSyntax, errors);
                 }
 
-                convertedValue = default;
                 return ListTypeError;
             }
 
-            internal abstract Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                JsonListSyntax jsonListSyntax,
-                out T convertedValue,
-                ArrayBuilder<PTypeError> errors);
+            internal abstract Union<ITypeErrorBuilder, T> TryCreateFromList(JsonListSyntax jsonListSyntax, ArrayBuilder<PTypeError> errors);
 
-            public sealed override Maybe<T> TryConvert(PValue value)
-                => value is PList list ? TryConvertFromList(list) : Maybe<T>.Nothing;
+            public sealed override PValue ConvertToPValue(T value) => ConvertToPList(value);
 
-            public abstract Maybe<T> TryConvertFromList(PList list);
-
-            public sealed override PValue GetPValue(T value)
-                => GetBaseValue(value);
-
-            public abstract PList GetBaseValue(T value);
+            public abstract PList ConvertToPList(T value);
         }
 
         /// <summary>
-        /// A tuple with a fixed number of items greater than one, each item having a defined type.
+        /// A tuple with a fixed number of items, each item having a defined type.
         /// </summary>
         public abstract class TupleTypeBase<T> : ListBase<T>
         {
@@ -99,8 +89,7 @@ namespace Eutherion.Win.Storage
                 JsonListSyntax jsonListSyntax,
                 int itemIndex,
                 ArrayBuilder<PTypeError> errors,
-                out ItemT convertedTargetValue,
-                out PValue value)
+                out ItemT value)
             {
                 if (itemIndex < jsonListSyntax.ListItemNodes.Count)
                 {
@@ -109,11 +98,10 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out convertedTargetValue,
-                        out value);
+                        out value,
+                        allowMissingValues: false);
                 }
 
-                convertedTargetValue = default;
                 value = default;
                 return false;
             }
@@ -126,16 +114,11 @@ namespace Eutherion.Win.Storage
         {
             public PType<T> ItemType { get; }
 
-            public ValueList(PType<T> itemType)
-                => ItemType = itemType;
+            public ValueList(PType<T> itemType) => ItemType = itemType;
 
-            internal override Union<ITypeErrorBuilder, PList> TryCreateFromList(
-                JsonListSyntax jsonListSyntax,
-                out IEnumerable<T> convertedValue,
-                ArrayBuilder<PTypeError> errors)
+            internal override Union<ITypeErrorBuilder, IEnumerable<T>> TryCreateFromList(JsonListSyntax jsonListSyntax, ArrayBuilder<PTypeError> errors)
             {
                 var validTargetValues = new List<T>();
-                var validValues = new List<PValue>();
                 int itemNodeCount = jsonListSyntax.ListItemNodes.Count;
 
                 for (int itemIndex = 0; itemIndex < itemNodeCount; itemIndex++)
@@ -146,36 +129,17 @@ namespace Eutherion.Win.Storage
                         jsonListSyntax,
                         itemIndex,
                         errors,
-                        out T convertedTargetValue,
-                        out PValue value))
+                        out T value,
+                        allowMissingValues: true))
                     {
-                        validTargetValues.Add(convertedTargetValue);
-                        validValues.Add(value);
+                        validTargetValues.Add(value);
                     }
                 }
 
-                convertedValue = validTargetValues;
-                return new PList(validValues);
+                return validTargetValues;
             }
 
-            public override Maybe<IEnumerable<T>> TryConvertFromList(PList list)
-            {
-                var validValues = new List<T>();
-
-                for (int i = 0; i < list.Count; i++)
-                {
-                    // Error tolerance: ignore items of the wrong type.
-                    if (ItemType.TryConvert(list[i]).IsJust(out T value))
-                    {
-                        validValues.Add(value);
-                    }
-                }
-
-                return validValues;
-            }
-
-            public override PList GetBaseValue(IEnumerable<T> value)
-                => new PList(value.Select(ItemType.GetPValue));
+            public override PList ConvertToPList(IEnumerable<T> value) => new PList(value.Select(ItemType.ConvertToPValue));
         }
     }
 }

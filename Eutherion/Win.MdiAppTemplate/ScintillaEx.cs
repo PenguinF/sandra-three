@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ScintillaEx.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ namespace Eutherion.Win.MdiAppTemplate
         }
     }
 
-    public sealed class ScintillaZoomFactor : PType.Derived<PInteger, int>
+    public sealed class ScintillaZoomFactor : PType.Alias<int>
     {
         /// <summary>
         /// Returns the minimum recommended value for the zoom factor
@@ -269,12 +269,6 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static readonly ScintillaZoomFactor Instance = new ScintillaZoomFactor();
 
-        private ScintillaZoomFactor() : base(new PType.RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
-
-        public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-            => (int)integer.Value;
-
-        public override PInteger GetBaseValue(int value)
-            => new PInteger(value);
+        private ScintillaZoomFactor() : base(new PType.CLR.RangedInt32(MinDiscreteValue, MaxDiscreteValue)) { }
     }
 }

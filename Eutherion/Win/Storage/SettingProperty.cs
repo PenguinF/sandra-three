@@ -19,9 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text.Json;
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
 {
@@ -33,7 +31,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
-        public StringKey<SettingProperty> Name { get; }
+        public StringKey<SettingSchema.Member> Name { get; }
 
         /// <summary>
         /// Gets the built-in description of the property in a settings file.
@@ -50,42 +48,15 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the property in a settings file.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> is null.
+        /// <paramref name="name"/> is <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, SettingComment description)
+        public SettingProperty(StringKey<SettingSchema.Member> name, SettingComment description)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Description = description;
         }
 
-        /// <summary>
-        /// Returns if a raw <see cref="PValue"/> can be converted to the target .NET type of this property.
-        /// </summary>
-        /// <param name="value">
-        /// The value to convert from.
-        /// </param>
-        /// <returns>
-        /// Whether or not conversion will succeed.
-        /// </returns>
-        public abstract bool IsValidValue(PValue value);
-
-        /// <summary>
-        /// Type-checks a context free value syntax while parsing json.
-        /// Parameters other than <paramref name="valueNode"/> are given for type error construction.
-        /// </summary>
-        /// <param name="valueNode">
-        /// The value node to type-check.
-        /// </param>
-        /// <param name="errors">
-        /// The list of inner errors to which new type errors can be added.
-        /// </param>
-        /// <returns>
-        /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
-        /// or the converted <see cref="PValue"/> if the type check succeeded.
-        /// </returns>
-        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            ArrayBuilder<PTypeError> errors);
+        internal abstract SettingSchema.Member CreateSchemaMember(SettingSchema ownerSchema);
     }
 
     /// <summary>
@@ -94,7 +65,7 @@ namespace Eutherion.Win.Storage
     /// <typeparam name="T">
     /// The .NET target <see cref="Type"/> to convert to and from.
     /// </typeparam>
-    public class SettingProperty<T> : SettingProperty
+    public sealed class SettingProperty<T> : SettingProperty
     {
         /// <summary>
         /// Gets the type of value that it contains.
@@ -111,9 +82,9 @@ namespace Eutherion.Win.Storage
         /// The type of value that it contains.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
+        /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType) : this(name, pType, null)
+        public SettingProperty(StringKey<SettingSchema.Member> name, PType<T> pType) : this(name, pType, null)
         {
         }
 
@@ -130,19 +101,14 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the property in a settings file.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
+        /// <paramref name="name"/> and/or <paramref name="pType"/> are <see langword="null"/>.
         /// </exception>
-        public SettingProperty(StringKey<SettingProperty> name, PType<T> pType, SettingComment description) : base(name, description)
+        public SettingProperty(StringKey<SettingSchema.Member> name, PType<T> pType, SettingComment description) : base(name, description)
         {
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
 
-        public sealed override bool IsValidValue(PValue value)
-            => !PType.TryConvert(value).IsNothing;
-
-        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
-            JsonValueSyntax valueNode,
-            ArrayBuilder<PTypeError> errors)
-            => PType.TryCreateValue(valueNode, out _, errors);
+        internal override SettingSchema.Member CreateSchemaMember(SettingSchema ownerSchema)
+            => new SettingSchema.Member<T>(ownerSchema, Name, PType);
     }
 }

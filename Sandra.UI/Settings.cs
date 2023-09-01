@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Settings.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Storage;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -36,29 +34,23 @@ namespace Sandra.UI
             = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
 
         public static readonly SettingProperty<int> Version = new SettingProperty<int>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Version))),
+            SettingKey.ToSnakeCaseKey(nameof(Version)),
             VersionRange.Instance,
             new SettingComment(VersionDescription));
 
-        private sealed class VersionRange : PType.Derived<PInteger, int>
+        private sealed class VersionRange : PType.Alias<int>
         {
             public static readonly VersionRange Instance = new VersionRange();
 
-            private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
-
-            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => (int)integer.Value;
-
-            public override PInteger GetBaseValue(int value)
-                => new PInteger(value);
+            private VersionRange() : base(new PType.CLR.RangedInt32(1, 1)) { }
         }
 
         public static readonly SettingProperty<IEnumerable<PersistableFormState>> Windows = new SettingProperty<IEnumerable<PersistableFormState>>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Windows))),
+            SettingKey.ToSnakeCaseKey(nameof(Windows)),
             new PType.ValueList<PersistableFormState>(PersistableFormState.Type));
 
         public static readonly SettingProperty<int> PgnZoom = new SettingProperty<int>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(PgnZoom))),
+            SettingKey.ToSnakeCaseKey(nameof(PgnZoom)),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -66,24 +58,18 @@ namespace Sandra.UI
             + $"This value must be between {FastNavigationPlyCountRange.MinPlyCount} and {FastNavigationPlyCountRange.MaxPlyCount}.";
 
         public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
+            SettingKey.ToSnakeCaseKey(nameof(FastNavigationPlyCount)),
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
 
-        private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
+        private sealed class FastNavigationPlyCountRange : PType.Alias<int>
         {
             public static readonly int MinPlyCount = 2;
             public static readonly int MaxPlyCount = 40;
 
             public static readonly FastNavigationPlyCountRange Instance = new FastNavigationPlyCountRange();
 
-            private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
-
-            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => (int)integer.Value;
-
-            public override PInteger GetBaseValue(int value)
-                => new PInteger(value);
+            private FastNavigationPlyCountRange() : base(new PType.CLR.RangedInt32(MinPlyCount, MaxPlyCount)) { }
         }
 
         private static readonly string DarkSquareColorDescription
@@ -91,7 +77,7 @@ namespace Sandra.UI
             + "for example \"#808000\" is the Olive color.";
 
         public static readonly SettingProperty<Color> DarkSquareColor = new SettingProperty<Color>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DarkSquareColor))),
+            SettingKey.ToSnakeCaseKey(nameof(DarkSquareColor)),
             OpaqueColorType.Instance,
             new SettingComment(DarkSquareColorDescription));
 
@@ -100,7 +86,7 @@ namespace Sandra.UI
             + "for example \"#F0E68C\" is the Khaki color.";
 
         public static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
+            SettingKey.ToSnakeCaseKey(nameof(LightSquareColor)),
             OpaqueColorType.Instance,
             new SettingComment(LightSquareColorDescription));
 
@@ -109,7 +95,7 @@ namespace Sandra.UI
             + "for example \"#DC143C\" is the Crimson color.";
 
         public static readonly SettingProperty<Color> LastMoveArrowColor = new SettingProperty<Color>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
+            SettingKey.ToSnakeCaseKey(nameof(LastMoveArrowColor)),
             OpaqueColorType.Instance,
             new SettingComment(LastMoveArrowColorDescription));
 
@@ -117,8 +103,8 @@ namespace Sandra.UI
             = "Whether or not to display all legal target squares of a piece when it is selected.";
 
         public static readonly SettingProperty<bool> DisplayLegalTargetSquares = new SettingProperty<bool>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
-            PType.CLR.Boolean,
+            SettingKey.ToSnakeCaseKey(nameof(DisplayLegalTargetSquares)),
+            PType.Boolean,
             new SettingComment(DisplayLegalTargetSquaresDescription));
 
         private static readonly string LegalTargetSquaresColorDescription
@@ -126,7 +112,7 @@ namespace Sandra.UI
             + "for example \"#B0E0E6\" is the PowderBlue color.";
 
         public static readonly SettingProperty<Color> LegalTargetSquaresColor = new SettingProperty<Color>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(LegalTargetSquaresColor))),
+            SettingKey.ToSnakeCaseKey(nameof(LegalTargetSquaresColor)),
             OpaqueColorType.Instance,
             new SettingComment(LegalTargetSquaresColorDescription));
     }
@@ -175,23 +161,23 @@ namespace Sandra.UI
                 session.DeveloperMode);
         }
 
-        public SettingCopy CreateBuiltIn(Session session)
+        public SettingObject CreateBuiltIn(Session session)
         {
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
-            defaultSettings.AddOrReplace(SettingKeys.Version, 1);
-            defaultSettings.AddOrReplace(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
-            defaultSettings.AddOrReplace(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
-            defaultSettings.AddOrReplace(session.DeveloperMode, false);
-            defaultSettings.AddOrReplace(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
-            defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
-            defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
-            defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);
-            defaultSettings.AddOrReplace(SettingKeys.DisplayLegalTargetSquares, true);
-            defaultSettings.AddOrReplace(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
-            defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
+            defaultSettings.Set(SettingKeys.Version, 1);
+            defaultSettings.Set(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.Set(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
+            defaultSettings.Set(session.DeveloperMode, false);
+            defaultSettings.Set(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
+            defaultSettings.Set(SettingKeys.DarkSquareColor, Color.LightBlue);
+            defaultSettings.Set(SettingKeys.LightSquareColor, Color.Azure);
+            defaultSettings.Set(SettingKeys.LastMoveArrowColor, Color.DimGray);
+            defaultSettings.Set(SettingKeys.DisplayLegalTargetSquares, true);
+            defaultSettings.Set(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
+            defaultSettings.Set(SettingKeys.FastNavigationPlyCount, 10);
 
-            return defaultSettings;
+            return defaultSettings.Commit();
         }
     }
 }

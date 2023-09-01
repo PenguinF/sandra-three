@@ -28,19 +28,19 @@ using System.Linq;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents the mutable working copy of a <see cref="SettingObject"/>.
+    /// Represents a mutable working copy of a <see cref="SettingObject"/>.
     /// </summary>
-    public class SettingCopy
+    public sealed class SettingCopy
     {
         /// <summary>
         /// Gets the schema for this <see cref="SettingCopy"/>.
         /// </summary>
-        public readonly SettingSchema Schema;
+        public SettingSchema Schema { get; }
 
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        private readonly Dictionary<string, PValue> KeyValueMapping;
+        private readonly Dictionary<string, object> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
@@ -49,17 +49,64 @@ namespace Eutherion.Win.Storage
         /// The schema to use.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="schema"/> is null.
+        /// <paramref name="schema"/> is <see langword="null"/>.
         /// </exception>
         public SettingCopy(SettingSchema schema)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            KeyValueMapping = new Dictionary<string, PValue>();
+            KeyValueMapping = new Dictionary<string, object>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SettingCopy"/>.
+        /// </summary>
+        /// <param name="schema">
+        /// The schema to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> and/or <paramref name="keyValueMapping"/> are <see langword="null"/>.
+        /// </exception>
+        public SettingCopy(SettingSchema schema, IDictionary<string, object> keyValueMapping)
+        {
+            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            KeyValueMapping = new Dictionary<string, object>(keyValueMapping);
+        }
+
+        /// <summary>
+        /// Adds or replaces a value associated with a member.
+        /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the member.
+        /// </typeparam>
+        /// <param name="member">
+        /// The member for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the member.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
+        public void Set<TValue>(SettingSchema.Member<TValue> member, TValue value)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+
+            // Passed in member must have the same schema.
+            // Passed in value is guaranteed to have the correct type if this check succeeds.
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+
+            KeyValueMapping[member.Name.Key] = value;
         }
 
         /// <summary>
         /// Adds or replaces a value associated with a property.
         /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
         /// <param name="property">
         /// The property for which to add or replace the value.
         /// </param>
@@ -67,120 +114,115 @@ namespace Eutherion.Win.Storage
         /// The new value to associate with the property.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
-        public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
+        public void Set<TValue>(SettingProperty<TValue> property, TValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            AddOrReplaceRaw(property, property.PType.GetPValue(value));
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType)
+            {
+                Set(typedMember, value);
+            }
         }
 
         /// <summary>
-        /// Adds or replaces a value from a source <see cref="SettingObject"/> with a different schema.
+        /// Removes a value associated with a member.
         /// </summary>
-        /// <param name="property">
-        /// The property for which to add or replace the value.
-        /// </param>
-        /// <param name="value">
-        /// The new value to associate with the property.
+        /// <param name="member">
+        /// The member for which to remove the value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
+        /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
-        public void AddOrReplaceRaw(SettingProperty property, PValue value)
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
+        public void Unset(SettingSchema.Member member)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (member == null) throw new ArgumentNullException(nameof(member));
 
-            if (Schema.ContainsProperty(property) && property.IsValidValue(value))
-            {
-                KeyValueMapping[property.Name.Key] = value;
-            }
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+            KeyValueMapping.Remove(member.Name.Key);
         }
 
         /// <summary>
         /// Removes a value associated with a property.
         /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
         /// <param name="property">
         /// The property for which to remove the value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
-        public void Remove<TValue>(SettingProperty<TValue> property)
+        public void Unset<TValue>(SettingProperty<TValue> property)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            if (Schema.ContainsProperty(property))
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType)
             {
-                KeyValueMapping.Remove(property.Name.Key);
+                Unset(typedMember);
             }
         }
 
         /// <summary>
-        /// Reverts to the state of a <see cref="SettingObject"/>.
+        /// Adds, replaces, or removes a value from another <see cref="SettingObject"/> with a potentially different schema.
         /// </summary>
-        /// <param name="settingObject">
-        /// The <see cref="SettingObject"/> to revert to.
+        /// <param name="member">
+        /// The member for which to add or replace the value.
+        /// </param>
+        /// <param name="otherObject">
+        /// The other <see cref="SettingObject"/> to copy the source value from.
+        /// </param>
+        /// <param name="otherMember">
+        /// The <see cref="SettingSchema.Member"/> of <paramref name="otherObject"/> that holds the source value.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settingObject"/> is null.
+        /// <paramref name="member"/> and/or <paramref name="otherObject"/> and/or <paramref name="otherMember"/> are <see langword="null"/>.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="settingObject"/> does not have the same schema.
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> and/or <paramref name="otherMember"/> has different schemas than expected.
         /// </exception>
-        public void Revert(SettingObject settingObject)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> and <paramref name="otherMember"/> have incompatible types.
+        /// </exception>
+        /// <remarks>
+        /// If a member exists in the source object but its value is undefined, the value becomes undefined in this object as well.
+        /// </remarks>
+        public void AssignFrom(SettingSchema.Member member, SettingObject otherObject, SettingSchema.Member otherMember)
         {
-            if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
-            if (settingObject.Schema != Schema) throw new ArgumentException($"Cannot revert to a {nameof(SettingObject)} with a different schema.");
+            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (otherObject == null) throw new ArgumentNullException(nameof(otherObject));
+            if (otherMember == null) throw new ArgumentNullException(nameof(otherMember));
 
-            // Clear out the mapping before copying key-value pairs.
-            KeyValueMapping.Clear();
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+            otherObject.Schema.ThrowIfNonMatchingSchema(otherMember.OwnerSchema);
 
-            // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in settingObject.Map)
+            // With schemas being correct, we can now test if the types are compatible.
+            member.ThrowIfNonMatchingType(otherMember);
+
+            if (otherObject.TryGetUntypedValue(otherMember, out object otherValue))
             {
-                KeyValueMapping.Add(kv.Key, kv.Value);
+                KeyValueMapping[member.Name.Key] = otherValue;
+            }
+            else
+            {
+                KeyValueMapping.Remove(member.Name.Key);
             }
         }
 
         /// <summary>
         /// Commits this working <see cref="SettingCopy"/> to a new <see cref="SettingObject"/>.
         /// </summary>
-        public SettingObject Commit() => new SettingObject(this);
-
-        /// <summary>
-        /// Compares this <see cref="SettingCopy"/> with a <see cref="SettingObject"/> and returns if they are equal.
-        /// </summary>
-        /// <param name="other">
-        /// The <see cref="SettingObject"/> to compare with.
-        /// </param>
-        /// <returns>
-        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
-        /// <remarks>
-        /// This is not the same as complete equality, in particular this method returns true from the following expression:
-        /// <code>
-        /// workingCopy.Commit().EqualTo(workingCopy)
-        /// </code>
-        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
-        /// <code>
-        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
-        /// </code>
-        /// </remarks>
-        public bool EqualTo(SettingObject other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            return ToPMap().EqualTo(other.Map);
-        }
-
-        internal PMap ToPMap() => new PMap(KeyValueMapping);
+        public SettingObject Commit() => new SettingObject(Schema, new Dictionary<string, object>(KeyValueMapping));
 
         /// <summary>
         /// Loads settings from text.
@@ -192,12 +234,16 @@ namespace Eutherion.Win.Storage
             if (settingSyntaxTree.SettingObject != null)
             {
                 // Error tolerance:
-                // 1) Even if there are errors, still load the map.
+                // 1) Even if there are errors, still load the object.
                 // 2) Don't clear the existing settings, only overwrite them.
-                //    The map might not contain all expected properties.
-                foreach (var kv in settingSyntaxTree.SettingObject.Map)
+                //    The other object might not contain all expected members.
+                foreach (var member in Schema.AllMembers)
                 {
-                    KeyValueMapping[kv.Key] = kv.Value;
+                    if (settingSyntaxTree.SettingObject.Schema.TryGetMember(member.Name, out var otherMember)
+                        && settingSyntaxTree.SettingObject.IsSet(otherMember))
+                    {
+                        AssignFrom(member, settingSyntaxTree.SettingObject, otherMember);
+                    }
                 }
             }
 
@@ -212,8 +258,11 @@ namespace Eutherion.Win.Storage
             var typeErrors = settingSyntaxTree.TypeErrors;
             if (typeErrors.Any())
             {
+                // Allow loading from auto-save files with type errors, e.g. when a previously known auto-save property
+                // has disappeared, such values should be ignored.
+                // This is not the appropriate place to check if the parsed json is complete, since a length check
+                // on the stored file has already been performed when it was loaded.
                 typeErrors.ForEach(x => new SettingsParseException(x).Trace());
-                return false;
             }
 
             return true;
@@ -225,14 +274,14 @@ namespace Eutherion.Win.Storage
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
             string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(
-                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetLocalizedDisplayValue(x, TextFormatter.Default)));
+                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, TextFormatter.Default)));
 
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
         public static string AutoSaveFileParseMessage(PTypeError typeError)
         {
-            return $"{typeError.GetLocalizedMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
+            return $"{typeError.FormatMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
         }
 
         public SettingsParseException(JsonErrorInfo jsonErrorInfo)

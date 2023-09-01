@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Common.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Eutherion.Win.Storage
 {
@@ -33,57 +34,78 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static class CLR
         {
-            public static readonly PType<bool> Boolean = new _BooleanCLRType();
-            public static readonly PType<int> Int32 = new _Int32CLRType();
-            public static readonly PType<uint> UInt32 = new _UInt32CLRType();
-            public static readonly PType<string> String = new _StringCLRType();
+            public static readonly PType<int> Int32 = new Int32CLRType();
+            public static readonly PType<uint> UInt32 = new UInt32CLRType();
 
-            private sealed class _BooleanCLRType : Derived<PBoolean, bool>
+            private sealed class Int32CLRType : Derived<BigInteger, int>
             {
-                public _BooleanCLRType() : base(PType.Boolean) { }
+                public Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
 
-                public override Union<ITypeErrorBuilder, bool> TryGetTargetValue(PBoolean boolean)
-                    => boolean.Value;
+                public override Union<ITypeErrorBuilder, int> TryGetTargetValue(BigInteger integer) => (int)integer;
 
-                public override PBoolean GetBaseValue(bool value)
-                    => new PBoolean(value);
+                public override BigInteger ConvertToBaseValue(int value) => value;
             }
 
-            private sealed class _Int32CLRType : Derived<PInteger, int>
+            private sealed class UInt32CLRType : Derived<BigInteger, uint>
             {
-                public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
+                public UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
 
-                public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                    => (int)integer.Value;
+                public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(BigInteger integer) => (uint)integer;
 
-                public override PInteger GetBaseValue(int value)
-                    => new PInteger(value);
+                public override BigInteger ConvertToBaseValue(uint value) => value;
             }
 
-            private sealed class _UInt32CLRType : Derived<PInteger, uint>
+            /// <summary>
+            /// Converts to and from <see cref="int"/> values within a specified valid range.
+            /// </summary>
+            public sealed class RangedInt32 : Filter<int>, ITypeErrorBuilder
             {
-                public _UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
+                /// <summary>
+                /// Gets the minimum value which is allowed for values of this type.
+                /// </summary>
+                public int MinValue { get; }
 
-                public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(PInteger integer)
-                    => (uint)integer.Value;
+                /// <summary>
+                /// Gets the maximum value which is allowed for values of this type.
+                /// </summary>
+                public int MaxValue { get; }
 
-                public override PInteger GetBaseValue(uint value)
-                    => new PInteger(value);
-            }
+                /// <summary>
+                /// Initializes a new instance of the <see cref="RangedInt32"/> type.
+                /// </summary>
+                /// <param name="minValue">
+                /// The minimum allowed value.
+                /// </param>
+                /// <param name="maxValue">
+                /// The maximum allowed value.
+                /// </param>
+                public RangedInt32(int minValue, int maxValue) : base(Int32)
+                {
+                    MinValue = minValue;
+                    MaxValue = maxValue;
+                }
 
-            private sealed class _StringCLRType : Derived<PString, string>
-            {
-                public _StringCLRType() : base(PType.String) { }
+                public override bool IsValid(int candidateValue, out ITypeErrorBuilder typeError)
+                    => MinValue <= candidateValue
+                    && candidateValue <= MaxValue
+                    ? ValidValue(out typeError)
+                    : InvalidValue(this, out typeError);
 
-                public override Union<ITypeErrorBuilder, string> TryGetTargetValue(PString stringValue)
-                    => stringValue.Value;
+                public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                    => RangedInteger.FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
 
-                public override PString GetBaseValue(string value)
-                    => new PString(value);
+                public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                    => RangedInteger.FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
+
+                public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                    => RangedInteger.FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
+
+                public override string ToString()
+                    => $"{nameof(RangedInt32)}[{MinValue}..{MaxValue}]";
             }
         }
 
-        public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
+        public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct, Enum
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
@@ -95,9 +117,9 @@ namespace Eutherion.Win.Storage
             /// The list of distinct enumeration values.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="enumValues"/> is null.
+            /// <paramref name="enumValues"/> is <see langword="null"/>.
             /// </exception>
-            public Enumeration(IEnumerable<TEnum> enumValues) : base(CLR.String)
+            public Enumeration(IEnumerable<TEnum> enumValues) : base(String)
             {
                 if (enumValues == null) throw new ArgumentNullException(nameof(enumValues));
 
@@ -115,57 +137,57 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : InvalidValue(this);
 
-            public override string GetBaseValue(TEnum value) => enumToString[value];
+            public override string ConvertToBaseValue(TEnum value) => enumToString[value];
 
-            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToEnum.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Format(
+                        whenNothing: () => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Format(
+                        whenJust: somewhere => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
                 }
 
-                string localizedValueList;
+                string formattedValueList;
                 if (stringToEnum.Count == 1)
                 {
-                    localizedValueList = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.First());
+                    formattedValueList = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.First());
                 }
                 else
                 {
                     IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
-                    localizedValueList = localizer.Format(
+                    formattedValueList = formatter.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", enumValues),
                         lastEnumValue);
                 }
 
                 return maybeSomewhere.Match(
-                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                        localizer,
-                        localizedValueList,
+                    whenNothing: () => PTypeErrorBuilder.FormatTypeErrorMessage(
+                        formatter,
+                        formattedValueList,
                         actualValueString),
-                    whenJust: somewhere => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                        localizer,
-                        localizedValueList,
+                    whenJust: somewhere => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                        formatter,
+                        formattedValueList,
                         actualValueString,
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
@@ -179,9 +201,9 @@ namespace Eutherion.Win.Storage
             /// The mapping which maps distinct keys to values of type <typeparamref name="T"/>.
             /// </param>
             /// <exception cref="ArgumentNullException">
-            /// <paramref name="keyedValues"/> is null.
+            /// <paramref name="keyedValues"/> is <see langword="null"/>.
             /// </exception>
-            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
+            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(String)
             {
                 if (keyedValues == null) throw new ArgumentNullException(nameof(keyedValues));
                 keyedValues.ForEach(stringToTarget.Add);
@@ -192,7 +214,7 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : InvalidValue(this);
 
-            public override string GetBaseValue(T value)
+            public override string ConvertToBaseValue(T value)
             {
                 foreach (var kv in stringToTarget)
                 {
@@ -202,56 +224,56 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            private string GenericTypeErrorMessage(TextFormatter localizer, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToTarget.Count == 0)
                 {
                     return maybeSomewhere.Match(
-                        whenNothing: () => localizer.Format(
+                        whenNothing: () => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesError,
                             actualValueString),
-                        whenJust: somewhere => localizer.Format(
+                        whenJust: somewhere => formatter.Format(
                             PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
                             actualValueString,
                             somewhere));
                 }
 
-                string localizedKeysList;
+                string formattedKeysList;
                 if (stringToTarget.Count == 1)
                 {
-                    localizedKeysList = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.First());
+                    formattedKeysList = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.First());
                 }
                 else
                 {
                     // TODO: escape characters in KeyedSet keys.
                     IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
-                    localizedKeysList = localizer.Format(
+                    formattedKeysList = formatter.Format(
                         PTypeErrorBuilder.EnumerateWithOr,
                         string.Join(", ", keys),
                         lastKey);
                 }
 
                 return maybeSomewhere.Match(
-                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
-                        localizer,
-                        localizedKeysList,
+                    whenNothing: () => PTypeErrorBuilder.FormatTypeErrorMessage(
+                        formatter,
+                        formattedKeysList,
                         actualValueString),
-                    whenJust: somewhere => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
-                        localizer,
-                        localizedKeysList,
+                    whenJust: somewhere => PTypeErrorBuilder.FormatTypeErrorSomewhereMessage(
+                        formatter,
+                        formattedKeysList,
                         actualValueString,
                         somewhere));
             }
 
-            public string GetLocalizedTypeErrorMessage(TextFormatter localizer, string actualValueString)
-                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(TextFormatter localizer, string actualValueString, string propertyKey)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string GetLocalizedTypeErrorAtItemIndexMessage(TextFormatter localizer, string actualValueString, int itemIndex)
-                => GenericTypeErrorMessage(localizer, actualValueString, PTypeErrorBuilder.GetLocatedAtItemIndexMessage(localizer, itemIndex));
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
     }
 }

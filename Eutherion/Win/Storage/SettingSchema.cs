@@ -27,7 +27,86 @@ namespace Eutherion.Win.Storage
 {
     public class SettingSchema : PType.MapBase<SettingObject>
     {
-        private readonly Dictionary<string, SettingProperty> properties;
+        /// <summary>
+        /// Describes a key-value pair in a JSON object.
+        /// </summary>
+        public abstract class Member
+        {
+            /// <summary>
+            /// Gets the schema that owns this member.
+            /// </summary>
+            public SettingSchema OwnerSchema { get; }
+
+            /// <summary>
+            /// Gets the name of this member.
+            /// </summary>
+            public StringKey<Member> Name { get; }
+
+            internal Member(SettingSchema ownerSchema, StringKey<Member> name)
+            {
+                OwnerSchema = ownerSchema;
+                Name = name;
+            }
+
+            internal abstract void ThrowIfNonMatchingType(Member otherMember);
+
+            /// <summary>
+            /// Type-checks a JSON value syntax node.
+            /// </summary>
+            /// <param name="valueNode">
+            /// The value node to type-check.
+            /// </param>
+            /// <param name="errors">
+            /// The list of inner errors to which new type errors can be added.
+            /// </param>
+            /// <returns>
+            /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
+            /// or the converted <see cref="PValue"/> if the type check succeeded.
+            /// </returns>
+            internal abstract Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors);
+
+            internal abstract PValue ConvertToPValue(object untypedValue);
+        }
+
+        /// <summary>
+        /// Describes a key-value pair in a JSON object.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to convert to and from.
+        /// </typeparam>
+        public sealed class Member<T> : Member
+        {
+            /// <summary>
+            /// Gets the type of value that it contains.
+            /// </summary>
+            public PType<T> PType { get; }
+
+            internal Member(SettingSchema ownerSchema, StringKey<Member> name, PType<T> pType)
+                : base(ownerSchema, name)
+                => PType = pType;
+
+            internal override void ThrowIfNonMatchingType(Member otherMember)
+            {
+                // Conceptually it would be better to use structural equality between types,
+                // so that if e.g. one constructs TupleType<int, string, bool> twice, they'd accept each other's values.
+                if (!(otherMember is Member<T> otherTypedMember) || PType != otherTypedMember.PType)
+                {
+                    throw new ArgumentException($"Attempt to assign a value of a non-matching type to '{Name.Key}'", nameof(otherMember));
+                }
+            }
+
+            internal override Union<ITypeErrorBuilder, object> TryCreateValue(JsonValueSyntax valueNode, ArrayBuilder<PTypeError> errors)
+                => PType.TryCreateValue(valueNode, errors).Match(
+                    whenOption1: Union<ITypeErrorBuilder, object>.Option1,
+                    whenOption2: value => value);
+
+            internal override PValue ConvertToPValue(object untypedValue)
+                => PType.ConvertToPValue((T)untypedValue);
+        }
+
+        private readonly Dictionary<string, Member> Members;
+
+        private readonly Dictionary<string, SettingComment> MemberDescriptions;
 
         /// <summary>
         /// Gets the built-in description of the schema in a settings file.
@@ -75,81 +154,94 @@ namespace Eutherion.Win.Storage
         /// The built-in description of the schema in a settings file.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Two or more properties have the same key; or one of the properties is null.
+        /// Two or more properties have the same key; or one of the properties is <see langword="null"/>.
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties, SettingComment description = null)
         {
-            this.properties = new Dictionary<string, SettingProperty>();
+            Members = new Dictionary<string, Member>();
+            MemberDescriptions = new Dictionary<string, SettingComment>();
 
             if (properties != null)
             {
                 foreach (var property in properties)
                 {
-                    if (property == null) throw new ArgumentException("One of the properties is null.", nameof(properties));
-                    this.properties.Add(property.Name.Key, property);
+                    if (property == null) throw new ArgumentException($"One or more elements in {nameof(properties)} is null.", nameof(properties));
+                    Member member = property.CreateSchemaMember(this);
+                    Members.Add(member.Name.Key, member);
+                    if (property.Description != null) MemberDescriptions.Add(property.Name.Key, property.Description);
                 }
             }
 
             Description = description;
         }
 
+        internal void ThrowIfNonMatchingSchema(SettingSchema shouldBeThisSchema)
+        {
+            if (this != shouldBeThisSchema)
+            {
+                throw new SchemaMismatchException();
+            }
+        }
+
         /// <summary>
-        /// Gets the <see cref="SettingProperty"/> that is associated with the specified key.
+        /// Enumerates all members in this schema.
         /// </summary>
-        /// <param name="settingKey">
+        public IEnumerable<Member> AllMembers => Members.Values;
+
+        /// <summary>
+        /// Gets the <see cref="Member"/> that is associated with the specified key.
+        /// </summary>
+        /// <param name="key">
         /// The key to locate.
         /// </param>
-        /// <param name="property">
-        /// When this method returns, contains the <see cref="SettingProperty"/> associated with the specified key, if the key is found;
-        /// otherwise, the default <see cref="SettingProperty"/> value.
+        /// <param name="member">
+        /// When this method returns, contains the <see cref="Member"/> associated with the specified key, if the key is found;
+        /// otherwise, the default <see cref="Member"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingSchema"/> contains a <see cref="SettingProperty"/> with the specified key; otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingSchema"/> contains a <see cref="Member"/> with the specified key;
+        /// otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settingKey"/> is null.
+        /// <paramref name="key"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetProperty(StringKey<SettingProperty> settingKey, out SettingProperty property)
+        public bool TryGetMember(StringKey<Member> key, out Member member)
         {
-            if (settingKey == null) throw new ArgumentNullException(nameof(settingKey));
+            if (key == null) throw new ArgumentNullException(nameof(key));
 
-            if (properties.TryGetValue(settingKey.Key, out property)) return true;
-            property = default;
+            if (Members.TryGetValue(key.Key, out member)) return true;
+            member = default;
             return false;
         }
 
         /// <summary>
-        /// Gets if a <see cref="SettingProperty"/> is contained in this schema.
+        /// Gets the <see cref="SettingComment"/> that is associated with the specified key.
         /// </summary>
-        /// <param name="property">
-        /// The <see cref="SettingProperty"/> to locate.
+        /// <param name="key">
+        /// The key to locate.
         /// </param>
         /// <returns>
-        /// Whether or not the property is contained in this schema.
+        /// A <see cref="SettingComment"/> that describes a member, or <see cref="Maybe{T}.Nothing"/> is none was found.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="key"/> is null.
         /// </exception>
-        public bool ContainsProperty(SettingProperty property)
+        public Maybe<SettingComment> TryGetDescription(StringKey<Member> key)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (key == null) throw new ArgumentNullException(nameof(key));
 
-            return properties.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
-                && property == propertyInDictionary;
+            if (MemberDescriptions.TryGetValue(key.Key, out SettingComment description))
+            {
+                return description;
+            }
+
+            return Maybe<SettingComment>.Nothing;
         }
 
-        /// <summary>
-        /// Enumerates all properties in this schema.
-        /// </summary>
-        public IEnumerable<SettingProperty> AllProperties => properties.Values;
-
-        internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
-            JsonMapSyntax jsonMapSyntax,
-            out SettingObject convertedValue,
-            ArrayBuilder<PTypeError> errors)
+        internal override Union<ITypeErrorBuilder, SettingObject> TryCreateFromMap(JsonMapSyntax jsonMapSyntax, ArrayBuilder<PTypeError> errors)
         {
-            var mapBuilder = new Dictionary<string, PValue>();
+            var mapBuilder = new Dictionary<string, object>();
 
             // Report errors on duplicate keys (case sensitive).
             HashSet<string> foundKeys = new HashSet<string>();
@@ -166,13 +258,13 @@ namespace Eutherion.Win.Storage
                     foundKeys.Add(keyNode.Value);
                 }
 
-                if (TryGetProperty(new StringKey<SettingProperty>(keyNode.Value), out SettingProperty property))
+                if (TryGetMember(new StringKey<Member>(keyNode.Value), out Member member))
                 {
-                    var valueOrError = property.TryCreateValue(valueNode, errors);
+                    var valueOrError = member.TryCreateValue(valueNode, errors);
 
-                    if (valueOrError.IsOption2(out PValue convertedItemValue))
+                    if (valueOrError.IsOption2(out object untypedValue))
                     {
-                        mapBuilder.Add(keyNode.Value, convertedItemValue);
+                        mapBuilder.Add(keyNode.Value, untypedValue);
                     }
                     else
                     {
@@ -186,15 +278,32 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            var map = new PMap(mapBuilder);
-            convertedValue = new SettingObject(this, map);
-            return map;
+            return new SettingObject(this, mapBuilder);
         }
 
-        public override Maybe<SettingObject> TryConvertFromMap(PMap map)
-            => new SettingObject(this, map);
+        public override PMap ConvertToPMap(SettingObject value)
+        {
+            var mapBuilder = new Dictionary<string, PValue>();
 
-        public override PMap GetBaseValue(SettingObject value)
-            => value.Map;
+            foreach (var member in value.Schema.AllMembers)
+            {
+                if (value.KeyValueMapping.TryGetValue(member.Name.Key, out object untypedValue))
+                {
+                    mapBuilder.Add(member.Name.Key, member.ConvertToPValue(untypedValue));
+                }
+            }
+
+            return new PMap(mapBuilder);
+        }
+    }
+
+    /// <summary>
+    /// Occurs when a <see cref="SettingObject"/> or <see cref="SettingCopy"/> ia accessed with members
+    /// of a <see cref="SettingSchema"/> that is not their own.
+    /// </summary>
+    public class SchemaMismatchException : Exception
+    {
+        internal SchemaMismatchException()
+            : base("Attempt to use property or object with a different owner schema") { }
     }
 }

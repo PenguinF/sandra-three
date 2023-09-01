@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingsAutoSave.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,38 +29,46 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class SettingsAutoSave
     {
-        private class SettingsRemoteState : AutoSaveTextFile<SettingCopy>.RemoteState
+        private class SettingsRemoteState : AutoSaveTextFile<PMap>.RemoteState
         {
             /// <summary>
-            /// Settings representing how they are currently stored in the auto-save file.
+            /// Settings representing how they were stored in the auto-save file at the time it was loaded.
             /// </summary>
-            public SettingObject RemoteSettings { get; private set; }
+            public SettingObject InitialRemoteSettings { get; private set; }
 
-            public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
+            private PMap RemoteSettings;
+
+            public SettingsRemoteState(SettingObject defaultSettings)
+            {
+                InitialRemoteSettings = defaultSettings;
+                RemoteSettings = defaultSettings.ConvertToMap();
+            }
 
             protected internal override void Initialize(string loadedText)
             {
                 if (loadedText != null)
                 {
                     // Load into a copy of RemoteSettings, preserving defaults.
-                    var workingCopy = RemoteSettings.CreateWorkingCopy();
+                    var workingCopy = InitialRemoteSettings.CreateWorkingCopy();
 
                     // Leave RemoteSettings unchanged if the loaded text contained any errors.
                     if (workingCopy.TryLoadFromText(loadedText))
                     {
-                        RemoteSettings = workingCopy.Commit();
+                        InitialRemoteSettings = workingCopy.Commit();
+                        RemoteSettings = InitialRemoteSettings.ConvertToMap();
                     }
                 }
             }
 
-            protected internal override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            protected internal override bool ShouldSave(IReadOnlyList<PMap> updates, out string textToSave)
             {
-                SettingCopy latestUpdate = updates[updates.Count - 1];
+                // Only take the latest update.
+                PMap latestUpdate = updates[updates.Count - 1];
 
                 if (!latestUpdate.EqualTo(RemoteSettings))
                 {
-                    RemoteSettings = latestUpdate.Commit();
-                    textToSave = CompactSettingWriter.ConvertToJson(RemoteSettings.Map);
+                    RemoteSettings = latestUpdate;
+                    textToSave = CompactSettingWriter.ConvertToJson(latestUpdate);
                     return true;
                 }
 
@@ -72,7 +80,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Contains both auto-save files.
         /// </summary>
-        private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
+        private readonly AutoSaveTextFile<PMap> autoSaveFile;
 
         /// <summary>
         /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
@@ -106,53 +114,50 @@ namespace Eutherion.Win.Storage
         {
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            CurrentSettings = new SettingCopy(schema).Commit();
+            CurrentSettings = SettingObject.CreateEmpty(schema);
 
             // If autoSaveFiles is null, just initialize from CurrentSettings so auto-saves within the session are still enabled.
             if (autoSaveFiles != null)
             {
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
+                autoSaveFile = new AutoSaveTextFile<PMap>(remoteState, autoSaveFiles);
 
                 // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
-                CurrentSettings = remoteState.RemoteSettings;
+                CurrentSettings = remoteState.InitialRemoteSettings;
             }
         }
 
-        private void Persist(SettingCopy workingCopy)
+        private void Persist()
         {
-            if (!workingCopy.EqualTo(CurrentSettings))
+            if (autoSaveFile != null)
             {
-                // Commit to CurrentSettings.
-                CurrentSettings = workingCopy.Commit();
-
-                if (autoSaveFile != null)
-                {
-                    // Persist a copy so its values are not shared with other threads.
-                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy());
-                }
+                autoSaveFile.Persist(CurrentSettings.ConvertToMap());
             }
         }
 
         /// <summary>
         /// Persists a value to the auto-save file.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
+        /// </exception>
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.AddOrReplace(property, value);
-            Persist(workingCopy);
+            CurrentSettings = CurrentSettings.Set(property, value);
+            Persist();
         }
 
         /// <summary>
         /// Removes a value from the auto-save file.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is <see langword="null"/>.
+        /// </exception>
         public void Remove<TValue>(SettingProperty<TValue> property)
         {
-            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.Remove(property);
-            Persist(workingCopy);
+            CurrentSettings = CurrentSettings.Unset(property);
+            Persist();
         }
 
         /// <summary>

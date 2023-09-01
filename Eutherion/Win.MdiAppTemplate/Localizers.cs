@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Localizers.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "Name of the language in the language itself. This property is mandatory.";
 
         public static readonly SettingProperty<string> NativeName = new SettingProperty<string>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(NativeName))),
+            SettingKey.ToSnakeCaseKey(nameof(NativeName)),
             TrimmedStringType.Instance,
             new SettingComment(NativeNameDescription));
 
@@ -43,7 +43,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "File name of the flag icon to display in the menu.";
 
         public static readonly SettingProperty<string> FlagIconFile = new SettingProperty<string>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(FlagIconFile))),
+            SettingKey.ToSnakeCaseKey(nameof(FlagIconFile)),
             FileNameType.Instance,
             new SettingComment(FlagIconFileDescription));
 
@@ -51,7 +51,7 @@ namespace Eutherion.Win.MdiAppTemplate
             = "List of translations.";
 
         public static readonly SettingProperty<Dictionary<StringKey<ForFormattedText>, string>> Translations = new SettingProperty<Dictionary<StringKey<ForFormattedText>, string>>(
-            new StringKey<SettingProperty>(SettingKey.ToSnakeCase(nameof(Translations))),
+            SettingKey.ToSnakeCaseKey(nameof(Translations)),
             TranslationDictionaryType.Instance,
             new SettingComment(TranslationsDescription));
 
@@ -106,7 +106,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     {
                         try
                         {
-                            var languageFile = SettingsFile.Create(fileInfo.FullName, new SettingCopy(languageFileSchema));
+                            var languageFile = SettingsFile.Create(fileInfo.FullName, SettingObject.CreateEmpty(languageFileSchema));
                             languageFile.Settings.TryGetValue(FlagIconFile, out string flagIconFileName);
 
                             foundLocalizers.Add(
@@ -155,9 +155,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static readonly TrimmedStringType Instance = new TrimmedStringType();
 
-        private TrimmedStringType() : base(PType.CLR.String) { }
+        private TrimmedStringType() : base(PType.String) { }
 
-        public override string GetBaseValue(string value) => value;
+        public override string ConvertToBaseValue(string value) => value;
 
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
@@ -170,7 +170,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
         private TranslationDictionaryType()
-            : base(new PType.ValueMap<string>(PType.CLR.String))
+            : base(new PType.ValueMap<string>(PType.String))
         {
         }
 
@@ -186,7 +186,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return dictionary;
         }
 
-        public override Dictionary<string, string> GetBaseValue(Dictionary<StringKey<ForFormattedText>, string> value)
+        public override Dictionary<string, string> ConvertToBaseValue(Dictionary<StringKey<ForFormattedText>, string> value)
         {
             var dictionary = new Dictionary<string, string>();
 

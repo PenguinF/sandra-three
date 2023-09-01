@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingObject.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,55 +25,108 @@ using System.Collections.Generic;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
+    /// Represents a read-only collection of type checked JSON values indexed by property key
+    /// (<see cref="StringKey{T}"/> of <see cref="SettingSchema.Member"/>).
     /// </summary>
     public sealed class SettingObject
     {
         /// <summary>
+        /// Creates an empty <see cref="SettingObject"/> with a given schema.
+        /// </summary>
+        /// <param name="schema">
+        /// The <see cref="SettingSchema"/> to use.
+        /// </param>
+        /// <returns>
+        /// A <see cref="SettingObject"/> with undefined values for each of the members of the schema.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> is <see langword="null"/>.
+        /// </exception>
+        public static SettingObject CreateEmpty(SettingSchema schema) => new SettingCopy(schema).Commit();
+
+        /// <summary>
         /// Gets the schema for this <see cref="SettingObject"/>.
         /// </summary>
-        public readonly SettingSchema Schema;
+        public SettingSchema Schema { get; }
 
-        internal readonly PMap Map;
+        /// <summary>
+        /// Gets the mapping between keys and values.
+        /// </summary>
+        internal readonly Dictionary<string, object> KeyValueMapping;
 
-        internal SettingObject(SettingSchema schema, PMap map)
+        internal SettingObject(SettingSchema schema, Dictionary<string, object> keyValueMapping)
         {
             Schema = schema;
-            Map = map;
-        }
-
-        internal SettingObject(SettingCopy workingCopy)
-            : this(workingCopy.Schema, workingCopy.ToPMap())
-        {
+            KeyValueMapping = keyValueMapping;
         }
 
         /// <summary>
-        /// Gets the <see cref="PValue"/> that is associated with the specified property.
+        /// Returns if this <see cref="SettingObject"/> contains a defined value for a given <see cref="SettingProperty"/>.
         /// </summary>
-        /// <param name="property">
-        /// The property to locate.
-        /// </param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified property,
-        /// if the property is found; otherwise, the default <see cref="PValue"/> value.
-        /// This parameter is passed uninitialized.
+        /// <param name="member">
+        /// The <see cref="SettingSchema.Member"/> to check.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value for the specified property;
-        /// otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a defined value for the given member;
+        /// otherwise <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="member"/> is <see langword="null"/>.
         /// </exception>
-        public bool TryGetRawValue(SettingProperty property, out PValue value)
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
+        public bool IsSet(SettingSchema.Member member)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (member == null) throw new ArgumentNullException(nameof(member));
 
-            if (Schema.ContainsProperty(property)
-                && Map.TryGetValue(property.Name.Key, out value))
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+            return KeyValueMapping.ContainsKey(member.Name.Key);
+        }
+
+        internal bool TryGetUntypedValue(SettingSchema.Member member, out object value)
+        {
+            // This ensures basic security that the passed in property also performed the type-check.
+            Schema.ThrowIfNonMatchingSchema(member.OwnerSchema);
+
+            if (KeyValueMapping.TryGetValue(member.Name.Key, out value))
             {
                 return true;
             }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the value that is associated with the specified member.
+        /// </summary>
+        /// <param name="member">
+        /// The member to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified member,
+        /// if it is defined for the given member; otherwise, the default value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a defined value for the given member;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="member"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="SchemaMismatchException">
+        /// <paramref name="member"/> has a different schema.
+        /// </exception>
+        public bool TryGetValue<TValue>(SettingSchema.Member<TValue> member, out TValue value)
+        {
+            if (TryGetUntypedValue(member, out object untypedValue))
+            {
+                value = (TValue)untypedValue;
+                return true;
+            }
+
             value = default;
             return false;
         }
@@ -87,70 +140,85 @@ namespace Eutherion.Win.Storage
         /// <param name="value">
         /// When this method returns, contains the value associated with the specified property,
         /// if the property is found and its value is of the correct <see cref="PType"/>;
-        /// otherwise, the default <see cref="PValue"/> value.
+        /// otherwise, the default value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
-        /// for the specified property; otherwise, false.
+        /// <see langword="true"/> if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
+        /// for the specified property; otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> is <see langword="null"/>.
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            if (TryGetRawValue(property, out PValue pValue)
-                && property.PType.TryConvert(pValue).IsJust(out value))
+            if (Schema.TryGetMember(property.Name, out SettingSchema.Member member)
+                && member is SettingSchema.Member<TValue> typedMember
+                && typedMember.PType == property.PType
+                && TryGetValue(typedMember, out value))
             {
                 return true;
             }
+
             value = default;
             return false;
         }
 
         /// <summary>
-        /// Gets the value that is associated with the specified property.
+        /// Creates a copy of this <see cref="SettingObject"/> with an added or replaced value associated with a property.
         /// </summary>
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
         /// <param name="property">
-        /// The property to locate.
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the property.
         /// </param>
         /// <returns>
-        /// The value associated with the specified property.
+        /// The new <see cref="SettingObject"/> with the requested change.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> is null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are <see langword="null"/>.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The value associated with the specified property is not of the target type.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        /// The property does not exist.
-        /// </exception>
-        public TValue GetValue<TValue>(SettingProperty<TValue> property)
+        public SettingObject Set<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-
-            if (!Map.ContainsKey(property.Name.Key))
-            {
-                throw new KeyNotFoundException($"Key {property.Name} does not exist in the {nameof(SettingObject)}.");
-            }
-
-            if (!TryGetValue(property, out TValue value))
-            {
-                throw new ArgumentException($"The value of {property.Name} is not of the target type {typeof(TValue).FullName}.");
-            }
-
-            return value;
+            SettingCopy workingCopy = CreateWorkingCopy();
+            workingCopy.Set(property, value);
+            return workingCopy.Commit();
         }
 
         /// <summary>
-        /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
+        /// Creates a copy of this <see cref="SettingObject"/> with a removed value associated with a property.
         /// </summary>
-        public SettingCopy CreateWorkingCopy()
+        /// <typeparam name="TValue">
+        /// The target .NET type of the property.
+        /// </typeparam>
+        /// <param name="property">
+        /// The property for which to remove the value.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="SettingObject"/> with the requested change.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is <see langword="null"/>.
+        /// </exception>
+        public SettingObject Unset<TValue>(SettingProperty<TValue> property)
         {
-            var copy = new SettingCopy(Schema);
-            copy.Revert(this);
-            return copy;
+            SettingCopy workingCopy = CreateWorkingCopy();
+            workingCopy.Unset(property);
+            return workingCopy.Commit();
         }
+
+        /// <summary>
+        /// Creates a mutable <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
+        /// </summary>
+        public SettingCopy CreateWorkingCopy() => new SettingCopy(Schema, new Dictionary<string, object>(KeyValueMapping));
+
+        /// <summary>
+        /// Converts this <see cref="SettingObject"/> into a <see cref="PMap"/> suitable for serialization to JSON.
+        /// </summary>
+        public PMap ConvertToMap() => Schema.ConvertToPMap(this);
     }
 }

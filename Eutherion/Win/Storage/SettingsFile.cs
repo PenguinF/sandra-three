@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingsFile.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,8 +41,9 @@ namespace Eutherion.Win.Storage
         /// or if the settings file is corrupt, an empty <see cref="SettingsFile"/>
         /// object is returned.
         /// </param>
-        /// <param name="workingCopy">
-        /// The <see cref="SettingCopy"/> in which the values are stored.
+        /// <param name="templateSettings">
+        /// The <see cref="SettingObject"/> in which the initial values are stored.
+        /// If the file is loaded, its JSON must match the schema in these template settings.
         /// </param>
         /// <returns>
         /// The created <see cref="SettingsFile"/>.
@@ -53,7 +54,7 @@ namespace Eutherion.Win.Storage
         /// or is a relative path and its absolute path could not be resolved.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are null.
+        /// <paramref name="absoluteFilePath"/> and/or <paramref name="templateSettings"/> are <see langword="null"/>.
         /// </exception>
         /// <exception cref="IOException">
         /// <paramref name="absoluteFilePath"/> is longer than its maximum length (this is OS specific).
@@ -64,11 +65,11 @@ namespace Eutherion.Win.Storage
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
-        public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
+        public static SettingsFile Create(string absoluteFilePath, SettingObject templateSettings)
         {
-            if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
+            if (templateSettings == null) throw new ArgumentNullException(nameof(templateSettings));
 
-            var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
+            var settingsFile = new SettingsFile(absoluteFilePath, templateSettings);
             settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.LoadedText);
             return settingsFile;
         }
@@ -100,8 +101,8 @@ namespace Eutherion.Win.Storage
             return workingCopy.Commit();
         }
 
-        private readonly Dictionary<StringKey<SettingProperty>, WeakEvent<object, EventArgs>> settingsChangedEvents
-            = new Dictionary<StringKey<SettingProperty>, WeakEvent<object, EventArgs>>();
+        private readonly Dictionary<StringKey<SettingSchema.Member>, WeakEvent<object, EventArgs>> settingsChangedEvents
+            = new Dictionary<StringKey<SettingSchema.Member>, WeakEvent<object, EventArgs>>();
 
         /// <summary>
         /// Registers a handler for the weak event which occurs after the <see cref="Settings"/> have been updated in the file.
@@ -109,7 +110,7 @@ namespace Eutherion.Win.Storage
         /// For best performance, the class in which the event handler method is defined should implement <see cref="IWeakEventTarget"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are <see langword="null"/>.
         /// </exception>
         public void RegisterSettingsChangedHandler(SettingProperty property, Action<object, EventArgs> eventHandler)
         {
@@ -120,33 +121,39 @@ namespace Eutherion.Win.Storage
             keyedEvent.AddListener(eventHandler);
         }
 
-        private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
+        private IEnumerable<SettingSchema.Member> ChangedMembers(SettingObject newSettings)
         {
             PValueEqualityComparer eq = PValueEqualityComparer.Instance;
 
-            foreach (var property in Settings.Schema.AllProperties)
+            // Perform equality checks on PValue instances rather than the actual target values.
+            PMap convertedOldSettings = Settings.ConvertToMap();
+            PMap convertedNewSettings = newSettings.ConvertToMap();
+
+            foreach (var member in Settings.Schema.AllMembers)
             {
+                string memberName = member.Name.Key;
+
                 // Change if added, updated or deleted.
-                if (Settings.TryGetRawValue(property, out PValue oldValue))
+                if (convertedOldSettings.TryGetValue(memberName, out PValue oldValue))
                 {
-                    if (newSettings.TryGetRawValue(property, out PValue newValue))
+                    if (convertedNewSettings.TryGetValue(memberName, out PValue newValue))
                     {
                         if (!eq.AreEqual(oldValue, newValue))
                         {
                             // Updated.
-                            yield return property;
+                            yield return member;
                         }
                     }
                     else
                     {
                         // Deleted.
-                        yield return property;
+                        yield return member;
                     }
                 }
-                else if (newSettings.TryGetRawValue(property, out _))
+                else if (convertedNewSettings.TryGetValue(memberName, out _))
                 {
                     // Added.
-                    yield return property;
+                    yield return member;
                 }
             }
         }
@@ -157,51 +164,16 @@ namespace Eutherion.Win.Storage
 
             SettingObject newSettings = ReadSettingObject(LoadedText);
 
-            foreach (var property in ChangedProperties(newSettings))
+            foreach (var member in ChangedMembers(newSettings))
             {
                 // Update settings if at least one property changed.
                 Settings = newSettings;
 
-                if (settingsChangedEvents.TryGetValue(property.Name, out WeakEvent<object, EventArgs> keyedEvent))
+                if (settingsChangedEvents.TryGetValue(member.Name, out WeakEvent<object, EventArgs> keyedEvent))
                 {
                     keyedEvent.Raise(this, EventArgs.Empty);
                 }
             }
-        }
-
-        /// <summary>
-        /// Generates the text to save to the setting file from the current values in <paramref name="settings"/>.
-        /// </summary>
-        /// <param name="settings">
-        /// The settings to write.
-        /// </param>
-        /// <param name="options">
-        /// Specifies options for writing the settings.
-        /// </param>
-        /// <returns>
-        /// The text to save.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="settings"/> has an unexpected schema.
-        /// </exception>
-        public string GenerateJson(SettingObject settings, SettingWriterOptions options)
-        {
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            if (settings.Schema != TemplateSettings.Schema)
-            {
-                throw new ArgumentException(
-                    $"{nameof(settings)} has an unexpected schema",
-                    nameof(settings));
-            }
-
-            return SettingWriter.ConvertToJson(
-                settings.Map,
-                schema: settings.Schema,
-                options: options);
         }
 
         /// <summary>
@@ -214,12 +186,23 @@ namespace Eutherion.Win.Storage
         /// Specifies options for writing the settings.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> is null.
+        /// <paramref name="settings"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="settings"/> has an unexpected schema.
         /// </exception>
         public void WriteToFile(SettingObject settings, SettingWriterOptions options)
-            => Save(GenerateJson(settings, options));
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            if (settings.Schema != TemplateSettings.Schema)
+            {
+                throw new ArgumentException(
+                    $"{nameof(settings)} has an unexpected schema",
+                    nameof(settings));
+            }
+
+            Save(SettingWriter.ConvertToJson(settings, options));
+        }
     }
 }
