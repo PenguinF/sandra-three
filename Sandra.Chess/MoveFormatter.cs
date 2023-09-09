@@ -32,10 +32,10 @@ namespace Sandra.Chess
     {
         /// <summary>
         /// Generates a formatted notation for a move in a given position.
-        /// As a side effect, the game is updated to the resulting position after the move.
+        /// As a side effect, the position is updated to the resulting position after the move.
         /// </summary>
-        /// <param name="game">
-        /// The game in which the move was made.
+        /// <param name="position">
+        /// The position in which the move was made.
         /// </param>
         /// <param name="move">
         /// The move to be formatted.
@@ -43,7 +43,7 @@ namespace Sandra.Chess
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        string FormatMove(Game game, Move move);
+        string FormatMove(Position position, Move move);
     }
 
     /// <summary>
@@ -132,9 +132,9 @@ namespace Sandra.Chess
             builder.Append(square.Y() + 1);
         }
 
-        protected abstract void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move);
+        protected abstract void AppendDisambiguatingMoveSource(StringBuilder builder, Position position, Move move);
 
-        public string FormatMove(Game game, Move move)
+        public string FormatMove(Position position, Move move)
         {
             try
             {
@@ -154,7 +154,7 @@ namespace Sandra.Chess
                         moveBuilder.Append(pieceSymbols[move.MovingPiece]);
                     }
 
-                    AppendDisambiguatingMoveSource(moveBuilder, game, move);
+                    AppendDisambiguatingMoveSource(moveBuilder, position, move);
 
                     // Append a 'x' for capturing moves.
                     if (move.IsCapture)
@@ -176,16 +176,15 @@ namespace Sandra.Chess
 
                 MoveInfo moveInfo = move.CreateMoveInfo();
 
-                game.TryMakeMove(ref moveInfo, true);
+                position.TryMakeMove(ref moveInfo, true);
 
                 if (moveInfo.Result == MoveCheckResult.OK)
                 {
-                    ReadOnlyPosition current = game.CurrentPosition;
-                    Square friendlyKing = current.FindKing(current.SideToMove);
-                    if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
+                    Square friendlyKing = position.FindKing(position.SideToMove);
+                    if (position.IsSquareUnderAttack(friendlyKing, position.SideToMove))
                     {
                         // No need to generate castling moves since castling out of a check is illegal.
-                        if (current.GenerateLegalMoves().Any())
+                        if (position.GenerateLegalMoves().Any())
                         {
                             moveBuilder.Append(CheckSymbol);
                         }
@@ -216,7 +215,7 @@ namespace Sandra.Chess
         public LongAlgebraicMoveFormatter(string pieceSymbols)
             : base(pieceSymbols) { }
 
-        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
+        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Position position, Move move)
         {
             AppendFile(builder, move.SourceSquare);
             AppendRank(builder, move.SourceSquare);
@@ -237,7 +236,7 @@ namespace Sandra.Chess
         public ShortAlgebraicMoveFormatter(string pieceSymbols)
             : base(pieceSymbols) { }
 
-        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
+        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Position position, Move move)
         {
             if (move.MovingPiece == Piece.Pawn)
             {
@@ -256,12 +255,12 @@ namespace Sandra.Chess
                 };
 
                 bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
-                foreach (var square in game.CurrentPosition.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.CurrentPosition.SideToMove)))
+                foreach (var square in position.AllSquaresOccupiedBy(move.MovingPiece.Combine(position.SideToMove)))
                 {
                     if (square != move.SourceSquare)
                     {
                         testMoveInfo.SourceSquare = square;
-                        game.TryMakeMove(ref testMoveInfo, false);
+                        position.TryMakeMove(ref testMoveInfo, false);
                         if (testMoveInfo.Result.IsLegalMove())
                         {
                             // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
