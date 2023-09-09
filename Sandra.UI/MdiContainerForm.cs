@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiContainerForm.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -97,14 +97,12 @@ namespace Sandra.UI
                         DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                         {
                             // Add all these to a submenu.
-                            StandardChessBoard.GotoStart,
                             StandardChessBoard.GotoFirstMove,
                             StandardChessBoard.FastNavigateBackward,
                             StandardChessBoard.GotoPreviousMove,
                             StandardChessBoard.GotoNextMove,
                             StandardChessBoard.FastNavigateForward,
                             StandardChessBoard.GotoLastMove,
-                            StandardChessBoard.GotoEnd,
                             StandardChessBoard.GotoPreviousVariation,
                             StandardChessBoard.GotoNextVariation,
                         }
@@ -112,7 +110,6 @@ namespace Sandra.UI
 
                     StandardChessBoard.PromoteActiveVariation,
                     StandardChessBoard.DemoteActiveVariation,
-                    StandardChessBoard.BreakActiveVariation,
                     StandardChessBoard.DeleteActiveVariation,
                     StandardChessBoard.FlipBoard,
                     StandardChessBoard.TakeScreenshot,
@@ -388,21 +385,18 @@ namespace Sandra.UI
 
             newChessBoard.PlayingBoard.BindActions(new UIActionBindings
             {
-                { StandardChessBoard.GotoStart, newChessBoard.TryGotoStart },
                 { StandardChessBoard.GotoFirstMove, newChessBoard.TryGotoFirstMove },
                 { StandardChessBoard.FastNavigateBackward, newChessBoard.TryFastNavigateBackward },
                 { StandardChessBoard.GotoPreviousMove, newChessBoard.TryGotoPreviousMove },
                 { StandardChessBoard.GotoNextMove, newChessBoard.TryGotoNextMove },
                 { StandardChessBoard.FastNavigateForward, newChessBoard.TryFastNavigateForward },
                 { StandardChessBoard.GotoLastMove, newChessBoard.TryGotoLastMove },
-                { StandardChessBoard.GotoEnd, newChessBoard.TryGotoEnd },
 
                 { StandardChessBoard.GotoPreviousVariation, newChessBoard.TryGotoPreviousVariation },
                 { StandardChessBoard.GotoNextVariation, newChessBoard.TryGotoNextVariation },
 
                 { StandardChessBoard.PromoteActiveVariation, newChessBoard.TryPromoteActiveVariation },
                 { StandardChessBoard.DemoteActiveVariation, newChessBoard.TryDemoteActiveVariation },
-                { StandardChessBoard.BreakActiveVariation, newChessBoard.TryBreakActiveVariation },
                 { StandardChessBoard.DeleteActiveVariation, newChessBoard.TryDeleteActiveVariation },
 
                 { StandardChessBoard.FlipBoard, newChessBoard.TryFlipBoard },

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * LocalizedStringKeys.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,11 +27,9 @@ namespace Sandra.UI
 {
     internal static class LocalizedStringKeys
     {
-        internal static readonly StringKey<ForFormattedText> BreakAtCurrentPosition = new StringKey<ForFormattedText>(nameof(BreakAtCurrentPosition));
         internal static readonly StringKey<ForFormattedText> CopyDiagramToClipboard = new StringKey<ForFormattedText>(nameof(CopyDiagramToClipboard));
         internal static readonly StringKey<ForFormattedText> DeleteLine = new StringKey<ForFormattedText>(nameof(DeleteLine));
         internal static readonly StringKey<ForFormattedText> DemoteLine = new StringKey<ForFormattedText>(nameof(DemoteLine));
-        internal static readonly StringKey<ForFormattedText> EndOfGame = new StringKey<ForFormattedText>(nameof(EndOfGame));
         internal static readonly StringKey<ForFormattedText> FastBackward = new StringKey<ForFormattedText>(nameof(FastBackward));
         internal static readonly StringKey<ForFormattedText> FastForward = new StringKey<ForFormattedText>(nameof(FastForward));
         internal static readonly StringKey<ForFormattedText> FirstMove = new StringKey<ForFormattedText>(nameof(FirstMove));
@@ -48,15 +46,12 @@ namespace Sandra.UI
         internal static readonly StringKey<ForFormattedText> PreviousLine = new StringKey<ForFormattedText>(nameof(PreviousLine));
         internal static readonly StringKey<ForFormattedText> PreviousMove = new StringKey<ForFormattedText>(nameof(PreviousMove));
         internal static readonly StringKey<ForFormattedText> PromoteLine = new StringKey<ForFormattedText>(nameof(PromoteLine));
-        internal static readonly StringKey<ForFormattedText> StartOfGame = new StringKey<ForFormattedText>(nameof(StartOfGame));
 
         internal static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishTranslations => new Dictionary<StringKey<ForFormattedText>, string>
         {
-            { BreakAtCurrentPosition, "Break at current position" },
             { CopyDiagramToClipboard, "Copy diagram to clipboard" },
             { DeleteLine, "Delete line" },
             { DemoteLine, "Demote line" },
-            { EndOfGame, "End of game" },
             { FastBackward, "Fast backward" },
             { FastForward, "Fast forward" },
             { FirstMove, "First move" },
@@ -73,7 +68,6 @@ namespace Sandra.UI
             { PreviousLine, "Previous line" },
             { PreviousMove, "Previous move" },
             { PromoteLine, "Promote line" },
-            { StartOfGame, "Start of game" },
         };
     }
 }

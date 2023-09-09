@@ -2,7 +2,7 @@
 /*********************************************************************************
  * StandardChessBoard.UIActions.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -93,36 +93,18 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly UIAction GotoStart = new UIAction(
-            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoStart)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
-                    IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.StartOfGame.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryGotoStart(bool perform)
-        {
-            if (game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                do game.Backward(); while (!game.IsFirstMove);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
-        }
-
         public static readonly UIAction GotoFirstMove = new UIAction(
             new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoFirstMove)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
                 {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
+                    IsFirstInGroup = true,
+                    Shortcuts = new[]
+                    {
+                        new ShortcutKeys(ConsoleKey.Home),
+                        new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home),
+                    },
                     MenuTextProvider = LocalizedStringKeys.FirstMove.ToTextProvider(),
                 },
             });
@@ -132,13 +114,7 @@ namespace Sandra.UI
             if (game.IsFirstMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                // Go to the first move in this line, but make sure to not get stuck with repeated use.
-                game.Backward();
-                while (game.ActiveTree.ParentVariation != null
-                    && game.ActiveTree.ParentVariation.VariationIndex == 0)
-                {
-                    game.Backward();
-                }
+                do game.Backward(); while (!game.IsFirstMove);
                 GameUpdated();
             }
             return UIActionVisibility.Enabled;
@@ -266,7 +242,11 @@ namespace Sandra.UI
             {
                 new CombinedUIActionInterface
                 {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
+                    Shortcuts = new[]
+                    {
+                        new ShortcutKeys(ConsoleKey.End),
+                        new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
+                    },
                     MenuTextProvider = LocalizedStringKeys.LastMove.ToTextProvider(),
                 },
             });
@@ -277,34 +257,6 @@ namespace Sandra.UI
             if (perform)
             {
                 do game.Forward(); while (!game.IsLastMove);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly UIAction GotoEnd = new UIAction(
-            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(GotoEnd)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
-                    MenuTextProvider = LocalizedStringKeys.EndOfGame.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryGotoEnd(bool perform)
-        {
-            if (game.IsLastMove && GetFirstMove(game.ActiveTree.ParentVariation) == null)
-            {
-                // Last move in the main line of the game.
-                return UIActionVisibility.Disabled;
-            }
-
-            if (perform)
-            {
-                game.SetActiveTree(game.MoveTree);
-                while (!game.IsLastMove) game.Forward();
                 GameUpdated();
             }
             return UIActionVisibility.Enabled;
@@ -445,29 +397,6 @@ namespace Sandra.UI
             if (perform)
             {
                 moveWithSideLine.RepositionAfter(moveWithSideLine.VariationIndex + 1);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly UIAction BreakActiveVariation = new UIAction(
-            new StringKey<UIAction>(StandardChessBoardUIActionPrefix + nameof(BreakActiveVariation)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
-                    MenuTextProvider = LocalizedStringKeys.BreakAtCurrentPosition.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryBreakActiveVariation(bool perform)
-        {
-            // If this move is the main line, turn it into a side line.
-            if (game.IsLastMove) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                game.ActiveTree.Break();
                 GameUpdated();
             }
             return UIActionVisibility.Enabled;
