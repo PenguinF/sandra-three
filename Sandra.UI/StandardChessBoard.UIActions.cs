@@ -346,21 +346,8 @@ namespace Sandra.UI
 
         public UIActionState TryPromoteActiveVariation(bool perform)
         {
-            // Find the first move in this variation.
-            Variation firstMoveInVariation = GetFirstMove(game.ActiveTree.ParentVariation);
-
-            if (firstMoveInVariation == null)
-            {
-                // Already the main line of the game.
-                return UIActionVisibility.Disabled;
-            }
-
-            if (perform)
-            {
-                firstMoveInVariation.RepositionBefore(firstMoveInVariation.VariationIndex - 1);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
+            // Disable until we can modify PGN using its syntax tree.
+            return UIActionVisibility.Disabled;
         }
 
         public static readonly UIAction DemoteActiveVariation = new UIAction(
@@ -380,26 +367,8 @@ namespace Sandra.UI
 
         public UIActionState TryDemoteActiveVariation(bool perform)
         {
-            // Find the first move in this variation which has a 'less important' side line.
-            Variation moveWithSideLine = game.ActiveTree.ParentVariation;
-            while (moveWithSideLine != null
-                && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.Variations.Count)
-            {
-                moveWithSideLine = moveWithSideLine.ParentTree.ParentVariation;
-            }
-
-            if (moveWithSideLine == null)
-            {
-                // Already no sidelines below this one.
-                return UIActionVisibility.Disabled;
-            }
-
-            if (perform)
-            {
-                moveWithSideLine.RepositionAfter(moveWithSideLine.VariationIndex + 1);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
+            // Disable until we can modify PGN using its syntax tree.
+            return UIActionVisibility.Disabled;
         }
 
         public static readonly UIAction DeleteActiveVariation = new UIAction(
@@ -415,16 +384,8 @@ namespace Sandra.UI
 
         public UIActionState TryDeleteActiveVariation(bool perform)
         {
-            if (game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                // Go backward, then remove the move which was just active and its move tree.
-                Variation variationToRemove = game.ActiveTree.ParentVariation;
-                game.Backward();
-                game.ActiveTree.RemoveVariation(variationToRemove);
-                GameUpdated();
-            }
-            return UIActionVisibility.Enabled;
+            // Disable until we can modify PGN using its syntax tree.
+            return UIActionVisibility.Disabled;
         }
     }
 }

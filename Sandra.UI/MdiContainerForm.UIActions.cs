@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiContainerForm.UIActions.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ namespace Sandra.UI
 
         public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
-            if (perform) OpenChessBoard(pgnEditor, new Chess.Game(), null, null, null, null).EnsureActivated();
-            return UIActionVisibility.Enabled;
+            // Disable until we can modify PGN using its syntax tree.
+            return UIActionVisibility.Disabled;
         }
 
         public static readonly UIAction OpenGame = new UIAction(

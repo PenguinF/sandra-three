@@ -153,16 +153,9 @@ namespace Sandra.Chess
             }
             else
             {
-                Position currentPosition = CurrentPosition.Copy();
-                Move move = currentPosition.TryMakeMove(ref moveInfo, make);
-                if (moveInfo.Result == MoveCheckResult.OK)
-                {
-                    // Move to an existing variation, or create a new one.
-                    CurrentPosition = new ReadOnlyPosition(currentPosition);
-                    Variation variation = ActiveTree.GetOrAddVariation(move);
-                    ActiveTree = variation.MoveTree;
-                }
-                return move;
+                // Disable until we can modify PGN using its syntax tree.
+                moveInfo.Result = ~MoveCheckResult.OK;
+                return default;
             }
         }
     }
