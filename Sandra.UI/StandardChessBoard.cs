@@ -843,7 +843,11 @@ namespace Sandra.UI
 
             // Refresh actions.
             PlayingBoard.ActionHandler.Invalidate();
+
+            AfterGameUpdated?.Invoke(this, EventArgs.Empty);
         }
+
+        public event EventHandler AfterGameUpdated;
 
         Pen lastMoveArrowPen;
 
