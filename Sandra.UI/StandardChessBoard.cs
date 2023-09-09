@@ -914,7 +914,7 @@ namespace Sandra.UI
             // Draw a dotted line between the centers of the squares of the last move.
             if (game != null && !game.IsFirstMove)
             {
-                Chess.Move lastCommittedMove = game.PreviousMove();
+                Chess.Move lastCommittedMove = game.PreviousMove;
                 DrawLastMoveArrow(e.Graphics,
                                   ToSquareLocation(lastCommittedMove.SourceSquare),
                                   ToSquareLocation(lastCommittedMove.TargetSquare));

@@ -50,7 +50,7 @@ namespace Sandra.Chess
 
         public bool IsFirstMove => true;
         public bool IsLastMove => true;
-        public Move PreviousMove() => default;
+        public Move PreviousMove => default;
 
         public void Backward()
         {
