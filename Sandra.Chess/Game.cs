@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.Chess
 {
@@ -40,91 +39,25 @@ namespace Sandra.Chess
         public ReadOnlyPosition CurrentPosition { get; private set; }
 
         /// <summary>
-        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
-        /// </summary>
-        public MoveTree MoveTree { get; }
-
-        /// <summary>
         /// Creates a new game with the default initial <see cref="Position"/>.
         /// </summary>
         public Game()
         {
             Position initialPosition = Position.GetInitialPosition();
-            MoveTree moveTree = new MoveTree(initialPosition.SideToMove == Color.Black);
             InitialPosition = new ReadOnlyPosition(initialPosition);
             CurrentPosition = InitialPosition;
-            MoveTree = moveTree;
-            ActiveTree = moveTree;
         }
 
-        /// <summary>
-        /// Gets the move tree which is currently active.
-        /// </summary>
-        public MoveTree ActiveTree { get; private set; }
-
-        private void SetActiveTreeInner(MoveTree value)
-        {
-            // Replay all moves until the new active tree has been reached.
-            Stack<Move> previousMoves = new Stack<Move>();
-            MoveTree newActiveTree = value;
-
-            MoveTree current;
-            for (current = newActiveTree; current.ParentVariation != null; current = current.ParentVariation.ParentTree)
-            {
-                previousMoves.Push(current.ParentVariation.Move);
-            }
-
-            // 'value' should be embedded somewhere inside this.moveTree.
-            if (current != MoveTree)
-            {
-                throw new ArgumentException("value is not embedded in Game.MoveTree.", nameof(value));
-            }
-
-            Position newPosition = InitialPosition.Copy();
-            foreach (Move move in previousMoves)
-            {
-                newPosition.FastMakeMove(move);
-            }
-
-            CurrentPosition = new ReadOnlyPosition(newPosition);
-            ActiveTree = newActiveTree;
-        }
-
-        public void SetActiveTree(MoveTree value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (ActiveTree != value)
-            {
-                SetActiveTreeInner(value);
-            }
-        }
-
-        public bool IsFirstMove => ActiveTree.ParentVariation == null;
-        public bool IsLastMove => ActiveTree.MainLine == null;
-        public Move PreviousMove() => ActiveTree.ParentVariation.Move;
+        public bool IsFirstMove => true;
+        public bool IsLastMove => true;
+        public Move PreviousMove() => default;
 
         public void Backward()
         {
-            // No effect if first move.
-            if (IsFirstMove) return;
-
-            // Replay until the previous move.
-            SetActiveTreeInner(ActiveTree.ParentVariation.ParentTree);
         }
 
         public void Forward()
         {
-            // No effect if last move.
-            if (IsLastMove) return;
-
-            Position currentPosition = CurrentPosition.Copy();
-            currentPosition.FastMakeMove(ActiveTree.MainLine.Move);
-            CurrentPosition = new ReadOnlyPosition(currentPosition);
-            ActiveTree = ActiveTree.MainLine.MoveTree;
         }
 
         /// <summary>

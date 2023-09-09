@@ -110,7 +110,6 @@
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadOnlyPosition.cs" />
-    <Compile Include="Variation.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Eutherion.Common">
