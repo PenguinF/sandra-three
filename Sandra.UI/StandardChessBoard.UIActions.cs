@@ -189,22 +189,10 @@ namespace Sandra.UI
 
         public UIActionState TryGotoNextMove(bool perform)
         {
-            // Use this action to be able to navigate to side lines beyond the end of the main line.
-            if (game.ActiveTree.MainLine == null && !game.ActiveTree.SideLines.Any())
-            {
-                return UIActionVisibility.Disabled;
-            }
-
+            if (game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                if (game.ActiveTree.MainLine != null)
-                {
-                    game.Forward();
-                }
-                else
-                {
-                    game.SetActiveTree(game.ActiveTree.SideLines.First().MoveTree);
-                }
+                game.Forward();
                 GameUpdated();
             }
             return UIActionVisibility.Enabled;
