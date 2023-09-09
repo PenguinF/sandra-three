@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MoveFormatter.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess.Pgn;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -181,7 +180,7 @@ namespace Sandra.Chess
 
                 if (moveInfo.Result == MoveCheckResult.OK)
                 {
-                    Position current = game.CurrentPosition;
+                    ReadOnlyPosition current = game.CurrentPosition;
                     Square friendlyKing = current.FindKing(current.SideToMove);
                     if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
                     {

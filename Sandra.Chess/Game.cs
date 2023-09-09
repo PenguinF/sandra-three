@@ -32,8 +32,15 @@ namespace Sandra.Chess
     /// </summary>
     public class Game
     {
-        private readonly Position initialPosition;
-        private Position currentPosition;
+        /// <summary>
+        /// Gets the initial position of this game.
+        /// </summary>
+        public ReadOnlyPosition InitialPosition { get; }
+
+        /// <summary>
+        /// Gets the current position of this game.
+        /// </summary>
+        public ReadOnlyPosition CurrentPosition { get; private set; }
 
         /// <summary>
         /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
@@ -45,22 +52,13 @@ namespace Sandra.Chess
         /// </summary>
         public Game()
         {
-            initialPosition = Position.GetInitialPosition();
+            Position initialPosition = Position.GetInitialPosition();
             MoveTree moveTree = new MoveTree(initialPosition.SideToMove == Color.Black);
-            currentPosition = initialPosition.Copy();
+            InitialPosition = new ReadOnlyPosition(initialPosition);
+            CurrentPosition = InitialPosition;
             MoveTree = moveTree;
             ActiveTree = moveTree;
         }
-
-        /// <summary>
-        /// Gets the initial position of this game.
-        /// </summary>
-        public Position InitialPosition => initialPosition.Copy();
-
-        /// <summary>
-        /// Gets the current position of this game.
-        /// </summary>
-        public Position CurrentPosition => currentPosition.Copy();
 
         /// <summary>
         /// Gets the move tree which is currently active.
@@ -85,13 +83,13 @@ namespace Sandra.Chess
                 throw new ArgumentException("value is not embedded in Game.MoveTree.", nameof(value));
             }
 
-            Position newPosition = initialPosition.Copy();
+            Position newPosition = InitialPosition.Copy();
             foreach (Move move in previousMoves)
             {
                 newPosition.FastMakeMove(move);
             }
 
-            currentPosition = newPosition;
+            CurrentPosition = new ReadOnlyPosition(newPosition);
             ActiveTree = newActiveTree;
         }
 
@@ -126,14 +124,16 @@ namespace Sandra.Chess
             // No effect if last move.
             if (IsLastMove) return;
 
+            Position currentPosition = CurrentPosition.Copy();
             currentPosition.FastMakeMove(ActiveTree.MainLine.Move);
+            CurrentPosition = new ReadOnlyPosition(currentPosition);
             ActiveTree = ActiveTree.MainLine.MoveTree;
         }
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
-        public Color SideToMove => currentPosition.SideToMove;
+        public Color SideToMove => CurrentPosition.SideToMove;
 
         /// <summary>
         /// Gets the <see cref="ColoredPiece"/> which occupies a square, or null if the square is not occupied.
@@ -142,9 +142,9 @@ namespace Sandra.Chess
         {
             ulong squareVector = square.ToVector();
 
-            if (EnumValues<Piece>.List.Any(x => currentPosition.GetVector(x).Test(squareVector), out Piece piece))
+            if (EnumValues<Piece>.List.Any(x => CurrentPosition.GetVector(x).Test(squareVector), out Piece piece))
             {
-                if (currentPosition.GetVector(Color.White).Test(squareVector))
+                if (CurrentPosition.GetVector(Color.White).Test(squareVector))
                 {
                     return piece.Combine(Color.White);
                 }
@@ -158,13 +158,13 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all squares that are occupied by the given colored piece.
         /// </summary>
-        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => currentPosition.GetVector(coloredPiece).AllSquares();
+        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => CurrentPosition.GetVector(coloredPiece).AllSquares();
 
         /// <summary>
         /// If a pawn can be captured en passant in this position, returns the square of that pawn.
         /// Otherwise <see cref="Square.A1"/> is returned. 
         /// </summary>
-        public Square EnPassantCaptureSquare => currentPosition.EnPassantCaptureVector.GetSingleSquare();
+        public Square EnPassantCaptureSquare => CurrentPosition.EnPassantCaptureVector.GetSingleSquare();
 
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
@@ -185,14 +185,24 @@ namespace Sandra.Chess
         /// </exception>
         public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
         {
-            Move move = currentPosition.TryMakeMove(ref moveInfo, make);
-            if (make && moveInfo.Result == MoveCheckResult.OK)
+            if (!make)
             {
-                // Move to an existing variation, or create a new one.
-                Variation variation = ActiveTree.GetOrAddVariation(move);
-                ActiveTree = variation.MoveTree;
+                moveInfo.Result = CurrentPosition.TestMove(moveInfo);
+                return default;
             }
-            return move;
+            else
+            {
+                Position currentPosition = CurrentPosition.Copy();
+                Move move = currentPosition.TryMakeMove(ref moveInfo, make);
+                if (moveInfo.Result == MoveCheckResult.OK)
+                {
+                    // Move to an existing variation, or create a new one.
+                    CurrentPosition = new ReadOnlyPosition(currentPosition);
+                    Variation variation = ActiveTree.GetOrAddVariation(move);
+                    ActiveTree = variation.MoveTree;
+                }
+                return move;
+            }
         }
     }
 }
