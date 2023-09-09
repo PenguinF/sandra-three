@@ -34,7 +34,7 @@ namespace Eutherion.Win.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(null, TextFormatter.Default));
-            Assert.Throws<ArgumentNullException>("localizer", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
+            Assert.Throws<ArgumentNullException>("formatter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
 
             Assert.Throws<ArgumentNullException>(() => FormatUtilities.SoftFormat(null));
         }
