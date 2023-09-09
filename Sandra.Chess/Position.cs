@@ -618,13 +618,11 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// This method is for internal use only.
+        /// Plays a <see cref="Move"/>, assuming it is generated and verified in the exact same position
+        /// by <see cref="TryMakeMove(ref MoveInfo, bool)"/>. Calling this method in any other situation
+        /// will leave this <see cref="Position"/> in a corrupted state which cannot be recovered.
         /// </summary>
-        /// <remarks>
-        /// This is a copy of TryMakeMove() but without the checks and with make = true.
-        /// Only use if absolutely sure that the given Move is correct, or it will leave the position in a corrupted state.
-        /// </remarks>
-        internal void FastMakeMove(Move move)
+        public void FastMakeMove(Move move)
         {
             Debug.Assert(CheckInvariants());
 
