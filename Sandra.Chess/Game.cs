@@ -19,11 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Collections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
 namespace Sandra.Chess
 {
@@ -129,42 +126,6 @@ namespace Sandra.Chess
             CurrentPosition = new ReadOnlyPosition(currentPosition);
             ActiveTree = ActiveTree.MainLine.MoveTree;
         }
-
-        /// <summary>
-        /// Gets the <see cref="Color"/> of the side to move.
-        /// </summary>
-        public Color SideToMove => CurrentPosition.SideToMove;
-
-        /// <summary>
-        /// Gets the <see cref="ColoredPiece"/> which occupies a square, or null if the square is not occupied.
-        /// </summary>
-        public ColoredPiece? GetColoredPiece(Square square)
-        {
-            ulong squareVector = square.ToVector();
-
-            if (EnumValues<Piece>.List.Any(x => CurrentPosition.GetVector(x).Test(squareVector), out Piece piece))
-            {
-                if (CurrentPosition.GetVector(Color.White).Test(squareVector))
-                {
-                    return piece.Combine(Color.White);
-                }
-
-                return piece.Combine(Color.Black);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Enumerates all squares that are occupied by the given colored piece.
-        /// </summary>
-        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => CurrentPosition.GetVector(coloredPiece).AllSquares();
-
-        /// <summary>
-        /// If a pawn can be captured en passant in this position, returns the square of that pawn.
-        /// Otherwise <see cref="Square.A1"/> is returned. 
-        /// </summary>
-        public Square EnPassantCaptureSquare => CurrentPosition.EnPassantCaptureVector.GetSingleSquare();
 
         /// <summary>
         /// Validates a move against the current position and optionally performs it.

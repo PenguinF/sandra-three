@@ -77,6 +77,22 @@ namespace Sandra.Chess
         public ulong EnPassantCaptureVector => Position.EnPassantCaptureVector;
 
         /// <summary>
+        /// If a pawn can be captured en passant in this position, returns the square of that pawn.
+        /// Otherwise <see cref="Square.A1"/> is returned. 
+        /// </summary>
+        public Square EnPassantCaptureSquare => Position.EnPassantCaptureSquare;
+
+        /// <summary>
+        /// Gets the <see cref="ColoredPiece"/> which occupies a square, or <see langword="null"/> if the square is not occupied.
+        /// </summary>
+        public ColoredPiece? GetColoredPiece(Square square) => Position.GetColoredPiece(square);
+
+        /// <summary>
+        /// Enumerates all squares that are occupied by the given colored piece.
+        /// </summary>
+        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => Position.AllSquaresOccupiedBy(coloredPiece);
+
+        /// <summary>
         /// Returns if the given square is attacked by a piece of the opposite color.
         /// </summary>
         public bool IsSquareUnderAttack(Square square, Color defenderColor) => Position.IsSquareUnderAttack(square, defenderColor);

@@ -256,7 +256,7 @@ namespace Sandra.Chess
                 };
 
                 bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
-                foreach (var square in game.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.SideToMove)))
+                foreach (var square in game.CurrentPosition.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.CurrentPosition.SideToMove)))
                 {
                     if (square != move.SourceSquare)
                     {

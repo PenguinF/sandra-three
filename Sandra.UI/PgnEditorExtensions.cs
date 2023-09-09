@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnEditorExtensions.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -271,12 +271,12 @@ namespace Sandra.UI
                 PgnMoveSyntax moveSyntax = ply.Move.PlyContentNode.ContentNode;
                 if (moveSyntax.IsUnrecognizedMove) break;
 
-                var sideToMove = game.SideToMove;
+                var sideToMove = game.CurrentPosition.SideToMove;
                 MoveInfo moveInfo = GetMoveInfo(game, pgnEditor.GetTextRange(moveSyntax.AbsoluteStart, moveSyntax.Length), sideToMove);
                 game.TryMakeMove(ref moveInfo, true);
 
                 // Also invalidate on illegal move.
-                if (sideToMove == game.SideToMove) break;
+                if (sideToMove == game.CurrentPosition.SideToMove) break;
             }
 
             return game;
