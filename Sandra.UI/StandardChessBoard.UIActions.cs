@@ -268,20 +268,6 @@ namespace Sandra.UI
 
         public UIActionState TryGotoPreviousVariation(bool perform)
         {
-            Variation currentVariation = game.ActiveTree.ParentVariation;
-            if (currentVariation != null && currentVariation.VariationIndex > 0)
-            {
-                Variation previousVariation = currentVariation.ParentTree.Variations[currentVariation.VariationIndex - 1];
-                if (previousVariation != null)
-                {
-                    if (perform)
-                    {
-                        game.SetActiveTree(previousVariation.MoveTree);
-                        GameUpdated();
-                    }
-                    return UIActionVisibility.Enabled;
-                }
-            }
             return UIActionVisibility.Disabled;
         }
 
@@ -302,17 +288,6 @@ namespace Sandra.UI
 
         public UIActionState TryGotoNextVariation(bool perform)
         {
-            Variation currentVariation = game.ActiveTree.ParentVariation;
-            if (currentVariation != null && currentVariation.VariationIndex + 1 < currentVariation.ParentTree.Variations.Count)
-            {
-                if (perform)
-                {
-                    Variation nextVariation = currentVariation.ParentTree.Variations[currentVariation.VariationIndex + 1];
-                    game.SetActiveTree(nextVariation.MoveTree);
-                    GameUpdated();
-                }
-                return UIActionVisibility.Enabled;
-            }
             return UIActionVisibility.Disabled;
         }
 
