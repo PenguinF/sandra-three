@@ -740,7 +740,6 @@ namespace Sandra.UI
                 if (game.TryMakeMove(moveInfo) == Chess.MoveCheckResult.OK)
                 {
                     GameUpdated();
-                    PlayingBoard.ActionHandler.Invalidate();
                     moveStatus = MoveStatus.None;
                     return true;
                 }
@@ -841,6 +840,9 @@ namespace Sandra.UI
 
             // Then copy the position.
             CopyPositionToBoard();
+
+            // Refresh actions.
+            PlayingBoard.ActionHandler.Invalidate();
         }
 
         Pen lastMoveArrowPen;
