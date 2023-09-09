@@ -39,16 +39,6 @@ namespace Sandra.UI
     /// </summary>
     public partial class StandardChessBoard : ContainerControl, IDockableControl, IWeakEventTarget
     {
-        private static Chess.Variation GetFirstMove(Chess.Variation variation)
-        {
-            Chess.Variation firstMoveInVariation = variation;
-            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
-            {
-                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
-            }
-            return firstMoveInVariation;
-        }
-
         public DockProperties DockProperties { get; } = new DockProperties();
 
         /// <summary>
