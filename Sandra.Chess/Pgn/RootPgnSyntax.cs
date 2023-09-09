@@ -56,6 +56,11 @@ namespace Sandra.Chess.Pgn
         public override PgnSyntax ParentSyntax => null;
 
         /// <summary>
+        /// Gets the root node of this syntax tree, which is this syntax node.
+        /// </summary>
+        public override RootPgnSyntax Root => this;
+
+        /// <summary>
         /// Returns 0, which is the absolute start position of this syntax node.
         /// </summary>
         public override int AbsoluteStart => 0;

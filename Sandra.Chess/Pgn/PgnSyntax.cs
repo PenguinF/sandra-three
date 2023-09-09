@@ -42,9 +42,14 @@ namespace Sandra.Chess.Pgn
         public abstract int Length { get; }
 
         /// <summary>
-        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// Gets the parent syntax node of this instance. Returns <see langword="null"/> for the root node.
         /// </summary>
         public abstract PgnSyntax ParentSyntax { get; }
+
+        /// <summary>
+        /// Gets the root node of this syntax tree.
+        /// </summary>
+        public virtual RootPgnSyntax Root => ParentSyntax.Root;
 
         /// <summary>
         /// Gets the absolute start position of this syntax node.
