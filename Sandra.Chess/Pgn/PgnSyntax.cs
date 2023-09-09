@@ -204,5 +204,23 @@ namespace Sandra.Chess.Pgn
 
             return EmptyEnumerable<IPgnSymbol>.Instance;
         }
+
+        /// <summary>
+        /// Creates a <see cref="ReadOnlyMemory{T}"/> over the portion of the source PGN string
+        /// that corresponds exactly to this syntax node.
+        /// </summary>
+        /// <returns>
+        /// The read-only character memory representation of the source PGN.
+        /// </returns>
+        public ReadOnlyMemory<char> SourcePgnAsMemory => Root.Pgn.AsMemory(AbsoluteStart, Length);
+
+        /// <summary>
+        /// Creates a <see cref="ReadOnlySpan{T}"/> over the portion of the source PGN string
+        /// that corresponds exactly to this syntax node.
+        /// </summary>
+        /// <returns>
+        /// The read-only character memory representation of the source PGN.
+        /// </returns>
+        public ReadOnlySpan<char> SourcePgnAsSpan => Root.Pgn.AsSpan(AbsoluteStart, Length);
     }
 }
