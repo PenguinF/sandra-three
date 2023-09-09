@@ -22,6 +22,7 @@
 using Eutherion;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Sandra.Chess.Pgn
 {
@@ -30,6 +31,11 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class RootPgnSyntax : PgnSyntax
     {
+        /// <summary>
+        /// Gets a reference to the PGN string that generated this parse tree.
+        /// </summary>
+        public string Pgn { get; }
+
         /// <summary>
         /// Gets the syntax tree containing the list of PGN games.
         /// </summary>
@@ -97,6 +103,9 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes a new instance of <see cref="RootPgnSyntax"/>.
         /// </summary>
+        /// <param name="pgn">
+        /// A reference to the PGN string that generated this parse tree.
+        /// </param>
         /// <param name="gameListSyntax">
         /// The syntax tree containing a list of PGN games.
         /// </param>
@@ -104,13 +113,16 @@ namespace Sandra.Chess.Pgn
         /// The collection of parse errors.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="gameListSyntax"/> and/or <paramref name="errors"/> is null.
+        /// <paramref name="pgn"/> and/or <paramref name="gameListSyntax"/> and/or <paramref name="errors"/> are <see langword="null"/>.
         /// </exception>
-        public RootPgnSyntax(GreenPgnGameListSyntax gameListSyntax, ReadOnlyList<PgnErrorInfo> errors)
+        public RootPgnSyntax(string pgn, GreenPgnGameListSyntax gameListSyntax, ReadOnlyList<PgnErrorInfo> errors)
         {
+            Pgn = pgn ?? throw new ArgumentNullException(nameof(pgn));
             if (gameListSyntax == null) throw new ArgumentNullException(nameof(gameListSyntax));
             GameListSyntax = new PgnGameListSyntax(this, gameListSyntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+
+            Debug.Assert(pgn.Length == Length);
         }
     }
 }
