@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Game.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,44 +40,22 @@ namespace Sandra.Chess
         /// </summary>
         public MoveTree MoveTree { get; }
 
-        private Game(Position initialPosition, MoveTree moveTree)
+        /// <summary>
+        /// Creates a new game with the default initial <see cref="Position"/>.
+        /// </summary>
+        public Game()
         {
-            this.initialPosition = initialPosition;
+            initialPosition = Position.GetInitialPosition();
+            MoveTree moveTree = new MoveTree(initialPosition.SideToMove == Color.Black);
             currentPosition = initialPosition.Copy();
             MoveTree = moveTree;
             ActiveTree = moveTree;
         }
 
         /// <summary>
-        /// Creates a new game with a given initial <see cref="Position"/>.
-        /// </summary>
-        public Game(Position initialPosition) : this(initialPosition,
-                                                     new MoveTree(initialPosition.SideToMove == Color.Black))
-        {
-        }
-
-        /// <summary>
-        /// Creates a new game with the default initial <see cref="Position"/>.
-        /// </summary>
-        public Game() : this(Position.GetInitialPosition())
-        {
-        }
-
-        /// <summary>
-        /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
-        /// but in which <see cref="ActiveTree"/> can be manipulated independently.
-        /// </summary>
-        public Game Copy() => new Game(initialPosition, MoveTree);
-
-        /// <summary>
         /// Gets the initial position of this game.
         /// </summary>
         public Position InitialPosition => initialPosition.Copy();
-
-        /// <summary>
-        /// Gets the <see cref="Color"/> of the side to move in the initial position.
-        /// </summary>
-        public Color InitialSideToMove => initialPosition.SideToMove;
 
         /// <summary>
         /// Gets the current position of this game.
