@@ -28,7 +28,7 @@ using System;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents the root of an abstract PGN syntax tree. It contains a list of games together with its trailing trivia.
+    /// Represents a list of games together with its trailing trivia.
     /// </summary>
     public sealed class GreenPgnGameListSyntax : ISpan
     {
@@ -67,10 +67,15 @@ namespace Sandra.Chess.Pgn
     }
 
     /// <summary>
-    /// Represents the root of an abstract PGN syntax tree. It contains a list of games together with its trailing trivia.
+    /// Represents a list of games together with its trailing trivia.
     /// </summary>
     public sealed class PgnGameListSyntax : PgnSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public RootPgnSyntax Parent { get; }
+
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
@@ -89,7 +94,7 @@ namespace Sandra.Chess.Pgn
         public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
 
         /// <summary>
-        /// Returns 0, which is the default start position of the root node.
+        /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => 0;
 
@@ -99,14 +104,9 @@ namespace Sandra.Chess.Pgn
         public override int Length => Green.Length;
 
         /// <summary>
-        /// Returns null, as this is the root node.
+        /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => null;
-
-        /// <summary>
-        /// Returns 0, which is the absolute start position of this syntax node.
-        /// </summary>
-        public override int AbsoluteStart => 0;
+        public override PgnSyntax ParentSyntax => Parent;
 
         /// <summary>
         /// Gets the number of children of this syntax node.
@@ -139,8 +139,9 @@ namespace Sandra.Chess.Pgn
             throw ExceptionUtility.ThrowListIndexOutOfRangeException();
         }
 
-        internal PgnGameListSyntax(GreenPgnGameListSyntax green)
+        internal PgnGameListSyntax(RootPgnSyntax parent, GreenPgnGameListSyntax green)
         {
+            Parent = parent;
             Green = green;
 
             Games = new SafeLazyObjectCollection<PgnGameSyntax>(
