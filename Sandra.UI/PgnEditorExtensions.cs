@@ -273,7 +273,7 @@ namespace Sandra.UI
 
                 var sideToMove = game.CurrentPosition.SideToMove;
                 MoveInfo moveInfo = GetMoveInfo(game, pgnEditor.GetTextRange(moveSyntax.AbsoluteStart, moveSyntax.Length), sideToMove);
-                game.TryMakeMove(ref moveInfo, true);
+                game.TryMakeMove(moveInfo);
 
                 // Also invalidate on illegal move.
                 if (sideToMove == game.CurrentPosition.SideToMove) break;

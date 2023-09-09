@@ -128,35 +128,23 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Validates a move against the current position and optionally performs it.
+        /// Makes a move in the current position if it is legal.
         /// </summary>
         /// <param name="moveInfo">
-        /// The move to validate and optionally perform.
-        /// </param>
-        /// <param name="make">
-        /// True if the move must actually be made, false if only validated.
+        /// The move to make.
         /// </param>
         /// <returns>
-        /// A valid legal <see cref="Move"/> structure if <see cref="MoveInfo.Result"/> is equal to  
-        /// <see cref="MoveCheckResult.OK"/>, or an incomplete <see cref="Move"/> if one of the other <see cref="MoveCheckResult"/> values.
-        /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
+        /// A <see cref="MoveCheckResult.OK"/> if the move is made and therefore legal; otherwise a <see cref="MoveCheckResult"/> value
+        /// which describes the reason why the move is illegal.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
+        /// Occurs when any of <paramref name="moveInfo"/>'s members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
+        public MoveCheckResult TryMakeMove(MoveInfo moveInfo)
         {
-            if (!make)
-            {
-                moveInfo.Result = CurrentPosition.TestMove(moveInfo);
-                return default;
-            }
-            else
-            {
-                // Disable until we can modify PGN using its syntax tree.
-                moveInfo.Result = ~MoveCheckResult.OK;
-                return default;
-            }
+            // Disable until we can modify PGN using its syntax tree.
+            moveInfo.Result = ~MoveCheckResult.OK;
+            return default;
         }
     }
 }

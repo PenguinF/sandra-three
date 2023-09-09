@@ -737,9 +737,7 @@ namespace Sandra.UI
 
                 ResetMoveEffects();
 
-                game.TryMakeMove(ref moveInfo, true);
-
-                if (moveInfo.Result == Chess.MoveCheckResult.OK)
+                if (game.TryMakeMove(moveInfo) == Chess.MoveCheckResult.OK)
                 {
                     GameUpdated();
                     PlayingBoard.ActionHandler.Invalidate();
