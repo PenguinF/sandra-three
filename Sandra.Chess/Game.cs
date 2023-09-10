@@ -28,7 +28,7 @@ using System.Numerics;
 namespace Sandra.Chess
 {
     /// <summary>
-    /// Represents a standard game of chess.
+    /// Represents a standard game of chess, with a pointer to an active ply.
     /// </summary>
     public class Game
     {
@@ -267,7 +267,7 @@ namespace Sandra.Chess
         private readonly List<PlyInfo> FirstPlies = new List<PlyInfo>();
 
         /// <summary>
-        /// Gets the current position of this game.
+        /// Gets the current position of this game, which depends on the active ply.
         /// </summary>
         public ReadOnlyPosition CurrentPosition { get; private set; }
 
@@ -378,9 +378,32 @@ namespace Sandra.Chess
             return current;
         }
 
-        public bool IsFirstMove => true;
-        public bool IsLastMove => true;
-        public Move PreviousMove => default;
+        // Null before the first move.
+        private PlyInfo activePly;
+
+        /// <summary>
+        /// Gets or sets the ply syntax node which is currently active.
+        /// </summary>
+        public PgnPlySyntax ActivePly { get => activePly?.Ply; }
+
+        /// <summary>
+        /// Returns the last played move, or a default value if <see cref="IsFirstMove"/> is <see langword="true"/>.
+        /// </summary>
+        public Move PreviousMove => activePly == null ? default : activePly.Move;
+
+        private List<PlyInfo> ActiveNextPlies => activePly == null ? FirstPlies : activePly.NextPlies;
+
+        private bool LegalNextPly(out PlyInfo legalNextPlay) => ActiveNextPlies.Any(x => x.IsLegalMove, out legalNextPlay);
+
+        /// <summary>
+        /// Returns if <see cref="ActivePly"/> is null, i.e. at the initial position.
+        /// </summary>
+        public bool IsFirstMove => activePly == null;
+
+        /// <summary>
+        /// Returns if the active ply is followed by another in a main or side line.
+        /// </summary>
+        public bool IsLastMove => !LegalNextPly(out _);
 
         public void Backward()
         {
