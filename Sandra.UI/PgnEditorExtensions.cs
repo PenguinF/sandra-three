@@ -32,8 +32,10 @@ namespace Sandra.UI
     /// </summary>
     public static class PgnEditorExtensions
     {
-        public static PgnGameSyntax GameAtOrBeforePosition(this PgnEditor pgnEditor, int position)
+        public static (PgnGameSyntax game, PgnPlySyntax deepestPly) GameAtOrBeforePosition(this PgnEditor pgnEditor, int position)
         {
+            PgnPlySyntax deepestPlySyntax = null;
+
             // We're looking for the symbols before and after the position.
             // If the position is right at the edge between two games, return the previous game; any trivia is part of the next game,
             // and so it's more likely we're closer to the previous game.
@@ -45,11 +47,18 @@ namespace Sandra.UI
                 while (pgnSyntax != null)
                 {
                     pgnSyntax = pgnSyntax.ParentSyntax;
-                    if (pgnSyntax is PgnGameSyntax pgnGameSyntax) return pgnGameSyntax;
+                    if (deepestPlySyntax == null && pgnSyntax is PgnPlySyntax plySyntax)
+                    {
+                        deepestPlySyntax = plySyntax;
+                    }
+                    else if (pgnSyntax is PgnGameSyntax pgnGameSyntax)
+                    {
+                        return (pgnGameSyntax, deepestPlySyntax);
+                    }
                 }
             }
 
-            return null;
+            return (null, null);
         }
     }
 }

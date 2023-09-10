@@ -75,7 +75,7 @@ namespace Sandra.UI
 
         public UIActionState TryOpenGame(PgnEditor pgnEditor, bool perform)
         {
-            PgnGameSyntax gameSyntax = pgnEditor.GameAtOrBeforePosition(pgnEditor.SelectionStart);
+            var (gameSyntax, deepestPly) = pgnEditor.GameAtOrBeforePosition(pgnEditor.SelectionStart);
             if (gameSyntax == null) return UIActionVisibility.Disabled;
 
             if (perform)
@@ -87,6 +87,8 @@ namespace Sandra.UI
                     return newChessBoard;
                 });
 
+                chessBoard.Game.ActivePly = deepestPly;
+                chessBoard.GameUpdated();
                 chessBoard.EnsureActivated();
             }
 
