@@ -455,15 +455,20 @@ namespace Sandra.Chess
 
         public bool TryGetPreviousSibling(PgnPlySyntax ply, out PgnPlySyntax previousSibling)
         {
-            // Choose simple implementation to only select from direct siblings.
+            // Choose simple implementation to only select from direct and legal siblings.
             if (ply != null && AllPlies.TryGetValue(ply, out PlyInfo plyInfo))
             {
                 List<PlyInfo> siblings = plyInfo.Previous == null ? FirstPlies : plyInfo.Previous.NextPlies;
                 int siblingIndex = siblings.IndexOf(plyInfo);
-                if (siblingIndex > 0)
+                while (siblingIndex > 0)
                 {
-                    previousSibling = siblings[siblingIndex - 1].Ply;
-                    return true;
+                    siblingIndex--;
+                    PlyInfo candidate = siblings[siblingIndex];
+                    if (candidate.IsLegalMove)
+                    {
+                        previousSibling = candidate.Ply;
+                        return true;
+                    }
                 }
             }
 
@@ -473,15 +478,20 @@ namespace Sandra.Chess
 
         public bool TryGetNextSibling(PgnPlySyntax ply, out PgnPlySyntax nextSibling)
         {
-            // Choose simple implementation to only select from direct siblings.
+            // Choose simple implementation to only select from direct and legal siblings.
             if (ply != null && AllPlies.TryGetValue(ply, out PlyInfo plyInfo))
             {
                 List<PlyInfo> siblings = plyInfo.Previous == null ? FirstPlies : plyInfo.Previous.NextPlies;
                 int siblingIndex = siblings.IndexOf(plyInfo);
-                if (siblingIndex < siblings.Count - 1)
+                while (siblingIndex < siblings.Count - 1)
                 {
-                    nextSibling = siblings[siblingIndex + 1].Ply;
-                    return true;
+                    siblingIndex++;
+                    PlyInfo candidate = siblings[siblingIndex];
+                    if (candidate.IsLegalMove)
+                    {
+                        nextSibling = candidate.Ply;
+                        return true;
+                    }
                 }
             }
 
