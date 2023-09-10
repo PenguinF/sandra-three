@@ -320,7 +320,12 @@ namespace Sandra.Chess
             // Initialize CurrentPosition. Copy-by-reference is ok since this is immutable.
             CurrentPosition = InitialPosition;
 
-            foreach (PgnPlySyntax ply in pgnGame.PlyList.Plies)
+            AddPlyList(position, null, pgnGame.PlyList);
+        }
+
+        private void AddPlyList(Position position, PlyInfo previous, PgnPlyListSyntax plyList)
+        {
+            foreach (PgnPlySyntax ply in plyList.Plies)
             {
                 // For now, invalidate the remainder of the game if seeing a null or unrecognized move.
                 if (ply.Move == null) break;
