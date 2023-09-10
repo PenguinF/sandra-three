@@ -383,7 +383,7 @@ namespace Sandra.UI
         /// <summary>
         /// Opens a chess board for a certain game at a current position.
         /// </summary>
-        private StandardChessBoard OpenChessBoard(PgnEditor ownerPgnEditor, Chess.Game game, string white, string black, string whiteElo, string blackElo)
+        private StandardChessBoard OpenChessBoard(PgnEditor ownerPgnEditor, Chess.Game game)
         {
             var newChessBoard = new StandardChessBoard
             {
@@ -417,6 +417,11 @@ namespace Sandra.UI
             });
 
             UIMenu.AddTo(newChessBoard.PlayingBoard);
+
+            string white = game.White?.Value;
+            string black = game.Black?.Value;
+            string whiteElo = game.WhiteElo?.Value;
+            string blackElo = game.BlackElo?.Value;
 
             if (string.IsNullOrWhiteSpace(white)) white = "?";
             if (string.IsNullOrWhiteSpace(black)) black = "?";

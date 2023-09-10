@@ -26,7 +26,6 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -83,44 +82,7 @@ namespace Sandra.UI
             {
                 StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
                 {
-                    const string WhiteTagName = "White";
-                    const string BlackTagName = "Black";
-                    const string WhiteEloTagName = "WhiteElo";
-                    const string BlackEloTagName = "BlackElo";
-
-                    // Look in the game's tags for these 4 values.
-                    string white = null;
-                    string black = null;
-                    string whiteElo = null;
-                    string blackElo = null;
-
-                    foreach (PgnTagPairSyntax tagPairSyntax in gameSyntax.TagSection.TagPairNodes)
-                    {
-                        string tagName = null;
-                        string tagValue = null;
-
-                        foreach (PgnTagElementSyntax tagElementSyntax in tagPairSyntax.TagElementNodes.Select(x => x.ContentNode))
-                        {
-                            if (tagElementSyntax is PgnTagNameSyntax tagNameSyntax)
-                            {
-                                tagName = tagNameSyntax.SourcePgnAsSpan.ToString();
-                            }
-                            else if (tagElementSyntax is PgnTagValueSyntax tagValueSyntax)
-                            {
-                                tagValue = tagValueSyntax.Value;
-                            }
-                        }
-
-                        if (tagName != null && tagValue != null)
-                        {
-                            if (tagName.Equals(WhiteTagName, StringComparison.OrdinalIgnoreCase)) white = tagValue;
-                            else if (tagName.Equals(BlackTagName, StringComparison.OrdinalIgnoreCase)) black = tagValue;
-                            else if (tagName.Equals(WhiteEloTagName, StringComparison.OrdinalIgnoreCase)) whiteElo = tagValue;
-                            else if (tagName.Equals(BlackEloTagName, StringComparison.OrdinalIgnoreCase)) blackElo = tagValue;
-                        }
-                    }
-
-                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game(gameSyntax), white, black, whiteElo, blackElo);
+                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game(gameSyntax));
                     newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
                     return newChessBoard;
                 });

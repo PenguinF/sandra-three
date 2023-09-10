@@ -21,6 +21,7 @@
 
 using Sandra.Chess.Pgn;
 using System;
+using System.Linq;
 using System.Numerics;
 
 namespace Sandra.Chess
@@ -235,6 +236,16 @@ namespace Sandra.Chess
             return moveInfo;
         }
 
+        public static readonly string WhiteTagName = "White";
+        public static readonly string BlackTagName = "Black";
+        public static readonly string WhiteEloTagName = "WhiteElo";
+        public static readonly string BlackEloTagName = "BlackElo";
+
+        public PgnTagValueSyntax White { get; }
+        public PgnTagValueSyntax Black { get; }
+        public PgnTagValueSyntax WhiteElo { get; }
+        public PgnTagValueSyntax BlackElo { get; }
+
         /// <summary>
         /// Gets the initial position of this game.
         /// </summary>
@@ -257,6 +268,33 @@ namespace Sandra.Chess
         public Game(PgnGameSyntax pgnGame)
         {
             if (pgnGame == null) throw new ArgumentNullException(nameof(pgnGame));
+
+            // Look in the game's tags for 4 known tag names.
+            foreach (PgnTagPairSyntax tagPairSyntax in pgnGame.TagSection.TagPairNodes)
+            {
+                ReadOnlySpan<char> tagName = default;
+                PgnTagValueSyntax tagValue = null;
+
+                foreach (PgnTagElementSyntax tagElementSyntax in tagPairSyntax.TagElementNodes.Select(x => x.ContentNode))
+                {
+                    if (tagElementSyntax is PgnTagNameSyntax tagNameSyntax)
+                    {
+                        tagName = tagNameSyntax.SourcePgnAsSpan;
+                    }
+                    else if (tagElementSyntax is PgnTagValueSyntax tagValueSyntax)
+                    {
+                        tagValue = tagValueSyntax;
+                    }
+                }
+
+                if (tagName.Length > 0 && tagValue != null)
+                {
+                    if (tagName.Equals(WhiteTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) White = tagValue;
+                    else if (tagName.Equals(BlackTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) Black = tagValue;
+                    else if (tagName.Equals(WhiteEloTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) WhiteElo = tagValue;
+                    else if (tagName.Equals(BlackEloTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) BlackElo = tagValue;
+                }
+            }
 
             Position initialPosition = Position.GetInitialPosition();
             InitialPosition = new ReadOnlyPosition(initialPosition);
