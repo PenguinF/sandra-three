@@ -383,6 +383,7 @@ namespace Sandra.Chess
 
         /// <summary>
         /// Gets or sets the ply syntax node which is currently active.
+        /// If a ply contains an illegal move, the active ply is set to the last valid ply.
         /// </summary>
         public PgnPlySyntax ActivePly { get => activePly?.Ply; set => SetActivePly(value); }
 
@@ -403,6 +404,7 @@ namespace Sandra.Chess
             for (PlyInfo p = plyInfo; p != null; p = p.Previous)
             {
                 if (p.IsLegalMove) moves.Push(p.Move);
+                else plyInfo = p.Previous;
             }
 
             Position position = InitialPosition.Copy();
