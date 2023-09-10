@@ -441,6 +441,55 @@ namespace Sandra.UI
 
             StandardChessBoard.ConstrainClientSize(newChessBoardForm);
 
+            // Keep selecting the active ply if it changes.
+            newChessBoard.AfterGameUpdated += (_, __) =>
+            {
+                PgnPlySyntax activePly = newChessBoard.Game.ActivePly;
+                int selectionStart;
+                int caretPosition;
+                if (activePly == null)
+                {
+                    // Put the caret before the first ply, but after leading trivia/float items if found.
+                    var plyList = newChessBoard.Game.PgnGame.PlyList;
+                    selectionStart = plyList.AbsoluteStart;
+
+                    if (plyList.Plies.Any(out PgnPlySyntax firstPly)
+                        && firstPly.ChildCount > 0
+                        && firstPly.GetChild(0) is WithPlyFloatItemsSyntax withFloatItems)
+                    {
+                        if (withFloatItems.PlyContentNode is WithTriviaSyntax withTrivia)
+                        {
+                            selectionStart = withTrivia.ContentNode.AbsoluteStart;
+                        }
+                        else
+                        {
+                            selectionStart = withFloatItems.PlyContentNode.AbsoluteStart;
+                        }
+                    }
+
+                    caretPosition = selectionStart;
+                }
+                else
+                {
+                    PgnMoveSyntax activeMove = activePly.Move?.PlyContentNode.ContentNode;
+                    if (activeMove == null)
+                    {
+                        // Put the caret right after the ply without selecting anything.
+                        selectionStart = activePly.AbsoluteStart + activePly.Length;
+                        caretPosition = selectionStart;
+                    }
+                    else
+                    {
+                        // Select the move.
+                        selectionStart = activeMove.AbsoluteStart;
+                        caretPosition = selectionStart + activeMove.Length;
+                    }
+                }
+
+                ownerPgnEditor.SetSelection(selectionStart, caretPosition);
+                ownerPgnEditor.ScrollRange(selectionStart, caretPosition);
+            };
+
             return newChessBoard;
         }
     }
