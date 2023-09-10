@@ -327,18 +327,56 @@ namespace Sandra.Chess
         {
             foreach (PgnPlySyntax ply in plyList.Plies)
             {
-                // For now, invalidate the remainder of the game if seeing a null or unrecognized move.
-                if (ply.Move == null) break;
-                PgnMoveSyntax moveSyntax = ply.Move.PlyContentNode.ContentNode;
-                if (moveSyntax.IsUnrecognizedMove) break;
+                Position savedCopy = null;
+                if (ply.Variations.Count > 0) savedCopy = position.Copy();
 
-                var sideToMove = CurrentPosition.SideToMove;
-                MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, sideToMove);
-                TryMakeMove(moveInfo);
+                // Add this ply before the variations, so it becomes the main line.
+                PlyInfo plyInfo = AddPly(position, previous, ply);
 
-                // Also invalidate on illegal move.
-                if (sideToMove == CurrentPosition.SideToMove) break;
+                foreach (var variation in ply.Variations)
+                {
+                    // Variations must use the same 'previous' ply info as the actual move.
+                    AddPlyList(savedCopy.Copy(), previous, variation.PlyContentNode.PliesWithFloatItems);
+                }
+
+                previous = plyInfo;
             }
+        }
+
+        private PlyInfo AddPly(Position position, PlyInfo previous, PgnPlySyntax ply)
+        {
+            PlyInfo current = new PlyInfo
+            {
+                Ply = ply,
+                Previous = previous,
+                IsLegalMove = false,
+            };
+
+            if (previous == null) FirstPlies.Add(current);
+            else previous.NextPlies.Add(current);
+
+            // For now, invalidate the remainder of the game if seeing a null or unrecognized move.
+            if ((previous == null || previous.IsLegalMove) && ply.Move != null)
+            {
+                PgnMoveSyntax moveSyntax = ply.Move.PlyContentNode.ContentNode;
+
+                if (!moveSyntax.IsUnrecognizedMove)
+                {
+                    var sideToMove = CurrentPosition.SideToMove;
+                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, sideToMove);
+                    TryMakeMove(moveInfo);
+
+                    // Also invalidate on illegal move.
+                    if (sideToMove != CurrentPosition.SideToMove)
+                    {
+                        current.IsLegalMove = true;
+                    }
+                }
+            }
+
+            AllPlies.Add(ply, current);
+
+            return current;
         }
 
         public bool IsFirstMove => true;
