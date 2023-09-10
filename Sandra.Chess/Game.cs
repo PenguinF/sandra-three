@@ -384,7 +384,38 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets or sets the ply syntax node which is currently active.
         /// </summary>
-        public PgnPlySyntax ActivePly { get => activePly?.Ply; }
+        public PgnPlySyntax ActivePly { get => activePly?.Ply; set => SetActivePly(value); }
+
+        private void SetActivePly(PgnPlySyntax newActivePly)
+        {
+            // Quick exit?
+            if (newActivePly == ActivePly) return;
+
+            if (newActivePly == null || !AllPlies.TryGetValue(newActivePly, out PlyInfo plyInfo))
+            {
+                // If null or unknown, just go to the initial position.
+                activePly = null;
+                CurrentPosition = InitialPosition;
+                return;
+            }
+
+            Stack<Move> moves = new Stack<Move>();
+            for (PlyInfo p = plyInfo; p != null; p = p.Previous)
+            {
+                if (p.IsLegalMove) moves.Push(p.Move);
+            }
+
+            Position position = InitialPosition.Copy();
+
+            while (moves.Count > 0)
+            {
+                Move move = moves.Pop();
+                position.FastMakeMove(move);
+            }
+
+            activePly = plyInfo;
+            CurrentPosition = new ReadOnlyPosition(position);
+        }
 
         /// <summary>
         /// Returns the last played move, or a default value if <see cref="IsFirstMove"/> is <see langword="true"/>.
@@ -405,12 +436,19 @@ namespace Sandra.Chess
         /// </summary>
         public bool IsLastMove => !LegalNextPly(out _);
 
-        public void Backward()
-        {
-        }
+        /// <summary>
+        /// Moves <see cref="ActivePly"/> one ply backwards, towards the first move.
+        /// If <see cref="IsFirstMove"/> is <see langword="true"/>, calling this method has no effect.
+        /// </summary>
+        public void Backward() => ActivePly = activePly?.Previous?.Ply;
 
+        /// <summary>
+        /// Moves <see cref="ActivePly"/> one ply forwards, towards the last move.
+        /// If <see cref="IsLastMove"/> is <see langword="true"/>, calling this method has no effect.
+        /// </summary>
         public void Forward()
         {
+            if (LegalNextPly(out PlyInfo next)) ActivePly = next.Ply;
         }
 
         /// <summary>
