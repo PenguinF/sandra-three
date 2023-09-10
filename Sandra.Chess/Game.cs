@@ -44,12 +44,12 @@ namespace Sandra.Chess
             }
         }
 
-        private static MoveInfo GetMoveInfo(Game game, string moveText, Color sideToMove)
+        private static MoveInfo GetMoveInfo(Position position, ReadOnlySpan<char> moveText, Color sideToMove)
         {
             MoveInfo moveInfo = new MoveInfo();
 
             // Very free-style parsing, based on the assumption that this is a recognized move.
-            if (moveText == "O-O")
+            if (moveText.Equals("O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleKingside;
                 if (sideToMove == Color.White)
@@ -63,7 +63,7 @@ namespace Sandra.Chess
                     moveInfo.TargetSquare = Square.G8;
                 }
             }
-            else if (moveText == "O-O-O")
+            else if (moveText.Equals("O-O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleQueenside;
                 if (sideToMove == Color.White)
@@ -121,8 +121,8 @@ namespace Sandra.Chess
                 moveInfo.TargetSquare = ((File)targetFile).Combine((Rank)targetRank);
 
                 // Get vector of pieces of the correct color that can move to the target square.
-                ulong occupied = ~game.CurrentPosition.GetEmptyVector();
-                ulong sourceSquareCandidates = game.CurrentPosition.GetVector(sideToMove) & game.CurrentPosition.GetVector(movingPiece);
+                ulong occupied = ~position.GetEmptyVector();
+                ulong sourceSquareCandidates = position.GetVector(sideToMove) & position.GetVector(movingPiece);
 
                 if (movingPiece == Piece.Pawn)
                 {
@@ -310,7 +310,7 @@ namespace Sandra.Chess
                 if (moveSyntax.IsUnrecognizedMove) break;
 
                 var sideToMove = CurrentPosition.SideToMove;
-                MoveInfo moveInfo = GetMoveInfo(this, moveSyntax.SourcePgnAsSpan.ToString(), sideToMove);
+                MoveInfo moveInfo = GetMoveInfo(initialPosition, moveSyntax.SourcePgnAsSpan, sideToMove);
                 TryMakeMove(moveInfo);
 
                 // Also invalidate on illegal move.
