@@ -362,14 +362,13 @@ namespace Sandra.Chess
 
                 if (!moveSyntax.IsUnrecognizedMove)
                 {
-                    var sideToMove = CurrentPosition.SideToMove;
-                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, sideToMove);
-                    TryMakeMove(moveInfo);
+                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
+                    Move move = position.TryMakeMove(ref moveInfo, true);
 
-                    // Also invalidate on illegal move.
-                    if (sideToMove != CurrentPosition.SideToMove)
+                    if (moveInfo.Result == MoveCheckResult.OK)
                     {
                         current.IsLegalMove = true;
+                        current.Move = move;
                     }
                 }
             }
