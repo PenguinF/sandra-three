@@ -241,6 +241,8 @@ namespace Sandra.Chess
         public static readonly string WhiteEloTagName = "WhiteElo";
         public static readonly string BlackEloTagName = "BlackElo";
 
+        public PgnGameSyntax PgnGame { get; }
+
         public PgnTagValueSyntax White { get; }
         public PgnTagValueSyntax Black { get; }
         public PgnTagValueSyntax WhiteElo { get; }
@@ -267,7 +269,7 @@ namespace Sandra.Chess
         /// </exception>
         public Game(PgnGameSyntax pgnGame)
         {
-            if (pgnGame == null) throw new ArgumentNullException(nameof(pgnGame));
+            PgnGame = pgnGame ?? throw new ArgumentNullException(nameof(pgnGame));
 
             // Look in the game's tags for 4 known tag names.
             foreach (PgnTagPairSyntax tagPairSyntax in pgnGame.TagSection.TagPairNodes)
