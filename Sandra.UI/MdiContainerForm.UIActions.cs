@@ -103,7 +103,7 @@ namespace Sandra.UI
                         {
                             if (tagElementSyntax is PgnTagNameSyntax tagNameSyntax)
                             {
-                                tagName = pgnEditor.GetTextRange(tagNameSyntax.AbsoluteStart, tagNameSyntax.Length);
+                                tagName = tagNameSyntax.SourcePgnAsSpan.ToString();
                             }
                             else if (tagElementSyntax is PgnTagValueSyntax tagValueSyntax)
                             {

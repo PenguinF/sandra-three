@@ -272,7 +272,7 @@ namespace Sandra.UI
                 if (moveSyntax.IsUnrecognizedMove) break;
 
                 var sideToMove = game.CurrentPosition.SideToMove;
-                MoveInfo moveInfo = GetMoveInfo(game, pgnEditor.GetTextRange(moveSyntax.AbsoluteStart, moveSyntax.Length), sideToMove);
+                MoveInfo moveInfo = GetMoveInfo(game, moveSyntax.SourcePgnAsSpan.ToString(), sideToMove);
                 game.TryMakeMove(moveInfo);
 
                 // Also invalidate on illegal move.
