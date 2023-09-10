@@ -311,8 +311,13 @@ namespace Sandra.Chess
                 }
             }
 
-            Position initialPosition = Position.GetInitialPosition();
-            InitialPosition = new ReadOnlyPosition(initialPosition);
+            // Working position used for making moves.
+            Position position = Position.GetInitialPosition();
+
+            // Create a copy for reference.
+            InitialPosition = new ReadOnlyPosition(position);
+
+            // Initialize CurrentPosition. Copy-by-reference is ok since this is immutable.
             CurrentPosition = InitialPosition;
 
             foreach (PgnPlySyntax ply in pgnGame.PlyList.Plies)
@@ -323,7 +328,7 @@ namespace Sandra.Chess
                 if (moveSyntax.IsUnrecognizedMove) break;
 
                 var sideToMove = CurrentPosition.SideToMove;
-                MoveInfo moveInfo = GetMoveInfo(initialPosition, moveSyntax.SourcePgnAsSpan, sideToMove);
+                MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, sideToMove);
                 TryMakeMove(moveInfo);
 
                 // Also invalidate on illegal move.
