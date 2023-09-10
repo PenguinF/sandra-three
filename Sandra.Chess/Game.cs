@@ -21,6 +21,7 @@
 
 using Sandra.Chess.Pgn;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -31,6 +32,15 @@ namespace Sandra.Chess
     /// </summary>
     public class Game
     {
+        private class PlyInfo
+        {
+            public PgnPlySyntax Ply;
+            public PlyInfo Previous; // Points to the previous move. Is null for the first move.
+            public bool IsLegalMove;
+            public Move Move;
+            public readonly List<PlyInfo> NextPlies = new List<PlyInfo>();
+        }
+
         private static Piece GetPiece(char c)
         {
             switch (c)
@@ -252,6 +262,9 @@ namespace Sandra.Chess
         /// Gets the initial position of this game.
         /// </summary>
         public ReadOnlyPosition InitialPosition { get; }
+
+        private readonly Dictionary<PgnPlySyntax, PlyInfo> AllPlies = new Dictionary<PgnPlySyntax, PlyInfo>();
+        private readonly List<PlyInfo> FirstPlies = new List<PlyInfo>();
 
         /// <summary>
         /// Gets the current position of this game.
