@@ -23,10 +23,8 @@ using Eutherion;
 using Eutherion.Collections;
 using Eutherion.UIActions;
 using Eutherion.Win.MdiAppTemplate;
-using Sandra.Chess;
 using System;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -268,6 +266,17 @@ namespace Sandra.UI
 
         public UIActionState TryGotoPreviousVariation(bool perform)
         {
+            if (game.TryGetPreviousSibling(game.ActivePly, out var previousSibling))
+            {
+                if (perform)
+                {
+                    game.ActivePly = previousSibling;
+                    GameUpdated();
+                }
+
+                return UIActionVisibility.Enabled;
+            }
+
             return UIActionVisibility.Disabled;
         }
 
@@ -288,6 +297,17 @@ namespace Sandra.UI
 
         public UIActionState TryGotoNextVariation(bool perform)
         {
+            if (game.TryGetNextSibling(game.ActivePly, out var nextSibling))
+            {
+                if (perform)
+                {
+                    game.ActivePly = nextSibling;
+                    GameUpdated();
+                }
+
+                return UIActionVisibility.Enabled;
+            }
+
             return UIActionVisibility.Disabled;
         }
 
