@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Position.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -169,6 +169,37 @@ namespace Sandra.Chess
         /// If a pawn can be captured en passant in this position, returns the vector which is true for the square of that pawn.
         /// </summary>
         public ulong EnPassantCaptureVector { get; private set; }
+
+        /// <summary>
+        /// If a pawn can be captured en passant in this position, returns the square of that pawn.
+        /// Otherwise <see cref="Square.A1"/> is returned. 
+        /// </summary>
+        public Square EnPassantCaptureSquare => EnPassantCaptureVector.GetSingleSquare();
+
+        /// <summary>
+        /// Gets the <see cref="ColoredPiece"/> which occupies a square, or <see langword="null"/> if the square is not occupied.
+        /// </summary>
+        public ColoredPiece? GetColoredPiece(Square square)
+        {
+            ulong squareVector = square.ToVector();
+
+            if (EnumValues<Piece>.List.Any(x => GetVector(x).Test(squareVector), out Piece piece))
+            {
+                if (GetVector(Color.White).Test(squareVector))
+                {
+                    return piece.Combine(Color.White);
+                }
+
+                return piece.Combine(Color.Black);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Enumerates all squares that are occupied by the given colored piece.
+        /// </summary>
+        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => GetVector(coloredPiece).AllSquares();
 
         /// <summary>
         /// Returns the standard initial position.
@@ -587,13 +618,11 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// This method is for internal use only.
+        /// Plays a <see cref="Move"/>, assuming it is generated and verified in the exact same position
+        /// by <see cref="TryMakeMove(ref MoveInfo, bool)"/>. Calling this method in any other situation
+        /// will leave this <see cref="Position"/> in a corrupted state which cannot be recovered.
         /// </summary>
-        /// <remarks>
-        /// This is a copy of TryMakeMove() but without the checks and with make = true.
-        /// Only use if absolutely sure that the given Move is correct, or it will leave the position in a corrupted state.
-        /// </remarks>
-        internal void FastMakeMove(Move move)
+        public void FastMakeMove(Move move)
         {
             Debug.Assert(CheckInvariants());
 
@@ -792,84 +821,5 @@ namespace Sandra.Chess
 
             Debug.Assert(CheckInvariants());
         }
-    }
-
-    /// <summary>
-    /// Enumerates all possible results of <see cref="Position.TryMakeMove(MoveInfo, bool)"/>.
-    /// </summary>
-    [Flags]
-    public enum MoveCheckResult
-    {
-        /// <summary>
-        /// The move is valid in the current position.
-        /// </summary>
-        OK,
-        /// <summary>
-        /// The given source and target squares are the same.
-        /// </summary>
-        SourceSquareIsTargetSquare = 1,
-        /// <summary>
-        /// There is no piece on the source square.
-        /// </summary>
-        SourceSquareIsEmpty = 2,
-        /// <summary>
-        /// The piece on the source square does not belong to the side to move.
-        /// </summary>
-        NotSideToMove = 4,
-        /// <summary>
-        /// The move would result in the capture of a piece of the same color.
-        /// </summary>
-        CannotCaptureOwnPiece = 8,
-        /// <summary>
-        /// The target square is not a legal destination for the moving piece in the current position.
-        /// </summary>
-        IllegalTargetSquare = 16,
-        /// <summary>
-        /// <see cref="MoveType.Promotion"/> was specified for a move which does not promote a pawn.
-        /// </summary>
-        IllegalMoveTypePromotion = 32,
-        /// <summary>
-        /// <see cref="MoveType.EnPassant"/> was specified for a move which does not capture a pawn en passant.
-        /// </summary>
-        IllegalMoveTypeEnPassant = 64,
-        /// <summary>
-        /// <see cref="MoveType.CastleQueenside"/> was specified for a non-castling move.
-        /// </summary>
-        IllegalMoveTypeCastleQueenside = 128,
-        /// <summary>
-        /// <see cref="MoveType.CastleKingside"/> was specified for a non-castling move.
-        /// </summary>
-        IllegalMoveTypeCastleKingside = 256,
-        /// <summary>
-        /// Making the move would put the friendly king in check.
-        /// </summary>
-        FriendlyKingInCheck = 512,
-
-        /// <summary>
-        /// Mask which selects all flags which denote an illegal move.
-        /// </summary>
-        IllegalMove = 1023,
-
-        /// <summary>
-        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
-        /// </summary>
-        MissingPromotionInformation = 1024,
-        /// <summary>
-        /// A move which captures a pawn en passant does not specify <see cref="MoveType.EnPassant"/>.
-        /// </summary>
-        MissingEnPassant = 2048,
-        /// <summary>
-        /// A castling move does not specify <see cref="MoveType.CastleQueenside"/>.
-        /// </summary>
-        MissingCastleQueenside = 4096,
-        /// <summary>
-        /// A castling move does not specify <see cref="MoveType.CastleKingside"/>.
-        /// </summary>
-        MissingCastleKingside = 8192,
-
-        /// <summary>
-        /// Mask which selects all flags which denote an incomplete move.
-        /// </summary>
-        IncompleteMove = MissingPromotionInformation | MissingEnPassant | MissingCastleQueenside | MissingCastleKingside,
     }
 }

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Game.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Collections;
+using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,193 +28,495 @@ using System.Numerics;
 namespace Sandra.Chess
 {
     /// <summary>
-    /// Represents a standard game of chess.
+    /// Represents a standard game of chess, with a pointer to an active ply.
     /// </summary>
     public class Game
     {
-        private readonly Position initialPosition;
-        private Position currentPosition;
-
-        /// <summary>
-        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
-        /// </summary>
-        public MoveTree MoveTree { get; }
-
-        private Game(Position initialPosition, MoveTree moveTree)
+        private class PlyInfo
         {
-            this.initialPosition = initialPosition;
-            currentPosition = initialPosition.Copy();
-            MoveTree = moveTree;
-            ActiveTree = moveTree;
+            public PgnPlySyntax Ply;
+            public PlyInfo Previous; // Points to the previous move. Is null for the first move.
+            public bool IsLegalMove;
+            public Move Move;
+            public readonly List<PlyInfo> NextPlies = new List<PlyInfo>();
         }
 
-        /// <summary>
-        /// Creates a new game with a given initial <see cref="Position"/>.
-        /// </summary>
-        public Game(Position initialPosition) : this(initialPosition,
-                                                     new MoveTree(initialPosition.SideToMove == Color.Black))
+        private static Piece GetPiece(char c)
         {
+            switch (c)
+            {
+                case 'N': return Piece.Knight;
+                case 'B': return Piece.Bishop;
+                case 'R': return Piece.Rook;
+                case 'Q': return Piece.Queen;
+                case 'K': return Piece.King;
+                default: return Piece.Pawn;
+            }
         }
 
-        /// <summary>
-        /// Creates a new game with the default initial <see cref="Position"/>.
-        /// </summary>
-        public Game() : this(Position.GetInitialPosition())
+        private static MoveInfo GetMoveInfo(Position position, ReadOnlySpan<char> moveText, Color sideToMove)
         {
+            MoveInfo moveInfo = new MoveInfo();
+
+            // Very free-style parsing, based on the assumption that this is a recognized move.
+            if (moveText.Equals("O-O".AsSpan(), StringComparison.Ordinal))
+            {
+                moveInfo.MoveType = MoveType.CastleKingside;
+                if (sideToMove == Color.White)
+                {
+                    moveInfo.SourceSquare = Square.E1;
+                    moveInfo.TargetSquare = Square.G1;
+                }
+                else
+                {
+                    moveInfo.SourceSquare = Square.E8;
+                    moveInfo.TargetSquare = Square.G8;
+                }
+            }
+            else if (moveText.Equals("O-O-O".AsSpan(), StringComparison.Ordinal))
+            {
+                moveInfo.MoveType = MoveType.CastleQueenside;
+                if (sideToMove == Color.White)
+                {
+                    moveInfo.SourceSquare = Square.E1;
+                    moveInfo.TargetSquare = Square.C1;
+                }
+                else
+                {
+                    moveInfo.SourceSquare = Square.E8;
+                    moveInfo.TargetSquare = Square.C8;
+                }
+            }
+            else
+            {
+                // Piece, disambiguation, capturing 'x', target square, promotion, check/mate/nag.
+                Piece movingPiece = Piece.Pawn;
+                int index = 0;
+                if (moveText[index] >= 'A' && moveText[index] <= 'Z')
+                {
+                    movingPiece = GetPiece(moveText[index]);
+                    index++;
+                }
+
+                File? disambiguatingSourceFile = null;
+                Rank? disambiguatingSourceRank = null;
+                File? targetFile = null;
+                Rank? targetRank = null;
+                Piece? promoteTo = null;
+
+                while (index < moveText.Length)
+                {
+                    char currentChar = moveText[index];
+                    if (currentChar == '=')
+                    {
+                        index++;
+                        promoteTo = GetPiece(moveText[index]);
+                        break;
+                    }
+                    else if (currentChar >= 'a' && currentChar <= 'h')
+                    {
+                        if (targetFile != null) disambiguatingSourceFile = targetFile;
+                        targetFile = (File)(currentChar - 'a');
+                    }
+                    else if (currentChar >= '1' && currentChar <= '8')
+                    {
+                        if (targetRank != null) disambiguatingSourceRank = targetRank;
+                        targetRank = (Rank)(currentChar - '1');
+                    }
+
+                    // Ignore 'x', '+', '#', '!', '?', increase index.
+                    index++;
+                }
+
+                moveInfo.TargetSquare = ((File)targetFile).Combine((Rank)targetRank);
+
+                // Get vector of pieces of the correct color that can move to the target square.
+                ulong occupied = ~position.GetEmptyVector();
+                ulong sourceSquareCandidates = position.GetVector(sideToMove) & position.GetVector(movingPiece);
+
+                if (movingPiece == Piece.Pawn)
+                {
+                    // Capture or normal move?
+                    if (disambiguatingSourceFile != null)
+                    {
+                        // Capture, go backwards by using the opposite side to move.
+                        sourceSquareCandidates &= Constants.PawnCaptures[sideToMove.Opposite(), moveInfo.TargetSquare];
+
+                        foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+                        {
+                            if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
+                            {
+                                moveInfo.SourceSquare = sourceSquareCandidate;
+                                break;
+                            }
+                        }
+
+                        // En passant special move type, if the target capture square is empty.
+                        if (!moveInfo.TargetSquare.ToVector().Test(occupied))
+                        {
+                            moveInfo.MoveType = MoveType.EnPassant;
+                        }
+                    }
+                    else
+                    {
+                        // One or two squares backwards.
+                        Func<ulong, ulong> direction;
+                        if (sideToMove == Color.White) direction = ChessExtensions.South;
+                        else direction = ChessExtensions.North;
+                        ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
+                        if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
+                        sourceSquareCandidates &= straightMoves;
+
+                        foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+                        {
+                            moveInfo.SourceSquare = sourceSquareCandidate;
+                            break;
+                        }
+                    }
+
+                    if (promoteTo != null)
+                    {
+                        moveInfo.MoveType = MoveType.Promotion;
+                        moveInfo.PromoteTo = (Piece)promoteTo;
+                    }
+                }
+                else
+                {
+                    switch (movingPiece)
+                    {
+                        case Piece.Knight:
+                            sourceSquareCandidates &= Constants.KnightMoves[moveInfo.TargetSquare];
+                            break;
+                        case Piece.Bishop:
+                            sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied);
+                            break;
+                        case Piece.Rook:
+                            sourceSquareCandidates &= Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
+                            break;
+                        case Piece.Queen:
+                            sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied)
+                                                    | Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
+                            break;
+                        case Piece.King:
+                            sourceSquareCandidates &= Constants.Neighbours[moveInfo.TargetSquare];
+                            break;
+                        default:
+                            sourceSquareCandidates = 0;
+                            break;
+                    }
+
+                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+                    {
+                        if (disambiguatingSourceFile != null)
+                        {
+                            if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
+                            {
+                                if (disambiguatingSourceRank != null)
+                                {
+                                    if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
+                                    {
+                                        moveInfo.SourceSquare = sourceSquareCandidate;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    moveInfo.SourceSquare = sourceSquareCandidate;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (disambiguatingSourceRank != null)
+                        {
+                            if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
+                            {
+                                moveInfo.SourceSquare = sourceSquareCandidate;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            moveInfo.SourceSquare = sourceSquareCandidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return moveInfo;
         }
 
-        /// <summary>
-        /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
-        /// but in which <see cref="ActiveTree"/> can be manipulated independently.
-        /// </summary>
-        public Game Copy() => new Game(initialPosition, MoveTree);
+        public static readonly string WhiteTagName = "White";
+        public static readonly string BlackTagName = "Black";
+        public static readonly string WhiteEloTagName = "WhiteElo";
+        public static readonly string BlackEloTagName = "BlackElo";
+
+        public PgnGameSyntax PgnGame { get; }
+
+        public PgnTagValueSyntax White { get; }
+        public PgnTagValueSyntax Black { get; }
+        public PgnTagValueSyntax WhiteElo { get; }
+        public PgnTagValueSyntax BlackElo { get; }
 
         /// <summary>
         /// Gets the initial position of this game.
         /// </summary>
-        public Position InitialPosition => initialPosition.Copy();
+        public ReadOnlyPosition InitialPosition { get; }
+
+        private readonly Dictionary<PgnPlySyntax, PlyInfo> AllPlies = new Dictionary<PgnPlySyntax, PlyInfo>();
+        private readonly List<PlyInfo> FirstPlies = new List<PlyInfo>();
 
         /// <summary>
-        /// Gets the <see cref="Color"/> of the side to move in the initial position.
+        /// Gets the current position of this game, which depends on the active ply.
         /// </summary>
-        public Color InitialSideToMove => initialPosition.SideToMove;
+        public ReadOnlyPosition CurrentPosition { get; private set; }
 
         /// <summary>
-        /// Gets the current position of this game.
+        /// Creates a new game from a given <see cref="PgnGameSyntax"/>.
         /// </summary>
-        public Position CurrentPosition => currentPosition.Copy();
-
-        /// <summary>
-        /// Gets the move tree which is currently active.
-        /// </summary>
-        public MoveTree ActiveTree { get; private set; }
-
-        private void SetActiveTreeInner(MoveTree value)
+        /// <param name="pgnGame">
+        /// The syntax node which contains the game to create.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="pgnGame"/> is <see langword="null"/>.
+        /// </exception>
+        public Game(PgnGameSyntax pgnGame)
         {
-            // Replay all moves until the new active tree has been reached.
-            Stack<Move> previousMoves = new Stack<Move>();
-            MoveTree newActiveTree = value;
+            PgnGame = pgnGame ?? throw new ArgumentNullException(nameof(pgnGame));
 
-            MoveTree current;
-            for (current = newActiveTree; current.ParentVariation != null; current = current.ParentVariation.ParentTree)
+            // Look in the game's tags for 4 known tag names.
+            foreach (PgnTagPairSyntax tagPairSyntax in pgnGame.TagSection.TagPairNodes)
             {
-                previousMoves.Push(current.ParentVariation.Move);
-            }
+                ReadOnlySpan<char> tagName = default;
+                PgnTagValueSyntax tagValue = null;
 
-            // 'value' should be embedded somewhere inside this.moveTree.
-            if (current != MoveTree)
-            {
-                throw new ArgumentException("value is not embedded in Game.MoveTree.", nameof(value));
-            }
-
-            Position newPosition = initialPosition.Copy();
-            foreach (Move move in previousMoves)
-            {
-                newPosition.FastMakeMove(move);
-            }
-
-            currentPosition = newPosition;
-            ActiveTree = newActiveTree;
-        }
-
-        public void SetActiveTree(MoveTree value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (ActiveTree != value)
-            {
-                SetActiveTreeInner(value);
-            }
-        }
-
-        public bool IsFirstMove => ActiveTree.ParentVariation == null;
-        public bool IsLastMove => ActiveTree.MainLine == null;
-        public Move PreviousMove() => ActiveTree.ParentVariation.Move;
-
-        public void Backward()
-        {
-            // No effect if first move.
-            if (IsFirstMove) return;
-
-            // Replay until the previous move.
-            SetActiveTreeInner(ActiveTree.ParentVariation.ParentTree);
-        }
-
-        public void Forward()
-        {
-            // No effect if last move.
-            if (IsLastMove) return;
-
-            currentPosition.FastMakeMove(ActiveTree.MainLine.Move);
-            ActiveTree = ActiveTree.MainLine.MoveTree;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Color"/> of the side to move.
-        /// </summary>
-        public Color SideToMove => currentPosition.SideToMove;
-
-        /// <summary>
-        /// Gets the <see cref="ColoredPiece"/> which occupies a square, or null if the square is not occupied.
-        /// </summary>
-        public ColoredPiece? GetColoredPiece(Square square)
-        {
-            ulong squareVector = square.ToVector();
-
-            if (EnumValues<Piece>.List.Any(x => currentPosition.GetVector(x).Test(squareVector), out Piece piece))
-            {
-                if (currentPosition.GetVector(Color.White).Test(squareVector))
+                foreach (PgnTagElementSyntax tagElementSyntax in tagPairSyntax.TagElementNodes.Select(x => x.ContentNode))
                 {
-                    return piece.Combine(Color.White);
+                    if (tagElementSyntax is PgnTagNameSyntax tagNameSyntax)
+                    {
+                        tagName = tagNameSyntax.SourcePgnAsSpan;
+                    }
+                    else if (tagElementSyntax is PgnTagValueSyntax tagValueSyntax)
+                    {
+                        tagValue = tagValueSyntax;
+                    }
                 }
 
-                return piece.Combine(Color.Black);
+                if (tagName.Length > 0 && tagValue != null)
+                {
+                    if (tagName.Equals(WhiteTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) White = tagValue;
+                    else if (tagName.Equals(BlackTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) Black = tagValue;
+                    else if (tagName.Equals(WhiteEloTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) WhiteElo = tagValue;
+                    else if (tagName.Equals(BlackEloTagName.AsSpan(), StringComparison.OrdinalIgnoreCase)) BlackElo = tagValue;
+                }
             }
 
-            return null;
+            // Working position used for making moves.
+            Position position = Position.GetInitialPosition();
+
+            // Create a copy for reference.
+            InitialPosition = new ReadOnlyPosition(position);
+
+            // Initialize CurrentPosition. Copy-by-reference is ok since this is immutable.
+            CurrentPosition = InitialPosition;
+
+            AddPlyList(position, null, pgnGame.PlyList);
+        }
+
+        private void AddPlyList(Position position, PlyInfo previous, PgnPlyListSyntax plyList)
+        {
+            foreach (PgnPlySyntax ply in plyList.Plies)
+            {
+                Position savedCopy = null;
+                if (ply.Variations.Count > 0) savedCopy = position.Copy();
+
+                // Add this ply before the variations, so it becomes the main line.
+                PlyInfo plyInfo = AddPly(position, previous, ply);
+
+                foreach (var variation in ply.Variations)
+                {
+                    // Variations must use the same 'previous' ply info as the actual move.
+                    AddPlyList(savedCopy.Copy(), previous, variation.PlyContentNode.PliesWithFloatItems);
+                }
+
+                previous = plyInfo;
+            }
+        }
+
+        private PlyInfo AddPly(Position position, PlyInfo previous, PgnPlySyntax ply)
+        {
+            PlyInfo current = new PlyInfo
+            {
+                Ply = ply,
+                Previous = previous,
+                IsLegalMove = false,
+            };
+
+            if (previous == null) FirstPlies.Add(current);
+            else previous.NextPlies.Add(current);
+
+            // For now, invalidate the remainder of the game if seeing a null or unrecognized move.
+            if ((previous == null || previous.IsLegalMove) && ply.Move != null)
+            {
+                PgnMoveSyntax moveSyntax = ply.Move.PlyContentNode.ContentNode;
+
+                if (!moveSyntax.IsUnrecognizedMove)
+                {
+                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
+                    Move move = position.TryMakeMove(ref moveInfo, true);
+
+                    if (moveInfo.Result == MoveCheckResult.OK)
+                    {
+                        current.IsLegalMove = true;
+                        current.Move = move;
+                    }
+                }
+            }
+
+            AllPlies.Add(ply, current);
+
+            return current;
+        }
+
+        // Null before the first move.
+        private PlyInfo activePly;
+
+        /// <summary>
+        /// Gets or sets the ply syntax node which is currently active.
+        /// If a ply contains an illegal move, the active ply is set to the last valid ply.
+        /// </summary>
+        public PgnPlySyntax ActivePly { get => activePly?.Ply; set => SetActivePly(value); }
+
+        private void SetActivePly(PgnPlySyntax newActivePly)
+        {
+            // Quick exit?
+            if (newActivePly == ActivePly) return;
+
+            if (newActivePly == null || !AllPlies.TryGetValue(newActivePly, out PlyInfo plyInfo))
+            {
+                // If null or unknown, just go to the initial position.
+                activePly = null;
+                CurrentPosition = InitialPosition;
+                return;
+            }
+
+            Stack<Move> moves = new Stack<Move>();
+            for (PlyInfo p = plyInfo; p != null; p = p.Previous)
+            {
+                if (p.IsLegalMove) moves.Push(p.Move);
+                else plyInfo = p.Previous;
+            }
+
+            Position position = InitialPosition.Copy();
+
+            while (moves.Count > 0)
+            {
+                Move move = moves.Pop();
+                position.FastMakeMove(move);
+            }
+
+            activePly = plyInfo;
+            CurrentPosition = new ReadOnlyPosition(position);
         }
 
         /// <summary>
-        /// Enumerates all squares that are occupied by the given colored piece.
+        /// Returns the last played move, or a default value if <see cref="IsFirstMove"/> is <see langword="true"/>.
         /// </summary>
-        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => currentPosition.GetVector(coloredPiece).AllSquares();
+        public Move PreviousMove => activePly == null ? default : activePly.Move;
+
+        private List<PlyInfo> ActiveNextPlies => activePly == null ? FirstPlies : activePly.NextPlies;
+
+        private bool LegalNextPly(out PlyInfo legalNextPlay) => ActiveNextPlies.Any(x => x.IsLegalMove, out legalNextPlay);
 
         /// <summary>
-        /// If a pawn can be captured en passant in this position, returns the square of that pawn.
-        /// Otherwise <see cref="Square.A1"/> is returned. 
+        /// Returns if <see cref="ActivePly"/> is null, i.e. at the initial position.
         /// </summary>
-        public Square EnPassantCaptureSquare => currentPosition.EnPassantCaptureVector.GetSingleSquare();
+        public bool IsFirstMove => activePly == null;
 
         /// <summary>
-        /// Validates a move against the current position and optionally performs it.
+        /// Returns if the active ply is followed by another in a main or side line.
+        /// </summary>
+        public bool IsLastMove => !LegalNextPly(out _);
+
+        /// <summary>
+        /// Moves <see cref="ActivePly"/> one ply backwards, towards the first move.
+        /// If <see cref="IsFirstMove"/> is <see langword="true"/>, calling this method has no effect.
+        /// </summary>
+        public void Backward() => ActivePly = activePly?.Previous?.Ply;
+
+        /// <summary>
+        /// Moves <see cref="ActivePly"/> one ply forwards, towards the last move.
+        /// If <see cref="IsLastMove"/> is <see langword="true"/>, calling this method has no effect.
+        /// </summary>
+        public void Forward()
+        {
+            if (LegalNextPly(out PlyInfo next)) ActivePly = next.Ply;
+        }
+
+        public bool TryGetPreviousSibling(PgnPlySyntax ply, out PgnPlySyntax previousSibling)
+        {
+            // Choose simple implementation to only select from direct and legal siblings.
+            if (ply != null && AllPlies.TryGetValue(ply, out PlyInfo plyInfo))
+            {
+                List<PlyInfo> siblings = plyInfo.Previous == null ? FirstPlies : plyInfo.Previous.NextPlies;
+                int siblingIndex = siblings.IndexOf(plyInfo);
+                while (siblingIndex > 0)
+                {
+                    siblingIndex--;
+                    PlyInfo candidate = siblings[siblingIndex];
+                    if (candidate.IsLegalMove)
+                    {
+                        previousSibling = candidate.Ply;
+                        return true;
+                    }
+                }
+            }
+
+            previousSibling = null;
+            return false;
+        }
+
+        public bool TryGetNextSibling(PgnPlySyntax ply, out PgnPlySyntax nextSibling)
+        {
+            // Choose simple implementation to only select from direct and legal siblings.
+            if (ply != null && AllPlies.TryGetValue(ply, out PlyInfo plyInfo))
+            {
+                List<PlyInfo> siblings = plyInfo.Previous == null ? FirstPlies : plyInfo.Previous.NextPlies;
+                int siblingIndex = siblings.IndexOf(plyInfo);
+                while (siblingIndex < siblings.Count - 1)
+                {
+                    siblingIndex++;
+                    PlyInfo candidate = siblings[siblingIndex];
+                    if (candidate.IsLegalMove)
+                    {
+                        nextSibling = candidate.Ply;
+                        return true;
+                    }
+                }
+            }
+
+            nextSibling = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Makes a move in the current position if it is legal.
         /// </summary>
         /// <param name="moveInfo">
-        /// The move to validate and optionally perform.
-        /// </param>
-        /// <param name="make">
-        /// True if the move must actually be made, false if only validated.
+        /// The move to make.
         /// </param>
         /// <returns>
-        /// A valid legal <see cref="Move"/> structure if <see cref="MoveInfo.Result"/> is equal to  
-        /// <see cref="MoveCheckResult.OK"/>, or an incomplete <see cref="Move"/> if one of the other <see cref="MoveCheckResult"/> values.
-        /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
+        /// A <see cref="MoveCheckResult.OK"/> if the move is made and therefore legal; otherwise a <see cref="MoveCheckResult"/> value
+        /// which describes the reason why the move is illegal.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
+        /// Occurs when any of <paramref name="moveInfo"/>'s members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
+        public MoveCheckResult TryMakeMove(MoveInfo moveInfo)
         {
-            Move move = currentPosition.TryMakeMove(ref moveInfo, make);
-            if (make && moveInfo.Result == MoveCheckResult.OK)
-            {
-                // Move to an existing variation, or create a new one.
-                Variation variation = ActiveTree.GetOrAddVariation(move);
-                ActiveTree = variation.MoveTree;
-            }
-            return move;
+            // Disable until we can modify PGN using its syntax tree.
+            moveInfo.Result = ~MoveCheckResult.OK;
+            return default;
         }
     }
 }

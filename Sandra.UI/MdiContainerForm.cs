@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiContainerForm.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -97,14 +97,12 @@ namespace Sandra.UI
                         DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                         {
                             // Add all these to a submenu.
-                            StandardChessBoard.GotoStart,
                             StandardChessBoard.GotoFirstMove,
                             StandardChessBoard.FastNavigateBackward,
                             StandardChessBoard.GotoPreviousMove,
                             StandardChessBoard.GotoNextMove,
                             StandardChessBoard.FastNavigateForward,
                             StandardChessBoard.GotoLastMove,
-                            StandardChessBoard.GotoEnd,
                             StandardChessBoard.GotoPreviousVariation,
                             StandardChessBoard.GotoNextVariation,
                         }
@@ -112,7 +110,6 @@ namespace Sandra.UI
 
                     StandardChessBoard.PromoteActiveVariation,
                     StandardChessBoard.DemoteActiveVariation,
-                    StandardChessBoard.BreakActiveVariation,
                     StandardChessBoard.DeleteActiveVariation,
                     StandardChessBoard.FlipBoard,
                     StandardChessBoard.TakeScreenshot,
@@ -321,7 +318,17 @@ namespace Sandra.UI
             pgnEditor.BindActions(pgnEditor.StandardSyntaxEditorUIActionBindings);
             UIMenu.AddTo(pgnEditor);
 
-            pgnEditor.DoubleClick += (_, __) => TryOpenGame(pgnEditor, true);
+            pgnEditor.DoubleClick += (_, __) =>
+            {
+                try
+                {
+                    TryOpenGame(pgnEditor, true);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+            };
 
             PgnStyleSelector.InitializeStyles(pgnEditor);
 
@@ -376,7 +383,7 @@ namespace Sandra.UI
         /// <summary>
         /// Opens a chess board for a certain game at a current position.
         /// </summary>
-        private StandardChessBoard OpenChessBoard(PgnEditor ownerPgnEditor, Chess.Game game, string white, string black, string whiteElo, string blackElo)
+        private StandardChessBoard OpenChessBoard(PgnEditor ownerPgnEditor, Chess.Game game)
         {
             var newChessBoard = new StandardChessBoard
             {
@@ -388,21 +395,18 @@ namespace Sandra.UI
 
             newChessBoard.PlayingBoard.BindActions(new UIActionBindings
             {
-                { StandardChessBoard.GotoStart, newChessBoard.TryGotoStart },
                 { StandardChessBoard.GotoFirstMove, newChessBoard.TryGotoFirstMove },
                 { StandardChessBoard.FastNavigateBackward, newChessBoard.TryFastNavigateBackward },
                 { StandardChessBoard.GotoPreviousMove, newChessBoard.TryGotoPreviousMove },
                 { StandardChessBoard.GotoNextMove, newChessBoard.TryGotoNextMove },
                 { StandardChessBoard.FastNavigateForward, newChessBoard.TryFastNavigateForward },
                 { StandardChessBoard.GotoLastMove, newChessBoard.TryGotoLastMove },
-                { StandardChessBoard.GotoEnd, newChessBoard.TryGotoEnd },
 
                 { StandardChessBoard.GotoPreviousVariation, newChessBoard.TryGotoPreviousVariation },
                 { StandardChessBoard.GotoNextVariation, newChessBoard.TryGotoNextVariation },
 
                 { StandardChessBoard.PromoteActiveVariation, newChessBoard.TryPromoteActiveVariation },
                 { StandardChessBoard.DemoteActiveVariation, newChessBoard.TryDemoteActiveVariation },
-                { StandardChessBoard.BreakActiveVariation, newChessBoard.TryBreakActiveVariation },
                 { StandardChessBoard.DeleteActiveVariation, newChessBoard.TryDeleteActiveVariation },
 
                 { StandardChessBoard.FlipBoard, newChessBoard.TryFlipBoard },
@@ -413,6 +417,11 @@ namespace Sandra.UI
             });
 
             UIMenu.AddTo(newChessBoard.PlayingBoard);
+
+            string white = game.White?.Value;
+            string black = game.Black?.Value;
+            string whiteElo = game.WhiteElo?.Value;
+            string blackElo = game.BlackElo?.Value;
 
             if (string.IsNullOrWhiteSpace(white)) white = "?";
             if (string.IsNullOrWhiteSpace(black)) black = "?";
@@ -431,6 +440,55 @@ namespace Sandra.UI
             };
 
             StandardChessBoard.ConstrainClientSize(newChessBoardForm);
+
+            // Keep selecting the active ply if it changes.
+            newChessBoard.AfterGameUpdated += (_, __) =>
+            {
+                PgnPlySyntax activePly = newChessBoard.Game.ActivePly;
+                int selectionStart;
+                int caretPosition;
+                if (activePly == null)
+                {
+                    // Put the caret before the first ply, but after leading trivia/float items if found.
+                    var plyList = newChessBoard.Game.PgnGame.PlyList;
+                    selectionStart = plyList.AbsoluteStart;
+
+                    if (plyList.Plies.Any(out PgnPlySyntax firstPly)
+                        && firstPly.ChildCount > 0
+                        && firstPly.GetChild(0) is WithPlyFloatItemsSyntax withFloatItems)
+                    {
+                        if (withFloatItems.PlyContentNode is WithTriviaSyntax withTrivia)
+                        {
+                            selectionStart = withTrivia.ContentNode.AbsoluteStart;
+                        }
+                        else
+                        {
+                            selectionStart = withFloatItems.PlyContentNode.AbsoluteStart;
+                        }
+                    }
+
+                    caretPosition = selectionStart;
+                }
+                else
+                {
+                    PgnMoveSyntax activeMove = activePly.Move?.PlyContentNode.ContentNode;
+                    if (activeMove == null)
+                    {
+                        // Put the caret right after the ply without selecting anything.
+                        selectionStart = activePly.AbsoluteStart + activePly.Length;
+                        caretPosition = selectionStart;
+                    }
+                    else
+                    {
+                        // Select the move.
+                        selectionStart = activeMove.AbsoluteStart;
+                        caretPosition = selectionStart + activeMove.Length;
+                    }
+                }
+
+                ownerPgnEditor.SetSelection(selectionStart, caretPosition);
+                ownerPgnEditor.ScrollRange(selectionStart, caretPosition);
+            };
 
             return newChessBoard;
         }

@@ -88,7 +88,7 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser(pgn);
             parser.ParsePgnText();
-            return new RootPgnSyntax(parser.YieldEof(), ReadOnlyList<PgnErrorInfo>.FromBuilder(parser.Errors));
+            return new RootPgnSyntax(pgn, parser.YieldEof(), ReadOnlyList<PgnErrorInfo>.FromBuilder(parser.Errors));
         }
 
         private readonly ArrayBuilder<PgnErrorInfo> Errors;

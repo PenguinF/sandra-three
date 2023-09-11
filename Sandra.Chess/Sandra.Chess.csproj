@@ -45,6 +45,7 @@
     <Compile Include="EnumIndexedArray.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Move.cs" />
+    <Compile Include="MoveCheckResult.cs" />
     <Compile Include="MoveFormatter.cs" />
     <Compile Include="Pgn\IPgnSymbol.cs" />
     <Compile Include="Pgn\PgnAnnotation.cs" />
@@ -108,7 +109,7 @@
     <Compile Include="Pgn\WithTriviaSyntax.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Variation.cs" />
+    <Compile Include="ReadOnlyPosition.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Eutherion.Common">

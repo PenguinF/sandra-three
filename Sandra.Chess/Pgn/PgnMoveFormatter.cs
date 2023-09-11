@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnMoveFormatter.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,23 +19,26 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Threading;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Move formatter which generates algebraic notation for PGN text.
     /// </summary>
-    public class PgnMoveFormatter : ShortAlgebraicMoveFormatter
+    public static class PgnMoveFormatter
     {
         /// <summary>
         /// Standardized PGN notation for pieces.
         /// </summary>
         public static readonly string PieceSymbols = "NBRQK";
 
-        /// <summary>
-        /// Returns the single <see cref="PgnMoveFormatter"/> instance.
-        /// </summary>
-        public static PgnMoveFormatter Instance { get; } = new PgnMoveFormatter();
+        private static readonly SafeLazy<ShortAlgebraicMoveFormatter> pgnMoveFormatter = new SafeLazy<ShortAlgebraicMoveFormatter>(
+            () => new ShortAlgebraicMoveFormatter(PieceSymbols));
 
-        private PgnMoveFormatter() : base(PieceSymbols) { }
+        /// <summary>
+        /// Returns a <see cref="ShortAlgebraicMoveFormatter"/> instance that uses PGN piece symbols to generate moves.
+        /// </summary>
+        public static ShortAlgebraicMoveFormatter MoveFormatter => pgnMoveFormatter.Value;
     }
 }

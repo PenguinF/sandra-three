@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MdiContainerForm.UIActions.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -54,8 +53,8 @@ namespace Sandra.UI
 
         public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
-            if (perform) OpenChessBoard(pgnEditor, new Chess.Game(), null, null, null, null).EnsureActivated();
-            return UIActionVisibility.Enabled;
+            // Disable until we can modify PGN using its syntax tree.
+            return UIActionVisibility.Disabled;
         }
 
         public static readonly UIAction OpenGame = new UIAction(
@@ -76,55 +75,20 @@ namespace Sandra.UI
 
         public UIActionState TryOpenGame(PgnEditor pgnEditor, bool perform)
         {
-            PgnGameSyntax gameSyntax = pgnEditor.GameAtOrBeforePosition(pgnEditor.SelectionStart);
+            var (gameSyntax, deepestPly) = pgnEditor.GameAtOrBeforePosition(pgnEditor.SelectionStart);
             if (gameSyntax == null) return UIActionVisibility.Disabled;
 
             if (perform)
             {
                 StandardChessBoard chessBoard = OpenGames.GetOrAdd(gameSyntax, key =>
                 {
-                    const string WhiteTagName = "White";
-                    const string BlackTagName = "Black";
-                    const string WhiteEloTagName = "WhiteElo";
-                    const string BlackEloTagName = "BlackElo";
-
-                    // Look in the game's tags for these 4 values.
-                    string white = null;
-                    string black = null;
-                    string whiteElo = null;
-                    string blackElo = null;
-
-                    foreach (PgnTagPairSyntax tagPairSyntax in gameSyntax.TagSection.TagPairNodes)
-                    {
-                        string tagName = null;
-                        string tagValue = null;
-
-                        foreach (PgnTagElementSyntax tagElementSyntax in tagPairSyntax.TagElementNodes.Select(x => x.ContentNode))
-                        {
-                            if (tagElementSyntax is PgnTagNameSyntax tagNameSyntax)
-                            {
-                                tagName = pgnEditor.GetTextRange(tagNameSyntax.AbsoluteStart, tagNameSyntax.Length);
-                            }
-                            else if (tagElementSyntax is PgnTagValueSyntax tagValueSyntax)
-                            {
-                                tagValue = tagValueSyntax.Value;
-                            }
-                        }
-
-                        if (tagName != null && tagValue != null)
-                        {
-                            if (tagName.Equals(WhiteTagName, StringComparison.OrdinalIgnoreCase)) white = tagValue;
-                            else if (tagName.Equals(BlackTagName, StringComparison.OrdinalIgnoreCase)) black = tagValue;
-                            else if (tagName.Equals(WhiteEloTagName, StringComparison.OrdinalIgnoreCase)) whiteElo = tagValue;
-                            else if (tagName.Equals(BlackEloTagName, StringComparison.OrdinalIgnoreCase)) blackElo = tagValue;
-                        }
-                    }
-
-                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, pgnEditor.CreateGame(gameSyntax), white, black, whiteElo, blackElo);
+                    StandardChessBoard newChessBoard = OpenChessBoard(pgnEditor, new Chess.Game(gameSyntax));
                     newChessBoard.Disposed += (_, __) => OpenGames.Remove(gameSyntax);
                     return newChessBoard;
                 });
 
+                chessBoard.Game.ActivePly = deepestPly;
+                chessBoard.GameUpdated();
                 chessBoard.EnsureActivated();
             }
 

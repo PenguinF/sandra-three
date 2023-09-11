@@ -208,8 +208,9 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(null, ReadOnlyList<PgnErrorInfo>.Empty));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, GreenPgnTriviaSyntax.Empty), null));
+            Assert.Throws<ArgumentNullException>("pgn", () => new RootPgnSyntax(null, new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, GreenPgnTriviaSyntax.Empty), ReadOnlyList<PgnErrorInfo>.Empty));
+            Assert.Throws<ArgumentNullException>("gameListSyntax", () => new RootPgnSyntax(string.Empty, null, ReadOnlyList<PgnErrorInfo>.Empty));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(string.Empty, new GreenPgnGameListSyntax(ReadOnlySpanList<GreenPgnGameSyntax>.Empty, GreenPgnTriviaSyntax.Empty), null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -771,16 +772,18 @@ namespace Sandra.Chess.Tests
             return length;
         }
 
-        public static IEnumerable<object[]> GetTestParseTrees()
-            => TestUtilities.Wrap(ParseTrees.TestParseTrees.Select(x => (x.pgn, x.expectedParseTree, Array.Empty<PgnErrorCode>())))
-            .Concat(TestUtilities.Wrap(ParseTrees.TestParseTreesWithErrors));
+        public static IEnumerable<(string pgn, ParseTrees.ParseTree<RootPgnSyntax> expectedParseTree, PgnErrorCode[] expectedErrors)> GetTestParseTrees()
+            => ParseTrees.TestParseTrees.Select(x => (x.pgn, new ParseTrees.ParseTree<RootPgnSyntax> { x.expectedParseTree }, Array.Empty<PgnErrorCode>()))
+            .Concat(ParseTrees.TestParseTreesWithErrors.Select(x => (x.pgn, new ParseTrees.ParseTree<RootPgnSyntax> { x.expectedParseTree }, x.expectedErrors)));
+
+        public static IEnumerable<object[]> WrappedTestParseTrees() => TestUtilities.Wrap(GetTestParseTrees());
 
         [Theory]
-        [MemberData(nameof(GetTestParseTrees))]
-        public void ParseTreeTests(string pgn, ParseTrees.ParseTree expectedParseTree, PgnErrorCode[] expectedErrors)
+        [MemberData(nameof(WrappedTestParseTrees))]
+        public void ParseTreeTests(string pgn, ParseTrees.ParseTree<RootPgnSyntax> expectedParseTree, PgnErrorCode[] expectedErrors)
         {
             RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
-            AssertParseTree(expectedParseTree, null, 0, rootSyntax.GameListSyntax);
+            AssertParseTree(expectedParseTree, null, 0, rootSyntax);
 
             // Assert expected errors.
             Assert.Collection(
