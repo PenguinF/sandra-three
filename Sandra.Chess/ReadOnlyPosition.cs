@@ -114,7 +114,7 @@ namespace Sandra.Chess
         /// The move to test.
         /// </param>
         /// <returns>
-        /// A <see cref="MoveCheckResult.OK"/> if the tested move is legal; otherwise a <see cref="MoveCheckResult"/> value
+        /// A <see cref="MoveCheckResult.OK"/> if the tested move is legal and fully specified; otherwise a <see cref="MoveCheckResult"/> value
         /// which describes the reason why the move is invalid.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">

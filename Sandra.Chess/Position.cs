@@ -333,15 +333,19 @@ namespace Sandra.Chess
         /// The move to validate and optionally perform.
         /// </param>
         /// <param name="make">
-        /// True if the move must actually be made, false if only validated.
+        /// <see langword="true"/> if the move must actually be made, <see langword="false"/> if only validated.
         /// </param>
-        /// <returns>
-        /// A valid legal <see cref="Move"/> structure if <see cref="MoveInfo.Result"/> is equal to  
+        /// <param name="move">
+        /// A valid legal <see cref="Move"/> structure if the return value is equal to  
         /// <see cref="MoveCheckResult.OK"/>, or an incomplete <see cref="Move"/> if one of the other <see cref="MoveCheckResult"/> values.
         /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
+        /// </param>
+        /// <returns>
+        /// A <see cref="MoveCheckResult.OK"/> if the move is legal and fully specified; otherwise a <see cref="MoveCheckResult"/> value
+        /// which describes the reason why the move is invalid.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
+        /// Occurs when any of <paramref name="moveInfo"/>'s members have an enumeration value which is outside of the allowed range.
         /// </exception>
         public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
         {
@@ -619,7 +623,7 @@ namespace Sandra.Chess
 
         /// <summary>
         /// Plays a <see cref="Move"/>, assuming it is generated and verified in the exact same position
-        /// by <see cref="TryMakeMove(ref MoveInfo, bool)"/>. Calling this method in any other situation
+        /// by <see cref="TryMakeMove(MoveInfo, bool, out Move)"/>. Calling this method in any other situation
         /// will leave this <see cref="Position"/> in a corrupted state which cannot be recovered.
         /// </summary>
         public void FastMakeMove(Move move)
