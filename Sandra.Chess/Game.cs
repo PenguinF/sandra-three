@@ -135,48 +135,7 @@ namespace Sandra.Chess
 
             moveInfo.TargetSquare = ((File)targetFile).Combine((Rank)targetRank);
 
-            // Get vector of pieces of the correct color that can move to the target square.
-            ulong occupied = ~position.GetEmptyVector();
-            ulong sourceSquareCandidates = position.GetVector(position.SideToMove) & position.GetVector(movingPiece);
-
-            if (movingPiece == Piece.Pawn)
-            {
-                // Captures: go backwards by using the opposite side to move.
-                ulong pawnCaptures = Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
-
-                // Non-captures: one or two squares backwards. (Moves such as e3-e5 are ruled out by TryMakeMove().)
-                Func<ulong, ulong> direction;
-                if (position.SideToMove == Color.White) direction = ChessExtensions.South;
-                else direction = ChessExtensions.North;
-                ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
-                if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
-                sourceSquareCandidates &= pawnCaptures | straightMoves;
-            }
-            else
-            {
-                switch (movingPiece)
-                {
-                    case Piece.Knight:
-                        sourceSquareCandidates &= Constants.KnightMoves[moveInfo.TargetSquare];
-                        break;
-                    case Piece.Bishop:
-                        sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied);
-                        break;
-                    case Piece.Rook:
-                        sourceSquareCandidates &= Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
-                        break;
-                    case Piece.Queen:
-                        sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied)
-                                                | Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
-                        break;
-                    case Piece.King:
-                        sourceSquareCandidates &= Constants.Neighbours[moveInfo.TargetSquare];
-                        break;
-                    default:
-                        sourceSquareCandidates = 0;
-                        break;
-                }
-            }
+            ulong sourceSquareCandidates = position.LegalSourceSquares(movingPiece, moveInfo.TargetSquare);
 
             if (movingPiece == Piece.Pawn)
             {

@@ -618,6 +618,70 @@ namespace Sandra.Chess
         }
 
         /// <summary>
+        /// Returns a vector representing all squares from which a given piece can legally move to a target square.
+        /// This ignores castling moves.
+        /// </summary>
+        /// <param name="movingPiece">
+        /// The moving piece.
+        /// </param>
+        /// <param name="targetSquare">
+        /// The square to move to.
+        /// </param>
+        /// <returns>
+        /// All possible squares from which the piece can move to the target square.
+        /// </returns>
+        /// <remarks>
+        /// Use <see cref="ChessExtensions.AllSquares"/> to enumerate all squares in a vector.
+        /// </remarks>
+        public ulong LegalSourceSquares(Piece movingPiece, Square targetSquare)
+        {
+            // Get vector of pieces of the correct color that can move to the target square.
+            ulong occupied = ~GetEmptyVector();
+            ulong sourceSquareCandidates = GetVector(SideToMove) & GetVector(movingPiece);
+
+            if (movingPiece == Piece.Pawn)
+            {
+                // Captures: go backwards by using the opposite side to move.
+                ulong pawnCaptures = Constants.PawnCaptures[SideToMove.Opposite(), targetSquare];
+
+                // Non-captures: one or two squares backwards. (Moves such as e3-e5 are ruled out by TryMakeMove().)
+                Func<ulong, ulong> direction;
+                if (SideToMove == Color.White) direction = ChessExtensions.South;
+                else direction = ChessExtensions.North;
+                ulong straightMoves = direction(targetSquare.ToVector());
+                if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
+                sourceSquareCandidates &= pawnCaptures | straightMoves;
+            }
+            else
+            {
+                switch (movingPiece)
+                {
+                    case Piece.Knight:
+                        sourceSquareCandidates &= Constants.KnightMoves[targetSquare];
+                        break;
+                    case Piece.Bishop:
+                        sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(targetSquare, occupied);
+                        break;
+                    case Piece.Rook:
+                        sourceSquareCandidates &= Constants.ReachableSquaresStraight(targetSquare, occupied);
+                        break;
+                    case Piece.Queen:
+                        sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(targetSquare, occupied)
+                                                | Constants.ReachableSquaresStraight(targetSquare, occupied);
+                        break;
+                    case Piece.King:
+                        sourceSquareCandidates &= Constants.Neighbours[targetSquare];
+                        break;
+                    default:
+                        sourceSquareCandidates = 0;
+                        break;
+                }
+            }
+
+            return sourceSquareCandidates;
+        }
+
+        /// <summary>
         /// Plays a <see cref="Move"/>, assuming it is generated and verified in the exact same position
         /// by <see cref="TryMakeMove(MoveInfo, bool, out Move)"/>. Calling this method in any other situation
         /// will leave this <see cref="Position"/> in a corrupted state which cannot be recovered.

@@ -127,6 +127,24 @@ namespace Sandra.Chess
         }
 
         /// <summary>
+        /// Returns a vector representing all squares from which a given piece can legally move to a target square.
+        /// This ignores castling moves.
+        /// </summary>
+        /// <param name="movingPiece">
+        /// The moving piece.
+        /// </param>
+        /// <param name="targetSquare">
+        /// The square to move to.
+        /// </param>
+        /// <returns>
+        /// All possible squares from which the piece can move to the target square.
+        /// </returns>
+        /// <remarks>
+        /// Use <see cref="ChessExtensions.AllSquares"/> to enumerate all squares in a vector.
+        /// </remarks>
+        public ulong LegalSourceSquares(Piece movingPiece, Square targetSquare) => Position.LegalSourceSquares(movingPiece, targetSquare);
+
+        /// <summary>
         /// Creates a mutable copy of this <see cref="ReadOnlyPosition"/>.
         /// </summary>
         public Position Copy() => Position.Copy();
