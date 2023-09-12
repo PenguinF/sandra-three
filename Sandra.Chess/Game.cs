@@ -363,7 +363,7 @@ namespace Sandra.Chess
                 if (!moveSyntax.IsUnrecognizedMove)
                 {
                     MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
-                    Move move = position.TryMakeMove(ref moveInfo, true);
+                    position.TryMakeMove(ref moveInfo, true, out Move move);
 
                     if (moveInfo.Result == MoveCheckResult.OK)
                     {

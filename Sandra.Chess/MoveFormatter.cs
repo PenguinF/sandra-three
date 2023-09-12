@@ -176,7 +176,7 @@ namespace Sandra.Chess
 
                 MoveInfo moveInfo = move.CreateMoveInfo();
 
-                position.TryMakeMove(ref moveInfo, true);
+                position.TryMakeMove(ref moveInfo, true, out _);
 
                 if (moveInfo.Result == MoveCheckResult.OK)
                 {
@@ -260,7 +260,7 @@ namespace Sandra.Chess
                     if (square != move.SourceSquare)
                     {
                         testMoveInfo.SourceSquare = square;
-                        position.TryMakeMove(ref testMoveInfo, false);
+                        position.TryMakeMove(ref testMoveInfo, false, out _);
                         if (testMoveInfo.Result.IsLegalMove())
                         {
                             // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.

@@ -347,14 +347,14 @@ namespace Sandra.Chess
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when any of <paramref name="moveInfo"/>'s members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
+        public void TryMakeMove(ref MoveInfo moveInfo, bool make, out Move move)
         {
             // Range checks.
             moveInfo.ThrowWhenOutOfRange();
 
             Debug.Assert(CheckInvariants());
 
-            Move move = new Move
+            move = new Move
             {
                 SourceSquare = moveInfo.SourceSquare,
                 TargetSquare = moveInfo.TargetSquare
@@ -388,10 +388,7 @@ namespace Sandra.Chess
             }
 
             // Can only check the rest if the basics are right.
-            if (moveInfo.Result != 0)
-            {
-                return move;
-            }
+            if (moveInfo.Result != 0) return;
 
             if (sideToMoveVector.Test(targetVector))
             {
@@ -617,8 +614,6 @@ namespace Sandra.Chess
             }
 
             Debug.Assert(CheckInvariants());
-
-            return move;
         }
 
         /// <summary>
