@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ChessTypes.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -137,6 +137,16 @@ namespace Sandra
         /// Returns a vector which is true only at the given square.
         /// </summary>
         public static ulong ToVector(this Square square) => 1UL << (int)square;
+
+        /// <summary>
+        /// Returns a vector which is true for each square in the same file.
+        /// </summary>
+        public static ulong ToVector(this File file) => Constants.FileMasksByFile[file];
+
+        /// <summary>
+        /// Returns a vector which is true for each square in the same rank.
+        /// </summary>
+        public static ulong ToVector(this Rank rank) => Constants.RankMasksByRank[rank];
 
         /// <summary>
         /// Gets the single square for which this vector is set, or an undefined value if the number of squares in the vector is not equal to one.
