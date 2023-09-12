@@ -363,9 +363,8 @@ namespace Sandra.Chess
                 if (!moveSyntax.IsUnrecognizedMove)
                 {
                     MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
-                    position.TryMakeMove(ref moveInfo, true, out Move move);
 
-                    if (moveInfo.Result == MoveCheckResult.OK)
+                    if (position.TryMakeMove(moveInfo, true, out Move move) == MoveCheckResult.OK)
                     {
                         current.IsLegalMove = true;
                         current.Move = move;
@@ -515,8 +514,7 @@ namespace Sandra.Chess
         public MoveCheckResult TryMakeMove(MoveInfo moveInfo)
         {
             // Disable until we can modify PGN using its syntax tree.
-            moveInfo.Result = ~MoveCheckResult.OK;
-            return default;
+            return ~MoveCheckResult.OK;
         }
     }
 }

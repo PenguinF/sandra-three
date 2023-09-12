@@ -174,11 +174,7 @@ namespace Sandra.Chess
                     }
                 }
 
-                MoveInfo moveInfo = move.CreateMoveInfo();
-
-                position.TryMakeMove(ref moveInfo, true, out _);
-
-                if (moveInfo.Result == MoveCheckResult.OK)
+                if (position.TryMakeMove(move.CreateMoveInfo(), true, out _) == MoveCheckResult.OK)
                 {
                     Square friendlyKing = position.FindKing(position.SideToMove);
                     if (position.IsSquareUnderAttack(friendlyKing, position.SideToMove))
@@ -260,8 +256,8 @@ namespace Sandra.Chess
                     if (square != move.SourceSquare)
                     {
                         testMoveInfo.SourceSquare = square;
-                        position.TryMakeMove(ref testMoveInfo, false, out _);
-                        if (testMoveInfo.Result.IsLegalMove())
+
+                        if (position.TryMakeMove(testMoveInfo, false, out _).IsLegalMove())
                         {
                             // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
                             // For example: Nb1-d2 or Nf3-d2.

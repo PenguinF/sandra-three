@@ -123,8 +123,7 @@ namespace Sandra.Chess
         public MoveCheckResult TestMove(MoveInfo moveInfo)
         {
             // Using false will leave the position unmodified.
-            Position.TryMakeMove(ref moveInfo, false, out _);
-            return moveInfo.Result;
+            return Position.TryMakeMove(moveInfo, false, out _);
         }
 
         /// <summary>
