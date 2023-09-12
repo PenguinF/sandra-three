@@ -141,26 +141,10 @@ namespace Sandra.Chess
 
             if (movingPiece == Piece.Pawn)
             {
-                // Capture or normal move?
-                if (disambiguatingSourceFile.IsJust(out File file))
+                if (!disambiguatingSourceFile.IsNothing)
                 {
                     // Capture, go backwards by using the opposite side to move.
                     sourceSquareCandidates &= Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
-
-                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                    {
-                        if (file == (File)sourceSquareCandidate.X())
-                        {
-                            moveInfo.SourceSquare = sourceSquareCandidate;
-                            break;
-                        }
-                    }
-
-                    // En passant special move type, if the target capture square is empty.
-                    if (!moveInfo.TargetSquare.ToVector().Test(occupied))
-                    {
-                        moveInfo.MoveType = MoveType.EnPassant;
-                    }
                 }
                 else
                 {
@@ -171,12 +155,6 @@ namespace Sandra.Chess
                     ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
                     if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
                     sourceSquareCandidates &= straightMoves;
-
-                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                    {
-                        moveInfo.SourceSquare = sourceSquareCandidate;
-                        break;
-                    }
                 }
             }
             else
@@ -203,7 +181,39 @@ namespace Sandra.Chess
                         sourceSquareCandidates = 0;
                         break;
                 }
+            }
 
+            if (movingPiece == Piece.Pawn)
+            {
+                // Special pawn handling: no disambiguating source file means a non-capture.
+                if (disambiguatingSourceFile.IsJust(out File file))
+                {
+                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+                    {
+                        if (file == (File)sourceSquareCandidate.X())
+                        {
+                            moveInfo.SourceSquare = sourceSquareCandidate;
+                            break;
+                        }
+                    }
+
+                    // En passant special move type, if the target capture square is empty.
+                    if (!moveInfo.TargetSquare.ToVector().Test(occupied))
+                    {
+                        moveInfo.MoveType = MoveType.EnPassant;
+                    }
+                }
+                else
+                {
+                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+                    {
+                        moveInfo.SourceSquare = sourceSquareCandidate;
+                        break;
+                    }
+                }
+            }
+            else
+            {
                 if (disambiguatingSourceFile.IsJust(out File sourceFile))
                 {
                     // Only allow candidates in the right file.
