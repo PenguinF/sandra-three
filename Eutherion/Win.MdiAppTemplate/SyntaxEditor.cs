@@ -642,6 +642,13 @@ namespace Eutherion.Win.MdiAppTemplate
             base.OnLayout(levent);
         }
 
+        protected override void OnZoomChanged(EventArgs e)
+        {
+            // OnUpdateUI may not be called even if some parts of the editor become visible.
+            VerifySyntaxAndStyle();
+            base.OnZoomChanged(e);
+        }
+
         public List<TError> CurrentErrors { get; private set; } = new List<TError>();
 
         public void ActivateError(int errorIndex)
