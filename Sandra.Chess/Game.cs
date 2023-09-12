@@ -103,8 +103,8 @@ namespace Sandra.Chess
                 index++;
             }
 
-            File? disambiguatingSourceFile = null;
-            Rank? disambiguatingSourceRank = null;
+            Maybe<File> disambiguatingSourceFile = Maybe<File>.Nothing;
+            Maybe<Rank> disambiguatingSourceRank = Maybe<Rank>.Nothing;
             File? targetFile = null;
             Rank? targetRank = null;
 
@@ -142,14 +142,14 @@ namespace Sandra.Chess
             if (movingPiece == Piece.Pawn)
             {
                 // Capture or normal move?
-                if (disambiguatingSourceFile != null)
+                if (disambiguatingSourceFile.IsJust(out File file))
                 {
                     // Capture, go backwards by using the opposite side to move.
                     sourceSquareCandidates &= Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
 
                     foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
                     {
-                        if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
+                        if (file == (File)sourceSquareCandidate.X())
                         {
                             moveInfo.SourceSquare = sourceSquareCandidate;
                             break;
@@ -206,13 +206,13 @@ namespace Sandra.Chess
 
                 foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
                 {
-                    if (disambiguatingSourceFile != null)
+                    if (disambiguatingSourceFile.IsJust(out File sourceFile))
                     {
-                        if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
+                        if (sourceFile == (File)sourceSquareCandidate.X())
                         {
-                            if (disambiguatingSourceRank != null)
+                            if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
                             {
-                                if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
+                                if (sourceRank == (Rank)sourceSquareCandidate.Y())
                                 {
                                     moveInfo.SourceSquare = sourceSquareCandidate;
                                     break;
@@ -225,9 +225,9 @@ namespace Sandra.Chess
                             }
                         }
                     }
-                    else if (disambiguatingSourceRank != null)
+                    else if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
                     {
-                        if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
+                        if (sourceRank == (Rank)sourceSquareCandidate.Y())
                         {
                             moveInfo.SourceSquare = sourceSquareCandidate;
                             break;
