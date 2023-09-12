@@ -189,7 +189,7 @@ namespace Sandra.Chess
                 if (!disambiguatingSourceFile.IsNothing)
                 {
                     // En passant special move type, if the target capture square is empty.
-                    if (!moveInfo.TargetSquare.ToVector().Test(occupied))
+                    if (moveInfo.TargetSquare.ToVector().Test(position.GetEmptyVector()))
                     {
                         moveInfo.MoveType = MoveType.EnPassant;
                     }
