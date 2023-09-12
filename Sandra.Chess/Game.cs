@@ -186,17 +186,8 @@ namespace Sandra.Chess
             if (movingPiece == Piece.Pawn)
             {
                 // Special pawn handling: no disambiguating source file means a non-capture.
-                if (disambiguatingSourceFile.IsJust(out File file))
+                if (!disambiguatingSourceFile.IsNothing)
                 {
-                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                    {
-                        if (file == (File)sourceSquareCandidate.X())
-                        {
-                            moveInfo.SourceSquare = sourceSquareCandidate;
-                            break;
-                        }
-                    }
-
                     // En passant special move type, if the target capture square is empty.
                     if (!moveInfo.TargetSquare.ToVector().Test(occupied))
                     {
@@ -205,32 +196,27 @@ namespace Sandra.Chess
                 }
                 else
                 {
-                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                    {
-                        moveInfo.SourceSquare = sourceSquareCandidate;
-                        break;
-                    }
+                    // Zero out all source squares not in the same file as the target square.
+                    sourceSquareCandidates &= Constants.FileMasks[moveInfo.TargetSquare];
                 }
             }
-            else
+
+            if (disambiguatingSourceFile.IsJust(out File sourceFile))
             {
-                if (disambiguatingSourceFile.IsJust(out File sourceFile))
-                {
-                    // Only allow candidates in the right file.
-                    sourceSquareCandidates &= sourceFile.ToVector();
-                }
+                // Only allow candidates in the right file.
+                sourceSquareCandidates &= sourceFile.ToVector();
+            }
 
-                if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
-                {
-                    // Only allow candidates in the right rank.
-                    sourceSquareCandidates &= sourceRank.ToVector();
-                }
+            if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
+            {
+                // Only allow candidates in the right rank.
+                sourceSquareCandidates &= sourceRank.ToVector();
+            }
 
-                foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                {
-                    moveInfo.SourceSquare = sourceSquareCandidate;
-                    break;
-                }
+            foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+            {
+                moveInfo.SourceSquare = sourceSquareCandidate;
+                break;
             }
 
             return true;
