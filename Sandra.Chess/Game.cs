@@ -107,7 +107,6 @@ namespace Sandra.Chess
             Rank? disambiguatingSourceRank = null;
             File? targetFile = null;
             Rank? targetRank = null;
-            Piece? promoteTo = null;
 
             while (index < moveText.Length)
             {
@@ -115,7 +114,8 @@ namespace Sandra.Chess
                 if (currentChar == '=')
                 {
                     index++;
-                    promoteTo = GetPiece(moveText[index]);
+                    moveInfo.MoveType = MoveType.Promotion;
+                    moveInfo.PromoteTo = GetPiece(moveText[index]);
                     break;
                 }
                 else if (currentChar >= 'a' && currentChar <= 'h')
@@ -177,12 +177,6 @@ namespace Sandra.Chess
                         moveInfo.SourceSquare = sourceSquareCandidate;
                         break;
                     }
-                }
-
-                if (promoteTo != null)
-                {
-                    moveInfo.MoveType = MoveType.Promotion;
-                    moveInfo.PromoteTo = (Piece)promoteTo;
                 }
             }
             else
