@@ -141,21 +141,16 @@ namespace Sandra.Chess
 
             if (movingPiece == Piece.Pawn)
             {
-                if (!disambiguatingSourceFile.IsNothing)
-                {
-                    // Capture, go backwards by using the opposite side to move.
-                    sourceSquareCandidates &= Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
-                }
-                else
-                {
-                    // One or two squares backwards.
-                    Func<ulong, ulong> direction;
-                    if (position.SideToMove == Color.White) direction = ChessExtensions.South;
-                    else direction = ChessExtensions.North;
-                    ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
-                    if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
-                    sourceSquareCandidates &= straightMoves;
-                }
+                // Captures: go backwards by using the opposite side to move.
+                ulong pawnCaptures = Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
+
+                // Non-captures: one or two squares backwards. (Moves such as e3-e5 are ruled out by TryMakeMove().)
+                Func<ulong, ulong> direction;
+                if (position.SideToMove == Color.White) direction = ChessExtensions.South;
+                else direction = ChessExtensions.North;
+                ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
+                if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
+                sourceSquareCandidates &= pawnCaptures | straightMoves;
             }
             else
             {
