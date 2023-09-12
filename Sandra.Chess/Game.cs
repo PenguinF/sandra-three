@@ -54,7 +54,7 @@ namespace Sandra.Chess
             }
         }
 
-        private static MoveInfo GetMoveInfo(Position position, ReadOnlySpan<char> moveText, Color sideToMove)
+        private static MoveInfo GetMoveInfo(Position position, ReadOnlySpan<char> moveText)
         {
             MoveInfo moveInfo = new MoveInfo();
 
@@ -62,7 +62,8 @@ namespace Sandra.Chess
             if (moveText.Equals("O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleKingside;
-                if (sideToMove == Color.White)
+
+                if (position.SideToMove == Color.White)
                 {
                     moveInfo.SourceSquare = Square.E1;
                     moveInfo.TargetSquare = Square.G1;
@@ -76,7 +77,8 @@ namespace Sandra.Chess
             else if (moveText.Equals("O-O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleQueenside;
-                if (sideToMove == Color.White)
+
+                if (position.SideToMove == Color.White)
                 {
                     moveInfo.SourceSquare = Square.E1;
                     moveInfo.TargetSquare = Square.C1;
@@ -132,7 +134,7 @@ namespace Sandra.Chess
 
                 // Get vector of pieces of the correct color that can move to the target square.
                 ulong occupied = ~position.GetEmptyVector();
-                ulong sourceSquareCandidates = position.GetVector(sideToMove) & position.GetVector(movingPiece);
+                ulong sourceSquareCandidates = position.GetVector(position.SideToMove) & position.GetVector(movingPiece);
 
                 if (movingPiece == Piece.Pawn)
                 {
@@ -140,7 +142,7 @@ namespace Sandra.Chess
                     if (disambiguatingSourceFile != null)
                     {
                         // Capture, go backwards by using the opposite side to move.
-                        sourceSquareCandidates &= Constants.PawnCaptures[sideToMove.Opposite(), moveInfo.TargetSquare];
+                        sourceSquareCandidates &= Constants.PawnCaptures[position.SideToMove.Opposite(), moveInfo.TargetSquare];
 
                         foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
                         {
@@ -161,7 +163,7 @@ namespace Sandra.Chess
                     {
                         // One or two squares backwards.
                         Func<ulong, ulong> direction;
-                        if (sideToMove == Color.White) direction = ChessExtensions.South;
+                        if (position.SideToMove == Color.White) direction = ChessExtensions.South;
                         else direction = ChessExtensions.North;
                         ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
                         if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
@@ -362,7 +364,7 @@ namespace Sandra.Chess
 
                 if (!moveSyntax.IsUnrecognizedMove)
                 {
-                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
+                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan);
 
                     if (position.TryMakeMove(moveInfo, true, out Move move) == MoveCheckResult.OK)
                     {
