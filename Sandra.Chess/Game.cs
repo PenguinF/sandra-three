@@ -213,13 +213,14 @@ namespace Sandra.Chess
                 sourceSquareCandidates &= sourceRank.ToVector();
             }
 
-            foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
+            // Allow only umambiguous moves.
+            if (sourceSquareCandidates.IsMaxOneBit())
             {
-                moveInfo.SourceSquare = sourceSquareCandidate;
-                break;
+                moveInfo.SourceSquare = sourceSquareCandidates.GetSingleSquare();
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public static readonly string WhiteTagName = "White";
