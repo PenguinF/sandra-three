@@ -678,6 +678,18 @@ namespace Sandra.Chess
                 }
             }
 
+            foreach (var candidate in sourceSquareCandidates.SetBits())
+            {
+                MoveInfo moveInfo = new MoveInfo
+                {
+                    SourceSquare = candidate.GetSingleSquare(),
+                    TargetSquare = targetSquare,
+                };
+
+                // Some moves will be incomplete (en-passant, promotion, etc.); allow those.
+                if (!TryMakeMove(moveInfo, false, out _).IsLegalMove()) sourceSquareCandidates &= ~candidate;
+            }
+
             return sourceSquareCandidates;
         }
 
