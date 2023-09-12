@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ChessConstants.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
  *
 **********************************************************************************/
 #endregion
-
-using System.Collections.Generic;
 
 namespace Sandra.Chess
 {
@@ -199,6 +197,11 @@ namespace Sandra.Chess
         public static readonly EnumIndexedArray<Square, ulong> FileMasks;
 
         /// <summary>
+        /// Contains a vector which is true for each square in the same file as a given file.
+        /// </summary>
+        public static readonly EnumIndexedArray<File, ulong> FileMasksByFile;
+
+        /// <summary>
         /// Contains a vector which is true for each square in the same file as a given square, except the two outermost squares.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> InnerFileMasks;
@@ -207,6 +210,11 @@ namespace Sandra.Chess
         /// Contains a vector which is true for each square in the same rank as a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> RankMasks;
+
+        /// <summary>
+        /// Contains a vector which is true for each square in the same rank as a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Rank, ulong> RankMasksByRank;
 
         /// <summary>
         /// Contains a vector which is true for each square in the same rank as a given square, except the two outermost squares.
@@ -283,8 +291,10 @@ namespace Sandra.Chess
             CastleKingsideRookDelta = EnumIndexedArray<Color, ulong>.New();
 
             FileMasks = EnumIndexedArray<Square, ulong>.New();
+            FileMasksByFile = EnumIndexedArray<File, ulong>.New();
             InnerFileMasks = EnumIndexedArray<Square, ulong>.New();
             RankMasks = EnumIndexedArray<Square, ulong>.New();
+            RankMasksByRank = EnumIndexedArray<Rank, ulong>.New();
             InnerRankMasks = EnumIndexedArray<Square, ulong>.New();
             A1H8Masks = EnumIndexedArray<Square, ulong>.New();
             InnerA1H8Masks = EnumIndexedArray<Square, ulong>.New();
@@ -362,6 +372,16 @@ namespace Sandra.Chess
             CastleQueensideRookDelta[Color.Black] = A8 | D8;
             CastleKingsideRookDelta[Color.White] = H1 | F1;
             CastleKingsideRookDelta[Color.Black] = H8 | F8;
+
+            for (File file = File.A; file <= File.H; file++)
+            {
+                FileMasksByFile[file] = allFiles[(int)file];
+            }
+
+            for (Rank rank = Rank._1; rank <= Rank._8; rank++)
+            {
+                RankMasksByRank[rank] = allRanks[(int)rank];
+            }
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {

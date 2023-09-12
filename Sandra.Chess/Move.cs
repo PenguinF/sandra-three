@@ -39,8 +39,6 @@ namespace Sandra.Chess
         public Square TargetSquare;
         public Piece PromoteTo;
 
-        public MoveCheckResult Result;
-
         public void ThrowWhenOutOfRange()
         {
             if (MoveType < 0 || MoveType > MoveType.CastleKingside)

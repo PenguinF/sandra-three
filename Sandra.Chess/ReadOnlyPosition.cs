@@ -114,7 +114,7 @@ namespace Sandra.Chess
         /// The move to test.
         /// </param>
         /// <returns>
-        /// A <see cref="MoveCheckResult.OK"/> if the tested move is legal; otherwise a <see cref="MoveCheckResult"/> value
+        /// A <see cref="MoveCheckResult.OK"/> if the tested move is legal and fully specified; otherwise a <see cref="MoveCheckResult"/> value
         /// which describes the reason why the move is invalid.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -123,9 +123,26 @@ namespace Sandra.Chess
         public MoveCheckResult TestMove(MoveInfo moveInfo)
         {
             // Using false will leave the position unmodified.
-            Position.TryMakeMove(ref moveInfo, false);
-            return moveInfo.Result;
+            return Position.TryMakeMove(moveInfo, false, out _);
         }
+
+        /// <summary>
+        /// Returns a vector representing all squares from which a given piece can legally move to a target square.
+        /// This ignores castling moves.
+        /// </summary>
+        /// <param name="movingPiece">
+        /// The moving piece.
+        /// </param>
+        /// <param name="targetSquare">
+        /// The square to move to.
+        /// </param>
+        /// <returns>
+        /// All possible squares from which the piece can move to the target square.
+        /// </returns>
+        /// <remarks>
+        /// Use <see cref="ChessExtensions.AllSquares"/> to enumerate all squares in a vector.
+        /// </remarks>
+        public ulong LegalSourceSquares(Piece movingPiece, Square targetSquare) => Position.LegalSourceSquares(movingPiece, targetSquare);
 
         /// <summary>
         /// Creates a mutable copy of this <see cref="ReadOnlyPosition"/>.

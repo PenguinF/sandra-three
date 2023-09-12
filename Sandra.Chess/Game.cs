@@ -54,15 +54,16 @@ namespace Sandra.Chess
             }
         }
 
-        private static MoveInfo GetMoveInfo(Position position, ReadOnlySpan<char> moveText, Color sideToMove)
+        private static bool GetMoveInfo(Position position, ReadOnlySpan<char> moveText, out MoveInfo moveInfo)
         {
-            MoveInfo moveInfo = new MoveInfo();
+            moveInfo = new MoveInfo();
 
-            // Very free-style parsing, based on the assumption that this is a recognized move.
+            // Very free-style parsing, based on the knowledge that this is a recognized move.
             if (moveText.Equals("O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleKingside;
-                if (sideToMove == Color.White)
+
+                if (position.SideToMove == Color.White)
                 {
                     moveInfo.SourceSquare = Square.E1;
                     moveInfo.TargetSquare = Square.G1;
@@ -72,11 +73,14 @@ namespace Sandra.Chess
                     moveInfo.SourceSquare = Square.E8;
                     moveInfo.TargetSquare = Square.G8;
                 }
+
+                return true;
             }
             else if (moveText.Equals("O-O-O".AsSpan(), StringComparison.Ordinal))
             {
                 moveInfo.MoveType = MoveType.CastleQueenside;
-                if (sideToMove == Color.White)
+
+                if (position.SideToMove == Color.White)
                 {
                     moveInfo.SourceSquare = Square.E1;
                     moveInfo.TargetSquare = Square.C1;
@@ -86,164 +90,91 @@ namespace Sandra.Chess
                     moveInfo.SourceSquare = Square.E8;
                     moveInfo.TargetSquare = Square.C8;
                 }
+
+                return true;
             }
-            else
+
+            // Piece, disambiguation, capturing 'x', target square, promotion, check/mate/nag.
+            Piece movingPiece = Piece.Pawn;
+            int index = 0;
+            if (moveText[index] >= 'A' && moveText[index] <= 'Z')
             {
-                // Piece, disambiguation, capturing 'x', target square, promotion, check/mate/nag.
-                Piece movingPiece = Piece.Pawn;
-                int index = 0;
-                if (moveText[index] >= 'A' && moveText[index] <= 'Z')
+                movingPiece = GetPiece(moveText[index]);
+                index++;
+            }
+
+            Maybe<File> disambiguatingSourceFile = Maybe<File>.Nothing;
+            Maybe<Rank> disambiguatingSourceRank = Maybe<Rank>.Nothing;
+            File? targetFile = null;
+            Rank? targetRank = null;
+
+            while (index < moveText.Length)
+            {
+                char currentChar = moveText[index];
+                if (currentChar == '=')
                 {
-                    movingPiece = GetPiece(moveText[index]);
                     index++;
+                    moveInfo.MoveType = MoveType.Promotion;
+                    moveInfo.PromoteTo = GetPiece(moveText[index]);
+                    break;
+                }
+                else if (currentChar >= 'a' && currentChar <= 'h')
+                {
+                    if (targetFile != null) disambiguatingSourceFile = targetFile;
+                    targetFile = (File)(currentChar - 'a');
+                }
+                else if (currentChar >= '1' && currentChar <= '8')
+                {
+                    if (targetRank != null) disambiguatingSourceRank = targetRank;
+                    targetRank = (Rank)(currentChar - '1');
                 }
 
-                File? disambiguatingSourceFile = null;
-                Rank? disambiguatingSourceRank = null;
-                File? targetFile = null;
-                Rank? targetRank = null;
-                Piece? promoteTo = null;
+                // Ignore 'x', '+', '#', '!', '?', increase index.
+                index++;
+            }
 
-                while (index < moveText.Length)
+            moveInfo.TargetSquare = ((File)targetFile).Combine((Rank)targetRank);
+
+            ulong sourceSquareCandidates = position.LegalSourceSquares(movingPiece, moveInfo.TargetSquare);
+
+            if (movingPiece == Piece.Pawn)
+            {
+                // Special pawn handling: no disambiguating source file means a non-capture.
+                if (!disambiguatingSourceFile.IsNothing)
                 {
-                    char currentChar = moveText[index];
-                    if (currentChar == '=')
+                    // En passant special move type, if the target capture square is empty.
+                    if (moveInfo.TargetSquare.ToVector().Test(position.GetEmptyVector()))
                     {
-                        index++;
-                        promoteTo = GetPiece(moveText[index]);
-                        break;
-                    }
-                    else if (currentChar >= 'a' && currentChar <= 'h')
-                    {
-                        if (targetFile != null) disambiguatingSourceFile = targetFile;
-                        targetFile = (File)(currentChar - 'a');
-                    }
-                    else if (currentChar >= '1' && currentChar <= '8')
-                    {
-                        if (targetRank != null) disambiguatingSourceRank = targetRank;
-                        targetRank = (Rank)(currentChar - '1');
-                    }
-
-                    // Ignore 'x', '+', '#', '!', '?', increase index.
-                    index++;
-                }
-
-                moveInfo.TargetSquare = ((File)targetFile).Combine((Rank)targetRank);
-
-                // Get vector of pieces of the correct color that can move to the target square.
-                ulong occupied = ~position.GetEmptyVector();
-                ulong sourceSquareCandidates = position.GetVector(sideToMove) & position.GetVector(movingPiece);
-
-                if (movingPiece == Piece.Pawn)
-                {
-                    // Capture or normal move?
-                    if (disambiguatingSourceFile != null)
-                    {
-                        // Capture, go backwards by using the opposite side to move.
-                        sourceSquareCandidates &= Constants.PawnCaptures[sideToMove.Opposite(), moveInfo.TargetSquare];
-
-                        foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                        {
-                            if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
-                            {
-                                moveInfo.SourceSquare = sourceSquareCandidate;
-                                break;
-                            }
-                        }
-
-                        // En passant special move type, if the target capture square is empty.
-                        if (!moveInfo.TargetSquare.ToVector().Test(occupied))
-                        {
-                            moveInfo.MoveType = MoveType.EnPassant;
-                        }
-                    }
-                    else
-                    {
-                        // One or two squares backwards.
-                        Func<ulong, ulong> direction;
-                        if (sideToMove == Color.White) direction = ChessExtensions.South;
-                        else direction = ChessExtensions.North;
-                        ulong straightMoves = direction(moveInfo.TargetSquare.ToVector());
-                        if (!straightMoves.Test(occupied)) straightMoves |= direction(straightMoves);
-                        sourceSquareCandidates &= straightMoves;
-
-                        foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                        {
-                            moveInfo.SourceSquare = sourceSquareCandidate;
-                            break;
-                        }
-                    }
-
-                    if (promoteTo != null)
-                    {
-                        moveInfo.MoveType = MoveType.Promotion;
-                        moveInfo.PromoteTo = (Piece)promoteTo;
+                        moveInfo.MoveType = MoveType.EnPassant;
                     }
                 }
                 else
                 {
-                    switch (movingPiece)
-                    {
-                        case Piece.Knight:
-                            sourceSquareCandidates &= Constants.KnightMoves[moveInfo.TargetSquare];
-                            break;
-                        case Piece.Bishop:
-                            sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied);
-                            break;
-                        case Piece.Rook:
-                            sourceSquareCandidates &= Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
-                            break;
-                        case Piece.Queen:
-                            sourceSquareCandidates &= Constants.ReachableSquaresDiagonal(moveInfo.TargetSquare, occupied)
-                                                    | Constants.ReachableSquaresStraight(moveInfo.TargetSquare, occupied);
-                            break;
-                        case Piece.King:
-                            sourceSquareCandidates &= Constants.Neighbours[moveInfo.TargetSquare];
-                            break;
-                        default:
-                            sourceSquareCandidates = 0;
-                            break;
-                    }
-
-                    foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
-                    {
-                        if (disambiguatingSourceFile != null)
-                        {
-                            if (disambiguatingSourceFile == (File)sourceSquareCandidate.X())
-                            {
-                                if (disambiguatingSourceRank != null)
-                                {
-                                    if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
-                                    {
-                                        moveInfo.SourceSquare = sourceSquareCandidate;
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    moveInfo.SourceSquare = sourceSquareCandidate;
-                                    break;
-                                }
-                            }
-                        }
-                        else if (disambiguatingSourceRank != null)
-                        {
-                            if (disambiguatingSourceRank == (Rank)sourceSquareCandidate.Y())
-                            {
-                                moveInfo.SourceSquare = sourceSquareCandidate;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            moveInfo.SourceSquare = sourceSquareCandidate;
-                            break;
-                        }
-                    }
+                    // Zero out all source squares not in the same file as the target square.
+                    sourceSquareCandidates &= Constants.FileMasks[moveInfo.TargetSquare];
                 }
             }
 
-            return moveInfo;
+            if (disambiguatingSourceFile.IsJust(out File sourceFile))
+            {
+                // Only allow candidates in the right file.
+                sourceSquareCandidates &= sourceFile.ToVector();
+            }
+
+            if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
+            {
+                // Only allow candidates in the right rank.
+                sourceSquareCandidates &= sourceRank.ToVector();
+            }
+
+            // Allow only umambiguous moves.
+            if (sourceSquareCandidates.IsMaxOneBit())
+            {
+                moveInfo.SourceSquare = sourceSquareCandidates.GetSingleSquare();
+                return true;
+            }
+
+            return false;
         }
 
         public static readonly string WhiteTagName = "White";
@@ -360,16 +291,13 @@ namespace Sandra.Chess
             {
                 PgnMoveSyntax moveSyntax = ply.Move.PlyContentNode.ContentNode;
 
-                if (!moveSyntax.IsUnrecognizedMove)
+                if (!moveSyntax.IsUnrecognizedMove
+                    && GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, out MoveInfo moveInfo)
+                    // This condition detects missing information such as promotion piece.
+                    && position.TryMakeMove(moveInfo, true, out Move move) == MoveCheckResult.OK)
                 {
-                    MoveInfo moveInfo = GetMoveInfo(position, moveSyntax.SourcePgnAsSpan, position.SideToMove);
-                    Move move = position.TryMakeMove(ref moveInfo, true);
-
-                    if (moveInfo.Result == MoveCheckResult.OK)
-                    {
-                        current.IsLegalMove = true;
-                        current.Move = move;
-                    }
+                    current.IsLegalMove = true;
+                    current.Move = move;
                 }
             }
 
@@ -515,8 +443,7 @@ namespace Sandra.Chess
         public MoveCheckResult TryMakeMove(MoveInfo moveInfo)
         {
             // Disable until we can modify PGN using its syntax tree.
-            moveInfo.Result = ~MoveCheckResult.OK;
-            return default;
+            return ~MoveCheckResult.OK;
         }
     }
 }
