@@ -204,40 +204,22 @@ namespace Sandra.Chess
                         break;
                 }
 
+                if (disambiguatingSourceFile.IsJust(out File sourceFile))
+                {
+                    // Only allow candidates in the right file.
+                    sourceSquareCandidates &= sourceFile.ToVector();
+                }
+
+                if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
+                {
+                    // Only allow candidates in the right rank.
+                    sourceSquareCandidates &= sourceRank.ToVector();
+                }
+
                 foreach (Square sourceSquareCandidate in sourceSquareCandidates.AllSquares())
                 {
-                    if (disambiguatingSourceFile.IsJust(out File sourceFile))
-                    {
-                        if (sourceFile == (File)sourceSquareCandidate.X())
-                        {
-                            if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
-                            {
-                                if (sourceRank == (Rank)sourceSquareCandidate.Y())
-                                {
-                                    moveInfo.SourceSquare = sourceSquareCandidate;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                moveInfo.SourceSquare = sourceSquareCandidate;
-                                break;
-                            }
-                        }
-                    }
-                    else if (disambiguatingSourceRank.IsJust(out Rank sourceRank))
-                    {
-                        if (sourceRank == (Rank)sourceSquareCandidate.Y())
-                        {
-                            moveInfo.SourceSquare = sourceSquareCandidate;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        moveInfo.SourceSquare = sourceSquareCandidate;
-                        break;
-                    }
+                    moveInfo.SourceSquare = sourceSquareCandidate;
+                    break;
                 }
             }
 
