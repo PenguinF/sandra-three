@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MenuCaptionBarForm.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2023 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -137,6 +137,8 @@ namespace Eutherion.Win.MdiAppTemplate
                 | ControlStyles.FixedWidth
                 | ControlStyles.ResizeRedraw
                 | ControlStyles.Opaque, true);
+
+            MinimumSize = new Size(20, 20);
 
             minimizeButton = CreateCaptionButton();
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
@@ -540,10 +542,6 @@ namespace Eutherion.Win.MdiAppTemplate
             // MinimumWidth  = MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft
             // MinimumHeight = CaptionHeight + VerticalResizeBorderThickness * 2
             // MinimumSize   = new Size(MinimumWidth, MinimumHeight)
-            //
-            // Setting MinimumSize to a fixed size for the time being, since a likely fix is going to be to trap
-            // the property getters and setters, and reimplementing what they do by hand.
-            MinimumSize = new Size(500, 80);
 
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
