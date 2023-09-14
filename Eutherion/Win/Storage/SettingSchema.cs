@@ -249,7 +249,9 @@ namespace Eutherion.Win.Storage
             // Analyze values with this schema while building the PMap.
             foreach (var (keyNode, valueNode) in jsonMapSyntax.DefinedKeyValuePairs())
             {
-                if (foundKeys.Contains(keyNode.Value))
+                bool duplicateKey = foundKeys.Contains(keyNode.Value);
+
+                if (duplicateKey)
                 {
                     errors.Add(new DuplicatePropertyKeyWarning(keyNode));
                 }
@@ -264,7 +266,11 @@ namespace Eutherion.Win.Storage
 
                     if (valueOrError.IsOption2(out object untypedValue))
                     {
-                        mapBuilder.Add(keyNode.Value, untypedValue);
+                        // Only add the first found recognized value.
+                        if (!duplicateKey)
+                        {
+                            mapBuilder.Add(keyNode.Value, untypedValue);
+                        }
                     }
                     else
                     {
