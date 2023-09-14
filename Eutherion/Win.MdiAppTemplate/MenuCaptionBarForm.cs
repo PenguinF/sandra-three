@@ -77,6 +77,9 @@ namespace Eutherion.Win.MdiAppTemplate
             public int SaveButtonLeft;
             public int CloseButtonLeft;
 
+            public int MinimumWidth;
+            public int MinimumHeight;
+
             public void UpdateSystemButtonMetrics(bool saveButtonVisible, bool maximizeButtonVisible, bool mininizeButtonVisible)
             {
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
@@ -103,6 +106,11 @@ namespace Eutherion.Win.MdiAppTemplate
                 if (maximizeButtonVisible) MaximizeButtonLeft -= captionButtonWidth + closeButtonMargin;
                 MinimizeButtonLeft = MaximizeButtonLeft;
                 if (mininizeButtonVisible) MinimizeButtonLeft -= captionButtonWidth;
+
+                // An appopriate MinimumSize is a size which allows the entire menu and the system buttons to be displayed,
+                // taking border thickness into account.
+                MinimumWidth = MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft;
+                MinimumHeight = CaptionHeight + VerticalResizeBorderThickness * 2;
             }
         }
 
@@ -535,13 +543,9 @@ namespace Eutherion.Win.MdiAppTemplate
             // https://github.com/dotnet/winforms/issues/3020
             // https://social.msdn.microsoft.com/Forums/en-US/9625570d-4bd7-48f2-b158-15dcbd96c60b/bug-in-form-class-setting-formminimumsize-triggers-an-activated-event-even-when-the-form-is
             // https://social.msdn.microsoft.com/Forums/en-US/31f9d493-f8d6-4b39-92c9-912399ed3964/why-parentformdeactivate-event-getting-triggered-when-try-to-set-the-minimum-size-for-child-form
-            //
-            // An appopriate MinimumSize is a size which allows the entire menu and the system buttons to be displayed,
-            // taking border thickness into account. Using the current metrics:
-            //
-            // MinimumWidth  = MainMenuLeft + MainMenuWidth + TotalWidth - MinimizeButtonLeft
-            // MinimumHeight = CaptionHeight + VerticalResizeBorderThickness * 2
-            // MinimumSize   = new Size(MinimumWidth, MinimumHeight)
+
+            // As a workaround, instead of setting MinimumSize, update MinimumWidth/MinimumHeight, and prevent resizes to smaller sizes.
+            // MinimumSize = new Size(MinimumWidth, MinimumHeight)
 
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
