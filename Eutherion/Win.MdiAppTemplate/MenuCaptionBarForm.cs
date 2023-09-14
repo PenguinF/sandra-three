@@ -22,6 +22,7 @@
 using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
+using Eutherion.Win.Forms;
 using Eutherion.Win.Native;
 using Eutherion.Win.UIActions;
 using System;
@@ -550,6 +551,23 @@ namespace Eutherion.Win.MdiAppTemplate
             // Update maximize button because Aero snap changes the client size directly and updates
             // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
             UpdateMaximizeButtonIcon();
+        }
+
+        protected override void OnResizing(ResizeEventArgs e)
+        {
+            base.OnResizing(e);
+
+            int minimumRight = e.MoveResizeRect.Left + currentMetrics.MinimumWidth;
+            if (e.MoveResizeRect.Right < minimumRight)
+            {
+                e.MoveResizeRect.Right = minimumRight;
+            }
+
+            int minimumBottom = e.MoveResizeRect.Top + currentMetrics.MinimumHeight;
+            if (e.MoveResizeRect.Bottom < minimumBottom)
+            {
+                e.MoveResizeRect.Bottom = minimumBottom;
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
