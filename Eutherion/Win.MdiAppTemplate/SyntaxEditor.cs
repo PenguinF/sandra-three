@@ -50,6 +50,8 @@ namespace Eutherion.Win.MdiAppTemplate
     {
         private class ErrorListPanel : ContainerControl, IDockableControl
         {
+            public const int DefaultItemHeight = 14;
+
             private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
             private static readonly Font normalFont = new Font("Calibri", 10);
 
@@ -73,7 +75,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     Dock = DockStyle.Fill,
                     BorderStyle = BorderStyle.None,
                     HorizontalScrollbar = false,
-                    ItemHeight = 14,
+                    ItemHeight = DefaultItemHeight,
                     SelectionMode = SelectionMode.MultiExtended,
                 };
 
@@ -845,7 +847,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         // Estimate how high the error list form needs to be to show all the errors.
                         // Stay within a certain range.
                         const int minHeight = 100;
-                        int estimatedHeight = CurrentErrors.Count * 15;
+                        int estimatedHeight = CurrentErrors.Count * (ErrorListPanel.DefaultItemHeight + 1);
 
                         // Add padding * 2.
                         estimatedHeight += 12;

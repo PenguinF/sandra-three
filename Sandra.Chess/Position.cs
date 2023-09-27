@@ -618,8 +618,9 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Returns a vector representing all squares from which a given piece can legally move to a target square.
+        /// Returns a vector representing all squares from which a given piece of the side to move can legally move to a target square.
         /// This ignores castling moves.
+        /// If moving a piece from a given source square would put its own king in check, that source square is excluded from the returned vector.
         /// </summary>
         /// <param name="movingPiece">
         /// The moving piece.
@@ -775,6 +776,7 @@ namespace Sandra.Chess
 
         /// <summary>
         /// Generates and enumerates all non-castling moves which are legal in this position.
+        /// This method does not filter out moves that are illegal in a position from putting a friendly king in check.
         /// </summary>
         public IEnumerable<MoveInfo> GenerateLegalMoves()
         {
