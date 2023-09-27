@@ -104,6 +104,7 @@ namespace Sandra.Chess
 
         /// <summary>
         /// Generates and enumerates all non-castling moves which are legal in this position.
+        /// This method does not filter out moves that are illegal in a position from putting a friendly king in check.
         /// </summary>
         public IEnumerable<MoveInfo> GenerateLegalMoves() => Position.GenerateLegalMoves();
 
