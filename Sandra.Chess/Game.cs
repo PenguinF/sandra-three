@@ -182,6 +182,20 @@ namespace Sandra.Chess
         public static readonly string WhiteEloTagName = "WhiteElo";
         public static readonly string BlackEloTagName = "BlackElo";
 
+        public static IEnumerable<string> WellKnownTagNames
+        {
+            get
+            {
+                // TODO standard order seems to be:
+                // Event, Site, Date, Round, White, Black, Result, WhiteElo, BlackElo, ECO, PlyCount
+                // Not sure where the FEN of a custom start position comes in.
+                yield return WhiteTagName;
+                yield return BlackTagName;
+                yield return WhiteEloTagName;
+                yield return BlackEloTagName;
+            }
+        }
+
         public PgnGameSyntax PgnGame { get; }
 
         public PgnTagValueSyntax White { get; }
