@@ -91,6 +91,7 @@ namespace Sandra.UI
                 DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
                     OpenNewPlayingBoard,
+                    OpenGame,
                     new MainMenuDropDownItem
                     {
                         Container = new UIMenuNode.Container(LocalizedStringKeys.GoTo.ToTextProvider()) { IsFirstInGroup = true },
@@ -128,7 +129,6 @@ namespace Sandra.UI
                 Container = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()),
                 DropDownItems = new List<Union<UIAction, MainMenuDropDownItem>>
                 {
-                    OpenGame,
                     SharedUIAction.ZoomIn,
                     SharedUIAction.ZoomOut,
                     SharedUIAction.ShowErrorPane,
