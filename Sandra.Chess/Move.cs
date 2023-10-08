@@ -39,6 +39,15 @@ namespace Sandra.Chess
         public Square TargetSquare;
         public Piece PromoteTo;
 
+        /// <summary>
+        /// Returns if both move info structures are equal while ignoring their results.
+        /// </summary>
+        public bool InputEquals(MoveInfo other)
+            => MoveType == other.MoveType
+            && SourceSquare == other.SourceSquare
+            && TargetSquare == other.TargetSquare
+            && PromoteTo == other.PromoteTo;
+
         public void ThrowWhenOutOfRange()
         {
             if (MoveType < 0 || MoveType > MoveType.CastleKingside)

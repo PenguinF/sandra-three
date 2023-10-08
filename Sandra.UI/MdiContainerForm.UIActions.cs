@@ -26,6 +26,8 @@ using Eutherion.Win.MdiAppTemplate;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -51,10 +53,71 @@ namespace Sandra.UI
                 },
             });
 
+        private int LengthExcludingTrailingNewlineCharacters(ScintillaNET.Line line)
+        {
+            string lineText = line.Text;
+            int lineLength = line.Length;
+            while (lineLength > 0 && (lineText[lineLength - 1] == '\n' || lineText[lineLength - 1] == '\r')) lineLength--;
+            return lineLength;
+        }
+
+        private string NewLine(ScintillaNET.Eol eol)
+        {
+            switch (eol)
+            {
+                default:
+                case ScintillaNET.Eol.CrLf:
+                    return "\r\n";
+                case ScintillaNET.Eol.Cr:
+                    return "\r";
+                case ScintillaNET.Eol.Lf:
+                    return "\n";
+            }
+        }
+
         public UIActionState TryOpenNewPlayingBoard(PgnEditor pgnEditor, bool perform)
         {
-            // Disable until we can modify PGN using its syntax tree.
-            return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                // Determine position in the source PGN where to insert a new game.
+                // When in the middle of a game, jump to the end of it.
+                int insertPosition = pgnEditor.SelectionStart;
+                var (gameSyntax, _) = pgnEditor.GameAtOrBeforePosition(insertPosition);
+                if (gameSyntax != null) insertPosition = Math.Max(insertPosition, gameSyntax.AbsoluteStart + gameSyntax.Length);
+
+                StringBuilder insertString = new StringBuilder();
+                int insertLineIndex = pgnEditor.LineFromPosition(insertPosition);
+                ScintillaNET.Line line = pgnEditor.Lines[insertLineIndex];
+
+                // If at the end of a line and there's another line following it, jump to the start position of that line.
+                int lineLength = line.Position + LengthExcludingTrailingNewlineCharacters(line);
+                if (lineLength > 0
+                    && insertPosition == line.Position + lineLength
+                    && insertLineIndex + 1 < pgnEditor.Lines.Count)
+                {
+                    insertLineIndex++;
+                    line = pgnEditor.Lines[insertLineIndex];
+                    insertPosition = line.Position;
+                }
+
+                // If in the middle of a line, add newlines before and/or after it.
+                // Respect the editor's current EolMode setting.
+                string newLine = NewLine(pgnEditor.EolMode);
+                if (line.Position < insertPosition) insertString.Append(newLine);
+                Chess.Game.WellKnownTagNames.ForEach(x => { insertString.AppendFormat("[{0} \"\"]", x); insertString.Append(newLine); });
+                if (insertPosition < line.Position + LengthExcludingTrailingNewlineCharacters(line)) insertString.Append(newLine);
+
+                string insertStringResult = insertString.ToString();
+                pgnEditor.InsertText(insertPosition, insertStringResult);
+                pgnEditor.SelectionStart = insertPosition + insertStringResult.Length;
+
+                // Parsing and selection start updates will only happen once Scintilla receives the appropriate windows messages.
+                // So in order to open the game that's just been inserted, force those messages with an Update() call.
+                pgnEditor.Update();
+                TryOpenGame(pgnEditor, perform);
+            }
+
+            return UIActionVisibility.Enabled;
         }
 
         public static readonly UIAction OpenGame = new UIAction(
@@ -64,7 +127,6 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.G), },
-                    IsFirstInGroup = true,
                     MenuTextProvider = LocalizedStringKeys.OpenGame.ToTextProvider(),
                 },
             });
