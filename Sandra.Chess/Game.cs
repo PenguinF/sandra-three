@@ -447,17 +447,33 @@ namespace Sandra.Chess
         /// <param name="moveInfo">
         /// The move to make.
         /// </param>
-        /// <returns>
-        /// A <see cref="MoveCheckResult.OK"/> if the move is made and therefore legal; otherwise a <see cref="MoveCheckResult"/> value
-        /// which describes the reason why the move is illegal.
-        /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when any of <paramref name="moveInfo"/>'s members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public MoveCheckResult TryMakeMove(MoveInfo moveInfo)
+        public bool TryMakeMove(MoveInfo moveInfo)
         {
-            // Disable until we can modify PGN using its syntax tree.
-            return ~MoveCheckResult.OK;
+            if (CurrentPosition.TestMove(moveInfo) == MoveCheckResult.OK)
+            {
+                List<PlyInfo> availableExistingPlies = activePly == null ? FirstPlies : activePly.NextPlies;
+
+                // Move to an existing variation?
+                foreach (var plyInfo in availableExistingPlies)
+                {
+                    if (plyInfo.Move.CreateMoveInfo().InputEquals(moveInfo))
+                    {
+                        activePly = plyInfo;
+
+                        Position position = CurrentPosition.Copy();
+                        position.FastMakeMove(plyInfo.Move);
+
+                        CurrentPosition = new ReadOnlyPosition(position);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }
