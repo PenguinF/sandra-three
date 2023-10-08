@@ -32,6 +32,16 @@ namespace Sandra.UI
     /// </summary>
     public static class PgnEditorExtensions
     {
+        public static PgnSyntax FirstNonWhitespaceNode(PgnSyntax pgnSyntax)
+        {
+            foreach (var symbol in pgnSyntax.TerminalSymbolsInRange(0, pgnSyntax.Length))
+            {
+                if (!(symbol is PgnWhitespaceSyntax)) return symbol.ToSyntax();
+            }
+
+            return null;
+        }
+
         private static PgnPlySyntax LastPlyInMainVariation(PgnGameSyntax pgnGameSyntax)
         {
             var plies = pgnGameSyntax.PlyList.Plies;
@@ -63,6 +73,22 @@ namespace Sandra.UI
                         }
                         else if (pgnSyntax is PgnGameSyntax pgnGameSyntax)
                         {
+                            // If the cursor position is before the start of the first syntax node of the current game,
+                            // return the previous game instead if it exists.
+                            PgnSyntax nonWhitespaceNode = FirstNonWhitespaceNode(pgnGameSyntax);
+                            if (nonWhitespaceNode != null && position < FirstNonWhitespaceNode(pgnGameSyntax).AbsoluteStart)
+                            {
+                                if (pgnGameSyntax.ParentIndex > 0)
+                                {
+                                    pgnGameSyntax = gameList.Games[pgnGameSyntax.ParentIndex - 1];
+                                    deepestPlySyntax = null;
+                                }
+                                else
+                                {
+                                    return (null, null);
+                                }
+                            }
+
                             if (deepestPlySyntax == null)
                             {
                                 // Return the last ply of the main variation if the cursor is in a higher position.
