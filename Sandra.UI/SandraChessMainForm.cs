@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SandraChessMainForm.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Win.MdiAppTemplate;
 using Eutherion.Win.Native;
 using Eutherion.Win.Storage;
@@ -267,7 +268,16 @@ namespace Sandra.UI
             // Restore maximized setting after setting the Bounds.
             if (formState.Maximized)
             {
-                mdiContainerForm.WindowState = FormWindowState.Maximized;
+                // If WindowState is set to maximized in the Load handler,
+                // the Form's restore bounds get erased.
+                // So delay this until the Form is actually shown.
+                Box<EventHandler> shownHandler = new Box<EventHandler>(null);
+                shownHandler.Value = (_, __) =>
+                {
+                    mdiContainerForm.WindowState = FormWindowState.Maximized;
+                    mdiContainerForm.Shown -= shownHandler.Value;
+                };
+                mdiContainerForm.Shown += shownHandler.Value;
             }
         }
 

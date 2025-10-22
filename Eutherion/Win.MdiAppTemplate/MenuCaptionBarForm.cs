@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MenuCaptionBarForm.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -117,6 +118,27 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
+        // Access to a private field in Form such that the effects of RestoreWindowBoundsIfNecessary() can be controlled.
+        private static readonly FieldInfo restoredWindowBoundsSpecifiedFieldInfo;
+
+        static MenuCaptionBarForm()
+        {
+            try
+            {
+                // Depending on the version, the field may have different names.
+                restoredWindowBoundsSpecifiedFieldInfo
+                    = typeof(Form).GetField("_restoredWindowBoundsSpecified", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?? typeof(Form).GetField("restoredWindowBoundsSpecified", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            }
+            catch (Exception e)
+            {
+                // Instead of generating a TypeLoadException from not being able to complete
+                // the static initializer, just trace the exception and move on.
+                // The bug that can be fixed by having access to restoredWindowBoundsSpecified just isn't that important.
+                e.Trace();
+            }
+        }
+
         private const int MainMenuHorizontalMargin = 8;
 
         public const int DefaultCaptionHeight = 30;
@@ -155,15 +177,7 @@ namespace Eutherion.Win.MdiAppTemplate
             maximizeButton = CreateCaptionButton();
             maximizeButton.Click += (_, __) =>
             {
-                inRestoreCommand = WindowState == FormWindowState.Maximized;
-                try
-                {
-                    WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
-                }
-                finally
-                {
-                    inRestoreCommand = false;
-                }
+                WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
                 UpdateMaximizeButtonIcon();
             };
 
@@ -653,10 +667,6 @@ namespace Eutherion.Win.MdiAppTemplate
             }
         }
 
-        private bool queryOpenMessageSent;
-        private bool inRestoreCommand;
-        private Rectangle lastKnownNormalWindowRectangle;
-
         protected override void WndProc(ref Message m)
         {
             if (m.Msg >= WM.NCCALCSIZE && m.Msg <= WM.NCHITTEST)
@@ -718,40 +728,18 @@ namespace Eutherion.Win.MdiAppTemplate
                     this.ShowSystemMenu(new Point(m.LParam.ToInt32()));
                 }
             }
-            else if (m.Msg == WM.QUERYOPEN)
-            {
-                // This message is sent to minimized windows to ask if a deminimize is possible, before doing anything else.
-                // Now we know that the window is about to be deminimized and a WM_WINDOWPOSCHANGED message will follow,
-                // where the base WndProc adjusts the stored restore bounds, which we want to undo.
-                // If somehow the window doesn't get deminimized, the flag will still be set, but because all code that depends
-                // on it is wrapped in a WindowState == FormWindowState.Normal check, this is not going to be a problem.
-                // If somehow the base WndProc code is altered and doesn't update the restore bounds anymore, this code has no effect.
-                queryOpenMessageSent = true;
-                base.WndProc(ref m);
-            }
             else if (m.Msg == WM.WINDOWPOSCHANGED)
             {
-                // Undo if either in an explicit restore command (maximize button, sys commands), or if deminimizing.
-                bool shouldUndoRestoredBounds = (inRestoreCommand || queryOpenMessageSent) && Bounds == lastKnownNormalWindowRectangle;
-
                 base.WndProc(ref m);
 
-                if (WindowState == FormWindowState.Normal)
+                if (restoredWindowBoundsSpecifiedFieldInfo != null)
                 {
-                    if (shouldUndoRestoredBounds && Bounds != lastKnownNormalWindowRectangle)
+                    // Erase all BoundsSpecified values from restoredWindowBoundsSpecified,
+                    // so that this window restores at the expected size+location after maximize->minimize->deminimize->demaximize.
+                    // RestoreWindowBoundsIfNecessary() incorrectly assumes things about this window's behavior.
+                    if (restoredWindowBoundsSpecifiedFieldInfo.GetValue(this) is BoundsSpecified restoredWindowBoundsSpecified)
                     {
-                        queryOpenMessageSent = false;
-
-                        // Undo effects of RestoreWindowBoundsIfNecessary(), without a non-client area the restore bounds are exactly right.
-                        SetBounds(lastKnownNormalWindowRectangle.X,
-                                  lastKnownNormalWindowRectangle.Y,
-                                  lastKnownNormalWindowRectangle.Width,
-                                  lastKnownNormalWindowRectangle.Height,
-                                  BoundsSpecified.All);
-                    }
-                    else
-                    {
-                        lastKnownNormalWindowRectangle = Bounds;
+                        restoredWindowBoundsSpecifiedFieldInfo.SetValue(this, restoredWindowBoundsSpecified & ~BoundsSpecified.All);
                     }
                 }
             }
@@ -764,21 +752,13 @@ namespace Eutherion.Win.MdiAppTemplate
             else if (m.Msg == WM.SYSCOMMAND)
             {
                 int wParam = SC.MASK & m.WParam.ToInt32();
-                inRestoreCommand = wParam == SC.RESTORE;
 
-                try
-                {
-                    base.WndProc(ref m);
+                base.WndProc(ref m);
 
-                    // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
-                    if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
-                    {
-                        UpdateMaximizeButtonIcon();
-                    }
-                }
-                finally
+                // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
+                if (wParam == SC.MAXIMIZE || wParam == SC.MINIMIZE || wParam == SC.RESTORE)
                 {
-                    inRestoreCommand = false;
+                    UpdateMaximizeButtonIcon();
                 }
             }
             else
