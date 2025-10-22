@@ -737,8 +737,10 @@ namespace Eutherion.Win.MdiAppTemplate
                     // Erase all BoundsSpecified values from restoredWindowBoundsSpecified,
                     // so that this window restores at the expected size+location after maximize->minimize->deminimize->demaximize.
                     // RestoreWindowBoundsIfNecessary() incorrectly assumes things about this window's behavior.
-                    BoundsSpecified restoredWindowBoundsSpecified = (BoundsSpecified)restoredWindowBoundsSpecifiedFieldInfo.GetValue(this);
-                    restoredWindowBoundsSpecifiedFieldInfo.SetValue(this, restoredWindowBoundsSpecified & ~BoundsSpecified.All);
+                    if (restoredWindowBoundsSpecifiedFieldInfo.GetValue(this) is BoundsSpecified restoredWindowBoundsSpecified)
+                    {
+                        restoredWindowBoundsSpecifiedFieldInfo.SetValue(this, restoredWindowBoundsSpecified & ~BoundsSpecified.All);
+                    }
                 }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
