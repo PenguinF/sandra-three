@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.MdiAppTemplate
@@ -116,6 +117,27 @@ namespace Eutherion.Win.MdiAppTemplate
         }
 
         private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
+        // Access to a private field in Form such that the effects of RestoreWindowBoundsIfNecessary() can be controlled.
+        private static readonly FieldInfo restoredWindowBoundsSpecifiedFieldInfo;
+
+        static MenuCaptionBarForm()
+        {
+            try
+            {
+                // Depending on the version, the field may have different names.
+                restoredWindowBoundsSpecifiedFieldInfo
+                    = typeof(Form).GetField("_restoredWindowBoundsSpecified", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?? typeof(Form).GetField("restoredWindowBoundsSpecified", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            }
+            catch (Exception e)
+            {
+                // Instead of generating a TypeLoadException from not being able to complete
+                // the static initializer, just trace the exception and move on.
+                // The bug that can be fixed by having access to restoredWindowBoundsSpecified just isn't that important.
+                e.Trace();
+            }
+        }
 
         private const int MainMenuHorizontalMargin = 8;
 
@@ -709,6 +731,15 @@ namespace Eutherion.Win.MdiAppTemplate
             else if (m.Msg == WM.WINDOWPOSCHANGED)
             {
                 base.WndProc(ref m);
+
+                if (restoredWindowBoundsSpecifiedFieldInfo != null)
+                {
+                    // Erase all BoundsSpecified values from restoredWindowBoundsSpecified,
+                    // so that this window restores at the expected size+location after maximize->minimize->deminimize->demaximize.
+                    // RestoreWindowBoundsIfNecessary() incorrectly assumes things about this window's behavior.
+                    BoundsSpecified restoredWindowBoundsSpecified = (BoundsSpecified)restoredWindowBoundsSpecifiedFieldInfo.GetValue(this);
+                    restoredWindowBoundsSpecifiedFieldInfo.SetValue(this, restoredWindowBoundsSpecified & ~BoundsSpecified.All);
+                }
             }
             else if (m.Msg == WM.DWMCOMPOSITIONCHANGED)
             {
