@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("SandraChess")]
 [assembly: AssemblyProduct("SandraChess")]
-[assembly: AssemblyCopyright("Copyright © 2004-2023 - Henk Nicolai")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

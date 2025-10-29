@@ -2,5 +2,6 @@
   <PropertyGroup>
     <Company>Eutherion</Company>
     <Description>Hosted on https://github.com/PenguinF/sandra-three</Description>
+    <Copyright>Copyright © 2004-$([System.DateTime]::Now.Year) - Henk Nicolai</Copyright>
   </PropertyGroup>
 </Project>
