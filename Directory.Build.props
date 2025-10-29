@@ -1,6 +1,8 @@
 ﻿<Project>
   <PropertyGroup>
     <Company>Eutherion</Company>
+    <Version>0.5.1.0</Version>
+    <FileVersion>0.5.1.0</FileVersion>
     <Description>Hosted on https://github.com/PenguinF/sandra-three</Description>
     <Copyright>Copyright © 2004-$([System.DateTime]::Now.Year) - Henk Nicolai</Copyright>
   </PropertyGroup>
