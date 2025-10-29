@@ -17,8 +17,16 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="MdiContainerForm.UIActions.cs">
+      <DependentUpon>MdiContainerForm.cs</DependentUpon>
+    </Compile>
     <Compile Update="PlayingBoard.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Properties\Resources.resx</DependentUpon>
     </Compile>
     <Compile Update="StandardChessBoard.cs">
       <SubType>Component</SubType>

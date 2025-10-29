@@ -22,6 +22,11 @@
     <Compile Update="ScintillaEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="SharedResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
