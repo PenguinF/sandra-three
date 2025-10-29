@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Eutherion")]
 [assembly: AssemblyCopyright("Copyright © 2004-2023 - Henk Nicolai")]
