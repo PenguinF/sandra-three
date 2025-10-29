@@ -61,7 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sandra.Chess.csproj">
+    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
       <Project>{f5e121c5-a874-4fef-9ff5-56285420cff6}</Project>
       <Name>Sandra.Chess</Name>
     </ProjectReference>

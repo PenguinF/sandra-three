@@ -18,7 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Win", "Eutherion\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess", "Sandra.Chess\Sandra.Chess.csproj", "{F5E121C5-A874-4FEF-9FF5-56285420CFF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess.Tests", "Sandra.Chess\Tests\Sandra.Chess.Tests.csproj", "{9DDB6AD7-4822-4732-9E18-309405917032}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess.Tests", "Sandra.Chess.Tests\Sandra.Chess.Tests.csproj", "{9DDB6AD7-4822-4732-9E18-309405917032}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{6DFCCA87-B240-47D0-AFC7-6A64C9275528}"
 EndProject
