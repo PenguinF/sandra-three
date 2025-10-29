@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Eutherion.Tests")]
 [assembly: AssemblyDescription("Hosted on https://github.com/PenguinF/sandra-three")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]

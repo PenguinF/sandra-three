@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Eutherion.Win")]
 [assembly: AssemblyDescription("Hosted on https://github.com/PenguinF/sandra-three")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
