@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SandraChess")]
 [assembly: AssemblyCopyright("Copyright © 2004-2023 - Henk Nicolai")]
 [assembly: AssemblyTrademark("")]

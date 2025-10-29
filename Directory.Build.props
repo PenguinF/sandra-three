@@ -1,5 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
+    <Company>Eutherion</Company>
     <Description>Hosted on https://github.com/PenguinF/sandra-three</Description>
   </PropertyGroup>
 </Project>
