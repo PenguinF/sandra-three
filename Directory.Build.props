@@ -1,6 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <Company>Eutherion</Company>
+    <Product>SandraChess</Product>
     <Version>0.5.1.0</Version>
     <FileVersion>0.5.1.0</FileVersion>
     <Description>Hosted on https://github.com/PenguinF/sandra-three</Description>
