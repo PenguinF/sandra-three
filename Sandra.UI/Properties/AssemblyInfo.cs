@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("SandraChess")]
-[assembly: AssemblyDescription("Hosted on https://github.com/PenguinF/sandra-three")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SandraChess")]
