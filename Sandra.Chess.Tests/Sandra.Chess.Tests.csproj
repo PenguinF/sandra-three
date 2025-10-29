@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Win\Eutherion.Win.csproj" />
+    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Eutherion.Common" Version="1.5.1" />

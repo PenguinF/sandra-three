@@ -1,37 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}</ProjectGuid>
+    <TargetFramework>net472</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sandra.UI</RootNamespace>
     <AssemblyName>SandraChess</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputPath>$(SolutionDir)Bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)Bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Sandra.ico</ApplicationIcon>
@@ -41,114 +15,40 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LocalizedStringKeys.cs" />
-    <Compile Include="MdiContainerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MdiContainerForm.UIActions.cs">
+    <Compile Update="MdiContainerForm.UIActions.cs">
       <DependentUpon>MdiContainerForm.cs</DependentUpon>
-      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MdiContainerState.cs" />
-    <Compile Include="PgnEditorExtensions.cs" />
-    <Compile Include="PgnErrorInfoExtensions.cs" />
-    <Compile Include="PgnStyleSelector.cs" />
-    <Compile Include="PgnSyntaxDescriptor.cs" />
-    <Compile Include="PieceImages.cs" />
-    <Compile Include="PlayingBoard.cs">
+    <Compile Update="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PlayingBoard.EventArgs.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
+      <DependentUpon>Properties\Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PropertyStore.cs" />
-    <Compile Include="SandraChessMainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Settings.cs" />
-    <Compile Include="StandardChessBoard.cs">
+    <Compile Update="StandardChessBoard.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="StandardChessBoard.UIActions.cs">
+    <Compile Update="StandardChessBoard.UIActions.cs">
       <DependentUpon>StandardChessBoard.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Eutherion\Win.MdiAppTemplate\Eutherion.Win.MdiAppTemplate.csproj">
-      <Project>{72a45cf1-2c79-4f11-9f22-ed5508c5e97a}</Project>
-      <Name>Eutherion.Win.MdiAppTemplate</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Eutherion\Win\Eutherion.Win.csproj">
-      <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
-      <Name>Eutherion.Win</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
-      <Project>{f5e121c5-a874-4fef-9ff5-56285420cff6}</Project>
-      <Name>Sandra.Chess</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Eutherion\Win.MdiAppTemplate\Eutherion.Win.MdiAppTemplate.csproj" />
+    <ProjectReference Include="..\Eutherion\Win\Eutherion.Win.csproj" />
+    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\bb.png" />
-    <None Include="Properties\bk.png" />
-    <None Include="Properties\bn.png" />
-    <None Include="Properties\bp.png" />
-    <None Include="Properties\bq.png" />
-    <None Include="Properties\br.png" />
-    <None Include="Properties\flip.png" />
-    <None Include="Properties\wb.png" />
-    <None Include="Properties\wk.png" />
-    <None Include="Properties\wn.png" />
-    <None Include="Properties\wp.png" />
-    <None Include="Properties\wq.png" />
-    <None Include="Properties\wr.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <PackageReference Include="Eutherion.Common" Version="1.5.1" />
+    <PackageReference Include="Eutherion.Text.Json" Version="1.5.1" />
+    <PackageReference Include="Eutherion.UIActions" Version="1.5.1" />
+    <PackageReference Include="Eutherion.Utilities" Version="1.5.1" />
+    <PackageReference Include="jacobslusser.ScintillaNET" Version="3.6.3" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Eutherion.Common">
-      <Version>1.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Eutherion.Text.Json">
-      <Version>1.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Eutherion.UIActions">
-      <Version>1.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Eutherion.Utilities">
-      <Version>1.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="jacobslusser.ScintillaNET">
-      <Version>3.6.3</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
