@@ -329,10 +329,7 @@ namespace Eutherion.Win.Controls
             using (DrawRun drawRun = new DrawRun(g))
             {
                 // Block out the entire client area.
-                using (var inactiveAreaBrush = new SolidBrush(BackColor))
-                {
-                    g.FillRectangle(inactiveAreaBrush, new Rectangle(0, 0, ClientSize.Width, TabHeaderHeight));
-                }
+                g.FillRectangle(drawRun.GetSolidBrush(BackColor), new Rectangle(0, 0, ClientSize.Width, TabHeaderHeight));
 
                 // Then draw each tab page.
                 for (int tabIndex = 0; tabIndex < TabPages.Count; tabIndex++)
@@ -353,10 +350,7 @@ namespace Eutherion.Win.Controls
 
                     if (tabIndex == ActiveTabPageIndex)
                     {
-                        using (var activeTabHeaderBrush = new SolidBrush(tabPage.ActiveBackColor))
-                        {
-                            g.FillRectangle(activeTabHeaderBrush, new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight));
-                        }
+                        g.FillRectangle(drawRun.GetSolidBrush(tabPage.ActiveBackColor), new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight));
 
                         tabBackColor = tabPage.ActiveBackColor;
                         tabForeColor = tabPage.ActiveForeColor;
@@ -389,16 +383,10 @@ namespace Eutherion.Win.Controls
                     {
                         if (tabIndex == HoverTabIndex)
                         {
-                            using (var hoverBrush = new SolidBrush(InactiveTabHeaderHoverColor))
-                            {
-                                g.FillRectangle(hoverBrush, tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight);
-                            }
+                            g.FillRectangle(drawRun.GetSolidBrush(InactiveTabHeaderHoverColor), tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight);
 
                             // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
-                            using (var hoverBorderPen = new Pen(InactiveTabHeaderHoverBorderColor, 1))
-                            {
-                                g.DrawRectangle(hoverBorderPen, tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, TabHeaderHeight);
-                            }
+                            g.DrawRectangle(drawRun.GetPen(InactiveTabHeaderHoverBorderColor, 1), tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, TabHeaderHeight);
 
                             tabBackColor = InactiveTabHeaderHoverColor;
                         }
@@ -473,21 +461,14 @@ namespace Eutherion.Win.Controls
                                 diameter);
 
                             // Draw a circle where otherwise the '×' would be.
-                            using (var ellipseBrush = new SolidBrush(glyphForeColor))
-                            {
-                                g.FillEllipse(ellipseBrush, modifiedGlyphRectangle);
-                            }
+                            g.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
                         }
                         else if (drawCloseButtonGlyph)
                         {
                             if (drawGlyphPressed)
                             {
                                 g.SmoothingMode = SmoothingMode.None;
-
-                                using (var backgroundBrush = new SolidBrush(glyphPressedBackColor))
-                                {
-                                    g.FillRectangle(backgroundBrush, backgroundGlyphRectangle);
-                                }
+                                g.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
 
                                 g.SmoothingMode = SmoothingMode.AntiAlias;
                             }
