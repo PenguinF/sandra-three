@@ -706,7 +706,7 @@ namespace Sandra.UI
             if (SquareSize > 0)
             {
                 int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
-                var padding = ForegroundImagePadding;
+                Padding padding = ForegroundImagePadding;
                 int imageOffset = (SquareSize - foregroundImageSize) / 2;
                 int left = imageOffset + padding.Left;
                 int top = imageOffset + padding.Top;
