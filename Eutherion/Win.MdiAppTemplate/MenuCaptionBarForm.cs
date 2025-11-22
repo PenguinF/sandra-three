@@ -651,7 +651,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         textAreaWidth,
                         currentMetrics.MainMenuHeight - 2);
 
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
                         g,
                         text,

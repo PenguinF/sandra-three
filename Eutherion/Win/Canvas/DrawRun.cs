@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Canvas
@@ -56,6 +57,25 @@ namespace Eutherion.Win.Canvas
                 {
                     Graphics.SmoothingMode = value;
                     _SmoothingMode = value;
+                }
+            }
+        }
+
+        private TextRenderingHint _TextRenderingHint = (TextRenderingHint)(-1);
+
+        /// <summary>
+        /// Gets or sets the current text rendering hint.
+        /// </summary>
+        public TextRenderingHint TextRenderingHint
+        {
+            get => _TextRenderingHint;
+            set
+            {
+                // Wrap this in an equality check to prevent P/Invoke calls if the value doesn't change.
+                if (value != _TextRenderingHint)
+                {
+                    Graphics.TextRenderingHint = value;
+                    _TextRenderingHint = value;
                 }
             }
         }
