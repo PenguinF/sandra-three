@@ -39,7 +39,7 @@ namespace Sandra.UI
     /// </summary>
     public class PlayingBoard : Control, IUIActionHandlerProvider
     {
-        private struct SquareVisualElement
+        private class SquareVisualElement
         {
             public bool IsLightSquare;
 
@@ -956,32 +956,22 @@ namespace Sandra.UI
                 g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    int y = 0;
-                    bool startWithDarkSquare = false;
-
-                    for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
+                    for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
                     {
-                        bool drawDarkSquare = startWithDarkSquare;
-                        int x = 0;
-
-                        for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
+                        for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
                         {
+                            SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
+
                             // Draw either a light or a dark square depending on its location.
-                            if (drawDarkSquare)
+                            if (squareElement.IsLightSquare)
                             {
-                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), x, y, squareSize, squareSize);
+                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), new Rectangle(squareElement.Location, squareElement.Size));
                             }
                             else
                             {
-                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), x, y, squareSize, squareSize);
+                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), new Rectangle(squareElement.Location, squareElement.Size));
                             }
-
-                            drawDarkSquare = !drawDarkSquare;
-                            x += delta;
                         }
-
-                        startWithDarkSquare = !startWithDarkSquare;
-                        y += delta;
                     }
                 }
                 g.SmoothingMode = SmoothingMode.AntiAlias;
