@@ -44,7 +44,7 @@ namespace Sandra.UI
             public bool IsLightSquare;
 
             public Image ForegroundImage;
-            public ForegroundImageAttribute ForegroundImageAttribute;
+            public ForegroundImageAttribute ImageAttribute;
             public Color SquareOverlayColor;
 
             public Point Location;  // Location relative to the top left corner of the control.
@@ -460,7 +460,7 @@ namespace Sandra.UI
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => SquareElements[GetIndex(x, y)].ForegroundImageAttribute;
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => SquareElements[GetIndex(x, y)].ImageAttribute;
 
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
@@ -489,9 +489,9 @@ namespace Sandra.UI
         public void SetForegroundImageAttribute(int x, int y, ForegroundImageAttribute value)
         {
             int index = GetIndex(x, y);
-            if (SquareElements[index].ForegroundImageAttribute != value)
+            if (SquareElements[index].ImageAttribute != value)
             {
-                SquareElements[index].ForegroundImageAttribute = value;
+                SquareElements[index].ImageAttribute = value;
                 Invalidate();
             }
         }
@@ -974,7 +974,7 @@ namespace Sandra.UI
                                         sizeH,
                                         sizeV);
 
-                                    if (squareElement.ForegroundImageAttribute == ForegroundImageAttribute.HalfTransparent)
+                                    if (squareElement.ImageAttribute == ForegroundImageAttribute.HalfTransparent)
                                     {
                                         // Half-transparent.
                                         g.DrawImage(image,
@@ -983,7 +983,7 @@ namespace Sandra.UI
                                                     GraphicsUnit.Pixel,
                                                     HalfTransparentImageAttributes);
                                     }
-                                    else if (squareElement.ForegroundImageAttribute == ForegroundImageAttribute.Highlight)
+                                    else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
                                     {
                                         // Highlight piece.
                                         g.DrawImage(image,
