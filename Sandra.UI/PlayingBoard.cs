@@ -86,7 +86,7 @@ namespace Sandra.UI
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            ResizeSquareElements();
+            ResizeSquareElements(0, 0);
 
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
@@ -107,10 +107,32 @@ namespace Sandra.UI
             HalfTransparentImageAttributes = halfTransparent;
         }
 
-        private void ResizeSquareElements()
+        private void ResizeSquareElements(int oldBoardWidth, int oldBoardHeight)
         {
-            int newArrayLength = BoardWidth * BoardHeight;
-            SquareElements = new SquareVisualElement[newArrayLength];
+            int newBoardWidth = BoardWidth,
+                newBoardHeight = BoardHeight;
+
+            SquareVisualElement[] newSquareElements = new SquareVisualElement[newBoardWidth * newBoardHeight];
+
+            // Copy from old array such that newSquareElements[x,y] := SquareElements[x,y].
+            for (int yIndex = 0; yIndex < newBoardHeight; ++yIndex)
+            {
+                for (int xIndex = 0; xIndex < newBoardWidth; ++xIndex)
+                {
+                    int index = GetIndex(xIndex, yIndex);
+                    if (yIndex < oldBoardHeight && xIndex < oldBoardWidth)
+                    {
+                        int oldIndex = yIndex * oldBoardWidth + xIndex;
+                        newSquareElements[index] = SquareElements[oldIndex];
+                    }
+                    else
+                    {
+                        newSquareElements[index] = new SquareVisualElement();
+                    }
+                }
+            }
+
+            SquareElements = newSquareElements;
         }
 
         /// <summary>
@@ -133,9 +155,10 @@ namespace Sandra.UI
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardHeight), value, "Board height must be 1 or higher.");
                 }
+                int oldBoardHeight = BoardHeight;
                 if (propertyStore.Set(nameof(BoardHeight), value))
                 {
-                    ResizeSquareElements();
+                    ResizeSquareElements(BoardWidth, oldBoardHeight);
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -163,9 +186,10 @@ namespace Sandra.UI
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardWidth), value, "Board width must be 1 or higher.");
                 }
+                int oldBoardWidth = BoardWidth;
                 if (propertyStore.Set(nameof(BoardWidth), value))
                 {
-                    ResizeSquareElements();
+                    ResizeSquareElements(oldBoardWidth, BoardHeight);
                     VerifySizeToFit();
                     Invalidate();
                 }
