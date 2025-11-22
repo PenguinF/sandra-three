@@ -1000,11 +1000,8 @@ namespace Sandra.UI
                         }
 
                         // Draw overlay color on the square, with the already drawn foreground image.
-                        using (var overlayBrush = new SolidBrush(squareElement.SquareOverlayColor))
-                        {
-                            drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(overlayBrush, squareRectangle);
-                        }
+                        drawRun.SmoothingMode = SmoothingMode.None;
+                        g.FillRectangle(drawRun.GetSolidBrush(squareElement.SquareOverlayColor), squareRectangle);
                     }
                 }
             }
