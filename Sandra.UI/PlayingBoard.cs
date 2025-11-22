@@ -939,75 +939,71 @@ namespace Sandra.UI
                     int sizeH = imgRect.Width,
                         sizeV = imgRect.Height;
 
-                    for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
+                    foreach (SquareVisualElement squareElement in SquareElements)
                     {
-                        for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
+                        Rectangle squareRectangle = new Rectangle(squareElement.Location, squareElement.Size);
+
+                        // Draw either a light or a dark square depending on its location.
+                        if (squareElement.IsLightSquare)
                         {
-                            SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
-                            Rectangle squareRectangle = new Rectangle(squareElement.Location, squareElement.Size);
+                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
+                        }
+                        else
+                        {
+                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
+                        }
 
-                            // Draw either a light or a dark square depending on its location.
-                            if (squareElement.IsLightSquare)
-                            {
-                                // Use SmoothingMode.None so crisp edges are drawn for the squares.
-                                drawRun.SmoothingMode = SmoothingMode.None;
-                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
-                            }
-                            else
-                            {
-                                // Use SmoothingMode.None so crisp edges are drawn for the squares.
-                                drawRun.SmoothingMode = SmoothingMode.None;
-                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
-                            }
+                        // Draw foreground images.
+                        if (sizeH > 0 && sizeV > 0)
+                        {
+                            Image image = squareElement.ForegroundImage;
 
-                            // Draw foreground images.
-                            if (sizeH > 0 && sizeV > 0)
+                            if (image != null)
                             {
-                                Image image = squareElement.ForegroundImage;
+                                Rectangle foregroundImageRectangle = new Rectangle(
+                                    squareRectangle.Left + imgRect.Left,
+                                    squareRectangle.Top + imgRect.Top,
+                                    sizeH,
+                                    sizeV);
 
-                                if (image != null)
+                                if (squareElement.ImageAttribute == ForegroundImageAttribute.HalfTransparent)
                                 {
-                                    Rectangle foregroundImageRectangle = new Rectangle(
-                                        squareRectangle.Left + imgRect.Left,
-                                        squareRectangle.Top + imgRect.Top,
-                                        sizeH,
-                                        sizeV);
-
-                                    if (squareElement.ImageAttribute == ForegroundImageAttribute.HalfTransparent)
-                                    {
-                                        // Half-transparent.
-                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                        g.DrawImage(image,
-                                                    foregroundImageRectangle,
-                                                    0, 0, image.Width, image.Height,
-                                                    GraphicsUnit.Pixel,
-                                                    HalfTransparentImageAttributes);
-                                    }
-                                    else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
-                                    {
-                                        // Highlight piece.
-                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                        g.DrawImage(image,
-                                                    foregroundImageRectangle,
-                                                    0, 0, image.Width, image.Height,
-                                                    GraphicsUnit.Pixel,
-                                                    HighlightImageAttributes);
-                                    }
-                                    else
-                                    {
-                                        // Default case.
-                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                        g.DrawImage(image, foregroundImageRectangle);
-                                    }
+                                    // Half-transparent.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    g.DrawImage(image,
+                                                foregroundImageRectangle,
+                                                0, 0, image.Width, image.Height,
+                                                GraphicsUnit.Pixel,
+                                                HalfTransparentImageAttributes);
+                                }
+                                else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
+                                {
+                                    // Highlight piece.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    g.DrawImage(image,
+                                                foregroundImageRectangle,
+                                                0, 0, image.Width, image.Height,
+                                                GraphicsUnit.Pixel,
+                                                HighlightImageAttributes);
+                                }
+                                else
+                                {
+                                    // Default case.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    g.DrawImage(image, foregroundImageRectangle);
                                 }
                             }
+                        }
 
-                            // Draw overlay color on the square, with the already drawn foreground image.
-                            using (var overlayBrush = new SolidBrush(squareElement.SquareOverlayColor))
-                            {
-                                drawRun.SmoothingMode = SmoothingMode.None;
-                                g.FillRectangle(overlayBrush, squareRectangle);
-                            }
+                        // Draw overlay color on the square, with the already drawn foreground image.
+                        using (var overlayBrush = new SolidBrush(squareElement.SquareOverlayColor))
+                        {
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            g.FillRectangle(overlayBrush, squareRectangle);
                         }
                     }
                 }
