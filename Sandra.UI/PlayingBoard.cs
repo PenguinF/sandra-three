@@ -91,7 +91,6 @@ namespace Sandra.UI
             { nameof(DarkSquareImage), null },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
-            { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -307,34 +306,6 @@ namespace Sandra.UI
                 }
                 if (propertyStore.Set(nameof(ForegroundImageRelativeSize), value))
                 {
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="InnerSpacing"/> property.
-        /// </summary>
-        public const int DefaultInnerSpacing = 0;
-
-        /// <summary>
-        /// Gets or sets the amount of spacing between squares inside the playing board.
-        /// The default value is <see cref="DefaultInnerSpacing"/> (0).
-        /// </summary>
-        [DefaultValue(DefaultInnerSpacing)]
-        public int InnerSpacing
-        {
-            get { return propertyStore.Get<int>(nameof(InnerSpacing)); }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(InnerSpacing), value, "Inner spacing must be 0 or higher.");
-                }
-                if (propertyStore.Set(nameof(InnerSpacing), value))
-                {
-                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -678,7 +649,7 @@ namespace Sandra.UI
         public Rectangle GetSquareRectangle(int x, int y)
         {
             ThrowIfOutOfRange(x, y);
-            int delta = SquareSize + InnerSpacing;
+            int delta = SquareSize;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
             return new Rectangle(px, py, SquareSize, SquareSize);
@@ -816,7 +787,7 @@ namespace Sandra.UI
 
             int x = GetX(index),
                 y = GetY(index),
-                delta = SquareSize + InnerSpacing;
+                delta = SquareSize;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
 
@@ -849,8 +820,8 @@ namespace Sandra.UI
         private int MaxSquareSize(Size clientSize)
         {
             int totalBorderWidth = BorderWidth * 2;
-            int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - totalBorderWidth) / BoardWidth;
-            int squareSizeVrt = (clientSize.Height - InnerSpacing * (BoardHeight - 1) - totalBorderWidth) / BoardHeight;
+            int squareSizeHrz = (clientSize.Width - totalBorderWidth) / BoardWidth;
+            int squareSizeVrt = (clientSize.Height - totalBorderWidth) / BoardHeight;
             return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
@@ -888,8 +859,8 @@ namespace Sandra.UI
         /// </summary>
         public Size GetExactAutoFitSize(int squareSize)
         {
-            int targetWidth = squareSize * BoardWidth + InnerSpacing * (BoardWidth - 1) + BorderWidth * 2;
-            int targetHeight = squareSize * BoardHeight + InnerSpacing * (BoardHeight - 1) + BorderWidth * 2;
+            int targetWidth = squareSize * BoardWidth + BorderWidth * 2;
+            int targetHeight = squareSize * BoardHeight + BorderWidth * 2;
             return new Size(targetWidth, targetHeight);
         }
 
@@ -913,7 +884,7 @@ namespace Sandra.UI
 
             int px = clientLocation.X - borderWidth,
                 py = clientLocation.Y - borderWidth,
-                delta = squareSize + InnerSpacing;
+                delta = squareSize;
 
             // Need to use a conditional expression because e.g. -1/2 == 0.
             int x = px < 0 ? -1 : px / delta,
@@ -1013,11 +984,10 @@ namespace Sandra.UI
                 int boardWidth = BoardWidth;
                 int boardHeight = BoardHeight;
                 int squareSize = SquareSize;
-                int innerSpacing = InnerSpacing;
-                int delta = squareSize + innerSpacing;
+                int delta = squareSize;
                 int borderWidth = BorderWidth;
-                int totalBoardWidth = delta * boardWidth - innerSpacing;
-                int totalBoardHeight = delta * boardHeight - innerSpacing;
+                int totalBoardWidth = delta * boardWidth;
+                int totalBoardHeight = delta * boardHeight;
 
                 Rectangle clipRectangle = pe.ClipRectangle;
                 Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
@@ -1084,28 +1054,10 @@ namespace Sandra.UI
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
                 // Draw borders.
-                if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+                if (borderWidth > 0 && clipRectangle.IntersectsWith(boardWithBorderRectangle))
                 {
                     // Clip to borders.
-                    if (innerSpacing == 0)
-                    {
-                        g.ExcludeClip(boardRectangle);
-                    }
-                    else
-                    {
-                        // Exclude all squares one by one.
-                        int y = borderWidth;
-                        for (int j = 0; j < boardHeight; ++j)
-                        {
-                            int x = borderWidth;
-                            for (int k = 0; k < boardWidth; ++k)
-                            {
-                                g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                                x += delta;
-                            }
-                            y += delta;
-                        }
-                    }
+                    g.ExcludeClip(boardRectangle);
 
                     // And draw.
                     g.FillRectangle(drawRun.GetSolidBrush(BorderColor), boardWithBorderRectangle);
