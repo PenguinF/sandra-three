@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Eutherion.UIActions;
+using Eutherion.Win.Canvas;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Forms;
 using Eutherion.Win.Native;
@@ -586,84 +587,87 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var g = e.Graphics;
-
-            if (currentMetrics.IsMaximized && !IsMdiContainer)
+            using (DrawRun drawRun = new DrawRun(e.Graphics))
             {
-                // Draw the window using the current transparency key.
-                // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
-                using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
+                var g = e.Graphics;
+
+                if (currentMetrics.IsMaximized && !IsMdiContainer)
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                    // Draw the window using the current transparency key.
+                    // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
+                    using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
+                    {
+                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                            0,
+                            0,
+                            currentMetrics.TotalWidth,
+                            currentMetrics.TotalHeight));
+                    }
+
+                    // Block out only the visible area of the window.
+                    using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                    {
+                        int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
+                        int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
+
+                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                            horizontalInvisibleBorderWidth,
+                            verticalInvisibleBorderWidth,
+                            currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
+                            currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
+                    }
+                }
+                else
+                {
+                    // Block out the entire client area, then draw a 1-pizel border around it.
+                    using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                    {
+                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                            0,
+                            0,
+                            currentMetrics.TotalWidth,
+                            currentMetrics.TotalHeight));
+                    }
+
+                    g.DrawRectangle(Pens.DimGray,
                         0,
                         0,
-                        currentMetrics.TotalWidth,
-                        currentMetrics.TotalHeight));
+                        currentMetrics.TotalWidth - 1,
+                        currentMetrics.TotalHeight - 1);
                 }
 
-                // Block out only the visible area of the window.
-                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                string text = Text;
+
+                if (!string.IsNullOrWhiteSpace(text))
                 {
-                    int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
-                    int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
+                    // Place the text in the middle between the outer menu right edge and the system buttons.
+                    // Also 1 pixel above center to align with the main menu.
+                    int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
+                    int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
 
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                        horizontalInvisibleBorderWidth,
-                        verticalInvisibleBorderWidth,
-                        currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
-                        currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
+                    Rectangle textAreaRectangle = new Rectangle(
+                        textAreaLeftEdge,
+                        currentMetrics.MainMenuTop,
+                        textAreaWidth,
+                        currentMetrics.MainMenuHeight - 2);
+
+                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    TextRenderer.DrawText(
+                        g,
+                        text,
+                        ObservableStyle.Font,
+                        textAreaRectangle,
+                        ObservableStyle.ForeColor,
+                        ObservableStyle.BackColor,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
-            }
-            else
-            {
-                // Block out the entire client area, then draw a 1-pizel border around it.
-                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+
+                // Only after the first paint allow window to be drawn in layered mode.
+                if (!AllowTransparency)
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                        0,
-                        0,
-                        currentMetrics.TotalWidth,
-                        currentMetrics.TotalHeight));
+                    TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+                    AllowTransparency = true;
                 }
-
-                g.DrawRectangle(Pens.DimGray,
-                    0,
-                    0,
-                    currentMetrics.TotalWidth - 1,
-                    currentMetrics.TotalHeight - 1);
-            }
-
-            string text = Text;
-
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                // Place the text in the middle between the outer menu right edge and the system buttons.
-                // Also 1 pixel above center to align with the main menu.
-                int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
-                int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
-
-                Rectangle textAreaRectangle = new Rectangle(
-                    textAreaLeftEdge,
-                    currentMetrics.MainMenuTop,
-                    textAreaWidth,
-                    currentMetrics.MainMenuHeight - 2);
-
-                g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                TextRenderer.DrawText(
-                    g,
-                    text,
-                    ObservableStyle.Font,
-                    textAreaRectangle,
-                    ObservableStyle.ForeColor,
-                    ObservableStyle.BackColor,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            }
-
-            // Only after the first paint allow window to be drawn in layered mode.
-            if (!AllowTransparency)
-            {
-                TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
-                AllowTransparency = true;
             }
         }
 
