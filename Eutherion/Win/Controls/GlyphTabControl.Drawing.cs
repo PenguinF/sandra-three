@@ -329,6 +329,7 @@ namespace Eutherion.Win.Controls
             using (DrawRun drawRun = new DrawRun(g))
             {
                 // Block out the entire client area.
+                drawRun.SmoothingMode = SmoothingMode.None;
                 g.FillRectangle(drawRun.GetSolidBrush(BackColor), new Rectangle(0, 0, ClientSize.Width, TabHeaderHeight));
 
                 // Then draw each tab page.
@@ -350,6 +351,7 @@ namespace Eutherion.Win.Controls
 
                     if (tabIndex == ActiveTabPageIndex)
                     {
+                        drawRun.SmoothingMode = SmoothingMode.None;
                         g.FillRectangle(drawRun.GetSolidBrush(tabPage.ActiveBackColor), new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight));
 
                         tabBackColor = tabPage.ActiveBackColor;
@@ -383,6 +385,7 @@ namespace Eutherion.Win.Controls
                     {
                         if (tabIndex == HoverTabIndex)
                         {
+                            drawRun.SmoothingMode = SmoothingMode.None;
                             g.FillRectangle(drawRun.GetSolidBrush(InactiveTabHeaderHoverColor), tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight);
 
                             // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
@@ -424,8 +427,8 @@ namespace Eutherion.Win.Controls
                     int textAreaWidth = CurrentTextAreaWidthIncludeGlyph;
                     if (drawModifiedGlyph || drawCloseButtonGlyph) textAreaWidth -= MeasuredGlyphSize.Width;
 
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                    drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
                         g,
                         tabPage.Text,
@@ -461,16 +464,15 @@ namespace Eutherion.Win.Controls
                                     diameter);
 
                                 // Draw a circle where otherwise the '×' would be.
+                                drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                                 g.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
                             }
                             else if (drawCloseButtonGlyph)
                             {
                                 if (drawGlyphPressed)
                                 {
-                                    g.SmoothingMode = SmoothingMode.None;
+                                    drawRun.SmoothingMode = SmoothingMode.None;
                                     g.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
-
-                                    g.SmoothingMode = SmoothingMode.AntiAlias;
                                 }
 
                                 // Make rectangle 2 pixels less high to not interfere with hover border.
@@ -480,6 +482,8 @@ namespace Eutherion.Win.Controls
                                     MeasuredGlyphSize.Width,
                                     MeasuredGlyphSize.Height - 2);
 
+                                drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                                 TextRenderer.DrawText(
                                     g,
                                     CloseButtonGlyph,
@@ -491,8 +495,6 @@ namespace Eutherion.Win.Controls
                             }
                         }
                     }
-
-                    g.SmoothingMode = SmoothingMode.None;
                 }
             }
         }
