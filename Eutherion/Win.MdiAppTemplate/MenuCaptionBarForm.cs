@@ -620,7 +620,7 @@ namespace Eutherion.Win.MdiAppTemplate
                         currentMetrics.TotalWidth,
                         currentMetrics.TotalHeight));
 
-                    g.DrawRectangle(Pens.DimGray,
+                    g.DrawRectangle(drawRun.GetPen(Color.DimGray, 1),
                         0,
                         0,
                         currentMetrics.TotalWidth - 1,

@@ -34,6 +34,7 @@ namespace Eutherion.Win.Canvas
     public sealed class DrawRun : IDisposable
     {
         private readonly Dictionary<Color, SolidBrush> SolidBrushes = new Dictionary<Color, SolidBrush>();
+        private readonly Dictionary<(Color, float), Pen> Pens = new Dictionary<(Color, float), Pen>();
         private readonly DisposableResourceCollection DisposableResources = new DisposableResourceCollection();
         private readonly List<ConstrainedClipScope> ClipScopes = new List<ConstrainedClipScope>();
 
@@ -99,6 +100,13 @@ namespace Eutherion.Win.Canvas
             var brush = new SolidBrush(key);
             DisposableResources.Add(brush);
             return brush;
+        });
+
+        public Pen GetPen(Color color, float penWidth) => Pens.GetOrAdd((color, penWidth), key =>
+        {
+            var pen = new Pen(key.Item1, key.Item2);
+            DisposableResources.Add(pen);
+            return pen;
         });
 
         public ConstrainedClipScope ExcludeClip(Rectangle rect)
