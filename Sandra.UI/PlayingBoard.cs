@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PlayingBoard.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Win.Canvas;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,6 +28,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -37,6 +39,47 @@ namespace Sandra.UI
     /// </summary>
     public class PlayingBoard : Control, IUIActionHandlerProvider
     {
+        private class SquareVisualElement
+        {
+            public bool IsLightSquare;
+
+            public Image ForegroundImage;
+            public ForegroundImageAttribute ImageAttribute;
+            public Color OverlayColor;
+
+            public Point Location;  // Location relative to the top left corner of the control.
+            public Size Size;       // Square size (same for all squares).
+        }
+
+        private SquareVisualElement[] SquareElements;
+
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
+        /// </summary>
+        public ImageAttributes HighlightImageAttributes { get; }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
+        /// </summary>
+        public ImageAttributes HalfTransparentImageAttributes { get; }
+
+        private readonly PropertyStore propertyStore = new PropertyStore
+        {
+            { nameof(BoardHeight), DefaultBoardHeight },
+            { nameof(BoardWidth), DefaultBoardWidth },
+            { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
+            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
+            { nameof(LightSquareColor), DefaultLightSquareColor },
+            { nameof(SizeToFit), DefaultSizeToFit },
+            { nameof(SquareSize), DefaultSquareSize },
+        };
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
         public PlayingBoard()
         {
             // Styles appropriate for a graphics-heavy control.
@@ -49,7 +92,7 @@ namespace Sandra.UI
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            UpdateSquareArrays();
+            ResizeSquareElements(0, 0);
 
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
@@ -70,44 +113,62 @@ namespace Sandra.UI
             HalfTransparentImageAttributes = halfTransparent;
         }
 
-        /// <summary>
-        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
-        /// </summary>
-        public ImageAttributes HighlightImageAttributes { get; }
-
-        /// <summary>
-        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
-        /// </summary>
-        public ImageAttributes HalfTransparentImageAttributes { get; }
-
-        private readonly PropertyStore propertyStore = new PropertyStore
+        private void ResizeSquareElements(int oldBoardWidth, int oldBoardHeight)
         {
-            { nameof(BoardHeight), DefaultBoardHeight },
-            { nameof(BoardWidth), DefaultBoardWidth },
-            { nameof(BorderColor), DefaultBorderColor },
-            { nameof(BorderWidth), DefaultBorderWidth },
-            { nameof(DarkSquareColor), DefaultDarkSquareColor },
-            { nameof(DarkSquareImage), null },
-            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
-            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
-            { nameof(InnerSpacing), DefaultInnerSpacing },
-            { nameof(LightSquareColor), DefaultLightSquareColor },
-            { nameof(LightSquareImage), null },
-            { nameof(SizeToFit), DefaultSizeToFit },
-            { nameof(SquareSize), DefaultSquareSize },
-        };
+            int newBoardWidth = BoardWidth,
+                newBoardHeight = BoardHeight;
 
+            SquareVisualElement[] newSquareElements = new SquareVisualElement[newBoardWidth * newBoardHeight];
 
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+            // Copy from old array such that newSquareElements[x,y] := SquareElements[x,y].
+            for (int yIndex = 0; yIndex < newBoardHeight; ++yIndex)
+            {
+                for (int xIndex = 0; xIndex < newBoardWidth; ++xIndex)
+                {
+                    int index = GetIndex(xIndex, yIndex);
+                    if (yIndex < oldBoardHeight && xIndex < oldBoardWidth)
+                    {
+                        int oldIndex = yIndex * oldBoardWidth + xIndex;
+                        newSquareElements[index] = SquareElements[oldIndex];
+                    }
+                    else
+                    {
+                        newSquareElements[index] = new SquareVisualElement();
+                        newSquareElements[index].IsLightSquare = ((xIndex + yIndex) & 1) == 0;
+                    }
+                }
+            }
 
+            SquareElements = newSquareElements;
+            PositionSquares();
+        }
+
+        private void PositionSquares()
+        {
+            int squareSize = SquareSize;
+
+            if (squareSize > 0)
+            {
+                for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
+                {
+                    for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
+                    {
+                        SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
+                        squareElement.Location = new Point(xIndex * squareSize, yIndex * squareSize);
+                        squareElement.Size = new Size(squareSize, squareSize);
+                    }
+                }
+            }
+            else
+            {
+                SquareElements.ForEach(x => x.Size = Size.Empty);
+            }
+        }
 
         /// <summary>
         /// Gets the default value for the <see cref="BoardHeight"/> property.
         /// </summary>
-        public const int DefaultBoardHeight = 8;
+        public const int DefaultBoardHeight = Chess.Constants.SquareCount;
 
         /// <summary>
         /// Gets or sets the number of squares in a file. The minimum value is 1.
@@ -124,9 +185,10 @@ namespace Sandra.UI
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardHeight), value, "Board height must be 1 or higher.");
                 }
+                int oldBoardHeight = BoardHeight;
                 if (propertyStore.Set(nameof(BoardHeight), value))
                 {
-                    UpdateSquareArrays();
+                    ResizeSquareElements(BoardWidth, oldBoardHeight);
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -137,7 +199,7 @@ namespace Sandra.UI
         /// <summary>
         /// Gets the default value for the <see cref="BoardWidth"/> property.
         /// </summary>
-        public const int DefaultBoardWidth = 8;
+        public const int DefaultBoardWidth = Chess.Constants.SquareCount;
 
         /// <summary>
         /// Gets or sets the number of squares in a rank. The minimum value is 1.
@@ -154,59 +216,10 @@ namespace Sandra.UI
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardWidth), value, "Board width must be 1 or higher.");
                 }
+                int oldBoardWidth = BoardWidth;
                 if (propertyStore.Set(nameof(BoardWidth), value))
                 {
-                    UpdateSquareArrays();
-                    VerifySizeToFit();
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="BorderColor"/> property.
-        /// </summary>
-        public static Color DefaultBorderColor => Color.Black;
-
-        /// <summary>
-        /// Gets or sets the color of the border area.
-        /// The default value is <see cref="DefaultBorderColor"/> (<see cref="Color.Black"/>).
-        /// </summary>
-        public Color BorderColor
-        {
-            get { return propertyStore.Get<Color>(nameof(BorderColor)); }
-            set
-            {
-                if (propertyStore.Set(nameof(BorderColor), value))
-                {
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="BorderWidth"/> property.
-        /// </summary>
-        public const int DefaultBorderWidth = 0;
-
-        /// <summary>
-        /// Gets or sets the width of the border around the playing board.
-        /// The default value is <see cref="DefaultBorderWidth"/> (0).
-        /// </summary>
-        [DefaultValue(DefaultBorderWidth)]
-        public int BorderWidth
-        {
-            get { return propertyStore.Get<int>(nameof(BorderWidth)); }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(BorderWidth), value, "Border width must be 0 or higher.");
-                }
-                if (propertyStore.Set(nameof(BorderWidth), value))
-                {
+                    ResizeSquareElements(oldBoardWidth, BoardHeight);
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -230,25 +243,6 @@ namespace Sandra.UI
             set
             {
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
-                {
-                    if (DarkSquareImage == null)
-                    {
-                        Invalidate();
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image background for dark squares.
-        /// </summary>
-        public Image DarkSquareImage
-        {
-            get { return propertyStore.Get<Image>(nameof(DarkSquareImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(DarkSquareImage), value))
                 {
                     Invalidate();
                 }
@@ -313,34 +307,6 @@ namespace Sandra.UI
 
 
         /// <summary>
-        /// Gets the default value for the <see cref="InnerSpacing"/> property.
-        /// </summary>
-        public const int DefaultInnerSpacing = 0;
-
-        /// <summary>
-        /// Gets or sets the amount of spacing between squares inside the playing board.
-        /// The default value is <see cref="DefaultInnerSpacing"/> (0).
-        /// </summary>
-        [DefaultValue(DefaultInnerSpacing)]
-        public int InnerSpacing
-        {
-            get { return propertyStore.Get<int>(nameof(InnerSpacing)); }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(InnerSpacing), value, "Inner spacing must be 0 or higher.");
-                }
-                if (propertyStore.Set(nameof(InnerSpacing), value))
-                {
-                    VerifySizeToFit();
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
         public static Color DefaultLightSquareColor => Color.Azure;
@@ -356,25 +322,6 @@ namespace Sandra.UI
             set
             {
                 if (propertyStore.Set(nameof(LightSquareColor), value))
-                {
-                    if (LightSquareImage == null)
-                    {
-                        Invalidate();
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image background for light squares.
-        /// </summary>
-        public Image LightSquareImage
-        {
-            get { return propertyStore.Get<Image>(nameof(LightSquareImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
                     Invalidate();
                 }
@@ -432,6 +379,7 @@ namespace Sandra.UI
                 }
                 if (propertyStore.Set(nameof(SquareSize), value))
                 {
+                    PositionSquares();
                     Invalidate();
                 }
             }
@@ -445,15 +393,13 @@ namespace Sandra.UI
         }
 
 
-        private Image[] foregroundImages;
-
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Image GetForegroundImage(int x, int y) => foregroundImages[GetIndex(x, y)];
+        public Image GetForegroundImage(int x, int y) => SquareElements[GetIndex(x, y)].ForegroundImage;
 
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
@@ -482,9 +428,9 @@ namespace Sandra.UI
         public void SetForegroundImage(int x, int y, Image value)
         {
             int index = GetIndex(x, y);
-            if (foregroundImages[index] != value)
+            if (SquareElements[index].ForegroundImage != value)
             {
-                foregroundImages[index] = value;
+                SquareElements[index].ForegroundImage = value;
                 Invalidate();
             }
         }
@@ -508,15 +454,13 @@ namespace Sandra.UI
         }
 
 
-        private ForegroundImageAttribute[] foregroundImageAttributes;
-
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => foregroundImageAttributes[GetIndex(x, y)];
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => SquareElements[GetIndex(x, y)].ImageAttribute;
 
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
@@ -545,9 +489,9 @@ namespace Sandra.UI
         public void SetForegroundImageAttribute(int x, int y, ForegroundImageAttribute value)
         {
             int index = GetIndex(x, y);
-            if (foregroundImageAttributes[index] != value)
+            if (SquareElements[index].ImageAttribute != value)
             {
-                foregroundImageAttributes[index] = value;
+                SquareElements[index].ImageAttribute = value;
                 Invalidate();
             }
         }
@@ -571,15 +515,13 @@ namespace Sandra.UI
         }
 
 
-        private Color[] squareOverlayColors;
-
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Color GetSquareOverlayColor(int x, int y) => squareOverlayColors[GetIndex(x, y)];
+        public Color GetSquareOverlayColor(int x, int y) => SquareElements[GetIndex(x, y)].OverlayColor;
 
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
@@ -608,9 +550,9 @@ namespace Sandra.UI
         public void SetSquareOverlayColor(int x, int y, Color value)
         {
             int index = GetIndex(x, y);
-            if (squareOverlayColors[index] != value)
+            if (SquareElements[index].OverlayColor != value)
             {
-                squareOverlayColors[index] = value;
+                SquareElements[index].OverlayColor = value;
                 Invalidate();
             }
         }
@@ -631,15 +573,6 @@ namespace Sandra.UI
         {
             ThrowIfNull(squareLocation);
             SetSquareOverlayColor(squareLocation.X, squareLocation.Y, value);
-        }
-
-
-        private void UpdateSquareArrays()
-        {
-            int newArrayLength = BoardWidth * BoardHeight;
-            foregroundImages = new Image[newArrayLength];
-            foregroundImageAttributes = new ForegroundImageAttribute[newArrayLength];
-            squareOverlayColors = new Color[newArrayLength];
         }
 
 
@@ -677,10 +610,8 @@ namespace Sandra.UI
         public Rectangle GetSquareRectangle(int x, int y)
         {
             ThrowIfOutOfRange(x, y);
-            int delta = SquareSize + InnerSpacing;
-            int px = BorderWidth + x * delta,
-                py = BorderWidth + y * delta;
-            return new Rectangle(px, py, SquareSize, SquareSize);
+            int squareSize = SquareSize;
+            return new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize);
         }
 
         /// <summary>
@@ -806,22 +737,6 @@ namespace Sandra.UI
             return y * BoardWidth + x;
         }
 
-        private Point GetLocationFromIndex(int index)
-        {
-            if (index < 0 || index >= BoardWidth * BoardHeight)
-            {
-                return Point.Empty;
-            }
-
-            int x = GetX(index),
-                y = GetY(index),
-                delta = SquareSize + InnerSpacing;
-            int px = BorderWidth + x * delta,
-                py = BorderWidth + y * delta;
-
-            return new Point(px, py);
-        }
-
         /// <summary>
         /// Returns the rectangle of a foreground image relative to its containing square.
         /// </summary>
@@ -830,7 +745,7 @@ namespace Sandra.UI
             if (SquareSize > 0)
             {
                 int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
-                var padding = ForegroundImagePadding;
+                Padding padding = ForegroundImagePadding;
                 int imageOffset = (SquareSize - foregroundImageSize) / 2;
                 int left = imageOffset + padding.Left;
                 int top = imageOffset + padding.Top;
@@ -847,9 +762,8 @@ namespace Sandra.UI
 
         private int MaxSquareSize(Size clientSize)
         {
-            int totalBorderWidth = BorderWidth * 2;
-            int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - totalBorderWidth) / BoardWidth;
-            int squareSizeVrt = (clientSize.Height - InnerSpacing * (BoardHeight - 1) - totalBorderWidth) / BoardHeight;
+            int squareSizeHrz = clientSize.Width / BoardWidth;
+            int squareSizeVrt = clientSize.Height / BoardHeight;
             return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
@@ -860,6 +774,7 @@ namespace Sandra.UI
             // Store directly in the property store, to bypass SizeToFit check.
             if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
+                PositionSquares();
                 Invalidate();
             }
         }
@@ -868,6 +783,7 @@ namespace Sandra.UI
         {
             // Only conditionally perform size-to-fit.
             if (SizeToFit) PerformSizeToFit();
+            else PositionSquares();
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
@@ -886,11 +802,7 @@ namespace Sandra.UI
         /// Given a square size, returns the <see cref="Size"/> which will allow the board to fit exactly.
         /// </summary>
         public Size GetExactAutoFitSize(int squareSize)
-        {
-            int targetWidth = squareSize * BoardWidth + InnerSpacing * (BoardWidth - 1) + BorderWidth * 2;
-            int targetHeight = squareSize * BoardHeight + InnerSpacing * (BoardHeight - 1) + BorderWidth * 2;
-            return new Size(targetWidth, targetHeight);
-        }
+            => new Size(squareSize * BoardWidth, squareSize * BoardHeight);
 
 
         private Point lastKnownMouseMovePoint = new Point(-1, -1);
@@ -908,11 +820,9 @@ namespace Sandra.UI
                 return -1;
             }
 
-            int borderWidth = BorderWidth;
-
-            int px = clientLocation.X - borderWidth,
-                py = clientLocation.Y - borderWidth,
-                delta = squareSize + InnerSpacing;
+            int px = clientLocation.X,
+                py = clientLocation.Y,
+                delta = squareSize;
 
             // Need to use a conditional expression because e.g. -1/2 == 0.
             int x = px < 0 ? -1 : px / delta,
@@ -1000,201 +910,99 @@ namespace Sandra.UI
             base.OnMouseLeave(e);
         }
 
-        /// <summary>
-        /// Holds all GDI objects used during a single Paint event of this <see cref="PlayingBoard"/>.
-        /// </summary>
-        private sealed class GDIPaintResources : IDisposable
-        {
-            public Brush BackgroundBrush;
-            public Brush BorderBrush;
-
-            public Brush DarkSquareBrush;
-            public Brush LightSquareBrush;
-
-            private void ReleaseManagedResources()
-            {
-                // Unmanaged resources: also dispose when finalizing.
-                if (BackgroundBrush != null) BackgroundBrush.Dispose();
-                if (BorderBrush != null) BorderBrush.Dispose();
-
-                if (DarkSquareBrush != null) DarkSquareBrush.Dispose();
-                if (LightSquareBrush != null) LightSquareBrush.Dispose();
-            }
-
-            public void Dispose()
-            {
-                ReleaseManagedResources();
-                GC.SuppressFinalize(this);
-            }
-
-            ~GDIPaintResources()
-            {
-                ReleaseManagedResources();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs pe)
         {
-            Graphics g = pe.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-
-            // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            int boardWidth = BoardWidth;
-            int boardHeight = BoardHeight;
-            int squareSize = SquareSize;
-            int innerSpacing = InnerSpacing;
-            int delta = squareSize + innerSpacing;
-            int borderWidth = BorderWidth;
-            int totalBoardWidth = delta * boardWidth - innerSpacing;
-            int totalBoardHeight = delta * boardHeight - innerSpacing;
-
-            Rectangle clipRectangle = pe.ClipRectangle;
-            Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
-            Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
-
-            using (GDIPaintResources gdi = new GDIPaintResources())
+            using (DrawRun drawRun = new DrawRun(pe.Graphics))
             {
+                // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
+                int boardWidth = BoardWidth;
+                int boardHeight = BoardHeight;
+                int squareSize = SquareSize;
+
+                Rectangle boardRectangle = new Rectangle(0, 0, squareSize * boardWidth, squareSize * boardHeight);
+
                 // Draw the background area not covered by the playing board.
-                g.ExcludeClip(boardWithBorderRectangle);
-                if (!g.IsVisibleClipEmpty)
+                using (drawRun.ExcludeClip(boardRectangle))
                 {
-                    gdi.BackgroundBrush = new SolidBrush(BackColor);
-                    g.FillRectangle(gdi.BackgroundBrush, ClientRectangle);
-                }
-                g.ResetClip();
-
-                // Draw the background light and dark squares in a block pattern.
-                // Use SmoothingMode.None so crisp edges are drawn for the squares.
-                g.SmoothingMode = SmoothingMode.None;
-                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
-                {
-                    Image darkSquareImage = DarkSquareImage;
-                    Image lightSquareImage = LightSquareImage;
-
-                    if (darkSquareImage == null) gdi.DarkSquareBrush = new SolidBrush(DarkSquareColor);
-                    if (lightSquareImage == null) gdi.LightSquareBrush = new SolidBrush(LightSquareColor);
-
-                    int y = borderWidth;
-                    bool startWithDarkSquare = false;
-
-                    for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
+                    if (!drawRun.Graphics.IsVisibleClipEmpty)
                     {
-                        bool drawDarkSquare = startWithDarkSquare;
-                        int x = borderWidth;
-
-                        for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
-                        {
-                            // Draw either a light or a dark square depending on its location.
-                            if (drawDarkSquare)
-                            {
-                                if (darkSquareImage != null)
-                                {
-                                    g.DrawImage(darkSquareImage, x, y, squareSize, squareSize);
-                                }
-                                else
-                                {
-                                    g.FillRectangle(gdi.DarkSquareBrush, x, y, squareSize, squareSize);
-                                }
-                            }
-                            else
-                            {
-                                if (lightSquareImage != null)
-                                {
-                                    g.DrawImage(lightSquareImage, x, y, squareSize, squareSize);
-                                }
-                                else
-                                {
-                                    g.FillRectangle(gdi.LightSquareBrush, x, y, squareSize, squareSize);
-                                }
-                            }
-
-                            drawDarkSquare = !drawDarkSquare;
-                            x += delta;
-                        }
-
-                        startWithDarkSquare = !startWithDarkSquare;
-                        y += delta;
+                        drawRun.SmoothingMode = SmoothingMode.None;
+                        drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
                     }
                 }
-                g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Draw borders.
-                if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+                if (squareSize > 0 && pe.ClipRectangle.IntersectsWith(boardRectangle))
                 {
-                    // Clip to borders.
-                    if (innerSpacing == 0)
-                    {
-                        g.ExcludeClip(boardRectangle);
-                    }
-                    else
-                    {
-                        // Exclude all squares one by one.
-                        int y = borderWidth;
-                        for (int j = 0; j < boardHeight; ++j)
-                        {
-                            int x = borderWidth;
-                            for (int k = 0; k < boardWidth; ++k)
-                            {
-                                g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                                x += delta;
-                            }
-                            y += delta;
-                        }
-                    }
-
-                    // And draw.
-                    gdi.BorderBrush = new SolidBrush(BorderColor);
-                    g.FillRectangle(gdi.BorderBrush, boardWithBorderRectangle);
-                    g.ResetClip();
-                }
-
-                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
-                {
-                    // Draw foreground images.
                     // Determine the image size and the amount of space around a foreground image within a square.
                     Rectangle imgRect = GetRelativeForegroundImageRectangle();
                     int sizeH = imgRect.Width,
                         sizeV = imgRect.Height;
 
-                    if (sizeH > 0 && sizeV > 0)
+                    foreach (SquareVisualElement squareElement in SquareElements)
                     {
-                        int hOffset = borderWidth + imgRect.Left,
-                            vOffset = borderWidth + imgRect.Top;
+                        Rectangle squareRectangle = new Rectangle(squareElement.Location, squareElement.Size);
 
-                        // Loop over foreground images and draw them.
-                        int y = vOffset;
-                        int index = 0;
-                        for (int j = 0; j < boardHeight; ++j)
+                        // Draw either a light or a dark square depending on its location.
+                        if (squareElement.IsLightSquare)
                         {
-                            int x = hOffset;
-                            for (int k = 0; k < boardWidth; ++k)
-                            {
-                                // Select picture.
-                                Image currentImg = foregroundImages[index];
-                                if (currentImg != null)
-                                {
-                                    DrawForegroundImage(g, currentImg,
-                                                        new Rectangle(x, y, sizeH, sizeV),
-                                                        foregroundImageAttributes[index]);
-                                }
-                                x += delta;
-                                ++index;
-                            }
-                            y += delta;
+                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
                         }
-                    }
-
-                    // Apply square highlights.
-                    for (int index = 0; index < boardWidth * boardHeight; ++index)
-                    {
-                        if (!squareOverlayColors[index].IsEmpty)
+                        else
                         {
-                            Point offset = GetLocationFromIndex(index);
-                            // Draw overlay color on the square, with the already drawn foreground image.
-                            using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
+                        }
+
+                        // Draw foreground image.
+                        if (sizeH > 0 && sizeV > 0)
+                        {
+                            Image image = squareElement.ForegroundImage;
+
+                            if (image != null)
                             {
-                                g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                                Rectangle foregroundImageRectangle = new Rectangle(
+                                    squareRectangle.Left + imgRect.Left,
+                                    squareRectangle.Top + imgRect.Top,
+                                    sizeH,
+                                    sizeV);
+
+                                if (squareElement.ImageAttribute == ForegroundImageAttribute.HalfTransparent)
+                                {
+                                    // Half-transparent.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    drawRun.Graphics.DrawImage(image,
+                                                               foregroundImageRectangle,
+                                                               0, 0, image.Width, image.Height,
+                                                               GraphicsUnit.Pixel,
+                                                               HalfTransparentImageAttributes);
+                                }
+                                else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
+                                {
+                                    // Highlight piece.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    drawRun.Graphics.DrawImage(image,
+                                                               foregroundImageRectangle,
+                                                               0, 0, image.Width, image.Height,
+                                                               GraphicsUnit.Pixel,
+                                                               HighlightImageAttributes);
+                                }
+                                else
+                                {
+                                    // Default case.
+                                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                                    drawRun.Graphics.DrawImage(image, foregroundImageRectangle);
+                                }
                             }
+                        }
+
+                        // Draw overlay color on the square, with the already drawn foreground image.
+                        if (!squareElement.OverlayColor.IsEmpty)
+                        {
+                            drawRun.SmoothingMode = SmoothingMode.None;
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(squareElement.OverlayColor), squareRectangle);
                         }
                     }
                 }
@@ -1202,34 +1010,6 @@ namespace Sandra.UI
 
             base.OnPaint(pe);
         }
-
-        private void DrawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
-        {
-            if (imgAttribute == ForegroundImageAttribute.HalfTransparent)
-            {
-                // Half-transparent.
-                g.DrawImage(image,
-                            destinationRectangle,
-                            0, 0, image.Width, image.Height,
-                            GraphicsUnit.Pixel,
-                            HalfTransparentImageAttributes);
-            }
-            else if (imgAttribute == ForegroundImageAttribute.Highlight)
-            {
-                // Highlight piece.
-                g.DrawImage(image,
-                            destinationRectangle,
-                            0, 0, image.Width, image.Height,
-                            GraphicsUnit.Pixel,
-                            HighlightImageAttributes);
-            }
-            else
-            {
-                // Default case.
-                g.DrawImage(image, destinationRectangle);
-            }
-        }
-
 
         protected override void Dispose(bool disposing)
         {
