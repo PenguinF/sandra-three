@@ -109,6 +109,14 @@ namespace Eutherion.Win.Canvas
             return pen;
         });
 
+        public ConstrainedClipScope SetClip(RectangleF rect)
+        {
+            Graphics.SetClip(rect);
+            ConstrainedClipScope excludedClipScope = new ConstrainedClipScope(this);
+            ClipScopes.Add(excludedClipScope);
+            return excludedClipScope;
+        }
+
         public ConstrainedClipScope ExcludeClip(Rectangle rect)
         {
             Graphics.ExcludeClip(rect);

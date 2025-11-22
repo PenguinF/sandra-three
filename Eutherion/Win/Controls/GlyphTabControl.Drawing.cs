@@ -450,47 +450,46 @@ namespace Eutherion.Win.Controls
                             MeasuredGlyphSize.Width + hrzPadding * 2,
                             targetHeight);
 
-                        g.SetClip(backgroundGlyphRectangle);
-
-                        if (drawModifiedGlyph)
+                        using (drawRun.SetClip(backgroundGlyphRectangle))
                         {
-                            RectangleF modifiedGlyphRectangle = new RectangleF(
-                                textAreaLeftOffset + textAreaWidth + hrzPadding,
-                                (TabHeaderHeight - diameter) / 2,
-                                diameter,
-                                diameter);
-
-                            // Draw a circle where otherwise the '×' would be.
-                            g.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
-                        }
-                        else if (drawCloseButtonGlyph)
-                        {
-                            if (drawGlyphPressed)
+                            if (drawModifiedGlyph)
                             {
-                                g.SmoothingMode = SmoothingMode.None;
-                                g.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
+                                RectangleF modifiedGlyphRectangle = new RectangleF(
+                                    textAreaLeftOffset + textAreaWidth + hrzPadding,
+                                    (TabHeaderHeight - diameter) / 2,
+                                    diameter,
+                                    diameter);
 
-                                g.SmoothingMode = SmoothingMode.AntiAlias;
+                                // Draw a circle where otherwise the '×' would be.
+                                g.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
                             }
+                            else if (drawCloseButtonGlyph)
+                            {
+                                if (drawGlyphPressed)
+                                {
+                                    g.SmoothingMode = SmoothingMode.None;
+                                    g.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
 
-                            // Make rectangle 2 pixels less high to not interfere with hover border.
-                            Rectangle glyphTextRectangle = new Rectangle(
-                                textAreaLeftOffset + textAreaWidth,
-                                1,
-                                MeasuredGlyphSize.Width,
-                                MeasuredGlyphSize.Height - 2);
+                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                }
 
-                            TextRenderer.DrawText(
-                                g,
-                                CloseButtonGlyph,
-                                CurrentCloseButtonGlyphFont,
-                                glyphTextRectangle,
-                                glyphForeColor,
-                                drawGlyphPressed ? glyphPressedBackColor : tabBackColor,
-                                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.PreserveGraphicsClipping);
+                                // Make rectangle 2 pixels less high to not interfere with hover border.
+                                Rectangle glyphTextRectangle = new Rectangle(
+                                    textAreaLeftOffset + textAreaWidth,
+                                    1,
+                                    MeasuredGlyphSize.Width,
+                                    MeasuredGlyphSize.Height - 2);
+
+                                TextRenderer.DrawText(
+                                    g,
+                                    CloseButtonGlyph,
+                                    CurrentCloseButtonGlyphFont,
+                                    glyphTextRectangle,
+                                    glyphForeColor,
+                                    drawGlyphPressed ? glyphPressedBackColor : tabBackColor,
+                                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.PreserveGraphicsClipping);
+                            }
                         }
-
-                        g.ResetClip();
                     }
 
                     g.SmoothingMode = SmoothingMode.None;
