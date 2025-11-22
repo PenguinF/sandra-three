@@ -330,7 +330,7 @@ namespace Eutherion.Win.Controls
             {
                 // Block out the entire client area.
                 drawRun.SmoothingMode = SmoothingMode.None;
-                g.FillRectangle(drawRun.GetSolidBrush(BackColor), new Rectangle(0, 0, ClientSize.Width, TabHeaderHeight));
+                drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(BackColor), new Rectangle(0, 0, ClientSize.Width, TabHeaderHeight));
 
                 // Then draw each tab page.
                 for (int tabIndex = 0; tabIndex < TabPages.Count; tabIndex++)
@@ -352,7 +352,7 @@ namespace Eutherion.Win.Controls
                     if (tabIndex == ActiveTabPageIndex)
                     {
                         drawRun.SmoothingMode = SmoothingMode.None;
-                        g.FillRectangle(drawRun.GetSolidBrush(tabPage.ActiveBackColor), new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight));
+                        drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(tabPage.ActiveBackColor), new RectangleF(tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight));
 
                         tabBackColor = tabPage.ActiveBackColor;
                         tabForeColor = tabPage.ActiveForeColor;
@@ -386,10 +386,10 @@ namespace Eutherion.Win.Controls
                         if (tabIndex == HoverTabIndex)
                         {
                             drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(drawRun.GetSolidBrush(InactiveTabHeaderHoverColor), tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight);
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(InactiveTabHeaderHoverColor), tabIndex * CurrentTabWidth, 0, CurrentTabWidth, TabHeaderHeight);
 
                             // Drawing rectangles with a Pen includes the right border, so subtract 1 from the width.
-                            g.DrawRectangle(drawRun.GetPen(InactiveTabHeaderHoverBorderColor, 1), tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, TabHeaderHeight);
+                            drawRun.Graphics.DrawRectangle(drawRun.GetPen(InactiveTabHeaderHoverBorderColor, 1), tabIndex * CurrentTabWidth, 0, CurrentTabWidth - 1, TabHeaderHeight);
 
                             tabBackColor = InactiveTabHeaderHoverColor;
                         }
@@ -430,7 +430,7 @@ namespace Eutherion.Win.Controls
                     drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                     drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
-                        g,
+                        drawRun.Graphics,
                         tabPage.Text,
                         Font,
                         new Rectangle(textAreaLeftOffset, 0, textAreaWidth, TabHeaderHeight),
@@ -465,14 +465,14 @@ namespace Eutherion.Win.Controls
 
                                 // Draw a circle where otherwise the '×' would be.
                                 drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                g.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
+                                drawRun.Graphics.FillEllipse(drawRun.GetSolidBrush(glyphForeColor), modifiedGlyphRectangle);
                             }
                             else if (drawCloseButtonGlyph)
                             {
                                 if (drawGlyphPressed)
                                 {
                                     drawRun.SmoothingMode = SmoothingMode.None;
-                                    g.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
+                                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(glyphPressedBackColor), backgroundGlyphRectangle);
                                 }
 
                                 // Make rectangle 2 pixels less high to not interfere with hover border.
@@ -485,7 +485,7 @@ namespace Eutherion.Win.Controls
                                 drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                                 drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                                 TextRenderer.DrawText(
-                                    g,
+                                    drawRun.Graphics,
                                     CloseButtonGlyph,
                                     CurrentCloseButtonGlyphFont,
                                     glyphTextRectangle,
