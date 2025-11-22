@@ -29,6 +29,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
 using System.Reflection;
@@ -589,13 +590,13 @@ namespace Eutherion.Win.MdiAppTemplate
         {
             using (DrawRun drawRun = new DrawRun(e.Graphics))
             {
-                var g = e.Graphics;
+                drawRun.SmoothingMode = SmoothingMode.None;
 
                 if (currentMetrics.IsMaximized && !IsMdiContainer)
                 {
                     // Draw the window using the current transparency key.
                     // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
-                    g.FillRectangle(drawRun.GetSolidBrush(TransparencyKey), new Rectangle(
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(TransparencyKey), new Rectangle(
                         0,
                         0,
                         currentMetrics.TotalWidth,
@@ -605,7 +606,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
                     int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
 
-                    g.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
                         horizontalInvisibleBorderWidth,
                         verticalInvisibleBorderWidth,
                         currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
@@ -614,13 +615,13 @@ namespace Eutherion.Win.MdiAppTemplate
                 else
                 {
                     // Block out the entire client area, then draw a 1-pizel border around it.
-                    g.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
                         0,
                         0,
                         currentMetrics.TotalWidth,
                         currentMetrics.TotalHeight));
 
-                    g.DrawRectangle(drawRun.GetPen(Color.DimGray, 1),
+                    drawRun.Graphics.DrawRectangle(drawRun.GetPen(Color.DimGray, 1),
                         0,
                         0,
                         currentMetrics.TotalWidth - 1,
@@ -642,9 +643,10 @@ namespace Eutherion.Win.MdiAppTemplate
                         textAreaWidth,
                         currentMetrics.MainMenuHeight - 2);
 
+                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                     drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
-                        g,
+                        drawRun.Graphics,
                         text,
                         ObservableStyle.Font,
                         textAreaRectangle,
