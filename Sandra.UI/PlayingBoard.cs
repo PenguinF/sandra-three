@@ -28,6 +28,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -43,6 +44,9 @@ namespace Sandra.UI
             public Image ForegroundImage;
             public ForegroundImageAttribute ForegroundImageAttribute;
             public Color SquareOverlayColor;
+
+            public Point Location;  // Location relative to the top left corner of the control.
+            public Size Size;       // Square size (same for all squares).
         }
 
         private SquareVisualElement[] SquareElements;
@@ -133,6 +137,29 @@ namespace Sandra.UI
             }
 
             SquareElements = newSquareElements;
+            PositionSquares();
+        }
+
+        private void PositionSquares()
+        {
+            int squareSize = SquareSize;
+
+            if (squareSize > 0)
+            {
+                for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
+                {
+                    for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
+                    {
+                        SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
+                        squareElement.Location = new Point(xIndex * squareSize, yIndex * squareSize);
+                        squareElement.Size = new Size(squareSize, squareSize);
+                    }
+                }
+            }
+            else
+            {
+                SquareElements.ForEach(x => x.Size = Size.Empty);
+            }
         }
 
         /// <summary>
@@ -349,6 +376,7 @@ namespace Sandra.UI
                 }
                 if (propertyStore.Set(nameof(SquareSize), value))
                 {
+                    PositionSquares();
                     Invalidate();
                 }
             }
@@ -757,6 +785,7 @@ namespace Sandra.UI
             // Store directly in the property store, to bypass SizeToFit check.
             if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
+                PositionSquares();
                 Invalidate();
             }
         }
@@ -765,6 +794,7 @@ namespace Sandra.UI
         {
             // Only conditionally perform size-to-fit.
             if (SizeToFit) PerformSizeToFit();
+            else PositionSquares();
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
