@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PlayingBoard.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Win.Canvas;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -1000,66 +1001,33 @@ namespace Sandra.UI
             base.OnMouseLeave(e);
         }
 
-        /// <summary>
-        /// Holds all GDI objects used during a single Paint event of this <see cref="PlayingBoard"/>.
-        /// </summary>
-        private sealed class GDIPaintResources : IDisposable
-        {
-            public Brush BackgroundBrush;
-            public Brush BorderBrush;
-
-            public Brush DarkSquareBrush;
-            public Brush LightSquareBrush;
-
-            private void ReleaseManagedResources()
-            {
-                // Unmanaged resources: also dispose when finalizing.
-                if (BackgroundBrush != null) BackgroundBrush.Dispose();
-                if (BorderBrush != null) BorderBrush.Dispose();
-
-                if (DarkSquareBrush != null) DarkSquareBrush.Dispose();
-                if (LightSquareBrush != null) LightSquareBrush.Dispose();
-            }
-
-            public void Dispose()
-            {
-                ReleaseManagedResources();
-                GC.SuppressFinalize(this);
-            }
-
-            ~GDIPaintResources()
-            {
-                ReleaseManagedResources();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs pe)
         {
             Graphics g = pe.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            int boardWidth = BoardWidth;
-            int boardHeight = BoardHeight;
-            int squareSize = SquareSize;
-            int innerSpacing = InnerSpacing;
-            int delta = squareSize + innerSpacing;
-            int borderWidth = BorderWidth;
-            int totalBoardWidth = delta * boardWidth - innerSpacing;
-            int totalBoardHeight = delta * boardHeight - innerSpacing;
-
-            Rectangle clipRectangle = pe.ClipRectangle;
-            Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
-            Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
-
-            using (GDIPaintResources gdi = new GDIPaintResources())
+            using (DrawRun drawRun = new DrawRun(pe.Graphics))
             {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
+                int boardWidth = BoardWidth;
+                int boardHeight = BoardHeight;
+                int squareSize = SquareSize;
+                int innerSpacing = InnerSpacing;
+                int delta = squareSize + innerSpacing;
+                int borderWidth = BorderWidth;
+                int totalBoardWidth = delta * boardWidth - innerSpacing;
+                int totalBoardHeight = delta * boardHeight - innerSpacing;
+
+                Rectangle clipRectangle = pe.ClipRectangle;
+                Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
+                Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
+
                 // Draw the background area not covered by the playing board.
                 g.ExcludeClip(boardWithBorderRectangle);
                 if (!g.IsVisibleClipEmpty)
                 {
-                    gdi.BackgroundBrush = new SolidBrush(BackColor);
-                    g.FillRectangle(gdi.BackgroundBrush, ClientRectangle);
+                    g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
                 }
                 g.ResetClip();
 
@@ -1070,9 +1038,6 @@ namespace Sandra.UI
                 {
                     Image darkSquareImage = DarkSquareImage;
                     Image lightSquareImage = LightSquareImage;
-
-                    if (darkSquareImage == null) gdi.DarkSquareBrush = new SolidBrush(DarkSquareColor);
-                    if (lightSquareImage == null) gdi.LightSquareBrush = new SolidBrush(LightSquareColor);
 
                     int y = borderWidth;
                     bool startWithDarkSquare = false;
@@ -1093,7 +1058,7 @@ namespace Sandra.UI
                                 }
                                 else
                                 {
-                                    g.FillRectangle(gdi.DarkSquareBrush, x, y, squareSize, squareSize);
+                                    g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), x, y, squareSize, squareSize);
                                 }
                             }
                             else
@@ -1104,7 +1069,7 @@ namespace Sandra.UI
                                 }
                                 else
                                 {
-                                    g.FillRectangle(gdi.LightSquareBrush, x, y, squareSize, squareSize);
+                                    g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), x, y, squareSize, squareSize);
                                 }
                             }
 
@@ -1143,8 +1108,7 @@ namespace Sandra.UI
                     }
 
                     // And draw.
-                    gdi.BorderBrush = new SolidBrush(BorderColor);
-                    g.FillRectangle(gdi.BorderBrush, boardWithBorderRectangle);
+                    g.FillRectangle(drawRun.GetSolidBrush(BorderColor), boardWithBorderRectangle);
                     g.ResetClip();
                 }
 

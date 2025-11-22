@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,6 +31,9 @@ namespace Eutherion.Win.Canvas
     /// </summary>
     public sealed class DrawRun : IDisposable
     {
+        private readonly Dictionary<Color, SolidBrush> SolidBrushes = new Dictionary<Color, SolidBrush>();
+        private readonly DisposableResourceCollection DisposableResources = new DisposableResourceCollection();
+
         /// <summary>
         /// Gets the graphics surface to draw on.
         /// </summary>
@@ -49,8 +53,16 @@ namespace Eutherion.Win.Canvas
             Graphics = graphics ?? throw new ArgumentNullException(nameof(graphics));
         }
 
+        public SolidBrush GetSolidBrush(Color color) => SolidBrushes.GetOrAdd(color, key =>
+        {
+            var brush = new SolidBrush(key);
+            DisposableResources.Add(brush);
+            return brush;
+        });
+
         public void Dispose()
         {
+            DisposableResources.Dispose();
             GC.SuppressFinalize(this);
         }
 
