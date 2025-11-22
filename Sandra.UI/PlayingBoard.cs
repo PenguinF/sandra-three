@@ -41,6 +41,8 @@ namespace Sandra.UI
     {
         private struct SquareVisualElement
         {
+            public bool IsLightSquare;
+
             public Image ForegroundImage;
             public ForegroundImageAttribute ForegroundImageAttribute;
             public Color SquareOverlayColor;
@@ -132,6 +134,7 @@ namespace Sandra.UI
                     else
                     {
                         newSquareElements[index] = new SquareVisualElement();
+                        newSquareElements[index].IsLightSquare = ((xIndex + yIndex) & 1) == 0;
                     }
                 }
             }
