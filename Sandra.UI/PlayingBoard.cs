@@ -88,11 +88,9 @@ namespace Sandra.UI
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
-            { nameof(DarkSquareImage), null },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
             { nameof(LightSquareColor), DefaultLightSquareColor },
-            { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
         };
@@ -231,25 +229,6 @@ namespace Sandra.UI
             {
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
                 {
-                    if (DarkSquareImage == null)
-                    {
-                        Invalidate();
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image background for dark squares.
-        /// </summary>
-        public Image DarkSquareImage
-        {
-            get { return propertyStore.Get<Image>(nameof(DarkSquareImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(DarkSquareImage), value))
-                {
                     Invalidate();
                 }
             }
@@ -328,25 +307,6 @@ namespace Sandra.UI
             set
             {
                 if (propertyStore.Set(nameof(LightSquareColor), value))
-                {
-                    if (LightSquareImage == null)
-                    {
-                        Invalidate();
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image background for light squares.
-        /// </summary>
-        public Image LightSquareImage
-        {
-            get { return propertyStore.Get<Image>(nameof(LightSquareImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
                     Invalidate();
                 }
@@ -1006,9 +966,6 @@ namespace Sandra.UI
                 g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    Image darkSquareImage = DarkSquareImage;
-                    Image lightSquareImage = LightSquareImage;
-
                     int y = borderWidth;
                     bool startWithDarkSquare = false;
 
@@ -1022,25 +979,11 @@ namespace Sandra.UI
                             // Draw either a light or a dark square depending on its location.
                             if (drawDarkSquare)
                             {
-                                if (darkSquareImage != null)
-                                {
-                                    g.DrawImage(darkSquareImage, x, y, squareSize, squareSize);
-                                }
-                                else
-                                {
-                                    g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), x, y, squareSize, squareSize);
-                                }
+                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), x, y, squareSize, squareSize);
                             }
                             else
                             {
-                                if (lightSquareImage != null)
-                                {
-                                    g.DrawImage(lightSquareImage, x, y, squareSize, squareSize);
-                                }
-                                else
-                                {
-                                    g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), x, y, squareSize, squareSize);
-                                }
+                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), x, y, squareSize, squareSize);
                             }
 
                             drawDarkSquare = !drawDarkSquare;
