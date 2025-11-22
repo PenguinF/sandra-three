@@ -47,6 +47,33 @@ namespace Sandra.UI
 
         private SquareVisualElement[] SquareElements;
 
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
+        /// </summary>
+        public ImageAttributes HighlightImageAttributes { get; }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
+        /// </summary>
+        public ImageAttributes HalfTransparentImageAttributes { get; }
+
+        private readonly PropertyStore propertyStore = new PropertyStore
+        {
+            { nameof(BoardHeight), DefaultBoardHeight },
+            { nameof(BoardWidth), DefaultBoardWidth },
+            { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
+            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
+            { nameof(LightSquareColor), DefaultLightSquareColor },
+            { nameof(SizeToFit), DefaultSizeToFit },
+            { nameof(SquareSize), DefaultSquareSize },
+        };
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
         public PlayingBoard()
         {
             // Styles appropriate for a graphics-heavy control.
@@ -79,34 +106,6 @@ namespace Sandra.UI
             halfTransparent.SetColorMatrix(halfTransparentMatrix);
             HalfTransparentImageAttributes = halfTransparent;
         }
-
-        /// <summary>
-        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
-        /// </summary>
-        public ImageAttributes HighlightImageAttributes { get; }
-
-        /// <summary>
-        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
-        /// </summary>
-        public ImageAttributes HalfTransparentImageAttributes { get; }
-
-        private readonly PropertyStore propertyStore = new PropertyStore
-        {
-            { nameof(BoardHeight), DefaultBoardHeight },
-            { nameof(BoardWidth), DefaultBoardWidth },
-            { nameof(DarkSquareColor), DefaultDarkSquareColor },
-            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
-            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
-            { nameof(LightSquareColor), DefaultLightSquareColor },
-            { nameof(SizeToFit), DefaultSizeToFit },
-            { nameof(SquareSize), DefaultSquareSize },
-        };
-
-
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
 
         /// <summary>
