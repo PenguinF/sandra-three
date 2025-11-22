@@ -924,13 +924,14 @@ namespace Sandra.UI
                 Rectangle boardRectangle = new Rectangle(0, 0, squareSize * boardWidth, squareSize * boardHeight);
 
                 // Draw the background area not covered by the playing board.
-                g.ExcludeClip(boardRectangle);
-                if (!g.IsVisibleClipEmpty)
+                using (drawRun.ExcludeClip(boardRectangle))
                 {
-                    drawRun.SmoothingMode = SmoothingMode.None;
-                    g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
+                    if (!g.IsVisibleClipEmpty)
+                    {
+                        drawRun.SmoothingMode = SmoothingMode.None;
+                        g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
+                    }
                 }
-                g.ResetClip();
 
                 if (squareSize > 0 && pe.ClipRectangle.IntersectsWith(boardRectangle))
                 {
