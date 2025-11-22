@@ -85,8 +85,6 @@ namespace Sandra.UI
         {
             { nameof(BoardHeight), DefaultBoardHeight },
             { nameof(BoardWidth), DefaultBoardWidth },
-            { nameof(BorderColor), DefaultBorderColor },
-            { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
@@ -155,56 +153,6 @@ namespace Sandra.UI
                 if (propertyStore.Set(nameof(BoardWidth), value))
                 {
                     UpdateSquareArrays();
-                    VerifySizeToFit();
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="BorderColor"/> property.
-        /// </summary>
-        public static Color DefaultBorderColor => Color.Black;
-
-        /// <summary>
-        /// Gets or sets the color of the border area.
-        /// The default value is <see cref="DefaultBorderColor"/> (<see cref="Color.Black"/>).
-        /// </summary>
-        public Color BorderColor
-        {
-            get { return propertyStore.Get<Color>(nameof(BorderColor)); }
-            set
-            {
-                if (propertyStore.Set(nameof(BorderColor), value))
-                {
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="BorderWidth"/> property.
-        /// </summary>
-        public const int DefaultBorderWidth = 0;
-
-        /// <summary>
-        /// Gets or sets the width of the border around the playing board.
-        /// The default value is <see cref="DefaultBorderWidth"/> (0).
-        /// </summary>
-        [DefaultValue(DefaultBorderWidth)]
-        public int BorderWidth
-        {
-            get { return propertyStore.Get<int>(nameof(BorderWidth)); }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(BorderWidth), value, "Border width must be 0 or higher.");
-                }
-                if (propertyStore.Set(nameof(BorderWidth), value))
-                {
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -609,10 +557,8 @@ namespace Sandra.UI
         public Rectangle GetSquareRectangle(int x, int y)
         {
             ThrowIfOutOfRange(x, y);
-            int delta = SquareSize;
-            int px = BorderWidth + x * delta,
-                py = BorderWidth + y * delta;
-            return new Rectangle(px, py, SquareSize, SquareSize);
+            int squareSize = SquareSize;
+            return new Rectangle(x * squareSize, y * squareSize, squareSize, squareSize);
         }
 
         /// <summary>
@@ -748,10 +694,8 @@ namespace Sandra.UI
             int x = GetX(index),
                 y = GetY(index),
                 delta = SquareSize;
-            int px = BorderWidth + x * delta,
-                py = BorderWidth + y * delta;
 
-            return new Point(px, py);
+            return new Point(x * delta, y * delta);
         }
 
         /// <summary>
@@ -779,9 +723,8 @@ namespace Sandra.UI
 
         private int MaxSquareSize(Size clientSize)
         {
-            int totalBorderWidth = BorderWidth * 2;
-            int squareSizeHrz = (clientSize.Width - totalBorderWidth) / BoardWidth;
-            int squareSizeVrt = (clientSize.Height - totalBorderWidth) / BoardHeight;
+            int squareSizeHrz = clientSize.Width / BoardWidth;
+            int squareSizeVrt = clientSize.Height / BoardHeight;
             return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
@@ -818,11 +761,7 @@ namespace Sandra.UI
         /// Given a square size, returns the <see cref="Size"/> which will allow the board to fit exactly.
         /// </summary>
         public Size GetExactAutoFitSize(int squareSize)
-        {
-            int targetWidth = squareSize * BoardWidth + BorderWidth * 2;
-            int targetHeight = squareSize * BoardHeight + BorderWidth * 2;
-            return new Size(targetWidth, targetHeight);
-        }
+            => new Size(squareSize * BoardWidth, squareSize * BoardHeight);
 
 
         private Point lastKnownMouseMovePoint = new Point(-1, -1);
@@ -840,10 +779,8 @@ namespace Sandra.UI
                 return -1;
             }
 
-            int borderWidth = BorderWidth;
-
-            int px = clientLocation.X - borderWidth,
-                py = clientLocation.Y - borderWidth,
+            int px = clientLocation.X,
+                py = clientLocation.Y,
                 delta = squareSize;
 
             // Need to use a conditional expression because e.g. -1/2 == 0.
@@ -945,16 +882,14 @@ namespace Sandra.UI
                 int boardHeight = BoardHeight;
                 int squareSize = SquareSize;
                 int delta = squareSize;
-                int borderWidth = BorderWidth;
                 int totalBoardWidth = delta * boardWidth;
                 int totalBoardHeight = delta * boardHeight;
 
                 Rectangle clipRectangle = pe.ClipRectangle;
-                Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
-                Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
+                Rectangle boardRectangle = new Rectangle(0, 0, totalBoardWidth, totalBoardHeight);
 
                 // Draw the background area not covered by the playing board.
-                g.ExcludeClip(boardWithBorderRectangle);
+                g.ExcludeClip(boardRectangle);
                 if (!g.IsVisibleClipEmpty)
                 {
                     g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
@@ -966,13 +901,13 @@ namespace Sandra.UI
                 g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    int y = borderWidth;
+                    int y = 0;
                     bool startWithDarkSquare = false;
 
                     for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
                     {
                         bool drawDarkSquare = startWithDarkSquare;
-                        int x = borderWidth;
+                        int x = 0;
 
                         for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
                         {
@@ -996,17 +931,6 @@ namespace Sandra.UI
                 }
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Draw borders.
-                if (borderWidth > 0 && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-                {
-                    // Clip to borders.
-                    g.ExcludeClip(boardRectangle);
-
-                    // And draw.
-                    g.FillRectangle(drawRun.GetSolidBrush(BorderColor), boardWithBorderRectangle);
-                    g.ResetClip();
-                }
-
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
                     // Draw foreground images.
@@ -1017,8 +941,8 @@ namespace Sandra.UI
 
                     if (sizeH > 0 && sizeV > 0)
                     {
-                        int hOffset = borderWidth + imgRect.Left,
-                            vOffset = borderWidth + imgRect.Top;
+                        int hOffset = imgRect.Left,
+                            vOffset = imgRect.Top;
 
                         // Loop over foreground images and draw them.
                         int y = vOffset;
