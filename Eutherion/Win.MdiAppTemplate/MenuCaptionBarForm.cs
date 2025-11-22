@@ -595,39 +595,30 @@ namespace Eutherion.Win.MdiAppTemplate
                 {
                     // Draw the window using the current transparency key.
                     // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
-                    using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
-                    {
-                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                            0,
-                            0,
-                            currentMetrics.TotalWidth,
-                            currentMetrics.TotalHeight));
-                    }
+                    g.FillRectangle(drawRun.GetSolidBrush(TransparencyKey), new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
 
                     // Block out only the visible area of the window.
-                    using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
-                    {
-                        int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
-                        int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
+                    int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
+                    int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
 
-                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                            horizontalInvisibleBorderWidth,
-                            verticalInvisibleBorderWidth,
-                            currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
-                            currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
-                    }
+                    g.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
+                        horizontalInvisibleBorderWidth,
+                        verticalInvisibleBorderWidth,
+                        currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
+                        currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
                 }
                 else
                 {
                     // Block out the entire client area, then draw a 1-pizel border around it.
-                    using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
-                    {
-                        g.FillRectangle(captionAreaColorBrush, new Rectangle(
-                            0,
-                            0,
-                            currentMetrics.TotalWidth,
-                            currentMetrics.TotalHeight));
-                    }
+                    g.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
+                        0,
+                        0,
+                        currentMetrics.TotalWidth,
+                        currentMetrics.TotalHeight));
 
                     g.DrawRectangle(Pens.DimGray,
                         0,
