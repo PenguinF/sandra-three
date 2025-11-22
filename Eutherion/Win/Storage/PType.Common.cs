@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Common.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -91,13 +91,13 @@ namespace Eutherion.Win.Storage
                     ? ValidValue(out typeError)
                     : InvalidValue(this, out typeError);
 
-                public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+                public string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString)
                     => RangedInteger.FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
 
-                public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+                public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey)
                     => RangedInteger.FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
 
-                public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+                public string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex)
                     => RangedInteger.FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
 
                 public override string ToString()
@@ -139,7 +139,7 @@ namespace Eutherion.Win.Storage
 
             public override string ConvertToBaseValue(TEnum value) => enumToString[value];
 
-            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToEnum.Count == 0)
                 {
@@ -180,13 +180,13 @@ namespace Eutherion.Win.Storage
                         somewhere));
             }
 
-            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+            public string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString)
                 => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex)
                 => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
 
@@ -224,7 +224,7 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            private string GenericTypeErrorMessage(TextFormatter formatter, string actualValueString, Maybe<string> maybeSomewhere)
+            private string GenericTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString, Maybe<string> maybeSomewhere)
             {
                 if (stringToTarget.Count == 0)
                 {
@@ -266,13 +266,13 @@ namespace Eutherion.Win.Storage
                         somewhere));
             }
 
-            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+            public string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString)
                 => GenericTypeErrorMessage(formatter, actualValueString, Maybe<string>.Nothing);
 
-            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey)
                 => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
-            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex)
                 => GenericTypeErrorMessage(formatter, actualValueString, PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
         }
     }

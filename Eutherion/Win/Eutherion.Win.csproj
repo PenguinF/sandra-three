@@ -30,9 +30,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Eutherion.Common" Version="1.5.1" />
-    <PackageReference Include="Eutherion.Text.Json" Version="1.5.1" />
-    <PackageReference Include="Eutherion.UIActions" Version="1.5.1" />
-    <PackageReference Include="Eutherion.Utilities" Version="1.5.1" />
+    <PackageReference Include="Eutherion.Common" Version="1.6.0" />
+    <PackageReference Include="Eutherion.Text.Json" Version="1.6.0" />
+    <PackageReference Include="Eutherion.UIActions" Version="1.6.0" />
+    <PackageReference Include="Eutherion.Utilities" Version="1.6.0" />
   </ItemGroup>
 </Project>

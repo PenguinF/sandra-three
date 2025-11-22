@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SyntaxEditor.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -1011,7 +1011,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the localized description for the default file extension.
         /// </summary>
-        public abstract StringKey<ForFormattedText> FileExtensionLocalizedKey { get; }
+        public abstract StringKey<Localization> FileExtensionLocalizedKey { get; }
 
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.

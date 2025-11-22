@@ -2,7 +2,7 @@
 /*********************************************************************************
  * FileLocalizer.cs
  *
- * Copyright (c) 2004-2022 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ namespace Eutherion.Win.MdiAppTemplate
     /// Apart from being a <see cref="TextFormatter"/>, contains properties
     /// to allow construction of <see cref="UIAction"/> bindings and interact with settings.
     /// </summary>
-    public sealed class FileLocalizer : TextFormatter, IWeakEventTarget, IDisposable
+    public sealed class FileLocalizer : TextFormatter<Localization>, IWeakEventTarget, IDisposable
     {
         private class LanguageMenuItemProvider : IFunc<string>, IFunc<Image>
         {
@@ -83,7 +83,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public string FlagIconFileName { get; private set; }
 
-        public Dictionary<StringKey<ForFormattedText>, string> Dictionary { get; private set; }
+        public Dictionary<StringKey<Localization>, string> Dictionary { get; private set; }
 
         public FileLocalizer(Session session, SettingsFile languageFile)
         {
@@ -105,10 +105,10 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateDictionary()
         {
-            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<StringKey<ForFormattedText>, string> dict) ? dict : new Dictionary<StringKey<ForFormattedText>, string>();
+            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<StringKey<Localization>, string> dict) ? dict : new Dictionary<StringKey<Localization>, string>();
         }
 
-        public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
+        public override string Format(StringKey<Localization> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
             ? FormatUtilities.SoftFormat(displayText, parameters)
             : Default.Format(localizedStringKey, parameters);

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfoParameterDisplayHelper.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the default key for displaying null values.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> NullString
-            = new StringKey<ForFormattedText>(nameof(NullString));
+        public static readonly StringKey<Localization> NullString
+            = new StringKey<Localization>(nameof(NullString));
 
         /// <summary>
         /// Gets the default key for displaying a <see cref="JsonErrorInfoParameter"/> of an unknown type.
         /// It expects one parameter, which is filled with the ToString() value of the value object.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> UntypedObjectString
-            = new StringKey<ForFormattedText>(nameof(UntypedObjectString));
+        public static readonly StringKey<Localization> UntypedObjectString
+            = new StringKey<Localization>(nameof(UntypedObjectString));
 
         /// <summary>
         /// Gets a formatted error message of a <see cref="JsonErrorInfoParameter"/>.
@@ -57,7 +57,7 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="parameter"/> and/or <paramref name="formatter"/> are <see langword="null"/>.
         /// </exception>
-        public static string GetFormattedDisplayValue(JsonErrorInfoParameter parameter, TextFormatter formatter)
+        public static string GetFormattedDisplayValue(JsonErrorInfoParameter parameter, TextFormatter<Localization> formatter)
         {
             if (parameter == null) throw new ArgumentNullException(nameof(parameter));
             if (formatter == null) throw new ArgumentNullException(nameof(formatter));

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * FileNameType.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ namespace Eutherion.Win.Storage
     public sealed class FileNameType : PType.Filter<string>
     {
         public static readonly PTypeErrorBuilder FileNameTypeError
-            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(FileNameTypeError)));
+            = new PTypeErrorBuilder(new StringKey<Localization>(nameof(FileNameTypeError)));
 
         public static readonly FileNameType Instance = new FileNameType(allowStartWithDots: false);
 

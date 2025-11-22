@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeErrorBuilder.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,17 +33,17 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the key for concatenating a list of values.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> EnumerateWithOr = new StringKey<ForFormattedText>(nameof(EnumerateWithOr));
+        public static readonly StringKey<Localization> EnumerateWithOr = new StringKey<Localization>(nameof(EnumerateWithOr));
 
         /// <summary>
         /// Gets the key for duplicate property keys.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> DuplicatePropertyKeyWarning = new StringKey<ForFormattedText>(nameof(DuplicatePropertyKeyWarning));
+        public static readonly StringKey<Localization> DuplicatePropertyKeyWarning = new StringKey<Localization>(nameof(DuplicatePropertyKeyWarning));
 
         /// <summary>
         /// Gets the key for property keys that are not recognized.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> UnrecognizedPropertyKeyWarning = new StringKey<ForFormattedText>(nameof(UnrecognizedPropertyKeyWarning));
+        public static readonly StringKey<Localization> UnrecognizedPropertyKeyWarning = new StringKey<Localization>(nameof(UnrecognizedPropertyKeyWarning));
 
         /// <summary>
         /// Gets the key for a generic json value type error.
@@ -52,7 +52,7 @@ namespace Eutherion.Win.Storage
         ///          "expected _______{0}______, but found __{1}__"
         /// See also: <seealso cref="FormatTypeErrorMessage"/>.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> GenericJsonTypeError = new StringKey<ForFormattedText>(nameof(GenericJsonTypeError));
+        public static readonly StringKey<Localization> GenericJsonTypeError = new StringKey<Localization>(nameof(GenericJsonTypeError));
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
@@ -64,32 +64,32 @@ namespace Eutherion.Win.Storage
         /// - an index error location (IndexErrorLocation)
         /// See also: <seealso cref="FormatTypeErrorSomewhereMessage"/>.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> GenericJsonTypeErrorSomewhere = new StringKey<ForFormattedText>(nameof(GenericJsonTypeErrorSomewhere));
+        public static readonly StringKey<Localization> GenericJsonTypeErrorSomewhere = new StringKey<Localization>(nameof(GenericJsonTypeErrorSomewhere));
 
         /// <summary>
         /// Gets the key for displaying an error in the context of a property key.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> KeyErrorLocation = new StringKey<ForFormattedText>(nameof(KeyErrorLocation));
+        public static readonly StringKey<Localization> KeyErrorLocation = new StringKey<Localization>(nameof(KeyErrorLocation));
 
         /// <summary>
         /// Gets the translation key for displaying an error in the context of an item index in an array.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> IndexErrorLocation = new StringKey<ForFormattedText>(nameof(IndexErrorLocation));
+        public static readonly StringKey<Localization> IndexErrorLocation = new StringKey<Localization>(nameof(IndexErrorLocation));
 
         /// <summary>
         /// Gets the key for when there are no legal values.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> NoLegalValuesError = new StringKey<ForFormattedText>(nameof(NoLegalValuesError));
+        public static readonly StringKey<Localization> NoLegalValuesError = new StringKey<Localization>(nameof(NoLegalValuesError));
 
         /// <summary>
         /// Gets the key for when there are no legal values.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> NoLegalValuesErrorSomewhere = new StringKey<ForFormattedText>(nameof(NoLegalValuesErrorSomewhere));
+        public static readonly StringKey<Localization> NoLegalValuesErrorSomewhere = new StringKey<Localization>(nameof(NoLegalValuesErrorSomewhere));
 
         /// <summary>
         /// Gets the key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> TupleItemTypeMismatchError = new StringKey<ForFormattedText>(nameof(TupleItemTypeMismatchError));
+        public static readonly StringKey<Localization> TupleItemTypeMismatchError = new StringKey<Localization>(nameof(TupleItemTypeMismatchError));
 
         /// <summary>
         /// Surrounds a string value with double quote characters.
@@ -228,7 +228,7 @@ namespace Eutherion.Win.Storage
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
         public static string FormatTypeErrorMessage(
-            TextFormatter formatter,
+            TextFormatter<Localization> formatter,
             string formattedExpectedTypeDescription,
             string actualValueString)
             => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
@@ -251,7 +251,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string FormatLocatedAtPropertyKeyMessage(TextFormatter formatter, string propertyKey)
+        public static string FormatLocatedAtPropertyKeyMessage(TextFormatter<Localization> formatter, string propertyKey)
             => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(KeyErrorLocation, propertyKey);
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public static string FormatLocatedAtItemIndexMessage(TextFormatter formatter, int itemIndex)
+        public static string FormatLocatedAtItemIndexMessage(TextFormatter<Localization> formatter, int itemIndex)
             => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(IndexErrorLocation, itemIndex.ToStringInvariant());
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Eutherion.Win.Storage
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
         public static string FormatTypeErrorSomewhereMessage(
-            TextFormatter formatter,
+            TextFormatter<Localization> formatter,
             string formattedExpectedTypeDescription,
             string actualValueString,
             string somewhere)
@@ -307,7 +307,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the key which describes the type of expected value.
         /// </summary>
-        public StringKey<ForFormattedText> ExpectedTypeDescriptionKey { get; }
+        public StringKey<Localization> ExpectedTypeDescriptionKey { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
@@ -315,7 +315,7 @@ namespace Eutherion.Win.Storage
         /// <param name="expectedTypeDescriptionKey">
         /// The key which describes the type of expected value.
         /// </param>
-        public PTypeErrorBuilder(StringKey<ForFormattedText> expectedTypeDescriptionKey)
+        public PTypeErrorBuilder(StringKey<Localization> expectedTypeDescriptionKey)
             => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
@@ -333,7 +333,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+        public string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString)
             => FormatTypeErrorMessage(
                 formatter,
                 (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),
@@ -357,7 +357,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+        public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey)
             => FormatTypeErrorSomewhereMessage(
                 formatter,
                 (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),
@@ -382,7 +382,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+        public string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex)
             => FormatTypeErrorSomewhereMessage(
                 formatter,
                 (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(ExpectedTypeDescriptionKey),

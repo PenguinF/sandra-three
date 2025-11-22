@@ -2,7 +2,7 @@
 /*********************************************************************************
  * OpaqueColorType.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ namespace Eutherion.Win.Storage
     public sealed class OpaqueColorType : PType.Derived<string, Color>
     {
         public static readonly PTypeErrorBuilder OpaqueColorTypeError
-            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(OpaqueColorTypeError)));
+            = new PTypeErrorBuilder(new StringKey<Localization>(nameof(OpaqueColorTypeError)));
 
         public static readonly OpaqueColorType Instance = new OpaqueColorType();
 

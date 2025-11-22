@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SubFolderNameType.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace Eutherion.Win.Storage
     public sealed class SubFolderNameType : PType.Filter<string>
     {
         public static readonly PTypeErrorBuilder SubFolderNameTypeError
-            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(SubFolderNameTypeError)));
+            = new PTypeErrorBuilder(new StringKey<Localization>(nameof(SubFolderNameTypeError)));
 
         public static readonly SubFolderNameType Instance = new SubFolderNameType();
 

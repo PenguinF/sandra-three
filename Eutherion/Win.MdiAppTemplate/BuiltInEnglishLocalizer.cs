@@ -2,7 +2,7 @@
 /*********************************************************************************
  * BuiltInEnglishLocalizer.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@ using System.Linq;
 
 namespace Eutherion.Win.MdiAppTemplate
 {
-    public sealed class BuiltInEnglishLocalizer : TextFormatter
+    public sealed class BuiltInEnglishLocalizer : TextFormatter<Localization>
     {
-        public readonly Dictionary<StringKey<ForFormattedText>, string> Dictionary;
+        public readonly Dictionary<StringKey<Localization>, string> Dictionary;
 
-        public override string Format(StringKey<ForFormattedText> localizedStringKey, string[] parameters)
+        public override string Format(StringKey<Localization> localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
             ? FormatUtilities.SoftFormat(displayText, parameters)
             : Default.Format(localizedStringKey, parameters);
 
-        public BuiltInEnglishLocalizer(params IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>>[] subDictionaries)
+        public BuiltInEnglishLocalizer(params IEnumerable<KeyValuePair<StringKey<Localization>, string>>[] subDictionaries)
         {
-            Dictionary = new Dictionary<StringKey<ForFormattedText>, string>();
+            Dictionary = new Dictionary<StringKey<Localization>, string>();
 
             if (subDictionaries != null)
             {

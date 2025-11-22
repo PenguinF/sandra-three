@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SharedLocalizedStringKeys.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,49 +26,49 @@ namespace Eutherion.Win.MdiAppTemplate
 {
     public static class SharedLocalizedStringKeys
     {
-        public static readonly StringKey<ForFormattedText> About = new StringKey<ForFormattedText>(nameof(About));
-        public static readonly StringKey<ForFormattedText> AllFiles = new StringKey<ForFormattedText>(nameof(AllFiles));
-        public static readonly StringKey<ForFormattedText> Close = new StringKey<ForFormattedText>(nameof(Close));
-        public static readonly StringKey<ForFormattedText> Copy = new StringKey<ForFormattedText>(nameof(Copy));
-        public static readonly StringKey<ForFormattedText> Credits = new StringKey<ForFormattedText>(nameof(Credits));
-        public static readonly StringKey<ForFormattedText> Cut = new StringKey<ForFormattedText>(nameof(Cut));
-        public static readonly StringKey<ForFormattedText> Edit = new StringKey<ForFormattedText>(nameof(Edit));
-        public static readonly StringKey<ForFormattedText> EditCurrentLanguage = new StringKey<ForFormattedText>(nameof(EditCurrentLanguage));
-        public static readonly StringKey<ForFormattedText> EditPreferencesFile = new StringKey<ForFormattedText>(nameof(EditPreferencesFile));
-        public static readonly StringKey<ForFormattedText> ErrorLocation = new StringKey<ForFormattedText>(nameof(ErrorLocation));
-        public static readonly StringKey<ForFormattedText> ErrorPaneTitle = new StringKey<ForFormattedText>(nameof(ErrorPaneTitle));
-        public static readonly StringKey<ForFormattedText> Exit = new StringKey<ForFormattedText>(nameof(Exit));
-        public static readonly StringKey<ForFormattedText> File = new StringKey<ForFormattedText>(nameof(File));
-        public static readonly StringKey<ForFormattedText> GoToNextError = new StringKey<ForFormattedText>(nameof(GoToNextError));
-        public static readonly StringKey<ForFormattedText> GoToPreviousError = new StringKey<ForFormattedText>(nameof(GoToPreviousError));
-        public static readonly StringKey<ForFormattedText> Help = new StringKey<ForFormattedText>(nameof(Help));
-        public static readonly StringKey<ForFormattedText> JsonFiles = new StringKey<ForFormattedText>(nameof(JsonFiles));
-        public static readonly StringKey<ForFormattedText> NoErrorsMessage = new StringKey<ForFormattedText>(nameof(NoErrorsMessage));
-        public static readonly StringKey<ForFormattedText> OpenExecutableFolder = new StringKey<ForFormattedText>(nameof(OpenExecutableFolder));
-        public static readonly StringKey<ForFormattedText> OpenLocalAppDataFolder = new StringKey<ForFormattedText>(nameof(OpenLocalAppDataFolder));
-        public static readonly StringKey<ForFormattedText> Paste = new StringKey<ForFormattedText>(nameof(Paste));
-        public static readonly StringKey<ForFormattedText> Redo = new StringKey<ForFormattedText>(nameof(Redo));
-        public static readonly StringKey<ForFormattedText> Save = new StringKey<ForFormattedText>(nameof(Save));
-        public static readonly StringKey<ForFormattedText> SaveAs = new StringKey<ForFormattedText>(nameof(SaveAs));
-        public static readonly StringKey<ForFormattedText> SaveChangesQuery = new StringKey<ForFormattedText>(nameof(SaveChangesQuery));
-        public static readonly StringKey<ForFormattedText> SelectAll = new StringKey<ForFormattedText>(nameof(SelectAll));
-        public static readonly StringKey<ForFormattedText> ShowDefaultSettingsFile = new StringKey<ForFormattedText>(nameof(ShowDefaultSettingsFile));
-        public static readonly StringKey<ForFormattedText> ShowErrorPane = new StringKey<ForFormattedText>(nameof(ShowErrorPane));
-        public static readonly StringKey<ForFormattedText> Tools = new StringKey<ForFormattedText>(nameof(Tools));
-        public static readonly StringKey<ForFormattedText> Undo = new StringKey<ForFormattedText>(nameof(Undo));
-        public static readonly StringKey<ForFormattedText> UnsavedChangesTitle = new StringKey<ForFormattedText>(nameof(UnsavedChangesTitle));
-        public static readonly StringKey<ForFormattedText> Untitled = new StringKey<ForFormattedText>(nameof(Untitled));
-        public static readonly StringKey<ForFormattedText> View = new StringKey<ForFormattedText>(nameof(View));
-        public static readonly StringKey<ForFormattedText> WindowMaximize = new StringKey<ForFormattedText>(nameof(WindowMaximize));
-        public static readonly StringKey<ForFormattedText> WindowMinimize = new StringKey<ForFormattedText>(nameof(WindowMinimize));
-        public static readonly StringKey<ForFormattedText> WindowMove = new StringKey<ForFormattedText>(nameof(WindowMove));
-        public static readonly StringKey<ForFormattedText> WindowRestore = new StringKey<ForFormattedText>(nameof(WindowRestore));
-        public static readonly StringKey<ForFormattedText> WindowSize = new StringKey<ForFormattedText>(nameof(WindowSize));
-        public static readonly StringKey<ForFormattedText> ZoomIn = new StringKey<ForFormattedText>(nameof(ZoomIn));
-        public static readonly StringKey<ForFormattedText> ZoomOut = new StringKey<ForFormattedText>(nameof(ZoomOut));
+        public static readonly StringKey<Localization> About = new StringKey<Localization>(nameof(About));
+        public static readonly StringKey<Localization> AllFiles = new StringKey<Localization>(nameof(AllFiles));
+        public static readonly StringKey<Localization> Close = new StringKey<Localization>(nameof(Close));
+        public static readonly StringKey<Localization> Copy = new StringKey<Localization>(nameof(Copy));
+        public static readonly StringKey<Localization> Credits = new StringKey<Localization>(nameof(Credits));
+        public static readonly StringKey<Localization> Cut = new StringKey<Localization>(nameof(Cut));
+        public static readonly StringKey<Localization> Edit = new StringKey<Localization>(nameof(Edit));
+        public static readonly StringKey<Localization> EditCurrentLanguage = new StringKey<Localization>(nameof(EditCurrentLanguage));
+        public static readonly StringKey<Localization> EditPreferencesFile = new StringKey<Localization>(nameof(EditPreferencesFile));
+        public static readonly StringKey<Localization> ErrorLocation = new StringKey<Localization>(nameof(ErrorLocation));
+        public static readonly StringKey<Localization> ErrorPaneTitle = new StringKey<Localization>(nameof(ErrorPaneTitle));
+        public static readonly StringKey<Localization> Exit = new StringKey<Localization>(nameof(Exit));
+        public static readonly StringKey<Localization> File = new StringKey<Localization>(nameof(File));
+        public static readonly StringKey<Localization> GoToNextError = new StringKey<Localization>(nameof(GoToNextError));
+        public static readonly StringKey<Localization> GoToPreviousError = new StringKey<Localization>(nameof(GoToPreviousError));
+        public static readonly StringKey<Localization> Help = new StringKey<Localization>(nameof(Help));
+        public static readonly StringKey<Localization> JsonFiles = new StringKey<Localization>(nameof(JsonFiles));
+        public static readonly StringKey<Localization> NoErrorsMessage = new StringKey<Localization>(nameof(NoErrorsMessage));
+        public static readonly StringKey<Localization> OpenExecutableFolder = new StringKey<Localization>(nameof(OpenExecutableFolder));
+        public static readonly StringKey<Localization> OpenLocalAppDataFolder = new StringKey<Localization>(nameof(OpenLocalAppDataFolder));
+        public static readonly StringKey<Localization> Paste = new StringKey<Localization>(nameof(Paste));
+        public static readonly StringKey<Localization> Redo = new StringKey<Localization>(nameof(Redo));
+        public static readonly StringKey<Localization> Save = new StringKey<Localization>(nameof(Save));
+        public static readonly StringKey<Localization> SaveAs = new StringKey<Localization>(nameof(SaveAs));
+        public static readonly StringKey<Localization> SaveChangesQuery = new StringKey<Localization>(nameof(SaveChangesQuery));
+        public static readonly StringKey<Localization> SelectAll = new StringKey<Localization>(nameof(SelectAll));
+        public static readonly StringKey<Localization> ShowDefaultSettingsFile = new StringKey<Localization>(nameof(ShowDefaultSettingsFile));
+        public static readonly StringKey<Localization> ShowErrorPane = new StringKey<Localization>(nameof(ShowErrorPane));
+        public static readonly StringKey<Localization> Tools = new StringKey<Localization>(nameof(Tools));
+        public static readonly StringKey<Localization> Undo = new StringKey<Localization>(nameof(Undo));
+        public static readonly StringKey<Localization> UnsavedChangesTitle = new StringKey<Localization>(nameof(UnsavedChangesTitle));
+        public static readonly StringKey<Localization> Untitled = new StringKey<Localization>(nameof(Untitled));
+        public static readonly StringKey<Localization> View = new StringKey<Localization>(nameof(View));
+        public static readonly StringKey<Localization> WindowMaximize = new StringKey<Localization>(nameof(WindowMaximize));
+        public static readonly StringKey<Localization> WindowMinimize = new StringKey<Localization>(nameof(WindowMinimize));
+        public static readonly StringKey<Localization> WindowMove = new StringKey<Localization>(nameof(WindowMove));
+        public static readonly StringKey<Localization> WindowRestore = new StringKey<Localization>(nameof(WindowRestore));
+        public static readonly StringKey<Localization> WindowSize = new StringKey<Localization>(nameof(WindowSize));
+        public static readonly StringKey<Localization> ZoomIn = new StringKey<Localization>(nameof(ZoomIn));
+        public static readonly StringKey<Localization> ZoomOut = new StringKey<Localization>(nameof(ZoomOut));
 
-        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishTranslations(string appName)
-            => new Dictionary<StringKey<ForFormattedText>, string>
+        public static IEnumerable<KeyValuePair<StringKey<Localization>, string>> DefaultEnglishTranslations(string appName)
+            => new Dictionary<StringKey<Localization>, string>
             {
                 { About, $"About {appName}" },
                 { AllFiles, "All files" },

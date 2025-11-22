@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ namespace Eutherion.Win.MdiAppTemplate
 {
     public static class JsonErrorInfoExtensions
     {
-        public static StringKey<ForFormattedText> GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
-            => new StringKey<ForFormattedText>($"JsonError{jsonErrorCode}");
+        public static StringKey<Localization> GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
+            => new StringKey<Localization>($"JsonError{jsonErrorCode}");
 
         /// <summary>
         /// Capitalizes error messages after generating them.
@@ -43,7 +43,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// harder to test.
         /// TODO: figure out how to incorporate this into localizers.
         /// </summary>
-        public static string ToSentenceCase(this TextFormatter localizer, string errorMessage)
+        public static string ToSentenceCase(this TextFormatter<Localization> localizer, string errorMessage)
         {
             GC.KeepAlive(localizer); // Only to disable the warning that variable is unused.
             if (errorMessage == null || errorMessage.Length == 0) return errorMessage;
@@ -59,7 +59,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
         /// </summary>
-        public static string Message(this JsonErrorInfo jsonErrorInfo, TextFormatter localizer)
+        public static string Message(this JsonErrorInfo jsonErrorInfo, TextFormatter<Localization> localizer)
         {
             return localizer.Format(
                 GetLocalizedStringKey(jsonErrorInfo.ErrorCode),
@@ -67,7 +67,7 @@ namespace Eutherion.Win.MdiAppTemplate
                     x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, localizer)).ToArrayEx());
         }
 
-        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>
+        public static IEnumerable<KeyValuePair<StringKey<Localization>, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<StringKey<Localization>, string>
         {
             { JsonErrorInfoParameterDisplayHelper.NullString, "<null>" },
             { JsonErrorInfoParameterDisplayHelper.UntypedObjectString, "{0}" },
@@ -91,7 +91,7 @@ namespace Eutherion.Win.MdiAppTemplate
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
             { GetLocalizedStringKey(JsonErrorCode.ParseTreeTooDeep), $"the syntactic structure exceeded its maximum complexity and can therefore not be analyzed" },
 
-            { PType.JsonBoolean, "'" + JsonValue.False + "' or '" + JsonValue.True + "' value" },
+            { PType.JsonBoolean, "'" + JsonValue.FalseString + "' or '" + JsonValue.TrueString + "' value" },
             { PType.JsonInteger, "integer value" },
             { PType.JsonString, "string value" },
             { PType.JsonArray, "a value array ('[1, 2, ...]')" },

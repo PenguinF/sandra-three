@@ -2,7 +2,7 @@
 /*********************************************************************************
  * SettingCopy.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -274,14 +274,14 @@ namespace Eutherion.Win.Storage
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
             string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(
-                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, TextFormatter.Default)));
+                jsonErrorInfo.Parameters.Select(x => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(x, TextFormatter<Localization>.Default)));
 
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
         public static string AutoSaveFileParseMessage(PTypeError typeError)
         {
-            return $"{typeError.FormatMessage(TextFormatter.Default)} at position {typeError.Start}, length {typeError.Length}";
+            return $"{typeError.FormatMessage(TextFormatter<Localization>.Default)} at position {typeError.Start}, length {typeError.Length}";
         }
 
         public SettingsParseException(JsonErrorInfo jsonErrorInfo)
