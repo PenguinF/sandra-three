@@ -45,7 +45,7 @@ namespace Sandra.UI
 
             public Image ForegroundImage;
             public ForegroundImageAttribute ImageAttribute;
-            public Color SquareOverlayColor;
+            public Color OverlayColor;
 
             public Point Location;  // Location relative to the top left corner of the control.
             public Size Size;       // Square size (same for all squares).
@@ -521,7 +521,7 @@ namespace Sandra.UI
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Color GetSquareOverlayColor(int x, int y) => SquareElements[GetIndex(x, y)].SquareOverlayColor;
+        public Color GetSquareOverlayColor(int x, int y) => SquareElements[GetIndex(x, y)].OverlayColor;
 
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
@@ -550,9 +550,9 @@ namespace Sandra.UI
         public void SetSquareOverlayColor(int x, int y, Color value)
         {
             int index = GetIndex(x, y);
-            if (SquareElements[index].SquareOverlayColor != value)
+            if (SquareElements[index].OverlayColor != value)
             {
-                SquareElements[index].SquareOverlayColor = value;
+                SquareElements[index].OverlayColor = value;
                 Invalidate();
             }
         }
@@ -1001,10 +1001,10 @@ namespace Sandra.UI
                         }
 
                         // Draw overlay color on the square, with the already drawn foreground image.
-                        if (!squareElement.SquareOverlayColor.IsEmpty)
+                        if (!squareElement.OverlayColor.IsEmpty)
                         {
                             drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(drawRun.GetSolidBrush(squareElement.SquareOverlayColor), squareRectangle);
+                            g.FillRectangle(drawRun.GetSolidBrush(squareElement.OverlayColor), squareRectangle);
                         }
                     }
                 }
