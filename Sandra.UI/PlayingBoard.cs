@@ -964,9 +964,9 @@ namespace Sandra.UI
                             // Draw foreground images.
                             if (sizeH > 0 && sizeV > 0)
                             {
-                                Image currentImg = squareElement.ForegroundImage;
+                                Image image = squareElement.ForegroundImage;
 
-                                if (currentImg != null)
+                                if (image != null)
                                 {
                                     Rectangle foregroundImageRectangle = new Rectangle(
                                         squareRectangle.Left + imgRect.Left,
@@ -974,9 +974,29 @@ namespace Sandra.UI
                                         sizeH,
                                         sizeV);
 
-                                    DrawForegroundImage(g, currentImg,
-                                                        foregroundImageRectangle,
-                                                        squareElement.ForegroundImageAttribute);
+                                    if (squareElement.ForegroundImageAttribute == ForegroundImageAttribute.HalfTransparent)
+                                    {
+                                        // Half-transparent.
+                                        g.DrawImage(image,
+                                                    foregroundImageRectangle,
+                                                    0, 0, image.Width, image.Height,
+                                                    GraphicsUnit.Pixel,
+                                                    HalfTransparentImageAttributes);
+                                    }
+                                    else if (squareElement.ForegroundImageAttribute == ForegroundImageAttribute.Highlight)
+                                    {
+                                        // Highlight piece.
+                                        g.DrawImage(image,
+                                                    foregroundImageRectangle,
+                                                    0, 0, image.Width, image.Height,
+                                                    GraphicsUnit.Pixel,
+                                                    HighlightImageAttributes);
+                                    }
+                                    else
+                                    {
+                                        // Default case.
+                                        g.DrawImage(image, foregroundImageRectangle);
+                                    }
                                 }
                             }
 
@@ -992,34 +1012,6 @@ namespace Sandra.UI
 
             base.OnPaint(pe);
         }
-
-        private void DrawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
-        {
-            if (imgAttribute == ForegroundImageAttribute.HalfTransparent)
-            {
-                // Half-transparent.
-                g.DrawImage(image,
-                            destinationRectangle,
-                            0, 0, image.Width, image.Height,
-                            GraphicsUnit.Pixel,
-                            HalfTransparentImageAttributes);
-            }
-            else if (imgAttribute == ForegroundImageAttribute.Highlight)
-            {
-                // Highlight piece.
-                g.DrawImage(image,
-                            destinationRectangle,
-                            0, 0, image.Width, image.Height,
-                            GraphicsUnit.Pixel,
-                            HighlightImageAttributes);
-            }
-            else
-            {
-                // Default case.
-                g.DrawImage(image, destinationRectangle);
-            }
-        }
-
 
         protected override void Dispose(bool disposing)
         {
