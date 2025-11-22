@@ -103,7 +103,7 @@ namespace Sandra.UI
         /// <summary>
         /// Gets the default value for the <see cref="BoardHeight"/> property.
         /// </summary>
-        public const int DefaultBoardHeight = 8;
+        public const int DefaultBoardHeight = Chess.Constants.SquareCount;
 
         /// <summary>
         /// Gets or sets the number of squares in a file. The minimum value is 1.
@@ -133,7 +133,7 @@ namespace Sandra.UI
         /// <summary>
         /// Gets the default value for the <see cref="BoardWidth"/> property.
         /// </summary>
-        public const int DefaultBoardWidth = 8;
+        public const int DefaultBoardWidth = Chess.Constants.SquareCount;
 
         /// <summary>
         /// Gets or sets the number of squares in a rank. The minimum value is 1.
