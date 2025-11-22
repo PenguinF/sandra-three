@@ -951,77 +951,58 @@ namespace Sandra.UI
                 }
                 g.ResetClip();
 
-                // Draw the background light and dark squares in a block pattern.
-                // Use SmoothingMode.None so crisp edges are drawn for the squares.
-                g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
-                    {
-                        for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
-                        {
-                            SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
-
-                            // Draw either a light or a dark square depending on its location.
-                            if (squareElement.IsLightSquare)
-                            {
-                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), new Rectangle(squareElement.Location, squareElement.Size));
-                            }
-                            else
-                            {
-                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), new Rectangle(squareElement.Location, squareElement.Size));
-                            }
-                        }
-                    }
-                }
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-
-                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
-                {
-                    // Draw foreground images.
                     // Determine the image size and the amount of space around a foreground image within a square.
                     Rectangle imgRect = GetRelativeForegroundImageRectangle();
                     int sizeH = imgRect.Width,
                         sizeV = imgRect.Height;
 
-                    if (sizeH > 0 && sizeV > 0)
+                    for (int yIndex = 0; yIndex < BoardHeight; ++yIndex)
                     {
-                        int hOffset = imgRect.Left,
-                            vOffset = imgRect.Top;
-
-                        // Loop over foreground images and draw them.
-                        int y = vOffset;
-                        int index = 0;
-                        for (int j = 0; j < boardHeight; ++j)
+                        for (int xIndex = 0; xIndex < BoardWidth; ++xIndex)
                         {
-                            int x = hOffset;
-                            for (int k = 0; k < boardWidth; ++k)
+                            SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
+                            Rectangle squareRectangle = new Rectangle(squareElement.Location, squareElement.Size);
+
+                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                            g.SmoothingMode = SmoothingMode.None;
+
+                            // Draw either a light or a dark square depending on its location.
+                            if (squareElement.IsLightSquare)
                             {
-                                // Select picture.
-                                Image currentImg = SquareElements[index].ForegroundImage;
+                                g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
+                            }
+                            else
+                            {
+                                g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
+                            }
+
+                            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                            // Draw foreground images.
+                            if (sizeH > 0 && sizeV > 0)
+                            {
+                                Image currentImg = squareElement.ForegroundImage;
+
                                 if (currentImg != null)
                                 {
-                                    DrawForegroundImage(g, currentImg,
-                                                        new Rectangle(x, y, sizeH, sizeV),
-                                                        SquareElements[index].ForegroundImageAttribute);
-                                }
-                                x += delta;
-                                ++index;
-                            }
-                            y += delta;
-                        }
-                    }
+                                    Rectangle foregroundImageRectangle = new Rectangle(
+                                        squareRectangle.Left + imgRect.Left,
+                                        squareRectangle.Top + imgRect.Top,
+                                        sizeH,
+                                        sizeV);
 
-                    // Apply square highlights.
-                    for (int index = 0; index < boardWidth * boardHeight; ++index)
-                    {
-                        if (!SquareElements[index].SquareOverlayColor.IsEmpty)
-                        {
-                            Point offset = GetLocationFromIndex(index);
+                                    DrawForegroundImage(g, currentImg,
+                                                        foregroundImageRectangle,
+                                                        squareElement.ForegroundImageAttribute);
+                                }
+                            }
+
                             // Draw overlay color on the square, with the already drawn foreground image.
-                            using (var overlayBrush = new SolidBrush(SquareElements[index].SquareOverlayColor))
+                            using (var overlayBrush = new SolidBrush(squareElement.SquareOverlayColor))
                             {
-                                g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                                g.FillRectangle(overlayBrush, squareRectangle);
                             }
                         }
                     }
