@@ -737,20 +737,6 @@ namespace Sandra.UI
             return y * BoardWidth + x;
         }
 
-        private Point GetLocationFromIndex(int index)
-        {
-            if (index < 0 || index >= BoardWidth * BoardHeight)
-            {
-                return Point.Empty;
-            }
-
-            int x = GetX(index),
-                y = GetY(index),
-                delta = SquareSize;
-
-            return new Point(x * delta, y * delta);
-        }
-
         /// <summary>
         /// Returns the rectangle of a foreground image relative to its containing square.
         /// </summary>
@@ -930,28 +916,23 @@ namespace Sandra.UI
 
             using (DrawRun drawRun = new DrawRun(pe.Graphics))
             {
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-
                 // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
                 int boardWidth = BoardWidth;
                 int boardHeight = BoardHeight;
                 int squareSize = SquareSize;
-                int delta = squareSize;
-                int totalBoardWidth = delta * boardWidth;
-                int totalBoardHeight = delta * boardHeight;
 
-                Rectangle clipRectangle = pe.ClipRectangle;
-                Rectangle boardRectangle = new Rectangle(0, 0, totalBoardWidth, totalBoardHeight);
+                Rectangle boardRectangle = new Rectangle(0, 0, squareSize * boardWidth, squareSize * boardHeight);
 
                 // Draw the background area not covered by the playing board.
                 g.ExcludeClip(boardRectangle);
                 if (!g.IsVisibleClipEmpty)
                 {
+                    g.SmoothingMode = SmoothingMode.None;
                     g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
                 }
                 g.ResetClip();
 
-                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
+                if (squareSize > 0 && pe.ClipRectangle.IntersectsWith(boardRectangle))
                 {
                     // Determine the image size and the amount of space around a foreground image within a square.
                     Rectangle imgRect = GetRelativeForegroundImageRectangle();
