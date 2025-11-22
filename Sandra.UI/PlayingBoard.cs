@@ -912,8 +912,6 @@ namespace Sandra.UI
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            Graphics g = pe.Graphics;
-
             using (DrawRun drawRun = new DrawRun(pe.Graphics))
             {
                 // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
@@ -926,10 +924,10 @@ namespace Sandra.UI
                 // Draw the background area not covered by the playing board.
                 using (drawRun.ExcludeClip(boardRectangle))
                 {
-                    if (!g.IsVisibleClipEmpty)
+                    if (!drawRun.Graphics.IsVisibleClipEmpty)
                     {
                         drawRun.SmoothingMode = SmoothingMode.None;
-                        g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
+                        drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
                     }
                 }
 
@@ -949,16 +947,16 @@ namespace Sandra.UI
                         {
                             // Use SmoothingMode.None so crisp edges are drawn for the squares.
                             drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
                         }
                         else
                         {
                             // Use SmoothingMode.None so crisp edges are drawn for the squares.
                             drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
                         }
 
-                        // Draw foreground images.
+                        // Draw foreground image.
                         if (sizeH > 0 && sizeV > 0)
                         {
                             Image image = squareElement.ForegroundImage;
@@ -975,27 +973,27 @@ namespace Sandra.UI
                                 {
                                     // Half-transparent.
                                     drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                    g.DrawImage(image,
-                                                foregroundImageRectangle,
-                                                0, 0, image.Width, image.Height,
-                                                GraphicsUnit.Pixel,
-                                                HalfTransparentImageAttributes);
+                                    drawRun.Graphics.DrawImage(image,
+                                                               foregroundImageRectangle,
+                                                               0, 0, image.Width, image.Height,
+                                                               GraphicsUnit.Pixel,
+                                                               HalfTransparentImageAttributes);
                                 }
                                 else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
                                 {
                                     // Highlight piece.
                                     drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                    g.DrawImage(image,
-                                                foregroundImageRectangle,
-                                                0, 0, image.Width, image.Height,
-                                                GraphicsUnit.Pixel,
-                                                HighlightImageAttributes);
+                                    drawRun.Graphics.DrawImage(image,
+                                                               foregroundImageRectangle,
+                                                               0, 0, image.Width, image.Height,
+                                                               GraphicsUnit.Pixel,
+                                                               HighlightImageAttributes);
                                 }
                                 else
                                 {
                                     // Default case.
                                     drawRun.SmoothingMode = SmoothingMode.AntiAlias;
-                                    g.DrawImage(image, foregroundImageRectangle);
+                                    drawRun.Graphics.DrawImage(image, foregroundImageRectangle);
                                 }
                             }
                         }
@@ -1004,7 +1002,7 @@ namespace Sandra.UI
                         if (!squareElement.OverlayColor.IsEmpty)
                         {
                             drawRun.SmoothingMode = SmoothingMode.None;
-                            g.FillRectangle(drawRun.GetSolidBrush(squareElement.OverlayColor), squareRectangle);
+                            drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(squareElement.OverlayColor), squareRectangle);
                         }
                     }
                 }
