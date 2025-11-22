@@ -38,6 +38,15 @@ namespace Sandra.UI
     /// </summary>
     public class PlayingBoard : Control, IUIActionHandlerProvider
     {
+        private struct SquareVisualElement
+        {
+            public Image ForegroundImage;
+            public ForegroundImageAttribute ForegroundImageAttribute;
+            public Color SquareOverlayColor;
+        }
+
+        private SquareVisualElement[] SquareElements;
+
         public PlayingBoard()
         {
             // Styles appropriate for a graphics-heavy control.
@@ -325,15 +334,13 @@ namespace Sandra.UI
         }
 
 
-        private Image[] foregroundImages;
-
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Image GetForegroundImage(int x, int y) => foregroundImages[GetIndex(x, y)];
+        public Image GetForegroundImage(int x, int y) => SquareElements[GetIndex(x, y)].ForegroundImage;
 
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
@@ -362,9 +369,9 @@ namespace Sandra.UI
         public void SetForegroundImage(int x, int y, Image value)
         {
             int index = GetIndex(x, y);
-            if (foregroundImages[index] != value)
+            if (SquareElements[index].ForegroundImage != value)
             {
-                foregroundImages[index] = value;
+                SquareElements[index].ForegroundImage = value;
                 Invalidate();
             }
         }
@@ -388,15 +395,13 @@ namespace Sandra.UI
         }
 
 
-        private ForegroundImageAttribute[] foregroundImageAttributes;
-
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => foregroundImageAttributes[GetIndex(x, y)];
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => SquareElements[GetIndex(x, y)].ForegroundImageAttribute;
 
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
@@ -425,9 +430,9 @@ namespace Sandra.UI
         public void SetForegroundImageAttribute(int x, int y, ForegroundImageAttribute value)
         {
             int index = GetIndex(x, y);
-            if (foregroundImageAttributes[index] != value)
+            if (SquareElements[index].ForegroundImageAttribute != value)
             {
-                foregroundImageAttributes[index] = value;
+                SquareElements[index].ForegroundImageAttribute = value;
                 Invalidate();
             }
         }
@@ -451,15 +456,13 @@ namespace Sandra.UI
         }
 
 
-        private Color[] squareOverlayColors;
-
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Color GetSquareOverlayColor(int x, int y) => squareOverlayColors[GetIndex(x, y)];
+        public Color GetSquareOverlayColor(int x, int y) => SquareElements[GetIndex(x, y)].SquareOverlayColor;
 
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
@@ -488,9 +491,9 @@ namespace Sandra.UI
         public void SetSquareOverlayColor(int x, int y, Color value)
         {
             int index = GetIndex(x, y);
-            if (squareOverlayColors[index] != value)
+            if (SquareElements[index].SquareOverlayColor != value)
             {
-                squareOverlayColors[index] = value;
+                SquareElements[index].SquareOverlayColor = value;
                 Invalidate();
             }
         }
@@ -517,9 +520,7 @@ namespace Sandra.UI
         private void UpdateSquareArrays()
         {
             int newArrayLength = BoardWidth * BoardHeight;
-            foregroundImages = new Image[newArrayLength];
-            foregroundImageAttributes = new ForegroundImageAttribute[newArrayLength];
-            squareOverlayColors = new Color[newArrayLength];
+            SquareElements = new SquareVisualElement[newArrayLength];
         }
 
 
@@ -953,12 +954,12 @@ namespace Sandra.UI
                             for (int k = 0; k < boardWidth; ++k)
                             {
                                 // Select picture.
-                                Image currentImg = foregroundImages[index];
+                                Image currentImg = SquareElements[index].ForegroundImage;
                                 if (currentImg != null)
                                 {
                                     DrawForegroundImage(g, currentImg,
                                                         new Rectangle(x, y, sizeH, sizeV),
-                                                        foregroundImageAttributes[index]);
+                                                        SquareElements[index].ForegroundImageAttribute);
                                 }
                                 x += delta;
                                 ++index;
@@ -970,11 +971,11 @@ namespace Sandra.UI
                     // Apply square highlights.
                     for (int index = 0; index < boardWidth * boardHeight; ++index)
                     {
-                        if (!squareOverlayColors[index].IsEmpty)
+                        if (!SquareElements[index].SquareOverlayColor.IsEmpty)
                         {
                             Point offset = GetLocationFromIndex(index);
                             // Draw overlay color on the square, with the already drawn foreground image.
-                            using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                            using (var overlayBrush = new SolidBrush(SquareElements[index].SquareOverlayColor))
                             {
                                 g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
                             }
