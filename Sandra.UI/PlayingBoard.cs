@@ -86,7 +86,7 @@ namespace Sandra.UI
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            UpdateSquareArrays();
+            ResizeSquareElements();
 
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
@@ -107,6 +107,11 @@ namespace Sandra.UI
             HalfTransparentImageAttributes = halfTransparent;
         }
 
+        private void ResizeSquareElements()
+        {
+            int newArrayLength = BoardWidth * BoardHeight;
+            SquareElements = new SquareVisualElement[newArrayLength];
+        }
 
         /// <summary>
         /// Gets the default value for the <see cref="BoardHeight"/> property.
@@ -130,7 +135,7 @@ namespace Sandra.UI
                 }
                 if (propertyStore.Set(nameof(BoardHeight), value))
                 {
-                    UpdateSquareArrays();
+                    ResizeSquareElements();
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -160,7 +165,7 @@ namespace Sandra.UI
                 }
                 if (propertyStore.Set(nameof(BoardWidth), value))
                 {
-                    UpdateSquareArrays();
+                    ResizeSquareElements();
                     VerifySizeToFit();
                     Invalidate();
                 }
@@ -513,13 +518,6 @@ namespace Sandra.UI
         {
             ThrowIfNull(squareLocation);
             SetSquareOverlayColor(squareLocation.X, squareLocation.Y, value);
-        }
-
-
-        private void UpdateSquareArrays()
-        {
-            int newArrayLength = BoardWidth * BoardHeight;
-            SquareElements = new SquareVisualElement[newArrayLength];
         }
 
 
