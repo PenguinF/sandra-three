@@ -34,7 +34,7 @@ namespace Eutherion.Win.Canvas
     {
         private readonly Dictionary<Color, SolidBrush> SolidBrushes = new Dictionary<Color, SolidBrush>();
         private readonly DisposableResourceCollection DisposableResources = new DisposableResourceCollection();
-        private readonly List<ConstrainedClipScope> ExcludedClips = new List<ConstrainedClipScope>();
+        private readonly List<ConstrainedClipScope> ClipScopes = new List<ConstrainedClipScope>();
 
         /// <summary>
         /// Gets the graphics surface to draw on.
@@ -85,18 +85,18 @@ namespace Eutherion.Win.Canvas
         {
             Graphics.ExcludeClip(rect);
             ConstrainedClipScope excludedClipScope = new ConstrainedClipScope(this);
-            ExcludedClips.Add(excludedClipScope);
+            ClipScopes.Add(excludedClipScope);
             return excludedClipScope;
         }
 
         internal void ResetClip(ConstrainedClipScope excludedClipScope)
         {
-            for (int i = ExcludedClips.Count - 1; i >= 0; i--)
+            for (int i = ClipScopes.Count - 1; i >= 0; i--)
             {
-                if (excludedClipScope == ExcludedClips[i])
+                if (excludedClipScope == ClipScopes[i])
                 {
-                    ExcludedClips.RemoveAt(i);
-                    if (ExcludedClips.Count == 0)
+                    ClipScopes.RemoveAt(i);
+                    if (ClipScopes.Count == 0)
                     {
                         Graphics.ResetClip();
                     }
