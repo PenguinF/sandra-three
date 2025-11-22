@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Canvas
@@ -38,6 +39,25 @@ namespace Eutherion.Win.Canvas
         /// Gets the graphics surface to draw on.
         /// </summary>
         public Graphics Graphics { get; }
+
+        private SmoothingMode _SmoothingMode = SmoothingMode.Invalid;
+
+        /// <summary>
+        /// Gets or sets the current smoothing mode.
+        /// </summary>
+        public SmoothingMode SmoothingMode
+        {
+            get => _SmoothingMode;
+            set
+            {
+                // Wrap this in an equality check to prevent P/Invoke calls if the value doesn't change.
+                if (value != _SmoothingMode)
+                {
+                    Graphics.SmoothingMode = value;
+                    _SmoothingMode = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new <see cref="DrawRun"/> with a Windows <see cref="System.Drawing.Graphics"/> object.

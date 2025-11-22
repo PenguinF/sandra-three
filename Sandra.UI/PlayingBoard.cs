@@ -927,7 +927,7 @@ namespace Sandra.UI
                 g.ExcludeClip(boardRectangle);
                 if (!g.IsVisibleClipEmpty)
                 {
-                    g.SmoothingMode = SmoothingMode.None;
+                    drawRun.SmoothingMode = SmoothingMode.None;
                     g.FillRectangle(drawRun.GetSolidBrush(BackColor), ClientRectangle);
                 }
                 g.ResetClip();
@@ -946,20 +946,19 @@ namespace Sandra.UI
                             SquareVisualElement squareElement = SquareElements[GetIndex(xIndex, yIndex)];
                             Rectangle squareRectangle = new Rectangle(squareElement.Location, squareElement.Size);
 
-                            // Use SmoothingMode.None so crisp edges are drawn for the squares.
-                            g.SmoothingMode = SmoothingMode.None;
-
                             // Draw either a light or a dark square depending on its location.
                             if (squareElement.IsLightSquare)
                             {
+                                // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                                drawRun.SmoothingMode = SmoothingMode.None;
                                 g.FillRectangle(drawRun.GetSolidBrush(LightSquareColor), squareRectangle);
                             }
                             else
                             {
+                                // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                                drawRun.SmoothingMode = SmoothingMode.None;
                                 g.FillRectangle(drawRun.GetSolidBrush(DarkSquareColor), squareRectangle);
                             }
-
-                            g.SmoothingMode = SmoothingMode.AntiAlias;
 
                             // Draw foreground images.
                             if (sizeH > 0 && sizeV > 0)
@@ -977,6 +976,7 @@ namespace Sandra.UI
                                     if (squareElement.ImageAttribute == ForegroundImageAttribute.HalfTransparent)
                                     {
                                         // Half-transparent.
+                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                                         g.DrawImage(image,
                                                     foregroundImageRectangle,
                                                     0, 0, image.Width, image.Height,
@@ -986,6 +986,7 @@ namespace Sandra.UI
                                     else if (squareElement.ImageAttribute == ForegroundImageAttribute.Highlight)
                                     {
                                         // Highlight piece.
+                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                                         g.DrawImage(image,
                                                     foregroundImageRectangle,
                                                     0, 0, image.Width, image.Height,
@@ -995,6 +996,7 @@ namespace Sandra.UI
                                     else
                                     {
                                         // Default case.
+                                        drawRun.SmoothingMode = SmoothingMode.AntiAlias;
                                         g.DrawImage(image, foregroundImageRectangle);
                                     }
                                 }
@@ -1003,6 +1005,7 @@ namespace Sandra.UI
                             // Draw overlay color on the square, with the already drawn foreground image.
                             using (var overlayBrush = new SolidBrush(squareElement.SquareOverlayColor))
                             {
+                                drawRun.SmoothingMode = SmoothingMode.None;
                                 g.FillRectangle(overlayBrush, squareRectangle);
                             }
                         }
