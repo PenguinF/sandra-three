@@ -2,7 +2,7 @@
 /*********************************************************************************
  * MiscTests.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,18 +33,18 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(null, TextFormatter.Default));
+            Assert.Throws<ArgumentNullException>("parameter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(null, TextFormatter<Localization>.Default));
             Assert.Throws<ArgumentNullException>("formatter", () => JsonErrorInfoParameterDisplayHelper.GetFormattedDisplayValue(new JsonErrorInfoParameter<char>('a'), null));
 
             Assert.Throws<ArgumentNullException>(() => FormatUtilities.SoftFormat(null));
         }
 
-        private sealed class TestFormatter : TextFormatter
+        private sealed class TestFormatter : TextFormatter<Localization>
         {
             public static readonly string TestNullString = "NULL";
             public static readonly string TestUntypedObjectString = "UNTYPED({0})";
 
-            public override string Format(StringKey<ForFormattedText> key, string[] parameters)
+            public override string Format(StringKey<Localization> key, string[] parameters)
             {
                 if (key == JsonErrorInfoParameterDisplayHelper.NullString)
                     return TestNullString;

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Localizers.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ namespace Eutherion.Win.MdiAppTemplate
         private static readonly string TranslationsDescription
             = "List of translations.";
 
-        public static readonly SettingProperty<Dictionary<StringKey<ForFormattedText>, string>> Translations = new SettingProperty<Dictionary<StringKey<ForFormattedText>, string>>(
+        public static readonly SettingProperty<Dictionary<StringKey<Localization>, string>> Translations = new SettingProperty<Dictionary<StringKey<Localization>, string>>(
             SettingKey.ToSnakeCaseKey(nameof(Translations)),
             TranslationDictionaryType.Instance,
             new SettingComment(TranslationsDescription));
@@ -151,7 +151,7 @@ namespace Eutherion.Win.MdiAppTemplate
     public sealed class TrimmedStringType : PType.Derived<string, string>
     {
         public static readonly PTypeErrorBuilder TrimmedStringTypeError
-            = new PTypeErrorBuilder(new StringKey<ForFormattedText>(nameof(TrimmedStringTypeError)));
+            = new PTypeErrorBuilder(new StringKey<Localization>(nameof(TrimmedStringTypeError)));
 
         public static readonly TrimmedStringType Instance = new TrimmedStringType();
 
@@ -165,7 +165,7 @@ namespace Eutherion.Win.MdiAppTemplate
             : InvalidValue(TrimmedStringTypeError);
     }
 
-    public class TranslationDictionaryType : PType.Derived<Dictionary<string, string>, Dictionary<StringKey<ForFormattedText>, string>>
+    public class TranslationDictionaryType : PType.Derived<Dictionary<string, string>, Dictionary<StringKey<Localization>, string>>
     {
         public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
@@ -174,19 +174,19 @@ namespace Eutherion.Win.MdiAppTemplate
         {
         }
 
-        public override Union<ITypeErrorBuilder, Dictionary<StringKey<ForFormattedText>, string>> TryGetTargetValue(Dictionary<string, string> value)
+        public override Union<ITypeErrorBuilder, Dictionary<StringKey<Localization>, string>> TryGetTargetValue(Dictionary<string, string> value)
         {
-            var dictionary = new Dictionary<StringKey<ForFormattedText>, string>();
+            var dictionary = new Dictionary<StringKey<Localization>, string>();
 
             foreach (var kv in value)
             {
-                dictionary.Add(new StringKey<ForFormattedText>(kv.Key), kv.Value);
+                dictionary.Add(new StringKey<Localization>(kv.Key), kv.Value);
             }
 
             return dictionary;
         }
 
-        public override Dictionary<string, string> ConvertToBaseValue(Dictionary<StringKey<ForFormattedText>, string> value)
+        public override Dictionary<string, string> ConvertToBaseValue(Dictionary<StringKey<Localization>, string> value)
         {
             var dictionary = new Dictionary<string, string>();
 

@@ -2,7 +2,7 @@
 /*********************************************************************************
  * Session.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ namespace Eutherion.Win.MdiAppTemplate
 
         public static Session Configure(SingleInstanceMainForm singleInstanceMainForm,
                                         ISettingsProvider settingsProvider,
-                                        TextFormatter defaultLocalizer,
-                                        Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary,
+                                        TextFormatter<Localization> defaultLocalizer,
+                                        Dictionary<StringKey<Localization>, string> defaultLocalizerDictionary,
                                         Icon applicationIcon)
         {
             var session = new Session(singleInstanceMainForm,
@@ -111,7 +111,7 @@ namespace Eutherion.Win.MdiAppTemplate
             return Current;
         }
 
-        private readonly Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary;
+        private readonly Dictionary<StringKey<Localization>, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
         /// <summary>
@@ -125,12 +125,12 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         internal readonly byte[] TodaysMagic;
 
-        private TextFormatter currentLocalizer;
+        private TextFormatter<Localization> currentLocalizer;
 
         private Session(SingleInstanceMainForm singleInstanceMainForm,
                         ISettingsProvider settingsProvider,
-                        TextFormatter defaultLocalizer,
-                        Dictionary<StringKey<ForFormattedText>, string> defaultLocalizerDictionary,
+                        TextFormatter<Localization> defaultLocalizer,
+                        Dictionary<StringKey<Localization>, string> defaultLocalizerDictionary,
                         Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
@@ -315,7 +315,7 @@ namespace Eutherion.Win.MdiAppTemplate
                 }
 
                 // Fall back onto defaults if still null.
-                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? TextFormatter.Default;
+                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? TextFormatter<Localization>.Default;
             }
             catch
             {
@@ -418,7 +418,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <exception cref="ArgumentNullException">
         /// The provided new value for <see cref="CurrentLocalizer"/> is null.
         /// </exception>
-        public TextFormatter CurrentLocalizer
+        public TextFormatter<Localization> CurrentLocalizer
         {
             get => currentLocalizer;
             set

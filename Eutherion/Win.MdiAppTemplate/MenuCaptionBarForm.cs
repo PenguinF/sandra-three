@@ -769,9 +769,9 @@ namespace Eutherion.Win.MdiAppTemplate
 
         private void UpdateToolTips()
         {
-            TextFormatter currentLocalizer = Session.Current.CurrentLocalizer;
+            TextFormatter<Localization> currentLocalizer = Session.Current.CurrentLocalizer;
 
-            new (NonSelectableButton, StringKey<ForFormattedText>)[]
+            new (NonSelectableButton, StringKey<Localization>)[]
             {
                 (minimizeButton, SharedLocalizedStringKeys.WindowMinimize),
                 (maximizeButton, SharedLocalizedStringKeys.WindowMaximize),

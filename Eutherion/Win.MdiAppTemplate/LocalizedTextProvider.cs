@@ -2,7 +2,7 @@
 /*********************************************************************************
  * LocalizedTextProvider.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// <summary>
         /// Gets the key for this <see cref="LocalizedTextProvider"/>.
         /// </summary>
-        public readonly StringKey<ForFormattedText> Key;
+        public readonly StringKey<Localization> Key;
 
         /// <summary>
         /// Gets the current localized display text.
@@ -40,15 +40,15 @@ namespace Eutherion.Win.MdiAppTemplate
         public string Eval() => Session.Current.CurrentLocalizer.Format(Key);
 
         /// <summary>
-        /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/>.
+        /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="StringKey{T}"/> of <see cref="Localization"/>.
         /// </summary>
         /// <param name="key">
-        /// The <see cref="StringKey{T}"/> of <see cref="ForFormattedText"/> for the <see cref="LocalizedTextProvider"/>.
+        /// The <see cref="StringKey{T}"/> of <see cref="Localization"/> for the <see cref="LocalizedTextProvider"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public LocalizedTextProvider(StringKey<ForFormattedText> key)
+        public LocalizedTextProvider(StringKey<Localization> key)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
         }

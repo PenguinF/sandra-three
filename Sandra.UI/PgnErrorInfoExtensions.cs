@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,16 +28,16 @@ namespace Sandra.UI
 {
     public static class PgnErrorInfoExtensions
     {
-        public static StringKey<ForFormattedText> GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
-            => new StringKey<ForFormattedText>($"PgnError{pgnErrorCode}");
+        public static StringKey<Localization> GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
+            => new StringKey<Localization>($"PgnError{pgnErrorCode}");
 
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="PgnErrorInfo"/>.
         /// </summary>
-        public static string Message(this PgnErrorInfo pgnErrorInfo, TextFormatter localizer)
+        public static string Message(this PgnErrorInfo pgnErrorInfo, TextFormatter<Localization> localizer)
             => localizer.Format(GetLocalizedStringKey(pgnErrorInfo.ErrorCode), pgnErrorInfo.Parameters);
 
-        public static IEnumerable<KeyValuePair<StringKey<ForFormattedText>, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<StringKey<ForFormattedText>, string>
+        public static IEnumerable<KeyValuePair<StringKey<Localization>, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<StringKey<Localization>, string>
         {
             { GetLocalizedStringKey(PgnErrorCode.IllegalCharacter), "illegal character '{0}'" },
             { GetLocalizedStringKey(PgnErrorCode.UnterminatedTagValue), "unterminated tag value" },

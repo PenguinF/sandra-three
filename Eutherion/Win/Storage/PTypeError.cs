@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PTypeError.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public abstract string FormatMessage(TextFormatter formatter);
+        public abstract string FormatMessage(TextFormatter<Localization> formatter);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string FormatMessage(TextFormatter formatter)
+        public override string FormatMessage(TextFormatter<Localization> formatter)
             => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 PTypeErrorBuilder.DuplicatePropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
@@ -143,7 +143,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string FormatMessage(TextFormatter formatter)
+        public override string FormatMessage(TextFormatter<Localization> formatter)
             => (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(
                 PTypeErrorBuilder.UnrecognizedPropertyKeyWarning,
                 PropertyKeyDisplayString.Value);
@@ -191,7 +191,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public string GenerateValueString(TextFormatter formatter)
+        public string GenerateValueString(TextFormatter<Localization> formatter)
             => ActualValueString.Value
             ?? (formatter ?? throw new ArgumentNullException(nameof(formatter))).Format(PType.JsonUndefinedValue);
 
@@ -207,7 +207,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string FormatMessage(TextFormatter formatter)
+        public override string FormatMessage(TextFormatter<Localization> formatter)
             => TypeErrorBuilder.FormatTypeErrorMessage(
                 formatter,
                 GenerateValueString(formatter));
@@ -257,7 +257,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string FormatMessage(TextFormatter formatter)
+        public override string FormatMessage(TextFormatter<Localization> formatter)
             => TypeErrorBuilder.FormatTypeErrorAtPropertyKeyMessage(
                 formatter,
                 GenerateValueString(formatter),
@@ -308,7 +308,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="formatter"/> is <see langword="null"/>.
         /// </exception>
-        public override string FormatMessage(TextFormatter formatter)
+        public override string FormatMessage(TextFormatter<Localization> formatter)
             => TypeErrorBuilder.FormatTypeErrorAtItemIndexMessage(
                 formatter,
                 GenerateValueString(formatter),

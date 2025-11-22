@@ -2,7 +2,7 @@
 /*********************************************************************************
  * ITypeErrorBuilder.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The formatted error message.
         /// </returns>
-        string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString);
+        string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString);
 
         /// <summary>
         /// Gets the formatted, context sensitive message for this error.
@@ -71,7 +71,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The formatted error message.
         /// </returns>
-        string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey);
+        string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey);
 
         /// <summary>
         /// Gets the formatted, context sensitive message for this error.
@@ -88,6 +88,6 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The formatted error message.
         /// </returns>
-        string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex);
+        string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex);
     }
 }

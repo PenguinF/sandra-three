@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PType.Base.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,37 +32,37 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for referring to a json boolean.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonBoolean = new StringKey<ForFormattedText>(nameof(JsonBoolean));
+        public static readonly StringKey<Localization> JsonBoolean = new StringKey<Localization>(nameof(JsonBoolean));
 
         /// <summary>
         /// Gets the translation key for referring to a json integer.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonInteger = new StringKey<ForFormattedText>(nameof(JsonInteger));
+        public static readonly StringKey<Localization> JsonInteger = new StringKey<Localization>(nameof(JsonInteger));
 
         /// <summary>
         /// Gets the translation key for referring to a json integer within a specific range.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> RangedJsonInteger = new StringKey<ForFormattedText>(nameof(RangedJsonInteger));
+        public static readonly StringKey<Localization> RangedJsonInteger = new StringKey<Localization>(nameof(RangedJsonInteger));
 
         /// <summary>
         /// Gets the translation key for referring to a json string.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonString = new StringKey<ForFormattedText>(nameof(JsonString));
+        public static readonly StringKey<Localization> JsonString = new StringKey<Localization>(nameof(JsonString));
 
         /// <summary>
         /// Gets the translation key for referring to a general json array (list).
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonArray = new StringKey<ForFormattedText>(nameof(JsonArray));
+        public static readonly StringKey<Localization> JsonArray = new StringKey<Localization>(nameof(JsonArray));
 
         /// <summary>
         /// Gets the translation key for referring to a general json object (map).
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonObject = new StringKey<ForFormattedText>(nameof(JsonObject));
+        public static readonly StringKey<Localization> JsonObject = new StringKey<Localization>(nameof(JsonObject));
 
         /// <summary>
         /// Gets the translation key for referring to an undefined value.
         /// </summary>
-        public static readonly StringKey<ForFormattedText> JsonUndefinedValue = new StringKey<ForFormattedText>(nameof(JsonUndefinedValue));
+        public static readonly StringKey<Localization> JsonUndefinedValue = new StringKey<Localization>(nameof(JsonUndefinedValue));
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see langword="bool"/> values.
@@ -115,7 +115,7 @@ namespace Eutherion.Win.Storage
             private readonly Func<TValue, PValue> ToPValueConverter;
 
             public BaseType(
-                StringKey<ForFormattedText> expectedTypeDescriptionKey,
+                StringKey<Localization> expectedTypeDescriptionKey,
                 JsonValueSyntaxVisitor<Maybe<TValue>> converter,
                 Func<TValue, PValue> toPValueConverter)
             {
@@ -326,14 +326,14 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            private static string FormatExpectedTypeDescription(TextFormatter formatter, BigInteger minValue, BigInteger maxValue)
+            private static string FormatExpectedTypeDescription(TextFormatter<Localization> formatter, BigInteger minValue, BigInteger maxValue)
                 => formatter.Format(
                     RangedJsonInteger,
                     minValue.ToStringInvariant(),
                     maxValue.ToStringInvariant());
 
             public static string FormatTypeErrorMessage(
-                TextFormatter formatter,
+                TextFormatter<Localization> formatter,
                 string actualValueString,
                 BigInteger minValue,
                 BigInteger maxValue)
@@ -343,7 +343,7 @@ namespace Eutherion.Win.Storage
                     actualValueString);
 
             public static string FormatTypeErrorAtPropertyKeyMessage(
-                TextFormatter formatter,
+                TextFormatter<Localization> formatter,
                 string actualValueString,
                 string propertyKey,
                 BigInteger minValue,
@@ -355,7 +355,7 @@ namespace Eutherion.Win.Storage
                     PTypeErrorBuilder.FormatLocatedAtPropertyKeyMessage(formatter, propertyKey));
 
             public static string FormatTypeErrorAtItemIndexMessage(
-                TextFormatter formatter,
+                TextFormatter<Localization> formatter,
                 string actualValueString,
                 int itemIndex,
                 BigInteger minValue,
@@ -366,13 +366,13 @@ namespace Eutherion.Win.Storage
                     actualValueString,
                     PTypeErrorBuilder.FormatLocatedAtItemIndexMessage(formatter, itemIndex));
 
-            public string FormatTypeErrorMessage(TextFormatter formatter, string actualValueString)
+            public string FormatTypeErrorMessage(TextFormatter<Localization> formatter, string actualValueString)
                 => FormatTypeErrorMessage(formatter, actualValueString, MinValue, MaxValue);
 
-            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter formatter, string actualValueString, string propertyKey)
+            public string FormatTypeErrorAtPropertyKeyMessage(TextFormatter<Localization> formatter, string actualValueString, string propertyKey)
                 => FormatTypeErrorAtPropertyKeyMessage(formatter, actualValueString, propertyKey, MinValue, MaxValue);
 
-            public string FormatTypeErrorAtItemIndexMessage(TextFormatter formatter, string actualValueString, int itemIndex)
+            public string FormatTypeErrorAtItemIndexMessage(TextFormatter<Localization> formatter, string actualValueString, int itemIndex)
                 => FormatTypeErrorAtItemIndexMessage(formatter, actualValueString, itemIndex, MinValue, MaxValue);
 
             public override string ToString()

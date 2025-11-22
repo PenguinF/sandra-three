@@ -2,7 +2,7 @@
 /*********************************************************************************
  * JsonSyntaxDescriptor.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public override string FileExtension
             => JsonFileExtension;
 
-        public override StringKey<ForFormattedText> FileExtensionLocalizedKey
+        public override StringKey<Localization> FileExtensionLocalizedKey
             => SharedLocalizedStringKeys.JsonFiles;
 
         public override RootJsonSyntax Parse(string code)

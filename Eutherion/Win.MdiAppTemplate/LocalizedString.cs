@@ -2,7 +2,7 @@
 /*********************************************************************************
  * LocalizedString.cs
  *
- * Copyright (c) 2004-2021 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ namespace Eutherion.Win.MdiAppTemplate
         /// </summary>
         public readonly ObservableValue<string> DisplayText = ObservableValue<string>.Create(string.Empty, StringComparer.Ordinal);
 
-        public LocalizedString(StringKey<ForFormattedText> key)
+        public LocalizedString(StringKey<Localization> key)
             : base(key)
         {
             DisplayText.Value = Eval();

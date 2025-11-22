@@ -2,7 +2,7 @@
 /*********************************************************************************
  * CombinedUIActionInterface.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -62,11 +62,11 @@ namespace Eutherion.Win.MdiAppTemplate
         public bool OpensDialog { get; set; }
 
         /// <summary>
-        /// Enumerates the <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> which combined construct a localized display string
+        /// Enumerates the <see cref="StringKey{T}"/>s of <see cref="Localization"/> which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </summary>
         /// <returns>
-        /// The <see cref="StringKey{T}"/>s of <see cref="ForFormattedText"/> enumerable which combined construct a localized display string
+        /// The <see cref="StringKey{T}"/>s of <see cref="Localization"/> enumerable which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </returns>
         public IEnumerable<IFunc<string>> DisplayShortcutKeys
@@ -141,7 +141,7 @@ namespace Eutherion.Win.MdiAppTemplate
         public static IFunc<string> ToTextProvider(this string displayText)
             => displayText == null ? null : new ConstantValue<string>(displayText);
 
-        public static IFunc<string> ToTextProvider(this StringKey<ForFormattedText> key)
+        public static IFunc<string> ToTextProvider(this StringKey<Localization> key)
             => key == null ? null : new LocalizedTextProvider(key);
 
         public static IFunc<Image> ToImageProvider(this Image image)

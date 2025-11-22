@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnSyntaxDescriptor.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ namespace Sandra.UI
         public override string FileExtension
             => PgnFileExtension;
 
-        public override StringKey<ForFormattedText> FileExtensionLocalizedKey
+        public override StringKey<Localization> FileExtensionLocalizedKey
             => LocalizedStringKeys.PgnFiles;
 
         public override RootPgnSyntax Parse(string code)
