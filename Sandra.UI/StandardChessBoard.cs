@@ -929,12 +929,10 @@ namespace Sandra.UI
                 if (hoverSquare != null && moveStatus != MoveStatus.None && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
                 {
                     Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
-
                     using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0)))
                     using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10)))
-                    using (var darkerGrayPen = new Pen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f))
                     {
-                        e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+                        e.Graphics.DrawRectangle(drawRun.GetPen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f), new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
                     }
                 }
 
@@ -972,11 +970,7 @@ namespace Sandra.UI
                 if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
                 {
                     Rectangle activeRect = PlayingBoard.GetSquareRectangle(ToSquareLocation(moveStartSquare));
-
-                    using (Pen darkerGrayPen = new Pen(GetDarkerGrayColor(moveStartSquare), 2f))
-                    {
-                        e.Graphics.DrawRectangle(darkerGrayPen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
-                    }
+                    e.Graphics.DrawRectangle(drawRun.GetPen(GetDarkerGrayColor(moveStartSquare), 1f), activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
             }
         }
