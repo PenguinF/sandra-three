@@ -929,15 +929,13 @@ namespace Sandra.UI
                 if (hoverSquare != null && moveStatus != MoveStatus.None && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
                 {
                     Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
-                    e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
-                    e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
 
+                    using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0)))
+                    using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10)))
                     using (var darkerGrayPen = new Pen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f))
                     {
                         e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
                     }
-
-                    e.Graphics.ResetClip();
                 }
 
                 if (currentSquareWithPromoteEffect != null)
