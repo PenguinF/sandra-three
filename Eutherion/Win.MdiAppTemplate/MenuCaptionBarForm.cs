@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Eutherion.UIActions;
+using Eutherion.Win.Canvas;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Forms;
 using Eutherion.Win.Native;
@@ -28,6 +29,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
 using System.Reflection;
@@ -586,84 +588,79 @@ namespace Eutherion.Win.MdiAppTemplate
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var g = e.Graphics;
-
-            if (currentMetrics.IsMaximized && !IsMdiContainer)
+            using (DrawRun drawRun = new DrawRun(e.Graphics))
             {
-                // Draw the window using the current transparency key.
-                // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
-                using (var captionAreaColorBrush = new SolidBrush(TransparencyKey))
+                drawRun.SmoothingMode = SmoothingMode.None;
+
+                if (currentMetrics.IsMaximized && !IsMdiContainer)
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                    // Draw the window using the current transparency key.
+                    // Unfortunately this doesn't work for MdiContainers, so then we need to revert back to default behavior.
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(TransparencyKey), new Rectangle(
                         0,
                         0,
                         currentMetrics.TotalWidth,
                         currentMetrics.TotalHeight));
-                }
 
-                // Block out only the visible area of the window.
-                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
-                {
+                    // Block out only the visible area of the window.
                     int horizontalInvisibleBorderWidth = currentMetrics.HorizontalResizeBorderThickness / 2;
                     int verticalInvisibleBorderWidth = currentMetrics.VerticalResizeBorderThickness / 2;
 
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
                         horizontalInvisibleBorderWidth,
                         verticalInvisibleBorderWidth,
                         currentMetrics.TotalWidth - horizontalInvisibleBorderWidth * 2,
                         currentMetrics.TotalHeight - verticalInvisibleBorderWidth * 2));
                 }
-            }
-            else
-            {
-                // Block out the entire client area, then draw a 1-pizel border around it.
-                using (var captionAreaColorBrush = new SolidBrush(ObservableStyle.BackColor))
+                else
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(
+                    // Block out the entire client area, then draw a 1-pizel border around it.
+                    drawRun.Graphics.FillRectangle(drawRun.GetSolidBrush(ObservableStyle.BackColor), new Rectangle(
                         0,
                         0,
                         currentMetrics.TotalWidth,
                         currentMetrics.TotalHeight));
+
+                    drawRun.Graphics.DrawRectangle(drawRun.GetPen(Color.DimGray, 1),
+                        0,
+                        0,
+                        currentMetrics.TotalWidth - 1,
+                        currentMetrics.TotalHeight - 1);
                 }
 
-                g.DrawRectangle(Pens.DimGray,
-                    0,
-                    0,
-                    currentMetrics.TotalWidth - 1,
-                    currentMetrics.TotalHeight - 1);
-            }
+                string text = Text;
 
-            string text = Text;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    // Place the text in the middle between the outer menu right edge and the system buttons.
+                    // Also 1 pixel above center to align with the main menu.
+                    int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
+                    int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
 
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                // Place the text in the middle between the outer menu right edge and the system buttons.
-                // Also 1 pixel above center to align with the main menu.
-                int textAreaLeftEdge = currentMetrics.MainMenuLeft + currentMetrics.MainMenuWidth;
-                int textAreaWidth = currentMetrics.MinimizeButtonLeft - textAreaLeftEdge;
+                    Rectangle textAreaRectangle = new Rectangle(
+                        textAreaLeftEdge,
+                        currentMetrics.MainMenuTop,
+                        textAreaWidth,
+                        currentMetrics.MainMenuHeight - 2);
 
-                Rectangle textAreaRectangle = new Rectangle(
-                    textAreaLeftEdge,
-                    currentMetrics.MainMenuTop,
-                    textAreaWidth,
-                    currentMetrics.MainMenuHeight - 2);
+                    drawRun.SmoothingMode = SmoothingMode.AntiAlias;
+                    drawRun.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    TextRenderer.DrawText(
+                        drawRun.Graphics,
+                        text,
+                        ObservableStyle.Font,
+                        textAreaRectangle,
+                        ObservableStyle.ForeColor,
+                        ObservableStyle.BackColor,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                }
 
-                g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                TextRenderer.DrawText(
-                    g,
-                    text,
-                    ObservableStyle.Font,
-                    textAreaRectangle,
-                    ObservableStyle.ForeColor,
-                    ObservableStyle.BackColor,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-            }
-
-            // Only after the first paint allow window to be drawn in layered mode.
-            if (!AllowTransparency)
-            {
-                TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
-                AllowTransparency = true;
+                // Only after the first paint allow window to be drawn in layered mode.
+                if (!AllowTransparency)
+                {
+                    TransparencyKey = ObservableStyle.SuggestedTransparencyKey;
+                    AllowTransparency = true;
+                }
             }
         }
 

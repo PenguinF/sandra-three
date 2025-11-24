@@ -2,7 +2,7 @@
 /*********************************************************************************
  * StandardChessBoard.cs
  *
- * Copyright (c) 2004-2023 Henk Nicolai
+ * Copyright (c) 2004-2025 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Collections;
+using Eutherion.Win.Canvas;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
 using Eutherion.Win.MdiAppTemplate;
@@ -182,21 +183,7 @@ namespace Sandra.UI
 
             Controls.Add(PlayingBoard);
 
-            UpdateLastMoveArrowPen();
-
             ActiveControl = PlayingBoard;
-        }
-
-        private void UpdateLastMoveArrowPen()
-        {
-            lastMoveArrowPen = new Pen(Session.Current.GetSetting(SettingKeys.LastMoveArrowColor))
-            {
-                DashStyle = DashStyle.Dot,
-                Width = 2,
-                Alignment = PenAlignment.Center,
-                StartCap = LineCap.Round,
-                EndCap = LineCap.RoundAnchor,
-            };
         }
 
         private void DarkSquareColorChanged(object sender, EventArgs e)
@@ -211,8 +198,6 @@ namespace Sandra.UI
 
         private void LastMoveArrowColorChanged(object sender, EventArgs e)
         {
-            lastMoveArrowPen.Dispose();
-            UpdateLastMoveArrowPen();
             PlayingBoard.Invalidate();
         }
 
@@ -849,9 +834,7 @@ namespace Sandra.UI
 
         public event EventHandler AfterGameUpdated;
 
-        Pen lastMoveArrowPen;
-
-        private void DrawLastMoveArrow(Graphics g, SquareLocation start, SquareLocation target)
+        private void DrawLastMoveArrow(DrawRun drawRun, SquareLocation start, SquareLocation target, Color lastMoveArrowColor)
         {
             Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
             int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
@@ -870,32 +853,40 @@ namespace Sandra.UI
             int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
             int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       startSquareCenterX, startSquareCenterY);
+            using (Pen lastMoveArrowPen = new Pen(lastMoveArrowColor)
+            {
+                DashStyle = DashStyle.Dot,
+                Width = 2,
+                Alignment = PenAlignment.Center,
+                StartCap = LineCap.Round,
+                EndCap = LineCap.RoundAnchor,
+            })
+            {
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          startSquareCenterX, startSquareCenterY);
 
-            // Draw two lines from the end point at a 30 degrees angle to make an arrow.
-            double phi = Math.Atan2(deltaY, deltaX);
+                // Draw two lines from the end point at a 30 degrees angle to make an arrow.
+                double phi = Math.Atan2(deltaY, deltaX);
 
-            double arrow1Phi = phi - Math.PI / 6;
-            double arrow2Phi = phi + Math.PI / 6;
+                double arrow1Phi = phi - Math.PI / 6;
+                double arrow2Phi = phi + Math.PI / 6;
 
-            double targetLength = PlayingBoard.SquareSize / 4f;
-            double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
-            double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
-            double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
-            double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
+                double targetLength = PlayingBoard.SquareSize / 4f;
+                double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
+                double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
+                double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
+                double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
 
-            lastMoveArrowPen.DashStyle = DashStyle.Solid;
-            lastMoveArrowPen.EndCap = LineCap.Round;
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       (float)arrow1EndX, (float)arrow1EndY);
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       (float)arrow2EndX, (float)arrow2EndY);
-            lastMoveArrowPen.DashStyle = DashStyle.Dot;
-            lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
+                lastMoveArrowPen.DashStyle = DashStyle.Solid;
+                lastMoveArrowPen.EndCap = LineCap.Round;
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          (float)arrow1EndX, (float)arrow1EndY);
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          (float)arrow2EndX, (float)arrow2EndY);
+            }
         }
 
         private Color GetDarkerGrayColor(Chess.Square square)
@@ -911,82 +902,82 @@ namespace Sandra.UI
 
         private void PlayingBoard_Paint(object sender, PaintEventArgs e)
         {
-            // Draw a dotted line between the centers of the squares of the last move.
-            if (game != null && !game.IsFirstMove)
+            using (DrawRun drawRun = new DrawRun(e.Graphics))
             {
-                Chess.Move lastCommittedMove = game.PreviousMove;
-                DrawLastMoveArrow(e.Graphics,
-                                  ToSquareLocation(lastCommittedMove.SourceSquare),
-                                  ToSquareLocation(lastCommittedMove.TargetSquare));
-            }
-
-            // Draw subtle corners just inside the edges of a legal target square.
-            var hoverSquare = PlayingBoard.HoverSquare;
-
-            if (hoverSquare != null && moveStatus != MoveStatus.None && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
-            {
-                Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
-                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
-                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
-
-                using (var darkerGrayPen = new Pen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f))
+                // Draw a dotted line between the centers of the squares of the last move.
+                if (game != null && !game.IsFirstMove)
                 {
-                    e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
-                }
+                    Chess.Move lastCommittedMove = game.PreviousMove;
 
-                e.Graphics.ResetClip();
-            }
-
-            if (currentSquareWithPromoteEffect != null)
-            {
-                int squareSize = PlayingBoard.SquareSize;
-                if (squareSize >= 2)
-                {
-                    Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
-
-                    Chess.Color promoteColor = game.CurrentPosition.SideToMove;
-
-                    SquareQuadrant[] allQuadrants = { SquareQuadrant.TopLeft, SquareQuadrant.TopRight, SquareQuadrant.BottomLeft, SquareQuadrant.BottomRight };
-                    allQuadrants.ForEach(quadrant =>
+                    Color lastMoveArrowColor = Color.Empty;
+                    try
                     {
-                        if (quadrant == hoverQuadrant)
-                        {
-                            Image image = PieceImages[GetPromoteToPiece(quadrant, promoteColor)];
-                            e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
-                                                 GetSquareQuadrantRectangle(ref rect, quadrant),
-                                                 0, 0, image.Width, image.Height,
-                                                 GraphicsUnit.Pixel,
-                                                 PlayingBoard.HighlightImageAttributes);
-                        }
-                        else
-                        {
-                            e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
-                                                 GetSquareQuadrantRectangle(ref rect, quadrant));
-                        }
-                    });
+                        lastMoveArrowColor = Session.Current.GetSetting(SettingKeys.LastMoveArrowColor);
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.Trace();
+                    }
+
+                    if (!lastMoveArrowColor.IsEmpty)
+                    {
+                        DrawLastMoveArrow(drawRun,
+                                          ToSquareLocation(lastCommittedMove.SourceSquare),
+                                          ToSquareLocation(lastCommittedMove.TargetSquare),
+                                          lastMoveArrowColor);
+                    }
                 }
-            }
 
-            // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
-            if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
-            {
-                Rectangle activeRect = PlayingBoard.GetSquareRectangle(ToSquareLocation(moveStartSquare));
+                // Draw subtle corners just inside the edges of a legal target square.
+                var hoverSquare = PlayingBoard.HoverSquare;
 
-                using (Pen darkerGrayPen = new Pen(GetDarkerGrayColor(moveStartSquare), 2f))
+                if (hoverSquare != null && moveStatus != MoveStatus.None && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
                 {
-                    e.Graphics.DrawRectangle(darkerGrayPen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
+                    Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
+                    using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0)))
+                    using (drawRun.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10)))
+                    {
+                        e.Graphics.DrawRectangle(drawRun.GetPen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f), new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+                    }
+                }
+
+                if (currentSquareWithPromoteEffect != null)
+                {
+                    int squareSize = PlayingBoard.SquareSize;
+                    if (squareSize >= 2)
+                    {
+                        Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
+
+                        Chess.Color promoteColor = game.CurrentPosition.SideToMove;
+
+                        SquareQuadrant[] allQuadrants = { SquareQuadrant.TopLeft, SquareQuadrant.TopRight, SquareQuadrant.BottomLeft, SquareQuadrant.BottomRight };
+                        allQuadrants.ForEach(quadrant =>
+                        {
+                            if (quadrant == hoverQuadrant)
+                            {
+                                Image image = PieceImages[GetPromoteToPiece(quadrant, promoteColor)];
+                                e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
+                                                     GetSquareQuadrantRectangle(ref rect, quadrant),
+                                                     0, 0, image.Width, image.Height,
+                                                     GraphicsUnit.Pixel,
+                                                     PlayingBoard.HighlightImageAttributes);
+                            }
+                            else
+                            {
+                                e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
+                                                     GetSquareQuadrantRectangle(ref rect, quadrant));
+                            }
+                        });
+                    }
+                }
+
+                // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
+                if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
+                {
+                    Rectangle activeRect = PlayingBoard.GetSquareRectangle(ToSquareLocation(moveStartSquare));
+                    e.Graphics.DrawRectangle(drawRun.GetPen(GetDarkerGrayColor(moveStartSquare), 1f), activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                lastMoveArrowPen.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
 
         private void PerformAutoFit(int? targetSquareSize)

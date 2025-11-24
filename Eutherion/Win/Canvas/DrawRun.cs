@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Canvas
@@ -33,6 +34,7 @@ namespace Eutherion.Win.Canvas
     public sealed class DrawRun : IDisposable
     {
         private readonly Dictionary<Color, SolidBrush> SolidBrushes = new Dictionary<Color, SolidBrush>();
+        private readonly Dictionary<(Color, float), Pen> Pens = new Dictionary<(Color, float), Pen>();
         private readonly DisposableResourceCollection DisposableResources = new DisposableResourceCollection();
         private readonly List<ConstrainedClipScope> ClipScopes = new List<ConstrainedClipScope>();
 
@@ -60,6 +62,25 @@ namespace Eutherion.Win.Canvas
             }
         }
 
+        private TextRenderingHint _TextRenderingHint = (TextRenderingHint)(-1);
+
+        /// <summary>
+        /// Gets or sets the current text rendering hint.
+        /// </summary>
+        public TextRenderingHint TextRenderingHint
+        {
+            get => _TextRenderingHint;
+            set
+            {
+                // Wrap this in an equality check to prevent P/Invoke calls if the value doesn't change.
+                if (value != _TextRenderingHint)
+                {
+                    Graphics.TextRenderingHint = value;
+                    _TextRenderingHint = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Initializes a new <see cref="DrawRun"/> with a Windows <see cref="System.Drawing.Graphics"/> object.
         /// </summary>
@@ -80,6 +101,21 @@ namespace Eutherion.Win.Canvas
             DisposableResources.Add(brush);
             return brush;
         });
+
+        public Pen GetPen(Color color, float penWidth) => Pens.GetOrAdd((color, penWidth), key =>
+        {
+            var pen = new Pen(key.Item1, key.Item2);
+            DisposableResources.Add(pen);
+            return pen;
+        });
+
+        public ConstrainedClipScope SetClip(RectangleF rect)
+        {
+            Graphics.SetClip(rect);
+            ConstrainedClipScope excludedClipScope = new ConstrainedClipScope(this);
+            ClipScopes.Add(excludedClipScope);
+            return excludedClipScope;
+        }
 
         public ConstrainedClipScope ExcludeClip(Rectangle rect)
         {
