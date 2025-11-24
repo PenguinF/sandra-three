@@ -183,21 +183,7 @@ namespace Sandra.UI
 
             Controls.Add(PlayingBoard);
 
-            UpdateLastMoveArrowPen();
-
             ActiveControl = PlayingBoard;
-        }
-
-        private void UpdateLastMoveArrowPen()
-        {
-            lastMoveArrowPen = new Pen(Session.Current.GetSetting(SettingKeys.LastMoveArrowColor))
-            {
-                DashStyle = DashStyle.Dot,
-                Width = 2,
-                Alignment = PenAlignment.Center,
-                StartCap = LineCap.Round,
-                EndCap = LineCap.RoundAnchor,
-            };
         }
 
         private void DarkSquareColorChanged(object sender, EventArgs e)
@@ -212,8 +198,6 @@ namespace Sandra.UI
 
         private void LastMoveArrowColorChanged(object sender, EventArgs e)
         {
-            lastMoveArrowPen.Dispose();
-            UpdateLastMoveArrowPen();
             PlayingBoard.Invalidate();
         }
 
@@ -850,8 +834,6 @@ namespace Sandra.UI
 
         public event EventHandler AfterGameUpdated;
 
-        Pen lastMoveArrowPen;
-
         private void DrawLastMoveArrow(DrawRun drawRun, SquareLocation start, SquareLocation target)
         {
             Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
@@ -871,32 +853,40 @@ namespace Sandra.UI
             int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
             int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
-            drawRun.Graphics.DrawLine(lastMoveArrowPen,
-                                      endPointX, endPointY,
-                                      startSquareCenterX, startSquareCenterY);
+            using (Pen lastMoveArrowPen = new Pen(Session.Current.GetSetting(SettingKeys.LastMoveArrowColor))
+            {
+                DashStyle = DashStyle.Dot,
+                Width = 2,
+                Alignment = PenAlignment.Center,
+                StartCap = LineCap.Round,
+                EndCap = LineCap.RoundAnchor,
+            })
+            {
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          startSquareCenterX, startSquareCenterY);
 
-            // Draw two lines from the end point at a 30 degrees angle to make an arrow.
-            double phi = Math.Atan2(deltaY, deltaX);
+                // Draw two lines from the end point at a 30 degrees angle to make an arrow.
+                double phi = Math.Atan2(deltaY, deltaX);
 
-            double arrow1Phi = phi - Math.PI / 6;
-            double arrow2Phi = phi + Math.PI / 6;
+                double arrow1Phi = phi - Math.PI / 6;
+                double arrow2Phi = phi + Math.PI / 6;
 
-            double targetLength = PlayingBoard.SquareSize / 4f;
-            double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
-            double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
-            double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
-            double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
+                double targetLength = PlayingBoard.SquareSize / 4f;
+                double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
+                double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
+                double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
+                double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
 
-            lastMoveArrowPen.DashStyle = DashStyle.Solid;
-            lastMoveArrowPen.EndCap = LineCap.Round;
-            drawRun.Graphics.DrawLine(lastMoveArrowPen,
-                                      endPointX, endPointY,
-                                      (float)arrow1EndX, (float)arrow1EndY);
-            drawRun.Graphics.DrawLine(lastMoveArrowPen,
-                                      endPointX, endPointY,
-                                      (float)arrow2EndX, (float)arrow2EndY);
-            lastMoveArrowPen.DashStyle = DashStyle.Dot;
-            lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
+                lastMoveArrowPen.DashStyle = DashStyle.Solid;
+                lastMoveArrowPen.EndCap = LineCap.Round;
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          (float)arrow1EndX, (float)arrow1EndY);
+                drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                          endPointX, endPointY,
+                                          (float)arrow2EndX, (float)arrow2EndY);
+            }
         }
 
         private Color GetDarkerGrayColor(Chess.Square square)
@@ -973,16 +963,6 @@ namespace Sandra.UI
                     e.Graphics.DrawRectangle(drawRun.GetPen(GetDarkerGrayColor(moveStartSquare), 1f), activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                lastMoveArrowPen.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
 
         private void PerformAutoFit(int? targetSquareSize)
