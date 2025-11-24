@@ -834,7 +834,7 @@ namespace Sandra.UI
 
         public event EventHandler AfterGameUpdated;
 
-        private void DrawLastMoveArrow(DrawRun drawRun, SquareLocation start, SquareLocation target)
+        private void DrawLastMoveArrow(DrawRun drawRun, SquareLocation start, SquareLocation target, Color lastMoveArrowColor)
         {
             Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
             int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
@@ -853,7 +853,7 @@ namespace Sandra.UI
             int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
             int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
-            using (Pen lastMoveArrowPen = new Pen(Session.Current.GetSetting(SettingKeys.LastMoveArrowColor))
+            using (Pen lastMoveArrowPen = new Pen(lastMoveArrowColor)
             {
                 DashStyle = DashStyle.Dot,
                 Width = 2,
@@ -908,9 +908,24 @@ namespace Sandra.UI
                 if (game != null && !game.IsFirstMove)
                 {
                     Chess.Move lastCommittedMove = game.PreviousMove;
-                    DrawLastMoveArrow(drawRun,
-                                      ToSquareLocation(lastCommittedMove.SourceSquare),
-                                      ToSquareLocation(lastCommittedMove.TargetSquare));
+
+                    Color lastMoveArrowColor = Color.Empty;
+                    try
+                    {
+                        lastMoveArrowColor = Session.Current.GetSetting(SettingKeys.LastMoveArrowColor);
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.Trace();
+                    }
+
+                    if (!lastMoveArrowColor.IsEmpty)
+                    {
+                        DrawLastMoveArrow(drawRun,
+                                          ToSquareLocation(lastCommittedMove.SourceSquare),
+                                          ToSquareLocation(lastCommittedMove.TargetSquare),
+                                          lastMoveArrowColor);
+                    }
                 }
 
                 // Draw subtle corners just inside the edges of a legal target square.
