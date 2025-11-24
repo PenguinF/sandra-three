@@ -852,7 +852,7 @@ namespace Sandra.UI
 
         Pen lastMoveArrowPen;
 
-        private void DrawLastMoveArrow(Graphics g, SquareLocation start, SquareLocation target)
+        private void DrawLastMoveArrow(DrawRun drawRun, SquareLocation start, SquareLocation target)
         {
             Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
             int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
@@ -871,9 +871,9 @@ namespace Sandra.UI
             int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
             int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       startSquareCenterX, startSquareCenterY);
+            drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                      endPointX, endPointY,
+                                      startSquareCenterX, startSquareCenterY);
 
             // Draw two lines from the end point at a 30 degrees angle to make an arrow.
             double phi = Math.Atan2(deltaY, deltaX);
@@ -889,12 +889,12 @@ namespace Sandra.UI
 
             lastMoveArrowPen.DashStyle = DashStyle.Solid;
             lastMoveArrowPen.EndCap = LineCap.Round;
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       (float)arrow1EndX, (float)arrow1EndY);
-            g.DrawLine(lastMoveArrowPen,
-                       endPointX, endPointY,
-                       (float)arrow2EndX, (float)arrow2EndY);
+            drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                      endPointX, endPointY,
+                                      (float)arrow1EndX, (float)arrow1EndY);
+            drawRun.Graphics.DrawLine(lastMoveArrowPen,
+                                      endPointX, endPointY,
+                                      (float)arrow2EndX, (float)arrow2EndY);
             lastMoveArrowPen.DashStyle = DashStyle.Dot;
             lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
         }
@@ -918,7 +918,7 @@ namespace Sandra.UI
                 if (game != null && !game.IsFirstMove)
                 {
                     Chess.Move lastCommittedMove = game.PreviousMove;
-                    DrawLastMoveArrow(e.Graphics,
+                    DrawLastMoveArrow(drawRun,
                                       ToSquareLocation(lastCommittedMove.SourceSquare),
                                       ToSquareLocation(lastCommittedMove.TargetSquare));
                 }
